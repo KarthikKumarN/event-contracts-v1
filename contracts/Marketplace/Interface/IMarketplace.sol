@@ -71,6 +71,12 @@ interface IMarketplace {
     event Delisted(uint256 indexed tokenId);
 
     /**
+     * @dev Emitted when an booking/room is deleted from list
+     * @param tokenId, unique number of the booking NFT
+     */
+    event DeletedListing(uint256 indexed tokenId);
+
+    /**
      * @dev Emitted when new Treasury Wallet has been updated
      * @param oldAddress, Address of the old treasury wallet
      * @param newAddress, Address of the new treasury wallet
@@ -102,10 +108,18 @@ interface IMarketplace {
 
     /**
      * @dev Function will delist of NFT
-     * @dev NFT owner or BukProtocal can delist
+     * @dev NFT owner can delist
      * @param tokenId_ NFT id
      */
     function deListing(uint256 tokenId_) external;
+
+    /**
+     * @dev Function will delete listing
+     * @dev NFT owner or BukProtocal can delete lisitng
+     * @dev When user checkin, buk protocol call this function
+     * @param tokenId_ NFT id
+     */
+    function deleteListing(uint256 tokenId_) external;
 
     /**
      * @dev Function will set price and status for listed of NFT
