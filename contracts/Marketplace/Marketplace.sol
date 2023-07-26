@@ -106,8 +106,8 @@ contract Marketplace is Context, IMarketplace {
         // TODO
         // Get booking details form bukprotocol
         // Validate owner, status
-        _listedNFT[tokenId_].status = ListingStatus.inactive;
-        emit Delisted(tokenId_);
+        delete _listedNFT[tokenId_];
+        emit DeletedListing(tokenId_);
     }
 
     /**
