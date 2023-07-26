@@ -115,7 +115,16 @@ contract Marketplace is Context, IMarketplace {
      * @dev Only NFT owner can update
      * @param tokenId_ NFT id
      */
-    function reList(uint256 tokenId_, uint256 price_) external {}
+    function reList(uint256 tokenId_, uint256 price_) external {
+        require(tokenId_ >= 0, "Invalide NFT");
+        require(_isTokenExists(tokenId_), "NFT not listed");
+        // TODO
+        // Get booking details form bukprotocol
+        // Validate owner, status
+        _listedNFT[tokenId_].status = ListingStatus.active;
+        _listedNFT[tokenId_].price = price_;
+        emit Relisted(tokenId_, price_);
+    }
 
     /**
      * @dev Refer IMarketplace
@@ -127,7 +136,10 @@ contract Marketplace is Context, IMarketplace {
      * @dev Refer IMarketplace
      * @param bukProtocol_ address of new buk protocol
      */
-    function setBukProtocol(address bukProtocol_) external {}
+    function setBukProtocol(address bukProtocol_) external {
+        require(bukProtocol_ != address(0), "Invalid address");
+        bukProtocalContract = bukProtocol_;
+    }
 
     /**
      * @dev Refer IMarketplace
