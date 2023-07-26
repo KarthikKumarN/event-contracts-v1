@@ -68,10 +68,7 @@ contract Marketplace is Context, IMarketplace {
         uint256 tardeTimeLimt_
     ) external {
         require(tokenId_ >= 0, "Invalide NFT");
-        require(
-            _listedNFT[tokenId_].status == ListingStatus.active,
-            "NFT already listed"
-        );
+        require(!_isTokenExists(tokenId), "NFT already listed");
         // TODO
         // Get booking details form bukprotocol
         // Validate owner, minSalePrice, status
@@ -92,7 +89,7 @@ contract Marketplace is Context, IMarketplace {
      */
     function deListing(uint256 tokenId_) external {
         require(tokenId_ >= 0, "Invalide NFT");
-        require(_listedNFT[tokenId_].price > 0, "NFT not listed");
+        require(_isTokenExists(tokenId), "NFT not listed");
         // TODO
         // Get booking details form bukprotocol
         // Validate owner, status
@@ -106,11 +103,19 @@ contract Marketplace is Context, IMarketplace {
      */
     function deleteListing(uint256 tokenId_) external {
         require(tokenId_ >= 0, "Invalide NFT");
-        require(_listedNFT[tokenId_].price > 0, "NFT not listed");
+        require(_isTokenExists(tokenId), "NFT not listed");
         // TODO
         // Get booking details form bukprotocol
         // Validate owner, status
         _listedNFT[tokenId_].status = ListingStatus.inactive;
         emit Delisted(tokenId_);
+    }
+
+    /**
+     * @dev Function check is NFT/Booking exists/listed
+     * @param tokenId_
+     */
+    function _isTokenExists(uint256 memory tokenId_) internal returns (bool) {
+        return bytes(_listedNFT[tokenId_]).length > 0 ? true : false;
     }
 }
