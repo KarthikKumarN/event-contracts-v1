@@ -8,6 +8,18 @@ pragma solidity =0.8.19;
  */
 interface IMarketplace {
     /**
+     * @title Struct to define the booking/room listing details
+     * @param price, price of room/booking
+     * @param tardeTimeLimt, end date for trade
+     * @param status, status of listing
+     */
+    struct ListingDetails {
+        uint256 price;
+        uint256 tardeTimeLimt;
+        ListingStatus status;
+    }
+
+    /**
      * @dev Enum for listing statuses.
      * @var ListingStatus.active      Listing has been active.
      * @var ListingStatus.inactive   Listing has been inactive
@@ -17,19 +29,6 @@ interface IMarketplace {
         active,
         inactive,
         sold
-    }
-    /**
-     * @title Struct to define the booking/room listing details
-     * @param price, price of room/booking
-     * @param owner, address of owner
-     * @param tardeTimeLimt, end date for trade
-     * @param status, status of listing
-     */
-    struct BookingDetails {
-        uint256 price;
-        address owner;
-        uint256 tardeTimeLimt;
-        ListingStatus status;
     }
 
     /**
@@ -77,6 +76,20 @@ interface IMarketplace {
     event DeletedListing(uint256 indexed tokenId);
 
     /**
+     * @dev Emitted when new BukProtocol address has been updated
+     * @param oldAddress, Address of the old bukProtocol
+     * @param newAddress, Address of the new bukProtocol
+     */
+    event BukProtocolSet(address oldAddress, address newAddress);
+
+    /**
+     * @dev Emitted when new BukNFT address has been updated
+     * @param oldAddress, Address of the old bukNFT
+     * @param newAddress, Address of the new bukNFT
+     */
+    event BukNFTSet(address oldAddress, address newAddress);
+
+    /**
      * @dev Emitted when new Treasury Wallet has been updated
      * @param oldAddress, Address of the old treasury wallet
      * @param newAddress, Address of the new treasury wallet
@@ -96,14 +109,12 @@ interface IMarketplace {
      * @param tokenId_ room/booking NFT id
      * @param price_  price of room/booking
      * @param tardeTimeLimt_ time till tradable
-     * @param owner_ address of owner
      * @dev While listing will approve marketplace to excecute transfer
      */
     function createListing(
         uint256 tokenId_,
         uint256 price_,
-        uint256 tardeTimeLimt_,
-        address owner_
+        uint256 tardeTimeLimt_
     ) external;
 
     /**
@@ -145,6 +156,12 @@ interface IMarketplace {
      * @param bukProtocol_ address of new buk protocol
      */
     function setBukProtocol(address bukProtocol_) external;
+
+    /**
+     * @dev Function will set new buk NFT address
+     * @param bukNFT_ address of new buk protocol
+     */
+    function setBukNFT(address bukNFT_) external;
 
     /**
      * @dev Set new buk royalty
@@ -215,5 +232,5 @@ interface IMarketplace {
      */
     function getListingDetails(
         uint256 tokenId_
-    ) external view returns (BookingDetails calldata);
+    ) external view returns (ListingDetails calldata);
 }
