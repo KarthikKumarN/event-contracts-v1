@@ -6,7 +6,6 @@ import "contracts/Token//interface/IToken.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 import "contracts/Marketplace/Interface/IMarketplace.sol";
-import "contracts/BukProtocol/ISupplierContract.sol";
 
 contract Marketplace is Context, IMarketplace {
     using SafeERC20 for IToken;
@@ -68,7 +67,7 @@ contract Marketplace is Context, IMarketplace {
         uint256 tardeTimeLimt_
     ) external {
         require(tokenId_ >= 0, "Invalide NFT");
-        require(!_isTokenExists(tokenId), "NFT already listed");
+        require(!_isTokenExists(tokenId_), "NFT already listed");
         // TODO
         // Get booking details form bukprotocol
         // Validate owner, minSalePrice, status
@@ -89,7 +88,7 @@ contract Marketplace is Context, IMarketplace {
      */
     function deListing(uint256 tokenId_) external {
         require(tokenId_ >= 0, "Invalide NFT");
-        require(_isTokenExists(tokenId), "NFT not listed");
+        require(_isTokenExists(tokenId_), "NFT not listed");
         // TODO
         // Get booking details form bukprotocol
         // Validate owner, status
@@ -103,7 +102,7 @@ contract Marketplace is Context, IMarketplace {
      */
     function deleteListing(uint256 tokenId_) external {
         require(tokenId_ >= 0, "Invalide NFT");
-        require(_isTokenExists(tokenId), "NFT not listed");
+        require(_isTokenExists(tokenId_), "NFT not listed");
         // TODO
         // Get booking details form bukprotocol
         // Validate owner, status
@@ -113,9 +112,9 @@ contract Marketplace is Context, IMarketplace {
 
     /**
      * @dev Function check is NFT/Booking exists/listed
-     * @param tokenId_
+     * @param tokenId_ TOkenID of booking
      */
-    function _isTokenExists(uint256 memory tokenId_) internal returns (bool) {
-        return bytes(_listedNFT[tokenId_]).length > 0 ? true : false;
+    function _isTokenExists(uint256 tokenId_) internal returns (bool) {
+        return _listedNFT[tokenId_].price > 0 ? true : false;
     }
 }
