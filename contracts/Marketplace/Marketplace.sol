@@ -111,6 +111,103 @@ contract Marketplace is Context, IMarketplace {
     }
 
     /**
+     * @dev Refer IMarketplace
+     * @dev Only NFT owner can update
+     * @param tokenId_ NFT id
+     */
+    function reList(uint256 tokenId_, uint256 price_) external {}
+
+    /**
+     * @dev Refer IMarketplace
+     * @param tokenId_ room/booking NFT id
+     */
+    function buyRoom(uint256 tokenId_) external {}
+
+    /**
+     * @dev Refer IMarketplace
+     * @param bukProtocol_ address of new buk protocol
+     */
+    function setBukProtocol(address bukProtocol_) external {}
+
+    /**
+     * @dev Refer IMarketplace
+     * @param bukNFT_ address of new buk protocol
+     */
+    function setBukNFT(address bukNFT_) external {}
+
+    /**
+     * @dev Refer IMarketplace
+     * @dev Only admin access to set
+     * @param royalty_, new royalty percentage with 2 decimals
+     */
+    function setBukRoyalty(uint8 royalty_) external {}
+
+    /**
+     * @dev Refer IMarketplace
+     * @dev Only admin access to set
+     * @dev Hotel royalty fee applies to the all listing
+     * @param royalty_, new royalty percentage with 2 decimals
+     */
+    function setHotelRoyalty(uint8 royalty_) external {}
+
+    /**
+     * @dev Refer IMarketplace
+     * @dev Only admin access to set
+     * @dev User royalty applies to the all listing
+     * @dev User royalty applies first time buyer of room
+     * @param royalty_, new royalty percentage with 2 decimals
+     */
+    function setUserRoyalty(uint8 royalty_) external {}
+
+    /**
+     * @dev Refer IMarketplace
+     * @dev Only admin access to set
+     * @param newTreasuryWallet_, Address of the new treasury wallet
+     */
+    function setTreasuryWallet(address newTreasuryWallet_) external {}
+
+    /**
+     * @dev Refer IMarketplace
+     * @dev Only admin access to set
+     * @param newWallet_, Address of the new fee wallet
+     */
+    function setHotelWallet(address newWallet_) external {}
+
+    /**
+     * @dev Refer IMarketplace
+     * @return address, Address of the stable token contract
+     */
+    function getStableToken() external view returns (address) {}
+
+    /**
+     * @dev Refer IMarketplace
+     * @return address, Address of the buk protocol contract
+     */
+    function getBukProtocol() external view returns (address) {}
+
+    /**
+     * @dev Refer IMarketplace
+     * @return address, Address of the treasury wallet
+     */
+    function getTreasuryWallet() external view returns (address) {}
+
+    /**
+     * @dev Refer IMarketplace
+     * @return address Address of the fee wallet
+     */
+    function getHotelWallet() external view returns (address) {}
+
+    /**
+     * @dev Function will provide Lisiting details of booking
+     * @param tokenId_ room/booking NFT id
+     */
+    function getListingDetails(
+        uint256 tokenId_
+    ) external view returns (ListingDetails memory) {
+        return _listedNFT[tokenId_];
+    }
+
+    /**
      * @dev Function check is NFT/Booking exists/listed
      * @param tokenId_ TOkenID of booking
      */
