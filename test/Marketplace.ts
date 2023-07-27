@@ -119,6 +119,7 @@ describe("Marketplace", function () {
         .not.be.reverted;
       expect(await marketplaceContract.getBukRoyalty()).to.equal(newBukRoyalty);
     });
+
     it("Should reverted for 0 BUK royalty", async function () {
       const { marketplaceContract, BUK_ROYALTY } = await loadFixture(
         deployMarketplaceFixture,
@@ -126,6 +127,17 @@ describe("Marketplace", function () {
       await expect(marketplaceContract.setBukRoyalty(0)).to.be.revertedWith(
         "Value should be greater than zero",
       );
+    });
+
+    it("Should set the BUK royalty and emit event", async function () {
+      const { marketplaceContract, BUK_ROYALTY } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let oldRoyalty = await marketplaceContract.getBukRoyalty();
+      let newBukRoyalty = 3;
+      await expect(await marketplaceContract.setBukRoyalty(newBukRoyalty))
+        .to.emit(marketplaceContract, "BukRoyaltySet")
+        .withArgs(oldRoyalty, newBukRoyalty);
     });
 
     it("Should set the Hotel royalty", async function () {
@@ -147,6 +159,16 @@ describe("Marketplace", function () {
         "Value should be greater than zero",
       );
     });
+    it("Should set the Hotel royalty and emit event", async function () {
+      const { marketplaceContract, BUK_ROYALTY } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let oldRoyalty = await marketplaceContract.getHotelRoyalty();
+      let newRoyalty = 3;
+      await expect(await marketplaceContract.setHotelRoyalty(newRoyalty))
+        .to.emit(marketplaceContract, "HotelRoyaltySet")
+        .withArgs(oldRoyalty, newRoyalty);
+    });
 
     it("Should set the User royalty", async function () {
       const { marketplaceContract } = await loadFixture(
@@ -167,6 +189,16 @@ describe("Marketplace", function () {
         "Value should be greater than zero",
       );
     });
+  });
+  it("Should set the user royalty and emit event", async function () {
+    const { marketplaceContract, BUK_ROYALTY } = await loadFixture(
+      deployMarketplaceFixture,
+    );
+    let oldRoyalty = await marketplaceContract.getUserRoyalty();
+    let newRoyalty = 3;
+    await expect(await marketplaceContract.setUserRoyalty(newRoyalty))
+      .to.emit(marketplaceContract, "UserRoyaltySet")
+      .withArgs(oldRoyalty, newRoyalty);
   });
 
   // Test cases for setting royalties
@@ -191,6 +223,16 @@ describe("Marketplace", function () {
         marketplaceContract.setTreasuryContract(newTreasury),
       ).to.be.revertedWith("Invalid address");
     });
+    it("Should set the treasury and emit event", async function () {
+      const { marketplaceContract, BUK_ROYALTY } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let oldAddress = await marketplaceContract.getTreasuryContract();
+      let newAddress = "0xa9a1C7be37Cb72811A6C4C278cA7C403D6459b78";
+      await expect(await marketplaceContract.setTreasuryContract(newAddress))
+        .to.emit(marketplaceContract, "TreasuryContractSet")
+        .withArgs(oldAddress, newAddress);
+    });
   });
 
   // Test cases for setting royalties
@@ -212,6 +254,16 @@ describe("Marketplace", function () {
       await expect(
         marketplaceContract.setHotelWallet(newWallet),
       ).to.be.revertedWith("Invalid address");
+    });
+    it("Should set the hotel wallet and emit event", async function () {
+      const { marketplaceContract, BUK_ROYALTY } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let oldAddress = await marketplaceContract.getHotelWallet();
+      let newAddress = "0xa9a1C7be37Cb72811A6C4C278cA7C403D6459b78";
+      await expect(await marketplaceContract.setHotelWallet(newAddress))
+        .to.emit(marketplaceContract, "HotelWalletSet")
+        .withArgs(oldAddress, newAddress);
     });
   });
 });
