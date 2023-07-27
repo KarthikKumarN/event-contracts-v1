@@ -104,6 +104,27 @@ interface IMarketplace {
     event HotelWalletSet(address oldAddress, address newAddress);
 
     /**
+     * @dev Emitted when new Buk royalty has been updated
+     * @param oldRoyalty, old buk royalty
+     * @param newRoyalty, new buk royalty
+     */
+    event BukRoyaltySet(uint8 oldRoyalty, uint8 newRoyalty);
+
+    /**
+     * @dev Emitted when new hotel royalty has been updated
+     * @param oldRoyalty, old hotel royalty
+     * @param newRoyalty, new hotel royalty
+     */
+    event HotelRoyaltySet(uint8 oldRoyalty, uint8 newRoyalty);
+
+    /**
+     * @dev Emitted when new user royalty has been updated
+     * @param oldRoyalty, old user royalty
+     * @param newRoyalty, new user royalty
+     */
+    event UserRoyaltySet(uint8 oldRoyalty, uint8 newRoyalty);
+
+    /**
      * @dev Function will create a listing of Booking/Room NFT
      * @dev Only NFT owner can list
      * @param tokenId_ room/booking NFT id

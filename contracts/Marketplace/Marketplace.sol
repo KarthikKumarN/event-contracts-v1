@@ -157,30 +157,36 @@ contract Marketplace is Context, IMarketplace {
      */
     function setBukRoyalty(uint8 royalty_) external {
         require(royalty_ > 0, "Value should be greater than zero");
+        uint8 oldRoyalty = _bukRoyalty;
         _bukRoyalty = royalty_;
+
+        emit BukRoyaltySet(oldRoyalty, royalty_);
     }
 
     /**
      * @dev Refer IMarketplace
      * @dev Only admin access to set
-     * @dev Hotel royalty fee applies to the all listing
      * @param royalty_, new royalty percentage with 2 decimals
      */
     function setHotelRoyalty(uint8 royalty_) external {
         require(royalty_ > 0, "Value should be greater than zero");
+        uint8 oldRoyalty = _hotelRoyalty;
         _hotelRoyalty = royalty_;
+
+        emit HotelRoyaltySet(oldRoyalty, royalty_);
     }
 
     /**
      * @dev Refer IMarketplace
      * @dev Only admin access to set
-     * @dev User royalty applies to the all listing
-     * @dev User royalty applies first time buyer of room
      * @param royalty_, new royalty percentage with 2 decimals
      */
     function setUserRoyalty(uint8 royalty_) external {
         require(royalty_ > 0, "Value should be greater than zero");
+        uint8 oldRoyalty = _userRoyalty;
         _userRoyalty = royalty_;
+
+        emit UserRoyaltySet(oldRoyalty, royalty_);
     }
 
     /**
