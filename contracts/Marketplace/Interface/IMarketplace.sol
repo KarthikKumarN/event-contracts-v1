@@ -209,10 +209,16 @@ interface IMarketplace {
     function getStableToken() external view returns (address);
 
     /**
-     * @dev Gets current buk protocoladdress
+     * @dev Gets current buk protocol address
      * @return address, Address of the buk protocol contract
      */
     function getBukProtocol() external view returns (address);
+
+    /**
+     * @dev Gets current buk NFT address
+     * @return address, Address of the buk NFT contract
+     */
+    function getBukNFT() external view returns (address);
 
     /**
      * @dev Gets treasury wallet address
@@ -225,6 +231,24 @@ interface IMarketplace {
      * @return address Address of the fee wallet
      */
     function getHotelWallet() external view returns (address);
+
+    /**
+     * @dev Gets BUK royalty
+     * @return uint8 Percent of BUK royalty
+     */
+    function getBukRoyalty() external view returns (uint8);
+
+    /**
+     * @dev Gets hotel royalty
+     * @return uint8 Percent of hotel royalty
+     */
+    function getHotelRoyalty() external view returns (uint8);
+
+    /**
+     * @dev Gets first user royalty
+     * @return uint8 Percent of user royalty
+     */
+    function getUserRoyalty() external view returns (uint8);
 
     /**
      * @dev Function will provide Lisiting details of booking
