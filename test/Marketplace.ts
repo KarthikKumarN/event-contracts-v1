@@ -108,6 +108,7 @@ describe("Marketplace", function () {
       expect(await marketplaceContract.getStableToken()).to.equal(CURRENCY);
     });
   });
+
   // Test cases for setting royalties
   describe("Set royalty for marketplace", function () {
     it("Should set the BUK royalty", async function () {
@@ -126,6 +127,19 @@ describe("Marketplace", function () {
       );
       await expect(marketplaceContract.setBukRoyalty(0)).to.be.revertedWith(
         "Value should be greater than zero",
+      );
+    });
+
+    it("Should reverted owner access Buk royalty", async function () {
+      const { marketplaceContract, owner, otherAccount } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      console.log(owner, " owner");
+      console.log(otherAccount, " otherAccount");
+      await expect(
+        marketplaceContract.connect(otherAccount).setBukRoyalty(0),
+      ).to.be.revertedWith(
+        `AccessControl: account ${otherAccount.address.toLowerCase()} is missing role ${await marketplaceContract.ADMIN_ROLE()}`,
       );
     });
 

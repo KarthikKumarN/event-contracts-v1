@@ -7,8 +7,10 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 import "contracts/Marketplace/Interface/IMarketplace.sol";
 
-contract Marketplace is Context, IMarketplace {
+contract Marketplace is Context, IMarketplace, AccessControl {
     using SafeERC20 for IToken;
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+    bytes32 public constant BUK_PROTOCOL_ROLE = keccak256("BUK_PROTOCOL_ROLE");
 
     // Buk protocol address
     address private _bukProtocalContract;
@@ -44,14 +46,20 @@ contract Marketplace is Context, IMarketplace {
     ) {
         _bukProtocalContract = bukProtocalAddress_;
         _bukNFTContract = bukNFTContract_;
-        _treasuryContract = treasury_;
-        _hotelWallet = hotelWallet_;
+
+        // Sets payment wallets
+        _setTreasuryContract(treasury_);
+        _setHotelWallet(hotelWallet_);
 
         // Set royalty
         _bukRoyalty = bukRoyalty_;
         _hotelRoyalty = hotelRoyalty_;
         _userRoyalty = userRoyalty_;
         _stableToken = IToken(currency_);
+
+        // Updating permission
+        _grantRole(ADMIN_ROLE, msg.sender);
+        _grantRole(BUK_PROTOCOL_ROLE, address(bukProtocalAddress_));
     }
 
     /**
@@ -145,7 +153,7 @@ contract Marketplace is Context, IMarketplace {
      * @dev Refer IMarketplace
      * @param bukNFT_ address of new buk protocol
      */
-    function setBukNFT(address bukNFT_) external {
+    function setBukNFT(address bukNFT_) external onlyRole(ADMIN_ROLE) {
         require(bukNFT_ != address(0), "Invalid address");
         _bukNFTContract = bukNFT_;
     }
@@ -155,7 +163,7 @@ contract Marketplace is Context, IMarketplace {
      * @dev Only admin access to set
      * @param royalty_, new royalty percentage with 2 decimals
      */
-    function setBukRoyalty(uint8 royalty_) external {
+    function setBukRoyalty(uint8 royalty_) external onlyRole(ADMIN_ROLE) {
         require(royalty_ > 0, "Value should be greater than zero");
         uint8 oldRoyalty = _bukRoyalty;
         _bukRoyalty = royalty_;
