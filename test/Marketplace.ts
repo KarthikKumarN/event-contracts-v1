@@ -108,4 +108,64 @@ describe("Marketplace", function () {
       expect(await marketplaceContract.getStableToken()).to.equal(CURRENCY);
     });
   });
+  // Test cases for setting royalties
+  describe("Set royalty for marketplace", function () {
+    it("Should set the BUK royalty", async function () {
+      const { marketplaceContract, BUK_ROYALTY } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let newBukRoyalty = 3;
+      await expect(await marketplaceContract.setBukRoyalty(newBukRoyalty)).to
+        .not.be.reverted;
+      expect(await marketplaceContract.getBukRoyalty()).to.equal(newBukRoyalty);
+    });
+    it("Should reverted for 0 BUK royalty", async function () {
+      const { marketplaceContract, BUK_ROYALTY } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      await expect(marketplaceContract.setBukRoyalty(0)).to.be.revertedWith(
+        "Value should be greater than zero",
+      );
+    });
+
+    it("Should set the Hotel royalty", async function () {
+      const { marketplaceContract } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let newHotelRoyalty = 3;
+      await expect(await marketplaceContract.setHotelRoyalty(newHotelRoyalty))
+        .to.not.be.reverted;
+      expect(await marketplaceContract.getHotelRoyalty()).to.equal(
+        newHotelRoyalty,
+      );
+    });
+    it("Should reverted for 0 Hotel royalty", async function () {
+      const { marketplaceContract } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      await expect(marketplaceContract.setHotelRoyalty(0)).to.be.revertedWith(
+        "Value should be greater than zero",
+      );
+    });
+
+    it("Should set the User royalty", async function () {
+      const { marketplaceContract } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let newUserRoyalty = 3;
+      await expect(await marketplaceContract.setUserRoyalty(newUserRoyalty)).to
+        .not.be.reverted;
+      expect(await marketplaceContract.getUserRoyalty()).to.equal(
+        newUserRoyalty,
+      );
+    });
+    it("Should reverted for 0 User royalty", async function () {
+      const { marketplaceContract } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      await expect(marketplaceContract.setUserRoyalty(0)).to.be.revertedWith(
+        "Value should be greater than zero",
+      );
+    });
+  });
 });

@@ -145,14 +145,20 @@ contract Marketplace is Context, IMarketplace {
      * @dev Refer IMarketplace
      * @param bukNFT_ address of new buk protocol
      */
-    function setBukNFT(address bukNFT_) external {}
+    function setBukNFT(address bukNFT_) external {
+        require(bukNFT_ != address(0), "Invalid address");
+        _bukNFTContract = bukNFT_;
+    }
 
     /**
      * @dev Refer IMarketplace
      * @dev Only admin access to set
      * @param royalty_, new royalty percentage with 2 decimals
      */
-    function setBukRoyalty(uint8 royalty_) external {}
+    function setBukRoyalty(uint8 royalty_) external {
+        require(royalty_ > 0, "Value should be greater than zero");
+        _bukRoyalty = royalty_;
+    }
 
     /**
      * @dev Refer IMarketplace
@@ -160,7 +166,10 @@ contract Marketplace is Context, IMarketplace {
      * @dev Hotel royalty fee applies to the all listing
      * @param royalty_, new royalty percentage with 2 decimals
      */
-    function setHotelRoyalty(uint8 royalty_) external {}
+    function setHotelRoyalty(uint8 royalty_) external {
+        require(royalty_ > 0, "Value should be greater than zero");
+        _hotelRoyalty = royalty_;
+    }
 
     /**
      * @dev Refer IMarketplace
@@ -169,7 +178,10 @@ contract Marketplace is Context, IMarketplace {
      * @dev User royalty applies first time buyer of room
      * @param royalty_, new royalty percentage with 2 decimals
      */
-    function setUserRoyalty(uint8 royalty_) external {}
+    function setUserRoyalty(uint8 royalty_) external {
+        require(royalty_ > 0, "Value should be greater than zero");
+        _userRoyalty = royalty_;
+    }
 
     /**
      * @dev Refer IMarketplace
