@@ -11,8 +11,8 @@ contract Marketplace is Context, IMarketplace {
     using SafeERC20 for IToken;
 
     // Buk protocol address
-    address public bukProtocalContract;
-    address public bukNFTContract;
+    address private _bukProtocalContract;
+    address private _bukNFTContract;
 
     // Treasury address
     address private _treasury;
@@ -42,8 +42,8 @@ contract Marketplace is Context, IMarketplace {
         uint8 userRoyalty_,
         address currency_
     ) {
-        bukProtocalContract = bukProtocalAddress_;
-        bukNFTContract = bukNFTContract_;
+        _bukProtocalContract = bukProtocalAddress_;
+        _bukNFTContract = bukNFTContract_;
         _treasury = treasury_;
         _hotelWallet = hotelWallet_;
 
@@ -138,7 +138,7 @@ contract Marketplace is Context, IMarketplace {
      */
     function setBukProtocol(address bukProtocol_) external {
         require(bukProtocol_ != address(0), "Invalid address");
-        bukProtocalContract = bukProtocol_;
+        _bukProtocalContract = bukProtocol_;
     }
 
     /**
@@ -189,25 +189,65 @@ contract Marketplace is Context, IMarketplace {
      * @dev Refer IMarketplace
      * @return address, Address of the stable token contract
      */
-    function getStableToken() external view returns (address) {}
+    function getStableToken() external view returns (address) {
+        return address(_stableToken);
+    }
 
     /**
      * @dev Refer IMarketplace
      * @return address, Address of the buk protocol contract
      */
-    function getBukProtocol() external view returns (address) {}
+    function getBukProtocol() external view returns (address) {
+        return _bukProtocalContract;
+    }
+
+    /**
+     * @dev Refer IMarketplace
+     * @return address, Address of the buk NFT contract
+     */
+    function getBukNFT() external view returns (address) {
+        return _bukNFTContract;
+    }
 
     /**
      * @dev Refer IMarketplace
      * @return address, Address of the treasury wallet
      */
-    function getTreasuryWallet() external view returns (address) {}
+    function getTreasuryWallet() external view returns (address) {
+        return _treasury;
+    }
 
     /**
      * @dev Refer IMarketplace
      * @return address Address of the fee wallet
      */
-    function getHotelWallet() external view returns (address) {}
+    function getHotelWallet() external view returns (address) {
+        return _hotelWallet;
+    }
+
+    /**
+     * @dev Refer IMarketplace
+     * @return uint8 Percent of BUK royalty
+     */
+    function getBukRoyalty() external view returns (uint8) {
+        return _bukRoyalty;
+    }
+
+    /**
+     * @dev Refer IMarketplace
+     * @return uint8 Percent of hotel royalty
+     */
+    function getHotelRoyalty() external view returns (uint8) {
+        return _hotelRoyalty;
+    }
+
+    /**
+     * @dev Refer IMarketplace
+     * @return uint8 Percent of user royalty
+     */
+    function getUserRoyalty() external view returns (uint8) {
+        return _userRoyalty;
+    }
 
     /**
      * @dev Function will provide Lisiting details of booking
@@ -223,7 +263,7 @@ contract Marketplace is Context, IMarketplace {
      * @dev Function check is NFT/Booking exists/listed
      * @param tokenId_ TOkenID of booking
      */
-    function _isTokenExists(uint256 tokenId_) internal returns (bool) {
+    function _isTokenExists(uint256 tokenId_) internal view returns (bool) {
         return _listedNFT[tokenId_].price > 0 ? true : false;
     }
 }
