@@ -15,7 +15,7 @@ contract Marketplace is Context, IMarketplace {
     address private _bukNFTContract;
 
     // Treasury address
-    address private _treasury;
+    address private _treasuryContract;
     address private _hotelWallet;
 
     // Address of owner who can perform adminitotor work
@@ -44,7 +44,7 @@ contract Marketplace is Context, IMarketplace {
     ) {
         _bukProtocalContract = bukProtocalAddress_;
         _bukNFTContract = bukNFTContract_;
-        _treasury = treasury_;
+        _treasuryContract = treasury_;
         _hotelWallet = hotelWallet_;
 
         // Set royalty
@@ -186,16 +186,20 @@ contract Marketplace is Context, IMarketplace {
     /**
      * @dev Refer IMarketplace
      * @dev Only admin access to set
-     * @param newTreasuryWallet_, Address of the new treasury wallet
+     * @param newTreasurycontract_, Address of the new treasury contract
      */
-    function setTreasuryWallet(address newTreasuryWallet_) external {}
+    function setTreasuryContract(address newTreasurycontract_) external {
+        _setTreasuryContract(newTreasurycontract_);
+    }
 
     /**
      * @dev Refer IMarketplace
      * @dev Only admin access to set
      * @param newWallet_, Address of the new fee wallet
      */
-    function setHotelWallet(address newWallet_) external {}
+    function setHotelWallet(address newWallet_) external {
+        _setHotelWallet(newWallet_);
+    }
 
     /**
      * @dev Refer IMarketplace
@@ -223,10 +227,10 @@ contract Marketplace is Context, IMarketplace {
 
     /**
      * @dev Refer IMarketplace
-     * @return address, Address of the treasury wallet
+     * @return address, Address of the treasury contract
      */
-    function getTreasuryWallet() external view returns (address) {
-        return _treasury;
+    function getTreasuryContract() external view returns (address) {
+        return _treasuryContract;
     }
 
     /**
@@ -272,10 +276,34 @@ contract Marketplace is Context, IMarketplace {
     }
 
     /**
+     * @dev Allows to set a new treasury contract address .
+     * @param newTreasuryContract_, Address of the new treasury contract
+     */
+    function _setTreasuryContract(address newTreasuryContract_) private {
+        require(newTreasuryContract_ != address(0), "Invalid address");
+        address oldTreasuryContract = _treasuryContract;
+        _treasuryContract = newTreasuryContract_;
+
+        emit TreasuryContractSet(oldTreasuryContract, newTreasuryContract_);
+    }
+
+    /**
+     * @dev Allows to set a new hotel wallet.
+     * @param newHotelWallet_, Address of the new hotel wallet
+     */
+    function _setHotelWallet(address newHotelWallet_) private {
+        require(newHotelWallet_ != address(0), "Invalid address");
+        address oldHotelWallet = _hotelWallet;
+        _hotelWallet = newHotelWallet_;
+
+        emit HotelWalletSet(oldHotelWallet, newHotelWallet_);
+    }
+
+    /**
      * @dev Function check is NFT/Booking exists/listed
      * @param tokenId_ TOkenID of booking
      */
-    function _isTokenExists(uint256 tokenId_) internal view returns (bool) {
+    function _isTokenExists(uint256 tokenId_) private view returns (bool) {
         return _listedNFT[tokenId_].price > 0 ? true : false;
     }
 }

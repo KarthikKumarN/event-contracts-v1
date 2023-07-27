@@ -90,11 +90,11 @@ interface IMarketplace {
     event BukNFTSet(address oldAddress, address newAddress);
 
     /**
-     * @dev Emitted when new Treasury Wallet has been updated
+     * @dev Emitted when new Treasury Contract has been updated
      * @param oldAddress, Address of the old treasury wallet
      * @param newAddress, Address of the new treasury wallet
      */
-    event TreasuryWalletSet(address oldAddress, address newAddress);
+    event TreasuryContractSet(address oldAddress, address newAddress);
 
     /**
      * @dev Emitted when new Hotel Wallet has been updated
@@ -189,11 +189,11 @@ interface IMarketplace {
     function setUserRoyalty(uint8 royalty_) external;
 
     /**
-     * @dev Allows to set a new treasury wallet where buk royalty funds will be transfered.
+     * @dev Allows to set a new treasury contract where buk royalty funds will be transfered.
      * @dev Only admin access to set
-     * @param newTreasuryWallet_, Address of the new treasury wallet
+     * @param newTreasuryContract_, Address of the new treasury contract
      */
-    function setTreasuryWallet(address newTreasuryWallet_) external;
+    function setTreasuryContract(address newTreasuryContract_) external;
 
     /**
      * @dev Allows to set a new hotel royalty wallet address where royalty will be transfered.
@@ -221,10 +221,10 @@ interface IMarketplace {
     function getBukNFT() external view returns (address);
 
     /**
-     * @dev Gets treasury wallet address
-     * @return address, Address of the treasury wallet
+     * @dev Gets treasury address
+     * @return address, Address of the treasury contract
      */
-    function getTreasuryWallet() external view returns (address);
+    function getTreasuryContract() external view returns (address);
 
     /**
      * @dev Gets Hotel wallet address

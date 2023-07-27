@@ -64,11 +64,11 @@ describe("Marketplace", function () {
       expect(await marketplaceContract.getBukNFT()).to.equal(BUK_NFT);
     });
 
-    it("Should set the treasury wallet", async function () {
+    it("Should set the treasury contract", async function () {
       const { marketplaceContract, WALLET } = await loadFixture(
         deployMarketplaceFixture,
       );
-      expect(await marketplaceContract.getTreasuryWallet()).to.equal(WALLET);
+      expect(await marketplaceContract.getTreasuryContract()).to.equal(WALLET);
     });
 
     it("Should set the hotel wallet", async function () {
@@ -166,6 +166,52 @@ describe("Marketplace", function () {
       await expect(marketplaceContract.setUserRoyalty(0)).to.be.revertedWith(
         "Value should be greater than zero",
       );
+    });
+  });
+
+  // Test cases for setting royalties
+  describe("Set Treasury contract for marketplace", function () {
+    it("Should set the BUK treasury", async function () {
+      const { marketplaceContract, WALLET } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let newTreasury = "0xa9a1C7be37Cb72811A6C4C278cA7C403D6459b78";
+      await expect(await marketplaceContract.setTreasuryContract(newTreasury))
+        .to.not.be.reverted;
+      expect(await marketplaceContract.getTreasuryContract()).to.equal(
+        newTreasury,
+      );
+    });
+    it("Should reverted with error BUK treasury", async function () {
+      const { marketplaceContract, WALLET } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let newTreasury = "0x0000000000000000000000000000000000000000";
+      await expect(
+        marketplaceContract.setTreasuryContract(newTreasury),
+      ).to.be.revertedWith("Invalid address");
+    });
+  });
+
+  // Test cases for setting royalties
+  describe("Set hotel wallet for marketplace", function () {
+    it("Should set the hotel wallet", async function () {
+      const { marketplaceContract, WALLET } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let newWallet = "0xa9a1C7be37Cb72811A6C4C278cA7C403D6459b78";
+      await expect(await marketplaceContract.setHotelWallet(newWallet)).to.not
+        .be.reverted;
+      expect(await marketplaceContract.getHotelWallet()).to.equal(newWallet);
+    });
+    it("Should reverted with error hotel wallet", async function () {
+      const { marketplaceContract, WALLET } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let newWallet = "0x0000000000000000000000000000000000000000";
+      await expect(
+        marketplaceContract.setHotelWallet(newWallet),
+      ).to.be.revertedWith("Invalid address");
     });
   });
 });
