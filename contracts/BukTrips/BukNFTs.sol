@@ -3,23 +3,23 @@ pragma solidity =0.8.19;
 
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "./IBukTripsUtilityNFT.sol";
+import "./IBukPOSNFTs.sol";
 
 /**
 * @title BUK Protocol NFT Contract
 * @author BUK Technology Inc
 * @dev Contract for managing hotel room-night inventory and ERC1155 token management for room-night NFTs
 */
-contract BukTripsNFT is AccessControl, ERC1155 {
+contract BukNFTs is AccessControl, ERC1155 {
 
     /**
     * @dev name of the collection contract
     */
     string public name;
     /**
-    * @dev address of the utility collection contract
+    * @dev address of thBuk PoS NFT collection contract
     */
-    address private utilityContract;
+    address private nftPoSContract;
 
     /**
     * @dev Mapping for token URI's for booked tickets
@@ -27,26 +27,26 @@ contract BukTripsNFT is AccessControl, ERC1155 {
     mapping(uint256 => string) public bookingTickets; //tokenID -> uri
 
     /**
-    * @dev Constant for the role of the factory contract
+    * @dev Constant for the role of the admin
     */
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN");
     /**
-    * @dev Constant for the role of the factory contract
+    * @dev Constant for the role of the Buk Protocol contract
     */
-    bytes32 public constant FACTORY_CONTRACT_ROLE = keccak256("FACTORY_CONTRACT");
+    bytes32 public constant BUK_PROTOCOL_CONTRACT_ROLE = keccak256("BUK_PROTOCOL_CONTRACT");
     /**
     * @dev Constant for the role of the marketplace contract
     */
     bytes32 public constant MARKETPLACE_CONTRACT_ROLE = keccak256("MARKETPLACE_CONTRACT");
 
     /**
-    * @dev Event to update the supplier details
+    * @dev Event to update the contract name
     */
     event UpdateContractName(string indexed contractName);
     /**
-    * @dev Event to safe transfer NFT
+    * @dev Emitted when Buk Protocol role access is granted for NFT and PoS contracts 
     */
-    event GrantFactoryRole(address indexed oldFactory, address indexed newFactory);
+    event GrantBukProtocolRole(address indexed oldAddress, address indexed newAddress);
     /**
     * @dev Event to set token URI
     */
@@ -54,35 +54,35 @@ contract BukTripsNFT is AccessControl, ERC1155 {
 
     /**
     * @dev Constructor to initialize the contract
-    * @param _utilityContract Address of the utility contract
-    * @param _factoryContract Address of the factory contract
+    * @param bukPoSContract Address of the Buk PoS NFTs contract
+    * @param bukProtocolContract Address of the buk protocol contract
     */
-    constructor(string memory _contractName, address _utilityContract, address _factoryContract) ERC1155("") {
-        name = _contractName;
+    constructor(string memory contractName, address bukPoSContract, address bukProtocolContract) ERC1155("") {
+        name = contractName;
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
-        _setRoleAdmin(FACTORY_CONTRACT_ROLE, FACTORY_CONTRACT_ROLE);
-        _grantRole(FACTORY_CONTRACT_ROLE, _factoryContract);
-        utilityContract = _utilityContract;
+        _setRoleAdmin(BUK_PROTOCOL_CONTRACT_ROLE, BUK_PROTOCOL_CONTRACT_ROLE);
+        _grantRole(BUK_PROTOCOL_CONTRACT_ROLE, bukProtocolContract);
+        nftPoSContract = bukPoSContract;
     }
     
     /**
-    * @dev To set the factory role.
-    * @param _factoryContract - Address of factory contract
+    * @dev To set the buk protocol role.
+    * @param bukProtocolContract - Address of buk protocol contract
     */
-    function grantFactoryRole(address _factoryContract) external onlyRole(FACTORY_CONTRACT_ROLE) {
-        IBukTripsUtilityNFT(utilityContract).grantFactoryRole(_factoryContract);
-        _grantRole(FACTORY_CONTRACT_ROLE, _factoryContract);
-        revokeRole(FACTORY_CONTRACT_ROLE, _msgSender());
-        emit GrantFactoryRole(_msgSender(), _factoryContract);
+    function grantBukProtocolRole(address bukProtocolContract) external onlyRole(BUK_PROTOCOL_CONTRACT_ROLE) {
+        IBukPOSNFTs(nftPoSContract).grantBukProtocolRole(bukProtocolContract);
+        _grantRole(BUK_PROTOCOL_CONTRACT_ROLE, bukProtocolContract);
+        revokeRole(BUK_PROTOCOL_CONTRACT_ROLE, _msgSender());
+        emit GrantBukProtocolRole(_msgSender(), bukProtocolContract);
     }
 
     /**
     * @dev Update the name of the contract.
     * @notice This function can only be called by addresses with `UPDATE_CONTRACT_ROLE`
     */
-    function updateName(string memory _contractName) external onlyRole(FACTORY_CONTRACT_ROLE) {
+    function updateName(string memory _contractName) external onlyRole(BUK_PROTOCOL_CONTRACT_ROLE) {
         name = _contractName;
-        IBukTripsUtilityNFT(utilityContract).updateName(_contractName);
+        IBukPOSNFTs(nftPoSContract).updateName(_contractName);
         emit UpdateContractName(_contractName);
     }
 
@@ -90,12 +90,14 @@ contract BukTripsNFT is AccessControl, ERC1155 {
     * @dev Sets the URI for a specific token ID.
     * @param _id - The ID of the token.
     * @param _newuri - The new URI for the token.
-    * @notice This function can only be called by a contract with `FACTORY_CONTRACT_ROLE`
+    * @notice This function can only be called by a contract with `BUK_PROTOCOL_CONTRACT_ROLE`
     */
-    function setURI(uint256 _id, string memory _newuri) external onlyRole(FACTORY_CONTRACT_ROLE) {
-        //check if that nft exists in the collection
-        _setURI(_id,_newuri);
-        IBukTripsUtilityNFT(utilityContract).setURI(_id,_newuri);
+    function setURI(uint256 _id, string memory _newuri) external onlyRole(BUK_PROTOCOL_CONTRACT_ROLE) {
+        if(bytes(bookingTickets[_id]).length != 0) {
+            _setURI(_id,_newuri);
+        } else {
+            IBukPOSNFTs(nftPoSContract).setURI(_id,_newuri);
+        }
         emit SetURI(_id,_newuri);
     }
 
@@ -107,9 +109,9 @@ contract BukTripsNFT is AccessControl, ERC1155 {
     * @param data - The data to store with the NFT.
     * @param _uri - The URI to associate with the NFT.
     * @return uint256 - The token ID of the newly minted NFT.
-    * @notice This function can only be called by a contract with `FACTORY_CONTRACT_ROLE`
+    * @notice This function can only be called by a contract with `BUK_PROTOCOL_CONTRACT_ROLE`
     */
-    function mint(uint256 _id, address account, uint256 amount, bytes calldata data, string calldata _uri) external onlyRole(FACTORY_CONTRACT_ROLE) returns (uint256) {
+    function mint(uint256 _id, address account, uint256 amount, bytes calldata data, string calldata _uri) external onlyRole(BUK_PROTOCOL_CONTRACT_ROLE) returns (uint256) {
         _mint(account, _id, amount, data);
         _setURI( _id, _uri);
         return ( _id );
@@ -120,16 +122,17 @@ contract BukTripsNFT is AccessControl, ERC1155 {
     * @param account - The account to burn the NFT from.
     * @param id - The token ID of the NFT to burn.
     * @param amount - The amount of NFTs to burn.
-    * @param utility - Whether or not to call the utility contract to burn the NFT.
-    * @notice This function can only be called by a contract with `FACTORY_CONTRACT_ROLE`
+    * @param isPoSNFT - Whether or not to call the Buk PoS NFTs contract to burn the NFT.
+    * @notice This function can only be called by a contract with `BUK_PROTOCOL_CONTRACT_ROLE`
     */
-    function burn(address account, uint256 id, uint256 amount, bool utility) external onlyRole(FACTORY_CONTRACT_ROLE) {
+    function burn(address account, uint256 id, uint256 amount, bool isPoSNFT) external onlyRole(BUK_PROTOCOL_CONTRACT_ROLE) {
         string memory uri_ =  bookingTickets[id];
         bookingTickets[id] = "";
-        if(utility) {
-            IBukTripsUtilityNFT(utilityContract).mint(account, id, amount, uri_, "");
+        if(isPoSNFT) {
+            IBukPOSNFTs(nftPoSContract).mint(account, id, amount, uri_, "");
+        } else {
+            _burn(account, id, amount);
         }
-        _burn(account, id, amount);
     }
 
     /**

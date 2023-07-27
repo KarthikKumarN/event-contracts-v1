@@ -4,16 +4,15 @@ pragma solidity =0.8.19;
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "./IBukTripsNFT.sol";
+import "./IBukNFTs.sol";
 import "./ITreasury.sol";
-import "./IBukTripsUtilityNFT.sol";
 
 /**
-* @title BUK Protocol Factory Contract
+* @title BUK Protocol Contract
 * @author BUK Technology Inc
-* @dev Genesis contract for managing all operations of the BUK protocol including ERC1155 token management for room-night NFTs and underlying sub-contracts such as Supplier, Hotel, Treasury, and Marketplace.
+* @dev Genesis contract for managing all operations of the BUK protocol including ERC1155 token management for room-night NFTs and underlying sub-contracts such as Buk NFTs, Buk PoS NFTs, Treasury, and Marketplace.
 */
-contract BukTrips is AccessControl, ReentrancyGuard {
+contract BukProtocol is AccessControl, ReentrancyGuard {
 
     /**
     * @dev Enum for booking statuses.
@@ -26,18 +25,17 @@ contract BukTrips is AccessControl, ReentrancyGuard {
     enum BookingStatus {nil, booked, confirmed, cancelled, expired}
 
     /**
-    * @dev Addresses for the Buk wallet, currency, treasury, supplier deployer, and utility deployer.
-    * @dev address buk_wallet        Address of the Buk wallet.
+    * @dev address bukWallet        Address of the Buk wallet.
     * @dev address currency          Address of the currency.
     * @dev address treasury          Address of the treasury.
-    * @dev address supplier_deployer Address of the supplier deployer.
-    * @dev address utility_deployer  Address of the utility deployer.
+    * @dev address nftContract Address of the Buk NFT contract.
+    * @dev address nftPoSContract  Address of the Buk NFT PoS Contract.
     */
     address private bukWallet;
     address private currency;
     address private treasury;
     address public nftContract;
-    address public nftUtilityContract;
+    address public nftPoSContract;
     /**
     * @dev Commission charged on bookings.
     */
@@ -46,7 +44,7 @@ contract BukTrips is AccessControl, ReentrancyGuard {
     /**
     * @dev Counters.Counter bookingIds    Counter for booking IDs.
     */
-    uint256 private _bookingIds;
+    uint256 private bookingIds;
 
     /**
     * @dev Struct for booking details.
@@ -84,9 +82,9 @@ contract BukTrips is AccessControl, ReentrancyGuard {
     */
     event SetCommission(uint256 indexed commission);
     /**
-    * @dev Event to safe transfer NFT
+    * @dev Emitted when Buk Protocol role access is granted for NFT and PoS contracts
     */
-    event GrantSupplierFactoryRole(address indexed oldFactory, address indexed newFactory);
+    event GrantBukProtocolRole(address indexed oldAddress, address indexed newAddress);
     /**
     * @dev Emitted when token uri is set.
     */
@@ -124,7 +122,7 @@ contract BukTrips is AccessControl, ReentrancyGuard {
     */
     event CancelRoom(uint256 indexed booking, bool indexed status);
     /**
-    * @dev Event to update the supplier details
+    * @dev Event to update the contract name
     */
     event UpdateContractName(string indexed contractName);
 
@@ -164,7 +162,7 @@ contract BukTrips is AccessControl, ReentrancyGuard {
     * @param _tokenId Token Id.
     */
     function setTokenUri( uint _tokenId, string memory _newUri) external onlyRole(ADMIN_ROLE) {
-        IBukTripsNFT(nftContract).setURI(_tokenId, _newUri);
+        IBukNFTs(nftContract).setURI(_tokenId, _newUri);
         emit SetTokenURI(_tokenId,_newUri);
     }
 
@@ -173,18 +171,18 @@ contract BukTrips is AccessControl, ReentrancyGuard {
     * @notice This function can only be called by addresses with `UPDATE_CONTRACT_ROLE`
     */
     function updateNFTName(string memory _contractName) external onlyRole(ADMIN_ROLE) {
-        IBukTripsNFT(nftContract).updateName(_contractName);
+        IBukNFTs(nftContract).updateName(_contractName);
         emit UpdateContractName(_contractName);
     }
 
     /**
-    * @dev Function to grant the factory role to a given supplier
-    * @param _newFactoryContract address: New factory contract of the supplier contract
+    * @dev Function to grant the BUK Protocol role access to NFT and PoS contracts
+    * @param _newBukProtocol address: New Buk Protocol contract of the Buk NFTs
     * @notice This function can only be called by a contract with `ADMIN_ROLE`
     */
-    function grantNFTFactoryRole(address _newFactoryContract) external onlyRole(ADMIN_ROLE)  {
-        IBukTripsNFT(nftContract).grantFactoryRole(_newFactoryContract);
-        emit GrantSupplierFactoryRole(address(this), _newFactoryContract);
+    function grantBukProtocolRole(address _newBukProtocol) external onlyRole(ADMIN_ROLE)  {
+        IBukNFTs(nftContract).grantBukProtocolRole(_newBukProtocol);
+        emit GrantBukProtocolRole(address(this), _newBukProtocol);
     }
 
     /**
@@ -204,32 +202,28 @@ contract BukTrips is AccessControl, ReentrancyGuard {
     * @param _checkin Checkin date.
     * @param _checkout Checkout date.
     * @return ids IDs of the bookings.
-    * @notice Only registered Suppliers' rooms can be booked.
     */
     function bookRoom(uint256 _count, uint256[] memory _total, uint256[] memory _baseRate, uint256 _checkin, uint256 _checkout) external nonReentrant() returns (bool) {
-        // require(suppliers[_supplierId].status, "Supplier not registered");
         require(((_total.length == _baseRate.length) && (_total.length == _count) && (_count>0)), "Array sizes mismatch");
         uint256[] memory bookings = new uint256[](_count);
         uint total = 0;
         uint commissionTotal = 0;
         for(uint8 i=0; i<_count;++i) {
-            ++_bookingIds;
-            bookingDetails[_bookingIds] = Booking(_bookingIds, BookingStatus.booked, 0, _msgSender(), _checkin, _checkout, _total[i], _baseRate[i]);
-            bookings[i] = _bookingIds;
+            ++bookingIds;
+            bookingDetails[bookingIds] = Booking(bookingIds, BookingStatus.booked, 0, _msgSender(), _checkin, _checkout, _total[i], _baseRate[i]);
+            bookings[i] = bookingIds;
             total+=_total[i];
             commissionTotal+= _baseRate[i]*commission/100;
-            emit BookRoom(_bookingIds);
+            emit BookRoom(bookingIds);
         }
-        return _bookingPayment(commissionTotal, total, bookings);
+        return _bookingPayment(commissionTotal, total);
     }
 
     /** 
     * @dev Function to refund the amount for the failure scenarios.
     * @param _ids IDs of the bookings.
-    * @notice Only registered Suppliers' rooms can be booked.
     */
     function bookingRefund(uint256[] memory _ids, address _owner) external onlyRole(ADMIN_ROLE) {
-        // require(suppliers[_supplierId].status, "Supplier not registered");
         uint256 len = _ids.length;
         require((len>0), "Array is empty");
         for(uint8 i=0; i<len; ++i) {
@@ -250,14 +244,12 @@ contract BukTrips is AccessControl, ReentrancyGuard {
     * @param _ids IDs of the bookings.
     * @param _uri URIs of the NFTs.
     * @param _status Status of the NFT.
-    * @notice Only registered Suppliers' rooms can be confirmed.
     * @notice Only the owner of the booking can confirm the rooms.
     * @notice The number of bookings and URIs should be same.
     * @notice The booking status should be booked to confirm it.
     * @notice The NFTs are minted to the owner of the booking.
     */
     function confirmRoom(uint256[] memory _ids, string[] memory _uri, bool _status) external nonReentrant() {
-        // require(suppliers[_supplierId].status, "Supplier not registered");
         uint256 len = _ids.length;
         for(uint8 i=0; i<len; ++i) {
             require(bookingDetails[_ids[i]].status == BookingStatus.booked, "Check the Booking status");
@@ -265,10 +257,10 @@ contract BukTrips is AccessControl, ReentrancyGuard {
         }
         require((len == _uri.length), "Check Ids and URIs size");
         require(((len > 0) && (len < 11)), "Not in max - min booking limit");
-        IBukTripsNFT _supplierContract = IBukTripsNFT(nftContract);
+        IBukNFTs bukNftsContract = IBukNFTs(nftContract);
         for(uint8 i=0; i<len; ++i) {
             bookingDetails[_ids[i]].status = BookingStatus.confirmed;
-            _supplierContract.mint(_ids[i], bookingDetails[_ids[i]].owner, 1, "", _uri[i], _status);
+            bukNftsContract.mint(_ids[i], bookingDetails[_ids[i]].owner, 1, "", _uri[i], _status);
             bookingDetails[_ids[i]].tokenID = _ids[i];
         }
         emit MintBookingNFT(_ids, true);
@@ -277,14 +269,12 @@ contract BukTrips is AccessControl, ReentrancyGuard {
     /**
     * @dev Function to checkout the rooms.
     * @param _ids IDs of the bookings.
-    * @notice Only registered Suppliers' rooms can be checked out.
     * @notice Only the admin can checkout the rooms.
     * @notice The booking status should be confirmed to checkout it.
     * @notice The Active Booking NFTs are burnt from the owner's account.
     * @notice The Utility NFTs are minted to the owner of the booking.
     */
     function checkout(uint256[] memory _ids ) external onlyRole(ADMIN_ROLE)  {
-        // require(suppliers[_supplierId].status, "Supplier not registered");
         uint256 len = _ids.length;
         require(((len > 0) && (len < 11)), "Not in max-min booking limit");
         for(uint8 i=0; i<len; ++i) {
@@ -292,7 +282,7 @@ contract BukTrips is AccessControl, ReentrancyGuard {
         }
         for(uint8 i=0; i<len;++i) {
             bookingDetails[_ids[i]].status = BookingStatus.expired;
-            IBukTripsNFT(nftContract).burn(bookingDetails[_ids[i]].owner, _ids[i], 1, true);
+            IBukNFTs(nftContract).burn(bookingDetails[_ids[i]].owner, _ids[i], 1, true);
         }
         emit CheckoutRooms(_ids, true);
     }
@@ -303,21 +293,19 @@ contract BukTrips is AccessControl, ReentrancyGuard {
     * @param _penalty Penalty amount to be refunded.
     * @param _refund Refund amount to be refunded.
     * @param _charges Charges amount to be refunded.
-    * @notice Only registered Suppliers' rooms can be cancelled.
     * @notice Only the admin can cancel the rooms.
     * @notice The booking status should be confirmed to cancel it.
     * @notice The Active Booking NFTs are burnt from the owner's account.
     */
     function cancelRoom(uint256 _id, uint256 _penalty, uint256 _refund, uint256 _charges) external onlyRole(ADMIN_ROLE) {
-        // require(suppliers[_supplierId].status, "Supplier not registered");
         require((bookingDetails[_id].status == BookingStatus.confirmed), "Not a confirmed Booking");
         require(((_penalty+_refund+_charges)<(bookingDetails[_id].total+1)), "Transfer amount exceeds total");
-        IBukTripsNFT _supplierContract = IBukTripsNFT(nftContract);
+        IBukNFTs bukNftsContract = IBukNFTs(nftContract);
         bookingDetails[_id].status = BookingStatus.cancelled;
-        ITreasury(treasury).cancelUSDCRefund(_penalty, nftContract);
+        ITreasury(treasury).cancelUSDCRefund(_penalty, bukWallet);
         ITreasury(treasury).cancelUSDCRefund(_refund, bookingDetails[_id].owner);
         ITreasury(treasury).cancelUSDCRefund(_charges, bukWallet);
-        _supplierContract.burn(bookingDetails[_id].owner, _id, 1, false);
+        bukNftsContract.burn(bookingDetails[_id].owner, _id, 1, false);
         emit CancelRoom(_id, true);
     }
 
@@ -325,24 +313,10 @@ contract BukTrips is AccessControl, ReentrancyGuard {
     * @dev Function to do the booking payment.
     * @param _commission Total BUK commission.
     * @param _total Total Booking Charge Excluding BUK commission.
-    * @param _bookings Array of Booking Ids.
     */
-    function _bookingPayment(uint256 _commission, uint256 _total, uint[] memory _bookings) internal returns (bool){
-        bool collectCommission = IERC20(currency).transferFrom(_msgSender(), bukWallet, _commission);
-        if(collectCommission) {
-            bool collectPayment = IERC20(currency).transferFrom(_msgSender(), treasury, _total);
-            if(collectPayment) {
-                emit BookRooms(_bookings, _total, _commission);
-                return true;
-            } else {
-                IERC20(currency).transferFrom(bukWallet, _msgSender(), _commission);
-                IERC20(currency).transferFrom(treasury, _msgSender(), _total);
-                return false;
-            }
-        } else {
-            IERC20(currency).transferFrom(bukWallet, _msgSender(), _commission);
-            return false;
-        }
-
+    function _bookingPayment(uint256 _commission, uint256 _total) internal returns(bool){
+        IERC20(currency).transferFrom(_msgSender(), bukWallet, _commission);
+        IERC20(currency).transferFrom(_msgSender(), treasury, _total);
+        return true;
     }
 }
