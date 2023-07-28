@@ -179,5 +179,5 @@ interface IMarketplace {
      * @dev Function check is NFT/Booking listed
      * @param tokenId_ TokenID of booking
      */
-    function tokenListed(uint256 tokenId_) external view returns (bool);
+    function isListed(uint256 tokenId_) external view returns (bool);
 }

@@ -52,7 +52,7 @@ contract Marketplace is Context, IMarketplace, AccessControl {
         uint256 tardeTimeLimt_
     ) external {
         require(tokenId_ >= 0, "Invalide NFT");
-        require(!tokenListed(tokenId_), "NFT already listed");
+        require(!isListed(tokenId_), "NFT already listed");
         // TODO
         // Get booking details form bukprotocol
         // Validate owner, minSalePrice, status
@@ -73,7 +73,7 @@ contract Marketplace is Context, IMarketplace, AccessControl {
      */
     function delisting(uint256 tokenId_) external {
         require(tokenId_ >= 0, "Invalide NFT");
-        require(tokenListed(tokenId_), "NFT not listed");
+        require(isListed(tokenId_), "NFT not listed");
         // TODO
         // Get booking details form bukprotocol
         // Validate owner, status
@@ -87,7 +87,7 @@ contract Marketplace is Context, IMarketplace, AccessControl {
      */
     function deleteListing(uint256 tokenId_) external {
         require(tokenId_ >= 0, "Invalide NFT");
-        require(tokenListed(tokenId_), "NFT not listed");
+        require(isListed(tokenId_), "NFT not listed");
         // TODO
         // Get booking details form bukprotocol
         // Validate owner, status
@@ -102,7 +102,7 @@ contract Marketplace is Context, IMarketplace, AccessControl {
      */
     function relist(uint256 tokenId_, uint256 price_) external {
         require(tokenId_ >= 0, "Invalide NFT");
-        require(tokenListed(tokenId_), "NFT not listed");
+        require(isListed(tokenId_), "NFT not listed");
         // TODO
         // Get booking details form bukprotocol
         // Validate owner, status
@@ -137,7 +137,10 @@ contract Marketplace is Context, IMarketplace, AccessControl {
      */
     function setBukNFT(address bukNFT_) external onlyRole(ADMIN_ROLE) {
         require(bukNFT_ != address(0), "Invalid address");
+        address oldAddress = _bukNFTContract;
         _bukNFTContract = bukNFT_;
+
+        emit BukNFTSet(oldAddress, bukNFT_);
     }
 
     /**
@@ -178,7 +181,7 @@ contract Marketplace is Context, IMarketplace, AccessControl {
      * @dev Function check is NFT/Booking exists/listed
      * @param tokenId_ TokenID of booking
      */
-    function tokenListed(uint256 tokenId_) public view returns (bool) {
+    function isListed(uint256 tokenId_) public view returns (bool) {
         return _listedNFT[tokenId_].price > 0 ? true : false;
     }
 }

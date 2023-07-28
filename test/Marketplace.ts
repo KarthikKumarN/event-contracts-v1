@@ -14,24 +14,15 @@ describe("Marketplace", function () {
     const BUK_PROTOCOL = "0x72a8d29b9b9EFCc0B58e11bb42686a527f978699";
     const BUK_NFT = "0xd84C3b47770aeCF852E99C5FdE2C987783027385";
     const CURRENCY = "0xae9B20071252B2f6e807D0D58e94763Aa08905aB";
-    const WALLET = "0xa9a1C7be37Cb72811A6C4C278cA7C403D6459b78";
-    const BUK_ROYALTY = 5;
-    const HOTEL_ROYALTY = 2;
-    const USER_ROYALTY = 1;
 
     // Contracts are deployed using the first signer/account by default
-    const [owner, otherAccount] = await ethers.getSigners();
+    const [owner, account1, account2] = await ethers.getSigners();
     console.log(owner, " owner");
 
     const Marketplace = await ethers.getContractFactory("Marketplace");
     const marketplaceContract = await Marketplace.deploy(
       BUK_PROTOCOL,
       BUK_NFT,
-      WALLET,
-      WALLET,
-      BUK_ROYALTY,
-      HOTEL_ROYALTY,
-      USER_ROYALTY,
       CURRENCY,
     );
 
@@ -40,12 +31,9 @@ describe("Marketplace", function () {
       BUK_PROTOCOL,
       BUK_NFT,
       CURRENCY,
-      WALLET,
-      BUK_ROYALTY,
-      HOTEL_ROYALTY,
-      USER_ROYALTY,
       owner,
-      otherAccount,
+      account1,
+      account2,
     };
   }
 
@@ -64,220 +52,145 @@ describe("Marketplace", function () {
       expect(await marketplaceContract.getBukNFT()).to.equal(BUK_NFT);
     });
 
-    it("Should set the treasury contract", async function () {
-      const { marketplaceContract, WALLET } = await loadFixture(
-        deployMarketplaceFixture,
-      );
-      expect(await marketplaceContract.getTreasuryContract()).to.equal(WALLET);
-    });
-
-    it("Should set the hotel wallet", async function () {
-      const { marketplaceContract, WALLET } = await loadFixture(
-        deployMarketplaceFixture,
-      );
-      expect(await marketplaceContract.getHotelWallet()).to.equal(WALLET);
-    });
-
-    it("Should set the BUK royalty", async function () {
-      const { marketplaceContract, BUK_ROYALTY } = await loadFixture(
-        deployMarketplaceFixture,
-      );
-      expect(await marketplaceContract.getBukRoyalty()).to.equal(BUK_ROYALTY);
-    });
-
-    it("Should set the hotel royalty", async function () {
-      const { marketplaceContract, HOTEL_ROYALTY } = await loadFixture(
-        deployMarketplaceFixture,
-      );
-      expect(await marketplaceContract.getHotelRoyalty()).to.equal(
-        HOTEL_ROYALTY,
-      );
-    });
-
-    it("Should set the User royalty", async function () {
-      const { marketplaceContract, USER_ROYALTY } = await loadFixture(
-        deployMarketplaceFixture,
-      );
-      expect(await marketplaceContract.getUserRoyalty()).to.equal(USER_ROYALTY);
-    });
-
     it("Should set the stable token", async function () {
       const { marketplaceContract, CURRENCY } = await loadFixture(
         deployMarketplaceFixture,
       );
       expect(await marketplaceContract.getStableToken()).to.equal(CURRENCY);
     });
-  });
 
-  // Test cases for setting royalties
-  describe("Set royalty for marketplace", function () {
-    it("Should set the BUK royalty", async function () {
-      const { marketplaceContract, BUK_ROYALTY } = await loadFixture(
+    it("Should set the buk protocol contract", async function () {
+      const { marketplaceContract, BUK_PROTOCOL } = await loadFixture(
         deployMarketplaceFixture,
       );
-      let newBukRoyalty = 3;
-      await expect(await marketplaceContract.setBukRoyalty(newBukRoyalty)).to
-        .not.be.reverted;
-      expect(await marketplaceContract.getBukRoyalty()).to.equal(newBukRoyalty);
+      expect(await marketplaceContract.getBukProtocol()).to.equal(BUK_PROTOCOL);
     });
 
-    it("Should reverted for 0 BUK royalty", async function () {
-      const { marketplaceContract, BUK_ROYALTY } = await loadFixture(
+    it("Should set the buk NFT contract", async function () {
+      const { marketplaceContract, BUK_NFT } = await loadFixture(
         deployMarketplaceFixture,
       );
-      await expect(marketplaceContract.setBukRoyalty(0)).to.be.revertedWith(
-        "Value should be greater than zero",
-      );
-    });
-
-    it("Should reverted owner access Buk royalty", async function () {
-      const { marketplaceContract, owner, otherAccount } = await loadFixture(
-        deployMarketplaceFixture,
-      );
-      console.log(owner, " owner");
-      console.log(otherAccount, " otherAccount");
-      await expect(
-        marketplaceContract.connect(otherAccount).setBukRoyalty(0),
-      ).to.be.revertedWith(
-        `AccessControl: account ${otherAccount.address.toLowerCase()} is missing role ${await marketplaceContract.ADMIN_ROLE()}`,
-      );
-    });
-
-    it("Should set the BUK royalty and emit event", async function () {
-      const { marketplaceContract, BUK_ROYALTY } = await loadFixture(
-        deployMarketplaceFixture,
-      );
-      let oldRoyalty = await marketplaceContract.getBukRoyalty();
-      let newBukRoyalty = 3;
-      await expect(await marketplaceContract.setBukRoyalty(newBukRoyalty))
-        .to.emit(marketplaceContract, "BukRoyaltySet")
-        .withArgs(oldRoyalty, newBukRoyalty);
-    });
-
-    it("Should set the Hotel royalty", async function () {
-      const { marketplaceContract } = await loadFixture(
-        deployMarketplaceFixture,
-      );
-      let newHotelRoyalty = 3;
-      await expect(await marketplaceContract.setHotelRoyalty(newHotelRoyalty))
-        .to.not.be.reverted;
-      expect(await marketplaceContract.getHotelRoyalty()).to.equal(
-        newHotelRoyalty,
-      );
-    });
-    it("Should reverted for 0 Hotel royalty", async function () {
-      const { marketplaceContract } = await loadFixture(
-        deployMarketplaceFixture,
-      );
-      await expect(marketplaceContract.setHotelRoyalty(0)).to.be.revertedWith(
-        "Value should be greater than zero",
-      );
-    });
-    it("Should set the Hotel royalty and emit event", async function () {
-      const { marketplaceContract, BUK_ROYALTY } = await loadFixture(
-        deployMarketplaceFixture,
-      );
-      let oldRoyalty = await marketplaceContract.getHotelRoyalty();
-      let newRoyalty = 3;
-      await expect(await marketplaceContract.setHotelRoyalty(newRoyalty))
-        .to.emit(marketplaceContract, "HotelRoyaltySet")
-        .withArgs(oldRoyalty, newRoyalty);
-    });
-
-    it("Should set the User royalty", async function () {
-      const { marketplaceContract } = await loadFixture(
-        deployMarketplaceFixture,
-      );
-      let newUserRoyalty = 3;
-      await expect(await marketplaceContract.setUserRoyalty(newUserRoyalty)).to
-        .not.be.reverted;
-      expect(await marketplaceContract.getUserRoyalty()).to.equal(
-        newUserRoyalty,
-      );
-    });
-    it("Should reverted for 0 User royalty", async function () {
-      const { marketplaceContract } = await loadFixture(
-        deployMarketplaceFixture,
-      );
-      await expect(marketplaceContract.setUserRoyalty(0)).to.be.revertedWith(
-        "Value should be greater than zero",
-      );
-    });
-  });
-  it("Should set the user royalty and emit event", async function () {
-    const { marketplaceContract, BUK_ROYALTY } = await loadFixture(
-      deployMarketplaceFixture,
-    );
-    let oldRoyalty = await marketplaceContract.getUserRoyalty();
-    let newRoyalty = 3;
-    await expect(await marketplaceContract.setUserRoyalty(newRoyalty))
-      .to.emit(marketplaceContract, "UserRoyaltySet")
-      .withArgs(oldRoyalty, newRoyalty);
-  });
-
-  // Test cases for setting royalties
-  describe("Set Treasury contract for marketplace", function () {
-    it("Should set the BUK treasury", async function () {
-      const { marketplaceContract, WALLET } = await loadFixture(
-        deployMarketplaceFixture,
-      );
-      let newTreasury = "0xa9a1C7be37Cb72811A6C4C278cA7C403D6459b78";
-      await expect(await marketplaceContract.setTreasuryContract(newTreasury))
-        .to.not.be.reverted;
-      expect(await marketplaceContract.getTreasuryContract()).to.equal(
-        newTreasury,
-      );
-    });
-    it("Should reverted with error BUK treasury", async function () {
-      const { marketplaceContract, WALLET } = await loadFixture(
-        deployMarketplaceFixture,
-      );
-      let newTreasury = "0x0000000000000000000000000000000000000000";
-      await expect(
-        marketplaceContract.setTreasuryContract(newTreasury),
-      ).to.be.revertedWith("Invalid address");
-    });
-    it("Should set the treasury and emit event", async function () {
-      const { marketplaceContract, BUK_ROYALTY } = await loadFixture(
-        deployMarketplaceFixture,
-      );
-      let oldAddress = await marketplaceContract.getTreasuryContract();
-      let newAddress = "0xa9a1C7be37Cb72811A6C4C278cA7C403D6459b78";
-      await expect(await marketplaceContract.setTreasuryContract(newAddress))
-        .to.emit(marketplaceContract, "TreasuryContractSet")
-        .withArgs(oldAddress, newAddress);
+      expect(await marketplaceContract.getBukNFT()).to.equal(BUK_NFT);
     });
   });
 
-  // Test cases for setting royalties
-  describe("Set hotel wallet for marketplace", function () {
-    it("Should set the hotel wallet", async function () {
-      const { marketplaceContract, WALLET } = await loadFixture(
+  // Test cases for setting buk protocol
+  describe("Set Buk protocol contract for marketplace", function () {
+    it("Should set the BUK protocol", async function () {
+      const { marketplaceContract } = await loadFixture(
         deployMarketplaceFixture,
       );
-      let newWallet = "0xa9a1C7be37Cb72811A6C4C278cA7C403D6459b78";
-      await expect(await marketplaceContract.setHotelWallet(newWallet)).to.not
+      let newContract = "0xa9a1C7be37Cb72811A6C4C278cA7C403D6459b78";
+      await expect(await marketplaceContract.setBukProtocol(newContract)).to.not
         .be.reverted;
-      expect(await marketplaceContract.getHotelWallet()).to.equal(newWallet);
+      expect(await marketplaceContract.getBukProtocol()).to.equal(newContract);
     });
-    it("Should reverted with error hotel wallet", async function () {
-      const { marketplaceContract, WALLET } = await loadFixture(
+    it("Should reverted with error Buk protocol contract", async function () {
+      const { marketplaceContract } = await loadFixture(
         deployMarketplaceFixture,
       );
-      let newWallet = "0x0000000000000000000000000000000000000000";
+      let newContract = "0x0000000000000000000000000000000000000000";
       await expect(
-        marketplaceContract.setHotelWallet(newWallet),
+        marketplaceContract.setBukProtocol(newContract),
       ).to.be.revertedWith("Invalid address");
     });
-    it("Should set the hotel wallet and emit event", async function () {
-      const { marketplaceContract, BUK_ROYALTY } = await loadFixture(
+
+    it("Should set the Buk protocol contract and emit event", async function () {
+      const { marketplaceContract } = await loadFixture(
         deployMarketplaceFixture,
       );
-      let oldAddress = await marketplaceContract.getHotelWallet();
+      let oldAddress = await marketplaceContract.getBukProtocol();
       let newAddress = "0xa9a1C7be37Cb72811A6C4C278cA7C403D6459b78";
-      await expect(await marketplaceContract.setHotelWallet(newAddress))
-        .to.emit(marketplaceContract, "HotelWalletSet")
+      await expect(await marketplaceContract.setBukProtocol(newAddress))
+        .to.emit(marketplaceContract, "BukProtocolSet")
         .withArgs(oldAddress, newAddress);
     });
+
+    it("Should reverted with admin error Buk protocol contract", async function () {
+      const { marketplaceContract, owner, account1 } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let newAddress = "0xa9a1C7be37Cb72811A6C4C278cA7C403D6459b78";
+
+      console.log(owner, account1);
+      console.log(await marketplaceContract.ADMIN_ROLE());
+      await expect(
+        marketplaceContract.connect(account1).setBukProtocol(newAddress),
+      ).to.be.revertedWith(
+        `AccessControl: account ${account1.address.toLowerCase()} is missing role ${await marketplaceContract.ADMIN_ROLE()}`,
+      );
+    });
+  });
+
+  // Test cases for setting buk NFT
+  describe("Set Buk NFT contract for marketplace", function () {
+    it("Should set the BUK NFT", async function () {
+      const { marketplaceContract } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let newContract = "0xa9a1C7be37Cb72811A6C4C278cA7C403D6459b78";
+      await expect(await marketplaceContract.setBukNFT(newContract)).to.not.be
+        .reverted;
+      expect(await marketplaceContract.getBukNFT()).to.equal(newContract);
+    });
+    it("Should reverted with error Buk NFT contract", async function () {
+      const { marketplaceContract } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let newContract = "0x0000000000000000000000000000000000000000";
+      await expect(
+        marketplaceContract.setBukNFT(newContract),
+      ).to.be.revertedWith("Invalid address");
+    });
+
+    it("Should set the Buk NFT contract and emit event", async function () {
+      const { marketplaceContract } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let oldAddress = await marketplaceContract.getBukNFT();
+      let newAddress = "0xa9a1C7be37Cb72811A6C4C278cA7C403D6459b78";
+      await expect(await marketplaceContract.setBukNFT(newAddress))
+        .to.emit(marketplaceContract, "BukNFTSet")
+        .withArgs(oldAddress, newAddress);
+    });
+
+    it("Should reverted with admin error Buk NFT contract", async function () {
+      const { marketplaceContract, owner, account1 } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let newAddress = "0xa9a1C7be37Cb72811A6C4C278cA7C403D6459b78";
+
+      console.log(owner, account1);
+      console.log(await marketplaceContract.ADMIN_ROLE());
+      await expect(
+        marketplaceContract.connect(account1).setBukNFT(newAddress),
+      ).to.be.revertedWith(
+        `AccessControl: account ${account1.address.toLowerCase()} is missing role ${await marketplaceContract.ADMIN_ROLE()}`,
+      );
+    });
+  });
+  // Test cases for getting listed status
+  describe("Listed status marketplace", function () {
+    it("Should get listed status", async function () {
+      const { marketplaceContract } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      await expect(await marketplaceContract.isListed(0)).to.equal(false);
+    });
+    //TODO Check for listed status
+  });
+
+  // Test cases for getting listing details
+  describe("Listing details marketplace", function () {
+    it("Should get listed details should be zero", async function () {
+      const { marketplaceContract } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let listingDetails = await marketplaceContract.getListingDetails(0);
+      await expect(listingDetails[0]).to.equal(0);
+      await expect(listingDetails[1]).to.equal(0);
+      await expect(listingDetails[2]).to.equal(0);
+    });
+    //TODO Check for listed once listed
   });
 });
