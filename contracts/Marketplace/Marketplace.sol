@@ -144,7 +144,7 @@ contract Marketplace is Context, IMarketplace, AccessControl {
      * @return address, Address of the buk protocol contract
      */
     function getBukProtocol() external view returns (address) {
-        return _bukProtocalContract;
+        return address(_bukProtocalContract);
     }
 
     /**
@@ -152,7 +152,7 @@ contract Marketplace is Context, IMarketplace, AccessControl {
      * @return address, Address of the buk NFT contract
      */
     function getBukNFT() external view returns (address) {
-        return _bukNFTContract;
+        return address(_bukNFTContract);
     }
 
     /**
