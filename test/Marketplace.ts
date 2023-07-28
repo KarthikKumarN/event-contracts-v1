@@ -5,6 +5,7 @@ import {
 import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
 import { expect } from "chai";
 import { ethers } from "hardhat";
+import { IMarketplace__factory } from "../typechain-types";
 
 describe("Marketplace", function () {
   // We define a fixture to reuse the same setup in every test.
@@ -17,7 +18,6 @@ describe("Marketplace", function () {
 
     // Contracts are deployed using the first signer/account by default
     const [owner, account1, account2] = await ethers.getSigners();
-    console.log(owner, " owner");
 
     const Marketplace = await ethers.getContractFactory("Marketplace");
     const marketplaceContract = await Marketplace.deploy(
@@ -112,8 +112,6 @@ describe("Marketplace", function () {
       );
       let newAddress = "0xa9a1C7be37Cb72811A6C4C278cA7C403D6459b78";
 
-      console.log(owner, account1);
-      console.log(await marketplaceContract.ADMIN_ROLE());
       await expect(
         marketplaceContract.connect(account1).setBukProtocol(newAddress),
       ).to.be.revertedWith(
@@ -160,8 +158,6 @@ describe("Marketplace", function () {
       );
       let newAddress = "0xa9a1C7be37Cb72811A6C4C278cA7C403D6459b78";
 
-      console.log(owner, account1);
-      console.log(await marketplaceContract.ADMIN_ROLE());
       await expect(
         marketplaceContract.connect(account1).setBukNFT(newAddress),
       ).to.be.revertedWith(
@@ -177,6 +173,15 @@ describe("Marketplace", function () {
       );
       await expect(await marketplaceContract.isListed(0)).to.equal(false);
     });
+    it("Should get listed status for true", async function () {
+      const { marketplaceContract } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let tokenId = 1;
+      let price = 100;
+      await marketplaceContract.createListing(tokenId, price);
+      await expect(await marketplaceContract.isListed(tokenId)).to.equal(true);
+    });
     //TODO Check for listed status
   });
 
@@ -189,8 +194,255 @@ describe("Marketplace", function () {
       let listingDetails = await marketplaceContract.getListingDetails(0);
       await expect(listingDetails[0]).to.equal(0);
       await expect(listingDetails[1]).to.equal(0);
-      await expect(listingDetails[2]).to.equal(0);
     });
-    //TODO Check for listed once listed
+    it("Should get listed details and verify for valid values", async function () {
+      const { marketplaceContract } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let tokenId = 1;
+      let price = 100;
+      await marketplaceContract.createListing(tokenId, price);
+      let listingDetails = await marketplaceContract.getListingDetails(tokenId);
+      await expect(listingDetails[0]).to.equal(price);
+      await expect(listingDetails[1]).to.equal(0);
+    });
+    //TODO Check for listed status
+  });
+
+  // Test cases for create listing
+  describe("Crate Listing marketplace", function () {
+    it("Should create listing", async function () {
+      const { marketplaceContract } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let tokenId = 1;
+      let price = 100;
+      await expect(await marketplaceContract.createListing(tokenId, price)).to
+        .not.be.reverted;
+    });
+
+    it("Should create and verify listing", async function () {
+      const { marketplaceContract } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let tokenId = 1;
+      let price = 100;
+      await marketplaceContract.createListing(tokenId, price);
+      let listingDetails = await marketplaceContract.getListingDetails(tokenId);
+
+      await expect(listingDetails[0]).to.equal(price);
+      // Since listing with active status value will be 0
+      await expect(listingDetails[1]).to.equal(0);
+    });
+
+    it("Should revert for already listed token ID", async function () {
+      const { marketplaceContract } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let tokenId = 1;
+      let price = 100;
+      await marketplaceContract.createListing(tokenId, price);
+      await expect(
+        marketplaceContract.createListing(tokenId, price),
+      ).to.be.revertedWith("NFT already listed");
+    });
+
+    // it("Should emit event listed token ID", async function () {
+    //   const { marketplaceContract } = await loadFixture(
+    //     deployMarketplaceFixture,
+    //   );
+    //   let tokenId = 1;
+    //   let price = 100;
+    //   await expect(await marketplaceContract.createListing(tokenId, price))
+    //     .to.emit(marketplaceContract, "BukNFTSet")
+    //     .withArgs(oldAddress, newAddress);
+    // });
+
+    //TODO Check emit event
+  });
+
+  // Test cases for delist
+  describe("Delist function marketplace", function () {
+    it("Should delist ", async function () {
+      const { marketplaceContract } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let tokenId = 1;
+      let price = 100;
+
+      await expect(await marketplaceContract.createListing(tokenId, price)).to
+        .not.be.reverted;
+      await expect(await marketplaceContract.delist(tokenId)).to.not.be
+        .reverted;
+    });
+    it("Should delist and verify delist status ", async function () {
+      const { marketplaceContract } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let tokenId = 1;
+      let price = 100;
+
+      await expect(await marketplaceContract.createListing(tokenId, price)).to
+        .not.be.reverted;
+      await expect(await marketplaceContract.delist(tokenId)).to.not.be
+        .reverted;
+      let listingDetails = await marketplaceContract.getListingDetails(tokenId);
+      await expect(listingDetails[0]).to.equal(price);
+      await expect(listingDetails[1]).to.equal(1);
+    });
+
+    it("Should emit event delisted token ID", async function () {
+      const { marketplaceContract } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let tokenId = 1;
+      let price = 100;
+
+      await expect(await marketplaceContract.createListing(tokenId, price)).to
+        .not.be.reverted;
+      await expect(await marketplaceContract.delist(tokenId))
+        .to.emit(marketplaceContract, "Delisted")
+        .withArgs(tokenId);
+    });
+    it("Should revert delist for not listed token ", async function () {
+      const { marketplaceContract } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let tokenId = 1;
+      await expect(marketplaceContract.delist(tokenId)).to.be.revertedWith(
+        "NFT not listed",
+      );
+    });
+    // TODO for owner validation
+  });
+
+  // Test cases for delete
+  describe("Delete listing function marketplace", function () {
+    it("Should delete listing ", async function () {
+      const { marketplaceContract } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let tokenId = 1;
+      let price = 100;
+      await expect(await marketplaceContract.createListing(tokenId, price)).to
+        .not.be.reverted;
+      await expect(await marketplaceContract.deleteListing(tokenId)).to.not.be
+        .reverted;
+    });
+    it("Should delete listing and verify status", async function () {
+      const { marketplaceContract } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let tokenId = 1;
+      let price = 100;
+      await expect(await marketplaceContract.createListing(tokenId, price)).to
+        .not.be.reverted;
+      await expect(await marketplaceContract.deleteListing(tokenId)).to.not.be
+        .reverted;
+      let listingDetails = await marketplaceContract.getListingDetails(tokenId);
+      await expect(listingDetails[0]).to.equal(0);
+      await expect(listingDetails[1]).to.equal(0);
+    });
+
+    it("Should emit event deleted token ID", async function () {
+      const { marketplaceContract } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let tokenId = 1;
+      let price = 100;
+
+      await expect(await marketplaceContract.createListing(tokenId, price)).to
+        .not.be.reverted;
+      await expect(await marketplaceContract.deleteListing(tokenId))
+        .to.emit(marketplaceContract, "DeletedListing")
+        .withArgs(tokenId);
+    });
+    it("Should revert delete listing for not listed token ", async function () {
+      const { marketplaceContract } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let tokenId = 1;
+      await expect(
+        marketplaceContract.deleteListing(tokenId),
+      ).to.be.revertedWith("NFT not listed");
+    });
+    //TODO owner check and contract
+  });
+
+  // Test cases for relist
+  describe("Relist listing function marketplace", function () {
+    it("Should relist listing ", async function () {
+      const { marketplaceContract } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let tokenId = 1;
+      let price = 100;
+      let price2 = 200;
+      await expect(await marketplaceContract.createListing(tokenId, price)).to
+        .not.be.reverted;
+      await expect(await marketplaceContract.relist(tokenId, price2)).to.not.be
+        .reverted;
+    });
+    it("Should revert relist listing for not listed token ", async function () {
+      const { marketplaceContract } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let tokenId = 1;
+      let price = 100;
+      await expect(
+        marketplaceContract.relist(tokenId, price),
+      ).to.be.revertedWith("NFT not listed");
+    });
+    it("Should relist listing and verify status", async function () {
+      const { marketplaceContract } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let tokenId = 1;
+      let price = 100;
+      let price2 = 200;
+      await expect(await marketplaceContract.createListing(tokenId, price)).to
+        .not.be.reverted;
+      await expect(await marketplaceContract.relist(tokenId, price2)).to.not.be
+        .reverted;
+      let listingDetails = await marketplaceContract.getListingDetails(tokenId);
+      await expect(listingDetails[0]).to.equal(price2);
+      await expect(listingDetails[1]).to.equal(0);
+    });
+
+    it("Should delist and relist listing and verify status", async function () {
+      const { marketplaceContract } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let tokenId = 1;
+      let price = 100;
+      await expect(await marketplaceContract.createListing(tokenId, price)).to
+        .not.be.reverted;
+      await expect(await marketplaceContract.delist(tokenId)).to.not.be
+        .reverted;
+      let listingDetails = await marketplaceContract.getListingDetails(tokenId);
+      await expect(listingDetails[0]).to.equal(price);
+      await expect(listingDetails[1]).to.equal(1);
+      await expect(await marketplaceContract.relist(tokenId, price)).to.not.be
+        .reverted;
+      let listingDetails2 = await marketplaceContract.getListingDetails(
+        tokenId,
+      );
+      await expect(listingDetails2[0]).to.equal(price);
+      await expect(listingDetails2[1]).to.equal(0);
+    });
+
+    it("Should emit event on relist token ID", async function () {
+      const { marketplaceContract } = await loadFixture(
+        deployMarketplaceFixture,
+      );
+      let tokenId = 1;
+      let price = 100;
+      let price2 = 100;
+      await expect(await marketplaceContract.createListing(tokenId, price)).to
+        .not.be.reverted;
+      await expect(await marketplaceContract.relist(tokenId, price2))
+        .to.emit(marketplaceContract, "Relisted")
+        .withArgs(tokenId, price, price2);
+    });
   });
 });
