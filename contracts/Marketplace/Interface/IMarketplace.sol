@@ -90,41 +90,6 @@ interface IMarketplace {
     event BukNFTSet(address oldAddress, address newAddress);
 
     /**
-     * @dev Emitted when new Treasury Contract has been updated
-     * @param oldAddress, Address of the old treasury wallet
-     * @param newAddress, Address of the new treasury wallet
-     */
-    event TreasuryContractSet(address oldAddress, address newAddress);
-
-    /**
-     * @dev Emitted when new Hotel Wallet has been updated
-     * @param oldAddress, Address of the old hotel wallet
-     * @param newAddress, Address of the new hotel wallet
-     */
-    event HotelWalletSet(address oldAddress, address newAddress);
-
-    /**
-     * @dev Emitted when new Buk royalty has been updated
-     * @param oldRoyalty, old buk royalty
-     * @param newRoyalty, new buk royalty
-     */
-    event BukRoyaltySet(uint8 oldRoyalty, uint8 newRoyalty);
-
-    /**
-     * @dev Emitted when new hotel royalty has been updated
-     * @param oldRoyalty, old hotel royalty
-     * @param newRoyalty, new hotel royalty
-     */
-    event HotelRoyaltySet(uint8 oldRoyalty, uint8 newRoyalty);
-
-    /**
-     * @dev Emitted when new user royalty has been updated
-     * @param oldRoyalty, old user royalty
-     * @param newRoyalty, new user royalty
-     */
-    event UserRoyaltySet(uint8 oldRoyalty, uint8 newRoyalty);
-
-    /**
      * @dev Function will create a listing of Booking/Room NFT
      * @dev Only NFT owner can list
      * @param tokenId_ room/booking NFT id
@@ -143,7 +108,7 @@ interface IMarketplace {
      * @dev NFT owner can delist
      * @param tokenId_ NFT id
      */
-    function deListing(uint256 tokenId_) external;
+    function delisting(uint256 tokenId_) external;
 
     /**
      * @dev Function will delete listing
@@ -158,7 +123,7 @@ interface IMarketplace {
      * @dev Only NFT owner can update
      * @param tokenId_ NFT id
      */
-    function reList(uint256 tokenId_, uint256 price_) external;
+    function relist(uint256 tokenId_, uint256 price_) external;
 
     /**
      * @dev Function will enble user buy this room/booking NFT
@@ -185,45 +150,6 @@ interface IMarketplace {
     function setBukNFT(address bukNFT_) external;
 
     /**
-     * @dev Set new buk royalty
-     * @dev Only admin access to set
-     * @dev Buk royalty fee applies to the all listing
-     * @param royalty_, new royalty percentage with 2 decimals
-     */
-    function setBukRoyalty(uint8 royalty_) external;
-
-    /**
-     * @dev Set new hotel royalty
-     * @dev Only admin access to set
-     * @dev Hotel royalty fee applies to the all listing
-     * @param royalty_, new royalty percentage with 2 decimals
-     */
-    function setHotelRoyalty(uint8 royalty_) external;
-
-    /**
-     * @dev Set new user royalty
-     * @dev Only admin access to set
-     * @dev User royalty applies to the all listing
-     * @dev User royalty applies first time buyer of room
-     * @param royalty_, new royalty percentage with 2 decimals
-     */
-    function setUserRoyalty(uint8 royalty_) external;
-
-    /**
-     * @dev Allows to set a new treasury contract where buk royalty funds will be transfered.
-     * @dev Only admin access to set
-     * @param newTreasuryContract_, Address of the new treasury contract
-     */
-    function setTreasuryContract(address newTreasuryContract_) external;
-
-    /**
-     * @dev Allows to set a new hotel royalty wallet address where royalty will be transfered.
-     * @dev Only admin access to set
-     * @param newWallet_, Address of the new fee wallet
-     */
-    function setHotelWallet(address newWallet_) external;
-
-    /**
      * @dev Gets stable token address
      * @return address, Address of the stable token contract
      */
@@ -242,40 +168,16 @@ interface IMarketplace {
     function getBukNFT() external view returns (address);
 
     /**
-     * @dev Gets treasury address
-     * @return address, Address of the treasury contract
-     */
-    function getTreasuryContract() external view returns (address);
-
-    /**
-     * @dev Gets Hotel wallet address
-     * @return address Address of the fee wallet
-     */
-    function getHotelWallet() external view returns (address);
-
-    /**
-     * @dev Gets BUK royalty
-     * @return uint8 Percent of BUK royalty
-     */
-    function getBukRoyalty() external view returns (uint8);
-
-    /**
-     * @dev Gets hotel royalty
-     * @return uint8 Percent of hotel royalty
-     */
-    function getHotelRoyalty() external view returns (uint8);
-
-    /**
-     * @dev Gets first user royalty
-     * @return uint8 Percent of user royalty
-     */
-    function getUserRoyalty() external view returns (uint8);
-
-    /**
      * @dev Function will provide Lisiting details of booking
      * @param tokenId_ room/booking NFT id
      */
     function getListingDetails(
         uint256 tokenId_
     ) external view returns (ListingDetails calldata);
+
+    /**
+     * @dev Function check is NFT/Booking listed
+     * @param tokenId_ TokenID of booking
+     */
+    function tokenListed(uint256 tokenId_) external view returns (bool);
 }
