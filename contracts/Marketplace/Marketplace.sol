@@ -43,25 +43,15 @@ contract Marketplace is Context, IMarketplace, AccessControl {
      * @dev Refer IMarketplace
      * @param tokenId_ room/booking NFT id
      * @param price_  price of room/booking
-     * @param tardeTimeLimt_ time till tradable
      * @dev While listing will approve marketplace to excecute transfer
      */
-    function createListing(
-        uint256 tokenId_,
-        uint256 price_,
-        uint256 tardeTimeLimt_
-    ) external {
-        require(tokenId_ >= 0, "Invalide NFT");
+    function createListing(uint256 tokenId_, uint256 price_) external {
         require(!isListed(tokenId_), "NFT already listed");
         // TODO
         // Get booking details form bukprotocol
         // Validate owner, minSalePrice, status
-        require(tardeTimeLimt_ > block.timestamp, "Trade limit time crossed");
-        _listedNFT[tokenId_] = ListingDetails(
-            price_,
-            tardeTimeLimt_,
-            ListingStatus.active
-        );
+        // require(tardeTimeLimt_ > block.timestamp, "Trade limit time crossed");
+        _listedNFT[tokenId_] = ListingDetails(price_, ListingStatus.active);
         // TODO emit
         // emit ListingCreated(owner, tokenId_, price_);
     }
@@ -71,8 +61,7 @@ contract Marketplace is Context, IMarketplace, AccessControl {
      * @dev NFT owner can delist
      * @param tokenId_ NFT id
      */
-    function delisting(uint256 tokenId_) external {
-        require(tokenId_ >= 0, "Invalide NFT");
+    function delist(uint256 tokenId_) external {
         require(isListed(tokenId_), "NFT not listed");
         // TODO
         // Get booking details form bukprotocol
@@ -86,7 +75,6 @@ contract Marketplace is Context, IMarketplace, AccessControl {
      * @param tokenId_ NFT id
      */
     function deleteListing(uint256 tokenId_) external {
-        require(tokenId_ >= 0, "Invalide NFT");
         require(isListed(tokenId_), "NFT not listed");
         // TODO
         // Get booking details form bukprotocol
@@ -100,15 +88,15 @@ contract Marketplace is Context, IMarketplace, AccessControl {
      * @dev Only NFT owner can update
      * @param tokenId_ NFT id
      */
-    function relist(uint256 tokenId_, uint256 price_) external {
-        require(tokenId_ >= 0, "Invalide NFT");
+    function relist(uint256 tokenId_, uint256 newPrice_) external {
         require(isListed(tokenId_), "NFT not listed");
         // TODO
         // Get booking details form bukprotocol
         // Validate owner, status
+        uint256 oldPrice_ = _listedNFT[tokenId_].price;
         _listedNFT[tokenId_].status = ListingStatus.active;
-        _listedNFT[tokenId_].price = price_;
-        emit Relisted(tokenId_, price_);
+        _listedNFT[tokenId_].price = newPrice_;
+        emit Relisted(tokenId_, oldPrice_, newPrice_);
     }
 
     /**

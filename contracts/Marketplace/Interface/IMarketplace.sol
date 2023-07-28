@@ -10,12 +10,10 @@ interface IMarketplace {
     /**
      * @title Struct to define the booking/room listing details
      * @param price, price of room/booking
-     * @param tardeTimeLimt, end date for trade
      * @param status, status of listing
      */
     struct ListingDetails {
         uint256 price;
-        uint256 tardeTimeLimt;
         ListingStatus status;
     }
 
@@ -58,9 +56,10 @@ interface IMarketplace {
     /**
      * @dev Emitted when an booking/room NFT is relisted
      * @param tokenId, unique number of the booking NFT
-     * @param price, new price of the room/booking
+     * @param oldPrice, old price of the room/booking
+     * @param newPrice, new price of the room/booking
      */
-    event Relisted(uint256 indexed tokenId, uint256 price);
+    event Relisted(uint256 indexed tokenId, uint256 oldPrice, uint256 newPrice);
 
     /**
      * @dev Emitted when an booking/room is delisted
@@ -94,21 +93,16 @@ interface IMarketplace {
      * @dev Only NFT owner can list
      * @param tokenId_ room/booking NFT id
      * @param price_  price of room/booking
-     * @param tardeTimeLimt_ time till tradable
      * @dev While listing will approve marketplace to excecute transfer
      */
-    function createListing(
-        uint256 tokenId_,
-        uint256 price_,
-        uint256 tardeTimeLimt_
-    ) external;
+    function createListing(uint256 tokenId_, uint256 price_) external;
 
     /**
      * @dev Function will delist of NFT
      * @dev NFT owner can delist
      * @param tokenId_ NFT id
      */
-    function delisting(uint256 tokenId_) external;
+    function delist(uint256 tokenId_) external;
 
     /**
      * @dev Function will delete listing
@@ -123,7 +117,7 @@ interface IMarketplace {
      * @dev Only NFT owner can update
      * @param tokenId_ NFT id
      */
-    function relist(uint256 tokenId_, uint256 price_) external;
+    function relist(uint256 tokenId_, uint256 newPrice_) external;
 
     /**
      * @dev Function will enble user buy this room/booking NFT
