@@ -3,7 +3,7 @@ pragma solidity =0.8.19;
 
 interface IBukPOSNFTs {
 
-    function grantSupplierRole(address supplierContract) external;
+    function grantBukNFTRole(address nftContractAddr) external;
 
     function grantBukProtocolRole(address bukProtocolContract) external;
 
