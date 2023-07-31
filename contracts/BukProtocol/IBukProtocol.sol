@@ -2,6 +2,7 @@
 pragma solidity =0.8.19;
 
 interface IBukProtocol {
+    //FIXME Need to confirm if checkin status and checkout status need to be added
     /**
      * @dev Enum for booking statuses.
      * @var BookingStatus.nil         Booking has not yet been initiated.
@@ -33,7 +34,7 @@ interface IBukProtocol {
         uint256 id;
         BookingStatus status;
         uint256 tokenID;
-        address owner;
+        address firstOwner;
         uint256 checkin;
         uint256 checkout;
         uint256 total;
@@ -73,6 +74,20 @@ interface IBukProtocol {
      * @dev Emitted when treasury is updated.
      */
     event SetTreasury(address indexed treasuryContract);
+
+    /**
+     * @dev Emitted when new Buk royalty has been updated
+     * @param oldRoyalty, old buk royalty
+     * @param newRoyalty, new buk royalty
+     */
+    event SetBukRoyalty(uint8 oldRoyalty, uint8 newRoyalty);
+
+    /**
+     * @dev Emitted when new hotel royalty has been updated
+     * @param oldRoyalty, old hotel royalty
+     * @param newRoyalty, new hotel royalty
+     */
+    event SetHotelRoyalty(uint8 oldRoyalty, uint8 newRoyalty);
 
     /**
      * @dev Emitted when single room is booked.
@@ -132,12 +147,30 @@ interface IBukProtocol {
     /**
     * @dev Function to define the royalties.
     * @param _recipients Array of recipients of royalties
-    * @param _percentages Array of percentages for each recipients in the _recipients[] order.
+    * @param _royaltyFractions Array of percentages for each recipients in the _recipients[] order.
     */
-    function setRoyaltyInfo(
+    function setOtherRoyaltyInfo(
         address[] memory _recipients,
-        uint96[] memory _percentages
+        uint96[] memory _royaltyFractions
     ) external;
+
+    /**
+    * @dev Function to define the royalty Fraction for Buk.
+    * @param _royaltyFraction Royalty Fraction.
+    */
+    function setBukRoyaltyInfo(uint96 _royaltyFraction) external;
+
+    /**
+    * @dev Function to define the royalty Fraction for Hotel.
+    * @param _royaltyFraction Royalty Fraction.
+    */
+    function setHotelRoyaltyInfo(uint96 _royaltyFraction) external;
+
+    /**
+    * @dev Function to define the royalty Fraction for the First Owners.
+    * @param _royaltyFraction Royalty Fraction.
+    */
+    function setFirstOwnerRoyaltyInfo(uint96 _royaltyFraction) external;
 
     /**
      * @dev Update the name of the contract.
@@ -197,6 +230,9 @@ interface IBukProtocol {
         bool _status
     ) external;
 
+
+    //FIXME Need to confirm if checkin function needs to be added
+
     /**
      * @dev Function to checkout the rooms.
      * @param _ids IDs of the bookings.
@@ -226,6 +262,8 @@ interface IBukProtocol {
 
     /**
      * @dev Function to retrieve royalty information.
+     * @param _tokenId ID of the token
+     * @notice Token ID and Booking ID are same.
      */
-    function getRoyaltyInfo() external view returns (Royalty[] memory);
+    function getRoyaltyInfo(uint256 _tokenId) external view returns (Royalty[] memory);
 }
