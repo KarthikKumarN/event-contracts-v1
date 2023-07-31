@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 * @title BUK Treasury Contract 
 * @author BUK Technology Inc
 */
-contract Treasury is AccessControl {
+contract BukTreasury is AccessControl {
     /**
     * @dev address currency          Address of the default currency.
     */
