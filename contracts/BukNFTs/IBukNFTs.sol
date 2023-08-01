@@ -81,6 +81,7 @@ interface IBukNFTs is IERC1155 {
      * @param _id - The ID of the NFT token.
      * @param _amount - Count of ERC1155 token of token ID.
      * @param _data - Additional data to include in the transfer.
+     * @notice This function checks if the NFT is tranferable or not.
      * @notice This function can only be called by a contract with `MARKETPLACE_CONTRACT_ROLE`
      */
     function safeTransferFrom(
@@ -98,6 +99,7 @@ interface IBukNFTs is IERC1155 {
      * @param _ids - The IDs of the NFT tokens.
      * @param _amounts - Count of ERC1155 tokens of the respective token IDs.
      * @param _data - Additional data to include in the transfer.
+     * @notice This function checks if the NFTs are tranferable or not.
      * @notice This function can only be called by a contract with `MARKETPLACE_CONTRACT_ROLE`
      */
     function safeBatchTransferFrom(

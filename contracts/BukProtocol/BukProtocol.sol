@@ -242,9 +242,9 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     }
 
     /**
-     * @dev See {IBukProtocol-confirmRoom}.
+     * @dev See {IBukProtocol-mintBukNFT}.
      */
-    function confirmRoom(
+    function mintBukNFT(
         uint256[] memory _ids,
         string[] memory _uri
     ) external nonReentrant {
@@ -276,10 +276,9 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         emit MintBookingNFT(_ids, true);
     }
 
-    /**
-     * @dev See {IBukProtocol-checkout}.
-     */
-    function checkout(uint256[] memory _ids) external onlyRole(ADMIN_ROLE) {
+    function checkin(uint256[] memory _ids) external onlyRole(ADMIN_ROLE) {
+        //FIXME Also the owner
+        //TODO Make the NFT non transferable
         uint256 len = _ids.length;
         require(((len > 0) && (len < 11)), "Not in max-min booking limit");
         for (uint8 i = 0; i < len; ++i) {
@@ -289,7 +288,25 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
             );
         }
         for (uint8 i = 0; i < len; ++i) {
-            bookingDetails[_ids[i]].status = BookingStatus.expired;
+            bookingDetails[_ids[i]].status = BookingStatus.checkedin;
+        }
+        emit CheckinRooms(_ids, true);
+    }
+
+    /**
+     * @dev See {IBukProtocol-checkout}.
+     */
+    function checkout(uint256[] memory _ids) external onlyRole(ADMIN_ROLE) {
+        uint256 len = _ids.length;
+        require(((len > 0) && (len < 11)), "Not in max-min booking limit");
+        for (uint8 i = 0; i < len; ++i) {
+            require(
+                bookingDetails[_ids[i]].status == BookingStatus.checkedin,
+                "Check the Booking status"
+            );
+        }
+        for (uint8 i = 0; i < len; ++i) {
+            bookingDetails[_ids[i]].status = BookingStatus.checkedout;
             IBukNFTs(nftContract).burn(
                 bookingDetails[_ids[i]].firstOwner,
                 _ids[i],

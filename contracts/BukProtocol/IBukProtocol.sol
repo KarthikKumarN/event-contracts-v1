@@ -16,7 +16,8 @@ interface IBukProtocol {
         booked,
         confirmed,
         cancelled,
-        expired
+        checkedin,
+        checkedout
     }
 
     /**
@@ -235,7 +236,7 @@ interface IBukProtocol {
     function bookingRefund(uint256[] memory _ids, address _owner) external;
 
     /**
-     * @dev Function to confirm the room bookings.
+     * @dev Function to confirm the room bookings and mint NFT.
      * @param _ids IDs of the bookings.
      * @param _uri URIs of the NFTs.
      * @notice Only the owner of the booking can confirm the rooms.
@@ -243,7 +244,7 @@ interface IBukProtocol {
      * @notice The booking status should be booked to confirm it.
      * @notice The NFTs are minted to the owner of the booking.
      */
-    function confirmRoom(
+    function mintBukNFT(
         uint256[] memory _ids,
         string[] memory _uri
     ) external;

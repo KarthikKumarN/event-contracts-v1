@@ -44,6 +44,11 @@ contract BukNFTs is AccessControl, ERC1155 {
     mapping(uint256 => string) public bookingTickets; //tokenID -> uri
 
     /**
+     * @dev Mapping to toggle the transferrability of Buk PoS NFTs
+     */
+    mapping(uint256 => bool) public transferStatus; //tokenID -> status
+
+    /**
      * @dev Constant for the role of the Buk Protocol contract
      */
     bytes32 public constant BUK_PROTOCOL_CONTRACT_ROLE =
@@ -82,6 +87,11 @@ contract BukNFTs is AccessControl, ERC1155 {
      * @dev Event to set token URI
      */
     event SetURI(uint256 indexed id, string indexed uri);
+
+    /**
+     * @dev Event to set toggle NFT transfer status
+     */
+    event ToggleNFT(uint indexed id, bool isTranferable);
 
     /**
      * @dev Constructor to initialize the contract
@@ -156,6 +166,20 @@ contract BukNFTs is AccessControl, ERC1155 {
         name = _contractName;
         IBukPOSNFTs(nftPoSContract).updateName(_contractName);
         emit UpdateContractName(_contractName);
+    }
+
+    /**
+     * @dev Function to toggle the NFT transferability status
+     * @param _tokenId uint256: The ID of the token
+     * @param _isTranferable bool: Transferability status of the NFT
+     * @notice This function can only be called by a contract with `ADMIN_ROLE`
+     */
+    function toggleNftTransfer(
+        uint256 _tokenId,
+        bool _isTranferable
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        transferStatus[_tokenId] = _isTranferable;
+        emit ToggleNFT(_tokenId, _isTranferable);
     }
 
     /**
@@ -254,6 +278,7 @@ contract BukNFTs is AccessControl, ERC1155 {
      * @param _id - The ID of the NFT token.
      * @param _amount - Count of ERC1155 token of token ID.
      * @param _data - Additional data to include in the transfer.
+     * @notice This function checks if the NFT is tranferable or not.
      * @notice This function can only be called by a contract with `MARKETPLACE_CONTRACT_ROLE`
      */
     function safeTransferFrom(
@@ -263,6 +288,7 @@ contract BukNFTs is AccessControl, ERC1155 {
         uint256 _amount,
         bytes memory _data
     ) public virtual override onlyRole(MARKETPLACE_CONTRACT_ROLE) {
+        require(transferStatus[_id], "This NFT is non transferable");
         super._safeTransferFrom(_from, _to, _id, _amount, _data);
     }
 
@@ -273,6 +299,7 @@ contract BukNFTs is AccessControl, ERC1155 {
      * @param _ids - The IDs of the NFT tokens.
      * @param _amounts - Count of ERC1155 tokens of the respective token IDs.
      * @param _data - Additional data to include in the transfer.
+     * @notice This function checks if the NFTs are tranferable or not.
      * @notice This function can only be called by a contract with `MARKETPLACE_CONTRACT_ROLE`
      */
     function safeBatchTransferFrom(
@@ -282,6 +309,11 @@ contract BukNFTs is AccessControl, ERC1155 {
         uint256[] memory _amounts,
         bytes memory _data
     ) public virtual override onlyRole(MARKETPLACE_CONTRACT_ROLE) {
+        uint256 len = _ids.length;
+        for(uint i=0; i<len; ++i) {
+            require(transferStatus[_ids[i]], "One of these NFT is non-transferable");
+        }
+        //FIXME Is this condition necessary?
         require((_ids.length < 11), "Exceeds max booking transfer limit");
         super._safeBatchTransferFrom(_from, _to, _ids, _amounts, _data);
     }

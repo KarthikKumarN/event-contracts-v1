@@ -253,6 +253,7 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
      * @param _id - The ID of the NFT token.
      * @param _amount - The amount of NFTs to mint.
      * @param _data - Additional data to include in the transfer.
+     * @notice This function checks if the NFT is tranferable or not.
      * @notice This function can only be called by a contract with `MARKETPLACE_CONTRACT_ROLE`
      */
     function safeTransferFrom(
@@ -262,6 +263,7 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
         uint256 _amount,
         bytes memory _data
     ) public virtual override onlyRole(MARKETPLACE_CONTRACT_ROLE) {
+        require(transferStatus[_id], "This NFT is non transferable");
         super._safeTransferFrom(_from, _to, _id, _amount, _data);
     }
 
@@ -272,6 +274,7 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
      * @param _ids - The IDs of the NFT tokens.
      * @param _amounts - Count of ERC1155 tokens of the respective token IDs.
      * @param _data - Additional data to include in the transfer.
+     * @notice This function checks if the NFTs are tranferable or not.
      * @notice This function can only be called by a contract with `MARKETPLACE_CONTRACT_ROLE`
      */
     function safeBatchTransferFrom(
@@ -281,6 +284,11 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
         uint256[] memory _amounts,
         bytes memory _data
     ) public virtual override onlyRole(MARKETPLACE_CONTRACT_ROLE) {
+        uint256 len = _ids.length;
+        for(uint i=0; i<len; ++i) {
+            require(transferStatus[_ids[i]], "One of these NFT is non-transferable");
+        }
+        //FIXME Is this condition necessary?
         require((_ids.length < 11), "Exceeds max booking transfer limit");
         super._safeBatchTransferFrom(_from, _to, _ids, _amounts, _data);
     }
@@ -331,26 +339,27 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
         return super.supportsInterface(interfaceId);
     }
 
-    /**
-     * @dev To calculate and transfer the royalty points to the respective receivers
-     * @param _tokenId The ID of the token for which the royalties should be calculated and transferred
-     * @param _salePrice The sale price of the token
-     */
-    function _distributeRoyalties(
-        uint256 _tokenId,
-        uint256 _salePrice
-    ) private {
-        address[] memory receivers;
-        uint256[] memory royaltyAmounts;
-        (receivers, royaltyAmounts) = royaltyInfo(_tokenId, _salePrice);
-        for (uint i = 0; i < receivers.length; i++) {
-            //FIXME How can we approve the currency before transfer
-            // require(
-            //     IERC20(_currency).transferFrom(receivers[i], royaltyAmounts[i]),
-            //     "Royalty transfer failed"
-            // );
-        }
-    }
+    // /**
+    //  * @dev To calculate and transfer the royalty points to the respective receivers
+    //  * @param _tokenId The ID of the token for which the royalties should be calculated and transferred
+    //  * @param _salePrice The sale price of the token
+    //  */
+    // function _distributeRoyalties(
+    //     uint256 _tokenId,
+    //     uint256 _salePrice
+    // ) private {
+    //     address[] memory receivers;
+    //     uint256[] memory royaltyAmounts;
+    //     (receivers, royaltyAmounts) = royaltyInfo(_tokenId, _salePrice);
+    //     for (uint i = 0; i < receivers.length; i++) {
+    //         //Before this, in the marketplace, we need to take an approval for the USDC contracts
+    //         //Approval from the buyer to the BukPOSNFTs
+    //         // require(
+    //         //     IERC20(_currency).transferFrom(buyer, receivers[i], royaltyAmounts[i]),
+    //         //     "Royalty transfer failed"
+    //         // );
+    //     }
+    // }
 
     /**
      * @dev Returns the URI associated with the token ID.
