@@ -19,6 +19,20 @@ interface IBukNFTs is IERC1155 {
     function updateName(string memory _contractName) external;
 
     /**
+    * @dev Function to update the currency address.
+    * @param _currencyContract Address of the currency contract.
+     * @notice This function can only be called by addresses with `BUK_PROTOCOL_CONTRACT_ROLE`
+    */
+    function setCurrency(address _currencyContract) external;
+
+    /**
+    * @dev Function to update the treasury address.
+    * @param _bukTreasuryContract Address of the treasury.
+     * @notice This function can only be called by addresses with `BUK_PROTOCOL_CONTRACT_ROLE`
+    */
+    function setTreasury(address _bukTreasuryContract) external;
+
+    /**
      * @dev Sets the URI for a specific token ID.
      * @param _id - The ID of the token.
      * @param _newuri - The new URI for the token.
@@ -29,67 +43,69 @@ interface IBukNFTs is IERC1155 {
     /**
      * @dev Mint a new NFT with a specific token ID, account, amount, and data.
      * @param _id - The token ID to mint the NFT with.
-     * @param account - The account to mint the NFT to.
-     * @param amount - The amount of NFTs to mint.
-     * @param data - The data to store with the NFT.
+     * @param _account - The account to mint the NFT to.
+     * @param _amount - The amount of NFTs to mint.
+     * @param _data - The data to store with the NFT.
      * @param _uri - The URI to associate with the NFT.
      * @return uint256 - The token ID of the newly minted NFT.
      * @notice This function can only be called by a contract with `BUK_PROTOCOL_CONTRACT_ROLE`
      */
     function mint(
         uint256 _id,
-        address account,
-        uint256 amount,
-        bytes calldata data,
+        address _account,
+        uint256 _amount,
+        bytes calldata _data,
         string calldata _uri
     ) external returns (uint256);
 
 
     /**
      * @dev Burn a specific NFT.
-     * @param account - The account to burn the NFT from.
-     * @param id - The token ID of the NFT to burn.
-     * @param amount - The amount of NFTs to burn.
-     * @param isPoSNFT - Whether or not to call the Buk PoS NFTs contract to burn the NFT.
+     * @param _account - The account to burn the NFT from.
+     * @param _id - The token ID of the NFT to burn.
+     * @param _amount - The amount of NFTs to burn.
+     * @param _isPoSNFT - Whether or not to call the Buk PoS NFTs contract to burn the NFT.
      * @notice This function can only be called by a contract with `BUK_PROTOCOL_CONTRACT_ROLE`
      */
     function burn(
-        address account,
-        uint256 id,
-        uint256 amount,
-        bool isPoSNFT
+        address _account,
+        uint256 _id,
+        uint256 _amount,
+        bool _isPoSNFT
     ) external;
 
     /**
      * @dev Transfers ownership of an NFT token from one address to another.
-     * @param from - The current owner of the NFT.
-     * @param to - The address to transfer the ownership to.
-     * @param id - The ID of the NFT token.
-     * @param data - Additional data to include in the transfer.
+     * @param _from - The current owner of the NFT.
+     * @param _to - The address to transfer the ownership to.
+     * @param _id - The ID of the NFT token.
+     * @param _amount - Count of ERC1155 token of token ID.
+     * @param _data - Additional data to include in the transfer.
      * @notice This function can only be called by a contract with `MARKETPLACE_CONTRACT_ROLE`
      */
     function safeTransferFrom(
-        address from,
-        address to,
-        uint256 id,
-        uint256 amount,
-        bytes memory data
+        address _from,
+        address _to,
+        uint256 _id,
+        uint256 _amount,
+        bytes memory _data
     ) external;
 
     /**
      * @dev Transfers ownership of multiple NFT tokens from one address to another.
-     * @param from - The current owner of the NFTs.
-     * @param to - The address to transfer the ownership to.
-     * @param ids - The IDs of the NFT tokens.
-     * @param data - Additional data to include in the transfer.
+     * @param _from - The current owner of the NFTs.
+     * @param _to - The address to transfer the ownership to.
+     * @param _ids - The IDs of the NFT tokens.
+     * @param _amounts - Count of ERC1155 tokens of the respective token IDs.
+     * @param _data - Additional data to include in the transfer.
      * @notice This function can only be called by a contract with `MARKETPLACE_CONTRACT_ROLE`
      */
     function safeBatchTransferFrom(
-        address from,
-        address to,
-        uint256[] memory ids,
-        uint256[] memory amounts,
-        bytes memory data
+        address _from,
+        address _to,
+        uint256[] memory _ids,
+        uint256[] memory _amounts,
+        bytes memory _data
     ) external;
 
     /**

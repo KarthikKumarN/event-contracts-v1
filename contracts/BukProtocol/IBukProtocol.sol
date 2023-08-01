@@ -71,6 +71,11 @@ interface IBukProtocol {
     event SetTokenURI(uint256 indexed nftId, string indexed uri);
 
     /**
+     * @dev Emitted when currency is updated.
+     */
+    event SetCurrency(address indexed _currencyContract);
+
+    /**
      * @dev Emitted when treasury is updated.
      */
     event SetTreasury(address indexed treasuryContract);
@@ -134,13 +139,22 @@ interface IBukProtocol {
 
     /**
     * @dev Function to update the treasury address.
-    * @param bukTreasury Address of the treasury.
+    * @param _bukTreasuryContract Address of the treasury.
+    * @notice This function can only be called by `ADMIN_ROLE`
     */
-    function setTreasury(address bukTreasury) external;
+    function setTreasury(address _bukTreasuryContract) external;
+
+    /**
+    * @dev Function to update the currency address.
+    * @param _currencyContract Address of the currency contract.
+    * @notice This function can only be called by `ADMIN_ROLE`
+    */
+    function setCurrency(address _currencyContract) external;
 
     /**
     * @dev Function to update the token uri.
     * @param _tokenId Token Id.
+    * @notice This function can only be called by `ADMIN_ROLE`
     */
     function setTokenUri(uint _tokenId, string memory _newUri) external;
 
@@ -148,6 +162,7 @@ interface IBukProtocol {
     * @dev Function to define the royalties.
     * @param _recipients Array of recipients of royalties
     * @param _royaltyFractions Array of percentages for each recipients in the _recipients[] order.
+    * @notice This function can only be called by `ADMIN_ROLE`
     */
     function setOtherRoyaltyInfo(
         address[] memory _recipients,
@@ -157,37 +172,41 @@ interface IBukProtocol {
     /**
     * @dev Function to define the royalty Fraction for Buk.
     * @param _royaltyFraction Royalty Fraction.
+    * @notice This function can only be called by `ADMIN_ROLE`
     */
     function setBukRoyaltyInfo(uint96 _royaltyFraction) external;
 
     /**
     * @dev Function to define the royalty Fraction for Hotel.
     * @param _royaltyFraction Royalty Fraction.
+    * @notice This function can only be called by `ADMIN_ROLE`
     */
     function setHotelRoyaltyInfo(uint96 _royaltyFraction) external;
 
     /**
     * @dev Function to define the royalty Fraction for the First Owners.
     * @param _royaltyFraction Royalty Fraction.
+    * @notice This function can only be called by `ADMIN_ROLE`
     */
     function setFirstOwnerRoyaltyInfo(uint96 _royaltyFraction) external;
 
     /**
      * @dev Update the name of the contract.
-     * @notice This function can only be called by addresses with `UPDATE_CONTRACT_ROLE`
+     * @notice This function can only be called by addresses with `ADMIN_ROLE`
      */
     function updateNFTName(string memory _contractName) external;
 
     /**
      * @dev Function to grant the BUK Protocol role access to NFT and PoS contracts
      * @param _newBukProtocol address: New Buk Protocol contract of the Buk NFTs
-     * @notice This function can only be called by a contract with `ADMIN_ROLE`
+     * @notice This function can only be called by `ADMIN_ROLE`
      */
     function grantBukProtocolRole(address _newBukProtocol) external;
 
     /**
      * @dev Function to set the Buk commission percentage.
      * @param _commission Commission percentage.
+     * @notice This function can only be called by `ADMIN_ROLE`
      */
     function setCommission(uint8 _commission) external;
 
@@ -211,6 +230,7 @@ interface IBukProtocol {
     /**
      * @dev Function to refund the amount for the failure scenarios.
      * @param _ids IDs of the bookings.
+     * @notice This function can only be called by `ADMIN_ROLE`
      */
     function bookingRefund(uint256[] memory _ids, address _owner) external;
 
@@ -218,7 +238,6 @@ interface IBukProtocol {
      * @dev Function to confirm the room bookings.
      * @param _ids IDs of the bookings.
      * @param _uri URIs of the NFTs.
-     * @param _status Status of the NFT.
      * @notice Only the owner of the booking can confirm the rooms.
      * @notice The number of bookings and URIs should be same.
      * @notice The booking status should be booked to confirm it.
@@ -226,8 +245,7 @@ interface IBukProtocol {
      */
     function confirmRoom(
         uint256[] memory _ids,
-        string[] memory _uri,
-        bool _status
+        string[] memory _uri
     ) external;
 
 
@@ -240,6 +258,7 @@ interface IBukProtocol {
      * @notice The booking status should be confirmed to checkout it.
      * @notice The Active Booking NFTs are burnt from the owner's account.
      * @notice The Utility NFTs are minted to the owner of the booking.
+     * @notice This function can only be called by `ADMIN_ROLE`
      */
     function checkout(uint256[] memory _ids) external;
 
@@ -252,6 +271,7 @@ interface IBukProtocol {
      * @notice Only the admin can cancel the rooms.
      * @notice The booking status should be confirmed to cancel it.
      * @notice The Active Booking NFTs are burnt from the owner's account.
+     * @notice This function can only be called by `ADMIN_ROLE`
      */
     function cancelRoom(
         uint256 _id,

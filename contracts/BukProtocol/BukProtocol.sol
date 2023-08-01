@@ -58,14 +58,14 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
 
     /**
      * @dev Constructor to initialize the contract
-     * @param bukTreasury Address of the treasury.
-     * @param currency Address of the currency.
-     * @param bukWallet Address of the Buk wallet.
+     * @param _bukTreasuryContract Address of the treasury.
+     * @param _currencyContract Address of the currency.
+     * @param _bukWalletContract Address of the Buk wallet.
      */
-    constructor(address bukTreasury, address currency, address bukWallet) {
-        _currency = currency;
-        _bukTreasury = bukTreasury;
-        _bukWallet = bukWallet;
+    constructor(address _bukTreasuryContract, address _currencyContract, address _bukWalletContract) {
+        _bukTreasury = _bukTreasuryContract;
+        _currency = _currencyContract;
+        _bukWallet = _bukWalletContract;
         _setupRole(ADMIN_ROLE, _msgSender());
         _grantRole(ADMIN_ROLE, _msgSender());
     }
@@ -73,9 +73,19 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     /**
      * @dev See {IBukProtocol-setTreasury}.
      */
-    function setTreasury(address bukTreasury) external onlyRole(ADMIN_ROLE) {
-        _bukTreasury = bukTreasury;
-        emit SetTreasury(bukTreasury);
+    function setTreasury(address _bukTreasuryContract) external onlyRole(ADMIN_ROLE) {
+        _bukTreasury = _bukTreasuryContract;
+        IBukNFTs(nftContract).setTreasury(_bukTreasuryContract);
+        emit SetTreasury(_bukTreasuryContract);
+    }
+
+    /**
+     * @dev See {IBukProtocol-setCurrency}.
+     */
+    function setCurrency(address _currencyContract) external onlyRole(ADMIN_ROLE) {
+        _currency = _currencyContract;
+        IBukNFTs(nftContract).setCurrency(_currencyContract);
+        emit SetCurrency(_currencyContract);
     }
 
     /**
@@ -236,10 +246,11 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
      */
     function confirmRoom(
         uint256[] memory _ids,
-        string[] memory _uri,
-        bool _status
+        string[] memory _uri
     ) external nonReentrant {
         uint256 len = _ids.length;
+        require((len == _uri.length), "Check Ids and URIs size");
+        require(((len > 0) && (len < 11)), "Not in max - min booking limit");
         for (uint8 i = 0; i < len; ++i) {
             require(
                 bookingDetails[_ids[i]].status == BookingStatus.booked,
@@ -250,8 +261,6 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
                 "Only booking owner has access"
             );
         }
-        require((len == _uri.length), "Check Ids and URIs size");
-        require(((len > 0) && (len < 11)), "Not in max - min booking limit");
         IBukNFTs bukNftsContract = IBukNFTs(nftContract);
         for (uint8 i = 0; i < len; ++i) {
             bookingDetails[_ids[i]].status = BookingStatus.confirmed;
@@ -260,8 +269,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
                 bookingDetails[_ids[i]].firstOwner,
                 1,
                 "",
-                _uri[i],
-                _status
+                _uri[i]
             );
             bookingDetails[_ids[i]].tokenID = _ids[i];
         }

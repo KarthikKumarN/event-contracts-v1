@@ -3,6 +3,7 @@ pragma solidity =0.8.19;
 
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../BukPOSNFTs/IBukPOSNFTs.sol";
 import "../BukProtocol/IBukProtocol.sol";
 
@@ -13,15 +14,27 @@ import "../BukProtocol/IBukProtocol.sol";
  */
 contract BukNFTs is AccessControl, ERC1155 {
     /**
-     * @dev name of the collection contract
+     * @dev Address of the Buk treasury contract.
+     */
+    address private _bukTreasury;
+
+    /**
+     * @dev Address of the currency.
+     */
+    address private _currency;
+
+    /**
+     * @dev Name of the collection contract
      */
     string public name;
+
     /**
-     * @dev address of the Buk PoS NFT collection contract
+     * @dev Address of the Buk PoS NFT collection contract
      */
     address public nftPoSContract;
+
     /**
-     * @dev address of the Buk Protocol contract
+     * @dev Address of the Buk Protocol contract
      */
     address public bukProtocolContract;
 
@@ -35,6 +48,7 @@ contract BukNFTs is AccessControl, ERC1155 {
      */
     bytes32 public constant BUK_PROTOCOL_CONTRACT_ROLE =
         keccak256("BUK_PROTOCOL_CONTRACT");
+
     /**
      * @dev Constant for the role of the marketplace contract
      */
@@ -42,9 +56,20 @@ contract BukNFTs is AccessControl, ERC1155 {
         keccak256("MARKETPLACE_CONTRACT");
 
     /**
+     * @dev Emitted when treasury is updated.
+     */
+    event SetTreasury(address indexed treasuryContract);
+
+    /**
+     * @dev Emitted when currency is updated.
+     */
+    event SetCurrency(address indexed _currencyContract);
+
+    /**
      * @dev Event to update the contract name
      */
     event UpdateContractName(string indexed contractName);
+
     /**
      * @dev Emitted when Buk Protocol role access is granted for NFT and PoS contracts
      */
@@ -52,6 +77,7 @@ contract BukNFTs is AccessControl, ERC1155 {
         address indexed oldAddress,
         address indexed newAddress
     );
+
     /**
      * @dev Event to set token URI
      */
@@ -63,12 +89,16 @@ contract BukNFTs is AccessControl, ERC1155 {
      * @param _bukPoSContract Address of the Buk PoS NFTs contract
      * @param _bukProtocolContract Address of the buk protocol contract
      * @param _marketplaceContract Address of the Marketplace contract
+     * @param _bukTreasuryContract Address of the treasury.
+     * @param _currencyContract Address of the currency.
      */
     constructor(
         string memory _contractName,
         address _bukPoSContract,
         address _bukProtocolContract,
-        address _marketplaceContract
+        address _marketplaceContract,
+        address _bukTreasuryContract,
+        address _currencyContract
     ) ERC1155("") {
         name = _contractName;
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
@@ -76,6 +106,30 @@ contract BukNFTs is AccessControl, ERC1155 {
         _grantRole(MARKETPLACE_CONTRACT_ROLE, _marketplaceContract);
         nftPoSContract = _bukPoSContract;
         bukProtocolContract = _bukProtocolContract;
+        _bukTreasury = _bukTreasuryContract;
+        _currency = _currencyContract;
+    }
+
+    /**
+    * @dev Function to update the treasury address.
+    * @param _bukTreasuryContract Address of the treasury.
+     * @notice This function can only be called by addresses with `BUK_PROTOCOL_CONTRACT_ROLE`
+    */
+    function setTreasury(address _bukTreasuryContract) external onlyRole(BUK_PROTOCOL_CONTRACT_ROLE) {
+        _bukTreasury = _bukTreasuryContract;
+        IBukPOSNFTs(nftPoSContract).setTreasury(_bukTreasuryContract);
+        emit SetTreasury(_bukTreasuryContract);
+    }
+
+    /**
+    * @dev Function to update the currency address.
+    * @param _currencyContract Address of the currency contract.
+     * @notice This function can only be called by addresses with `BUK_PROTOCOL_CONTRACT_ROLE`
+    */
+    function setCurrency(address _currencyContract) external onlyRole(BUK_PROTOCOL_CONTRACT_ROLE) {
+        _currency = _currencyContract;
+        IBukPOSNFTs(nftPoSContract).setCurrency(_currencyContract);
+        emit SetCurrency(_currencyContract);
     }
 
     /**
@@ -125,46 +179,45 @@ contract BukNFTs is AccessControl, ERC1155 {
     /**
      * @dev Mint a new NFT with a specific token ID, account, amount, and data.
      * @param _id - The token ID to mint the NFT with.
-     * @param account - The account to mint the NFT to.
-     * @param amount - The amount of NFTs to mint.
-     * @param data - The data to store with the NFT.
+     * @param _account - The account to mint the NFT to.
+     * @param _amount - The amount of NFTs to mint.
+     * @param _data - The data to store with the NFT.
      * @param _uri - The URI to associate with the NFT.
      * @return uint256 - The token ID of the newly minted NFT.
      * @notice This function can only be called by a contract with `BUK_PROTOCOL_CONTRACT_ROLE`
      */
     function mint(
         uint256 _id,
-        address account,
-        uint256 amount,
-        bytes calldata data,
+        address _account,
+        uint256 _amount,
+        bytes calldata _data,
         string calldata _uri
     ) external onlyRole(BUK_PROTOCOL_CONTRACT_ROLE) returns (uint256) {
-        _mint(account, _id, amount, data);
+        _mint(_account, _id, _amount, _data);
         _setURI(_id, _uri);
         return (_id);
     }
 
     /**
      * @dev Burn a specific NFT.
-     * @param account - The account to burn the NFT from.
-     * @param id - The token ID of the NFT to burn.
-     * @param amount - The amount of NFTs to burn.
-     * @param isPoSNFT - Whether or not to call the Buk PoS NFTs contract to burn the NFT.
+     * @param _account - The account to burn the NFT from.
+     * @param _id - The token ID of the NFT to burn.
+     * @param _amount - The amount of NFTs to burn.
+     * @param _isPoSNFT - Whether or not to call the Buk PoS NFTs contract to burn the NFT.
      * @notice This function can only be called by a contract with `BUK_PROTOCOL_CONTRACT_ROLE`
      */
     function burn(
-        address account,
-        uint256 id,
-        uint256 amount,
-        bool isPoSNFT
+        address _account,
+        uint256 _id,
+        uint256 _amount,
+        bool _isPoSNFT
     ) external onlyRole(BUK_PROTOCOL_CONTRACT_ROLE) {
-        string memory uri_ = bookingTickets[id];
-        bookingTickets[id] = "";
-        if (isPoSNFT) {
-            IBukPOSNFTs(nftPoSContract).mint(account, id, amount, uri_, "");
-        } else {
-            _burn(account, id, amount);
+        string memory uri_ = bookingTickets[_id];
+        bookingTickets[_id] = "";
+        if (_isPoSNFT) {
+            IBukPOSNFTs(nftPoSContract).mint(_account, _id, _amount, uri_, "");
         }
+        _burn(_account, _id, _amount);
     }
 
     /**
@@ -196,39 +249,41 @@ contract BukNFTs is AccessControl, ERC1155 {
 
     /**
      * @dev Transfers ownership of an NFT token from one address to another.
-     * @param from - The current owner of the NFT.
-     * @param to - The address to transfer the ownership to.
-     * @param id - The ID of the NFT token.
-     * @param data - Additional data to include in the transfer.
+     * @param _from - The current owner of the NFT.
+     * @param _to - The address to transfer the ownership to.
+     * @param _id - The ID of the NFT token.
+     * @param _amount - Count of ERC1155 token of token ID.
+     * @param _data - Additional data to include in the transfer.
      * @notice This function can only be called by a contract with `MARKETPLACE_CONTRACT_ROLE`
      */
     function safeTransferFrom(
-        address from,
-        address to,
-        uint256 id,
-        uint256 amount,
-        bytes memory data
+        address _from,
+        address _to,
+        uint256 _id,
+        uint256 _amount,
+        bytes memory _data
     ) public virtual override onlyRole(MARKETPLACE_CONTRACT_ROLE) {
-        super._safeTransferFrom(from, to, id, amount, data);
+        super._safeTransferFrom(_from, _to, _id, _amount, _data);
     }
 
     /**
      * @dev Transfers ownership of multiple NFT tokens from one address to another.
-     * @param from - The current owner of the NFTs.
-     * @param to - The address to transfer the ownership to.
-     * @param ids - The IDs of the NFT tokens.
-     * @param data - Additional data to include in the transfer.
+     * @param _from - The current owner of the NFTs.
+     * @param _to - The address to transfer the ownership to.
+     * @param _ids - The IDs of the NFT tokens.
+     * @param _amounts - Count of ERC1155 tokens of the respective token IDs.
+     * @param _data - Additional data to include in the transfer.
      * @notice This function can only be called by a contract with `MARKETPLACE_CONTRACT_ROLE`
      */
     function safeBatchTransferFrom(
-        address from,
-        address to,
-        uint256[] memory ids,
-        uint256[] memory amounts,
-        bytes memory data
+        address _from,
+        address _to,
+        uint256[] memory _ids,
+        uint256[] memory _amounts,
+        bytes memory _data
     ) public virtual override onlyRole(MARKETPLACE_CONTRACT_ROLE) {
-        require((ids.length < 11), "Exceeds max booking transfer limit");
-        super._safeBatchTransferFrom(from, to, ids, amounts, data);
+        require((_ids.length < 11), "Exceeds max booking transfer limit");
+        super._safeBatchTransferFrom(_from, _to, _ids, _amounts, _data);
     }
 
     /**
@@ -251,8 +306,13 @@ contract BukNFTs is AccessControl, ERC1155 {
         return super.supportsInterface(interfaceId);
     }
 
-    function _setURI(uint256 id, string memory newuri) internal {
-        bookingTickets[id] = newuri;
+    /**
+     * @dev Returns the URI associated with the token ID.
+     * @param _id - The token ID to retrieve the URI for.
+     * @param _newuri - The URI associated with the token ID.
+     */
+    function _setURI(uint256 _id, string memory _newuri) internal {
+        bookingTickets[_id] = _newuri;
     }
 
     /**

@@ -7,11 +7,25 @@ import "@openzeppelin/contracts/access/IAccessControl.sol";
 interface IBukPOSNFTs is IERC1155, IAccessControl {
 
     /**
+    * @dev Function to update the treasury address.
+    * @param _bukTreasuryContract Address of the treasury.
+     * @notice This function can only be called by a contract with `BUK_NFT_CONTRACT_ROLE`
+    */
+    function setTreasury(address _bukTreasuryContract) external;
+
+    /**
+    * @dev Function to update the currency address.
+    * @param _currencyContract Address of the currency contract.
+     * @notice This function can only be called by a contract with `BUK_NFT_CONTRACT_ROLE`
+    */
+    function setCurrency(address _currencyContract) external;
+
+    /**
      * @dev Function to grant the BukNFT role to a given contract
-     * @param nftContractAddr address: The address of the NFT contract
+     * @param _nftContract address: The address of the NFT contract
      * @notice This function can only be called by a contract with `BUK_PROTOCOL_CONTRACT_ROLE`
      */
-    function grantBukNFTRole(address nftContractAddr) external;
+    function grantBukNFTRole(address _nftContract) external;
 
     /**
      * @dev To set the Buk Protocol role Access.
@@ -61,34 +75,36 @@ interface IBukPOSNFTs is IERC1155, IAccessControl {
 
     /**
      * @dev Transfers ownership of an NFT token from one address to another.
-     * @param from - The current owner of the NFT.
-     * @param to - The address to transfer the ownership to.
-     * @param id - The ID of the NFT token.
-     * @param data - Additional data to include in the transfer.
+     * @param _from - The current owner of the NFT.
+     * @param _to - The address to transfer the ownership to.
+     * @param _id - The ID of the NFT token.
+     * @param _amount - The amount of NFTs to mint.
+     * @param _data - Additional data to include in the transfer.
      * @notice This function can only be called by a contract with `MARKETPLACE_CONTRACT_ROLE`
      */
     function safeTransferFrom(
-        address from,
-        address to,
-        uint256 id,
-        uint256 amount,
-        bytes memory data
+        address _from,
+        address _to,
+        uint256 _id,
+        uint256 _amount,
+        bytes memory _data
     ) external;
 
     /**
      * @dev Transfers ownership of multiple NFT tokens from one address to another.
-     * @param from - The current owner of the NFTs.
-     * @param to - The address to transfer the ownership to.
-     * @param ids - The IDs of the NFT tokens.
-     * @param data - Additional data to include in the transfer.
+     * @param _from - The current owner of the NFTs.
+     * @param _to - The address to transfer the ownership to.
+     * @param _ids - The IDs of the NFT tokens.
+     * @param _amounts - Count of ERC1155 tokens of the respective token IDs.
+     * @param _data - Additional data to include in the transfer.
      * @notice This function can only be called by a contract with `MARKETPLACE_CONTRACT_ROLE`
      */
     function safeBatchTransferFrom(
-        address from,
-        address to,
-        uint256[] memory ids,
-        uint256[] memory amounts,
-        bytes memory data
+        address _from,
+        address _to,
+        uint256[] memory _ids,
+        uint256[] memory _amounts,
+        bytes memory _data
     ) external;
 
     /**
@@ -108,13 +124,15 @@ interface IBukPOSNFTs is IERC1155, IAccessControl {
 
     /**
      * @dev Mapping for token URI's for Buk PoS NFTs
+     * @param _id uint256: The ID of the token
      */
-    function bookingTickets(uint256 id) external view returns (string memory);
+    function bookingTickets(uint256 _id) external view returns (string memory);
 
     /**
      * @dev Mapping to toggle the transferrability of Buk PoS NFTs
+     * @param _id uint256: The ID of the token
      */
-    function transferStatus(uint256 id) external view returns (bool);
+    function transferStatus(uint256 _id) external view returns (bool);
 
     /**
      * @dev Function to get the URI for a given ID
