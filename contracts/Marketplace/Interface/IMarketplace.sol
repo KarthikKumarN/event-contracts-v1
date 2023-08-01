@@ -10,12 +10,10 @@ interface IMarketplace {
     /**
      * @title Struct to define the booking/room listing details
      * @param price, price of room/booking
-     * @param tardeTimeLimt, end date for trade
      * @param status, status of listing
      */
     struct ListingDetails {
         uint256 price;
-        uint256 tardeTimeLimt;
         ListingStatus status;
     }
 
@@ -58,9 +56,10 @@ interface IMarketplace {
     /**
      * @dev Emitted when an booking/room NFT is relisted
      * @param tokenId, unique number of the booking NFT
-     * @param price, new price of the room/booking
+     * @param oldPrice, old price of the room/booking
+     * @param newPrice, new price of the room/booking
      */
-    event Relisted(uint256 indexed tokenId, uint256 price);
+    event Relisted(uint256 indexed tokenId, uint256 oldPrice, uint256 newPrice);
 
     /**
      * @dev Emitted when an booking/room is delisted
@@ -90,39 +89,20 @@ interface IMarketplace {
     event BukNFTSet(address oldAddress, address newAddress);
 
     /**
-     * @dev Emitted when new Treasury Wallet has been updated
-     * @param oldAddress, Address of the old treasury wallet
-     * @param newAddress, Address of the new treasury wallet
-     */
-    event TreasuryWalletSet(address oldAddress, address newAddress);
-
-    /**
-     * @dev Emitted when new Hotel Wallet has been updated
-     * @param oldAddress, Address of the old hotel wallet
-     * @param newAddress, Address of the new hotel wallet
-     */
-    event HotelWalletSet(address oldAddress, address newAddress);
-
-    /**
      * @dev Function will create a listing of Booking/Room NFT
      * @dev Only NFT owner can list
      * @param tokenId_ room/booking NFT id
      * @param price_  price of room/booking
-     * @param tardeTimeLimt_ time till tradable
      * @dev While listing will approve marketplace to excecute transfer
      */
-    function createListing(
-        uint256 tokenId_,
-        uint256 price_,
-        uint256 tardeTimeLimt_
-    ) external;
+    function createListing(uint256 tokenId_, uint256 price_) external;
 
     /**
      * @dev Function will delist of NFT
      * @dev NFT owner can delist
      * @param tokenId_ NFT id
      */
-    function deListing(uint256 tokenId_) external;
+    function delist(uint256 tokenId_) external;
 
     /**
      * @dev Function will delete listing
@@ -137,7 +117,7 @@ interface IMarketplace {
      * @dev Only NFT owner can update
      * @param tokenId_ NFT id
      */
-    function reList(uint256 tokenId_, uint256 price_) external;
+    function relist(uint256 tokenId_, uint256 newPrice_) external;
 
     /**
      * @dev Function will enble user buy this room/booking NFT
@@ -164,67 +144,22 @@ interface IMarketplace {
     function setBukNFT(address bukNFT_) external;
 
     /**
-     * @dev Set new buk royalty
-     * @dev Only admin access to set
-     * @dev Buk royalty fee applies to the all listing
-     * @param royalty_, new royalty percentage with 2 decimals
-     */
-    function setBukRoyalty(uint8 royalty_) external;
-
-    /**
-     * @dev Set new hotel royalty
-     * @dev Only admin access to set
-     * @dev Hotel royalty fee applies to the all listing
-     * @param royalty_, new royalty percentage with 2 decimals
-     */
-    function setHotelRoyalty(uint8 royalty_) external;
-
-    /**
-     * @dev Set new user royalty
-     * @dev Only admin access to set
-     * @dev User royalty applies to the all listing
-     * @dev User royalty applies first time buyer of room
-     * @param royalty_, new royalty percentage with 2 decimals
-     */
-    function setUserRoyalty(uint8 royalty_) external;
-
-    /**
-     * @dev Allows to set a new treasury wallet where buk royalty funds will be transfered.
-     * @dev Only admin access to set
-     * @param newTreasuryWallet_, Address of the new treasury wallet
-     */
-    function setTreasuryWallet(address newTreasuryWallet_) external;
-
-    /**
-     * @dev Allows to set a new hotel royalty wallet address where royalty will be transfered.
-     * @dev Only admin access to set
-     * @param newWallet_, Address of the new fee wallet
-     */
-    function setHotelWallet(address newWallet_) external;
-
-    /**
      * @dev Gets stable token address
      * @return address, Address of the stable token contract
      */
     function getStableToken() external view returns (address);
 
     /**
-     * @dev Gets current buk protocoladdress
+     * @dev Gets current buk protocol address
      * @return address, Address of the buk protocol contract
      */
     function getBukProtocol() external view returns (address);
 
     /**
-     * @dev Gets treasury wallet address
-     * @return address, Address of the treasury wallet
+     * @dev Gets current buk NFT address
+     * @return address, Address of the buk NFT contract
      */
-    function getTreasuryWallet() external view returns (address);
-
-    /**
-     * @dev Gets Hotel wallet address
-     * @return address Address of the fee wallet
-     */
-    function getHotelWallet() external view returns (address);
+    function getBukNFT() external view returns (address);
 
     /**
      * @dev Function will provide Lisiting details of booking
@@ -233,4 +168,10 @@ interface IMarketplace {
     function getListingDetails(
         uint256 tokenId_
     ) external view returns (ListingDetails calldata);
+
+    /**
+     * @dev Function check is NFT/Booking listed
+     * @param tokenId_ TokenID of booking
+     */
+    function isListed(uint256 tokenId_) external view returns (bool);
 }
