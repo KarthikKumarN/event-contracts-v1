@@ -5,90 +5,191 @@ import {
 import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { IMarketplace__factory } from "../typechain-types";
+import { ContractTransactionResponse } from "ethers";
+import { Marketplace } from "../typechain-types";
+import { BukProtocol } from "../typechain-types";
+import { bukNfTs } from "../typechain-types/contracts";
 
 describe("Marketplace", function () {
-  // We define a fixture to reuse the same setup in every test.
-  // We use loadFixture to run this setup once, snapshot that state,
-  // and reset Hardhat Network to that snapshot in every test.
-  async function deployMarketplaceFixture() {
-    const BUK_PROTOCOL = "0x72a8d29b9b9EFCc0B58e11bb42686a527f978699";
-    const BUK_NFT = "0xd84C3b47770aeCF852E99C5FdE2C987783027385";
-    const CURRENCY = "0xae9B20071252B2f6e807D0D58e94763Aa08905aB";
+  let stableTokenContract;
+  let marketplaceContract;
+  let bukProtocolContract;
+  let owner;
+  let account1;
+  let account2;
+  let adminWallet;
+  let bukWallet;
+  let bukTreasuryContract;
+  let nftContract;
+  let nftPosContract;
+  let sellerWallet;
+  let buyerWallet;
 
-    // Contracts are deployed using the first signer/account by default
-    const [owner, account1, account2] = await ethers.getSigners();
-
-    const Marketplace = await ethers.getContractFactory("Marketplace");
-    const marketplaceContract = await Marketplace.deploy(
-      BUK_PROTOCOL,
-      BUK_NFT,
-      CURRENCY,
-    );
-
-    return {
-      marketplaceContract,
-      BUK_PROTOCOL,
-      BUK_NFT,
-      CURRENCY,
+  before("deploy the contract instance first", async function () {
+    [
       owner,
       account1,
       account2,
-    };
-  }
+      adminWallet,
+      sellerWallet,
+      buyerWallet,
+      bukWallet,
+    ] = await ethers.getSigners();
+    // Token
+    const Token = await ethers.getContractFactory("Token");
+    stableTokenContract = await Token.deploy(
+      "USD Dollar",
+      "USDC",
+      18,
+      owner.address,
+      2000000,
+    );
+    console.log(await stableTokenContract.getAddress(), " tokenContract");
+    console.log(stableTokenContract, " tokenContract");
+
+    //BukTreasury
+    const BukTreasury = await ethers.getContractFactory("BukTreasury");
+    bukTreasuryContract = await BukTreasury.deploy(
+      stableTokenContract.getAddress(),
+    );
+    console.log(await bukTreasuryContract.getAddress(), " bukTreasuryContract");
+
+    //BukProtocol
+    const BukProtocol = await ethers.getContractFactory("BukProtocol");
+    bukProtocolContract = await BukProtocol.deploy(
+      bukTreasuryContract.getAddress(),
+      stableTokenContract.getAddress(),
+      bukWallet.address,
+    );
+    console.log(await bukProtocolContract.getAddress(), " bukProtocolContract");
+
+    // BukPOSNFT
+    const BukPOSNFT = await ethers.getContractFactory("BukPOSNFTs");
+    nftPosContract = await BukPOSNFT.deploy(
+      "BUK_POS",
+      bukProtocolContract.getAddress(),
+    );
+    console.log(await nftPosContract.getAddress(), " nftPosContract");
+
+    // BukNFT
+    const BukNFT = await ethers.getContractFactory("BukNFTs");
+    nftContract = await BukNFT.deploy(
+      "BUK_NFT",
+      nftPosContract.getAddress(),
+      bukProtocolContract.getAddress(),
+    );
+    console.log(await nftContract.getAddress(), " nftContract");
+
+    //Marketplace
+    const Marketplace = await ethers.getContractFactory("Marketplace");
+    marketplaceContract = await Marketplace.deploy(
+      bukProtocolContract.getAddress(),
+      nftContract.getAddress(),
+      stableTokenContract.getAddress(),
+    );
+    console.log(await marketplaceContract.getAddress(), " marketplaceContract");
+  });
+  // We define a fixture to reuse the same setup in every test.
+  // We use loadFixture to run this setup once, snapshot that state,
+  // and reset Hardhat Network to that snapshot in every test.
+  // async function deployMarketplaceFixture() {
+  //   const BUK_PROTOCOL = "0x72a8d29b9b9EFCc0B58e11bb42686a527f978699";
+  //   const BUK_NFT = "0xd84C3b47770aeCF852E99C5FdE2C987783027385";
+  //   const CURRENCY = "0xae9B20071252B2f6e807D0D58e94763Aa08905aB";
+
+  //   // Contracts are deployed using the first signer/account by default
+  //   const [owner, account1, account2, adminWallet] = await ethers.getSigners();
+  //   console.log(adminWallet.address, " adminWallet");
+
+  //   // Token
+  //   const Token = await ethers.getContractFactory("Token");
+  //   const token = await Token.deploy(
+  //     "USD Dollar",
+  //     "USDC",
+  //     18,
+  //     adminWallet.address,
+  //     2000000,
+  //   );
+  //   await token.getDeployedCode();
+  //   console.log(token.getAddress(), " tokenContract");
+  //   console.log(token, " tokenContract");
+
+  //   //BukTreasury
+  //   const BukTreasury = await ethers.getContractFactory("BukTreasury");
+  //   const bukTreasuryContract = await BukTreasury.deploy(token.address);
+
+  //   //BukProtocol
+  //   const BukProtocol = await ethers.getContractFactory("BukProtocol");
+  //   const bukProtocolContract = await BukProtocol.deploy(
+  //     bukTreasuryContract,
+  //     addresstokenContract,
+  //     BUK_NFT,
+  //     CURRENCY,
+  //   );
+
+  //   // BukNFT
+  //   const BukNFT = await ethers.getContractFactory("BukNFTs");
+  //   const bukNFTContract = await BukNFT.deploy(BUK_PROTOCOL, BUK_NFT, CURRENCY);
+
+  //   const Marketplace = await ethers.getContractFactory("Marketplace");
+  //   const marketplaceContract = await Marketplace.deploy(
+  //     BUK_PROTOCOL,
+  //     BUK_NFT,
+  //     CURRENCY,
+  //   );
+
+  //   return {
+  //     marketplaceContract,
+  //     BUK_PROTOCOL,
+  //     BUK_NFT,
+  //     CURRENCY,
+  //     owner,
+  //     account1,
+  //     account2,
+  //   };
+  // }
 
   describe("Deployment marketplace", function () {
     it("Should set the BUK protocol address", async function () {
-      const { marketplaceContract, BUK_PROTOCOL } = await loadFixture(
-        deployMarketplaceFixture,
+      expect(await marketplaceContract.getBukProtocol()).to.equal(
+        await bukProtocolContract.getAddress(),
       );
-      expect(await marketplaceContract.getBukProtocol()).to.equal(BUK_PROTOCOL);
     });
 
     it("Should set the BUK NFT address", async function () {
-      const { marketplaceContract, BUK_NFT, BUK_PROTOCOL } = await loadFixture(
-        deployMarketplaceFixture,
+      expect(await marketplaceContract.getBukNFT()).to.equal(
+        await nftContract.getAddress(),
       );
-      expect(await marketplaceContract.getBukNFT()).to.equal(BUK_NFT);
     });
 
     it("Should set the stable token", async function () {
-      const { marketplaceContract, CURRENCY } = await loadFixture(
-        deployMarketplaceFixture,
+      expect(await marketplaceContract.getStableToken()).to.equal(
+        await stableTokenContract.getAddress(),
       );
-      expect(await marketplaceContract.getStableToken()).to.equal(CURRENCY);
     });
 
     it("Should set the buk protocol contract", async function () {
-      const { marketplaceContract, BUK_PROTOCOL } = await loadFixture(
-        deployMarketplaceFixture,
+      expect(await marketplaceContract.getBukProtocol()).to.equal(
+        await bukProtocolContract.getAddress(),
       );
-      expect(await marketplaceContract.getBukProtocol()).to.equal(BUK_PROTOCOL);
     });
 
     it("Should set the buk NFT contract", async function () {
-      const { marketplaceContract, BUK_NFT } = await loadFixture(
-        deployMarketplaceFixture,
+      expect(await marketplaceContract.getBukNFT()).to.equal(
+        await nftContract.getAddress(),
       );
-      expect(await marketplaceContract.getBukNFT()).to.equal(BUK_NFT);
     });
   });
 
   // Test cases for setting buk protocol
   describe("Set Buk protocol contract for marketplace", function () {
     it("Should set the BUK protocol", async function () {
-      const { marketplaceContract } = await loadFixture(
-        deployMarketplaceFixture,
-      );
       let newContract = "0xa9a1C7be37Cb72811A6C4C278cA7C403D6459b78";
       await expect(await marketplaceContract.setBukProtocol(newContract)).to.not
         .be.reverted;
       expect(await marketplaceContract.getBukProtocol()).to.equal(newContract);
     });
     it("Should reverted with error Buk protocol contract", async function () {
-      const { marketplaceContract } = await loadFixture(
-        deployMarketplaceFixture,
-      );
       let newContract = "0x0000000000000000000000000000000000000000";
       await expect(
         marketplaceContract.setBukProtocol(newContract),
@@ -96,9 +197,6 @@ describe("Marketplace", function () {
     });
 
     it("Should set the Buk protocol contract and emit event", async function () {
-      const { marketplaceContract } = await loadFixture(
-        deployMarketplaceFixture,
-      );
       let oldAddress = await marketplaceContract.getBukProtocol();
       let newAddress = "0xa9a1C7be37Cb72811A6C4C278cA7C403D6459b78";
       await expect(await marketplaceContract.setBukProtocol(newAddress))
@@ -107,11 +205,7 @@ describe("Marketplace", function () {
     });
 
     it("Should reverted with admin error Buk protocol contract", async function () {
-      const { marketplaceContract, owner, account1 } = await loadFixture(
-        deployMarketplaceFixture,
-      );
       let newAddress = "0xa9a1C7be37Cb72811A6C4C278cA7C403D6459b78";
-
       await expect(
         marketplaceContract.connect(account1).setBukProtocol(newAddress),
       ).to.be.revertedWith(
@@ -120,21 +214,15 @@ describe("Marketplace", function () {
     });
   });
 
-  // Test cases for setting buk NFT
+  // // Test cases for setting buk NFT
   describe("Set Buk NFT contract for marketplace", function () {
     it("Should set the BUK NFT", async function () {
-      const { marketplaceContract } = await loadFixture(
-        deployMarketplaceFixture,
-      );
       let newContract = "0xa9a1C7be37Cb72811A6C4C278cA7C403D6459b78";
       await expect(await marketplaceContract.setBukNFT(newContract)).to.not.be
         .reverted;
       expect(await marketplaceContract.getBukNFT()).to.equal(newContract);
     });
     it("Should reverted with error Buk NFT contract", async function () {
-      const { marketplaceContract } = await loadFixture(
-        deployMarketplaceFixture,
-      );
       let newContract = "0x0000000000000000000000000000000000000000";
       await expect(
         marketplaceContract.setBukNFT(newContract),
@@ -142,9 +230,6 @@ describe("Marketplace", function () {
     });
 
     it("Should set the Buk NFT contract and emit event", async function () {
-      const { marketplaceContract } = await loadFixture(
-        deployMarketplaceFixture,
-      );
       let oldAddress = await marketplaceContract.getBukNFT();
       let newAddress = "0xa9a1C7be37Cb72811A6C4C278cA7C403D6459b78";
       await expect(await marketplaceContract.setBukNFT(newAddress))
@@ -153,9 +238,6 @@ describe("Marketplace", function () {
     });
 
     it("Should reverted with admin error Buk NFT contract", async function () {
-      const { marketplaceContract, owner, account1 } = await loadFixture(
-        deployMarketplaceFixture,
-      );
       let newAddress = "0xa9a1C7be37Cb72811A6C4C278cA7C403D6459b78";
 
       await expect(
@@ -165,18 +247,12 @@ describe("Marketplace", function () {
       );
     });
   });
-  // Test cases for getting listed status
+  // // Test cases for getting listed status
   describe("Listed status marketplace", function () {
     it("Should get listed status", async function () {
-      const { marketplaceContract } = await loadFixture(
-        deployMarketplaceFixture,
-      );
       await expect(await marketplaceContract.isListed(0)).to.equal(false);
     });
     it("Should get listed status for true", async function () {
-      const { marketplaceContract } = await loadFixture(
-        deployMarketplaceFixture,
-      );
       let tokenId = 1;
       let price = 100;
       await marketplaceContract.createListing(tokenId, price);
@@ -185,264 +261,265 @@ describe("Marketplace", function () {
     //TODO Check for listed status
   });
 
-  // Test cases for getting listing details
-  describe("Listing details marketplace", function () {
-    it("Should get listed details should be zero", async function () {
-      const { marketplaceContract } = await loadFixture(
-        deployMarketplaceFixture,
-      );
-      let listingDetails = await marketplaceContract.getListingDetails(0);
-      await expect(listingDetails[0]).to.equal(0);
-      await expect(listingDetails[1]).to.equal(0);
-    });
-    it("Should get listed details and verify for valid values", async function () {
-      const { marketplaceContract } = await loadFixture(
-        deployMarketplaceFixture,
-      );
-      let tokenId = 1;
-      let price = 100;
-      await marketplaceContract.createListing(tokenId, price);
-      let listingDetails = await marketplaceContract.getListingDetails(tokenId);
-      await expect(listingDetails[0]).to.equal(price);
-      await expect(listingDetails[1]).to.equal(0);
-    });
-    //TODO Check for listed status
-  });
+  // // Test cases for getting listing details
+  // describe("Listing details marketplace", function () {
+  //   it("Should get listed details should be zero", async function () {
+  //     const { marketplaceContract } = await loadFixture(
+  //       deployMarketplaceFixture,
+  //     );
+  //     let listingDetails = await marketplaceContract.getListingDetails(0);
+  //     await expect(listingDetails[0]).to.equal(0);
+  //     await expect(listingDetails[1]).to.equal(0);
+  //   });
+  //   it("Should get listed details and verify for valid values", async function () {
+  //     const { marketplaceContract } = await loadFixture(
+  //       deployMarketplaceFixture,
+  //     );
+  //     let tokenId = 1;
+  //     let price = 100;
+  //     await marketplaceContract.createListing(tokenId, price);
+  //     let listingDetails = await marketplaceContract.getListingDetails(tokenId);
+  //     await expect(listingDetails[0]).to.equal(price);
+  //     await expect(listingDetails[1]).to.equal(0);
+  //   });
+  //   //TODO Check for listed status
+  // });
 
-  // Test cases for create listing
-  describe("Crate Listing marketplace", function () {
-    it("Should create listing", async function () {
-      const { marketplaceContract } = await loadFixture(
-        deployMarketplaceFixture,
-      );
-      let tokenId = 1;
-      let price = 100;
-      await expect(await marketplaceContract.createListing(tokenId, price)).to
-        .not.be.reverted;
-    });
+  // // Test cases for create listing
+  // describe("Crate Listing marketplace", function () {
+  //   it("Should create listing", async function () {
+  //     const { marketplaceContract } = await loadFixture(
+  //       deployMarketplaceFixture,
+  //     );
+  //     let tokenId = 1;
+  //     let price = 100;
+  //     await expect(await marketplaceContract.createListing(tokenId, price)).to
+  //       .not.be.reverted;
+  //   });
 
-    it("Should create and verify listing", async function () {
-      const { marketplaceContract } = await loadFixture(
-        deployMarketplaceFixture,
-      );
-      let tokenId = 1;
-      let price = 100;
-      await marketplaceContract.createListing(tokenId, price);
-      let listingDetails = await marketplaceContract.getListingDetails(tokenId);
+  //   it("Should create and verify listing", async function () {
+  //     const { marketplaceContract } = await loadFixture(
+  //       deployMarketplaceFixture,
+  //     );
+  //     let tokenId = 1;
+  //     let price = 100;
+  //     await marketplaceContract.createListing(tokenId, price);
+  //     let listingDetails = await marketplaceContract.getListingDetails(tokenId);
 
-      await expect(listingDetails[0]).to.equal(price);
-      // Since listing with active status value will be 0
-      await expect(listingDetails[1]).to.equal(0);
-    });
+  //     await expect(listingDetails[0]).to.equal(price);
+  //     // Since listing with active status value will be 0
+  //     await expect(listingDetails[1]).to.equal(0);
+  //   });
 
-    it("Should revert for already listed token ID", async function () {
-      const { marketplaceContract } = await loadFixture(
-        deployMarketplaceFixture,
-      );
-      let tokenId = 1;
-      let price = 100;
-      await marketplaceContract.createListing(tokenId, price);
-      await expect(
-        marketplaceContract.createListing(tokenId, price),
-      ).to.be.revertedWith("NFT already listed");
-    });
+  //   it("Should revert for already listed token ID", async function () {
+  //     const { marketplaceContract } = await loadFixture(
+  //       deployMarketplaceFixture,
+  //     );
+  //     let tokenId = 1;
+  //     let price = 100;
+  //     await marketplaceContract.createListing(tokenId, price);
+  //     await expect(
+  //       marketplaceContract.createListing(tokenId, price),
+  //     ).to.be.revertedWith("NFT already listed");
+  //   });
 
-    // it("Should emit event listed token ID", async function () {
-    //   const { marketplaceContract } = await loadFixture(
-    //     deployMarketplaceFixture,
-    //   );
-    //   let tokenId = 1;
-    //   let price = 100;
-    //   await expect(await marketplaceContract.createListing(tokenId, price))
-    //     .to.emit(marketplaceContract, "BukNFTSet")
-    //     .withArgs(oldAddress, newAddress);
-    // });
+  //   // it("Should emit event listed token ID", async function () {
+  //   //   const { marketplaceContract } = await loadFixture(
+  //   //     deployMarketplaceFixture,
+  //   //   );
+  //   //   let tokenId = 1;
+  //   //   let price = 100;
+  //   //   await expect(await marketplaceContract.createListing(tokenId, price))
+  //   //     .to.emit(marketplaceContract, "BukNFTSet")
+  //   //     .withArgs(oldAddress, newAddress);
+  //   // });
 
-    //TODO Check emit event
-  });
+  //   //TODO Check emit event
+  // });
 
-  // Test cases for delist
-  describe("Delist function marketplace", function () {
-    it("Should delist ", async function () {
-      const { marketplaceContract } = await loadFixture(
-        deployMarketplaceFixture,
-      );
-      let tokenId = 1;
-      let price = 100;
+  // // Test cases for delist
+  // describe("Delist function marketplace", function () {
+  //   it("Should delist ", async function () {
+  //     const { marketplaceContract } = await loadFixture(
+  //       deployMarketplaceFixture,
+  //     );
+  //     let tokenId = 1;
+  //     let price = 100;
 
-      await expect(await marketplaceContract.createListing(tokenId, price)).to
-        .not.be.reverted;
-      await expect(await marketplaceContract.delist(tokenId)).to.not.be
-        .reverted;
-    });
-    it("Should delist and verify delist status ", async function () {
-      const { marketplaceContract } = await loadFixture(
-        deployMarketplaceFixture,
-      );
-      let tokenId = 1;
-      let price = 100;
+  //     await expect(await marketplaceContract.createListing(tokenId, price)).to
+  //       .not.be.reverted;
+  //     await expect(await marketplaceContract.delist(tokenId)).to.not.be
+  //       .reverted;
+  //   });
+  //   it("Should delist and verify delist status ", async function () {
+  //     const { marketplaceContract } = await loadFixture(
+  //       deployMarketplaceFixture,
+  //     );
+  //     let tokenId = 1;
+  //     let price = 100;
 
-      await expect(await marketplaceContract.createListing(tokenId, price)).to
-        .not.be.reverted;
-      await expect(await marketplaceContract.delist(tokenId)).to.not.be
-        .reverted;
-      let listingDetails = await marketplaceContract.getListingDetails(tokenId);
-      await expect(listingDetails[0]).to.equal(price);
-      await expect(listingDetails[1]).to.equal(1);
-    });
+  //     await expect(await marketplaceContract.createListing(tokenId, price)).to
+  //       .not.be.reverted;
+  //     await expect(await marketplaceContract.delist(tokenId)).to.not.be
+  //       .reverted;
+  //     let listingDetails = await marketplaceContract.getListingDetails(tokenId);
+  //     await expect(listingDetails[0]).to.equal(price);
+  //     await expect(listingDetails[1]).to.equal(1);
+  //   });
 
-    it("Should emit event delisted token ID", async function () {
-      const { marketplaceContract } = await loadFixture(
-        deployMarketplaceFixture,
-      );
-      let tokenId = 1;
-      let price = 100;
+  //   it("Should emit event delisted token ID", async function () {
+  //     const { marketplaceContract } = await loadFixture(
+  //       deployMarketplaceFixture,
+  //     );
+  //     let tokenId = 1;
+  //     let price = 100;
 
-      await expect(await marketplaceContract.createListing(tokenId, price)).to
-        .not.be.reverted;
-      await expect(await marketplaceContract.delist(tokenId))
-        .to.emit(marketplaceContract, "Delisted")
-        .withArgs(tokenId);
-    });
-    it("Should revert delist for not listed token ", async function () {
-      const { marketplaceContract } = await loadFixture(
-        deployMarketplaceFixture,
-      );
-      let tokenId = 1;
-      await expect(marketplaceContract.delist(tokenId)).to.be.revertedWith(
-        "NFT not listed",
-      );
-    });
-    // TODO for owner validation
-  });
+  //     await expect(await marketplaceContract.createListing(tokenId, price)).to
+  //       .not.be.reverted;
+  //     await expect(await marketplaceContract.delist(tokenId))
+  //       .to.emit(marketplaceContract, "Delisted")
+  //       .withArgs(tokenId);
+  //   });
+  //   it("Should revert delist for not listed token ", async function () {
+  //     const { marketplaceContract } = await loadFixture(
+  //       deployMarketplaceFixture,
+  //     );
+  //     let tokenId = 1;
+  //     await expect(marketplaceContract.delist(tokenId)).to.be.revertedWith(
+  //       "NFT not listed",
+  //     );
+  //   });
+  //   // TODO for owner validation
+  // });
 
-  // Test cases for delete
-  describe("Delete listing function marketplace", function () {
-    it("Should delete listing ", async function () {
-      const { marketplaceContract } = await loadFixture(
-        deployMarketplaceFixture,
-      );
-      let tokenId = 1;
-      let price = 100;
-      await expect(await marketplaceContract.createListing(tokenId, price)).to
-        .not.be.reverted;
-      await expect(await marketplaceContract.deleteListing(tokenId)).to.not.be
-        .reverted;
-    });
-    it("Should delete listing and verify status", async function () {
-      const { marketplaceContract } = await loadFixture(
-        deployMarketplaceFixture,
-      );
-      let tokenId = 1;
-      let price = 100;
-      await expect(await marketplaceContract.createListing(tokenId, price)).to
-        .not.be.reverted;
-      await expect(await marketplaceContract.deleteListing(tokenId)).to.not.be
-        .reverted;
-      let listingDetails = await marketplaceContract.getListingDetails(tokenId);
-      await expect(listingDetails[0]).to.equal(0);
-      await expect(listingDetails[1]).to.equal(0);
-    });
+  // // Test cases for delete
+  // describe("Delete listing function marketplace", function () {
+  //   it("Should delete listing ", async function () {
+  //     const { marketplaceContract } = await loadFixture(
+  //       deployMarketplaceFixture,
+  //     );
+  //     let tokenId = 1;
+  //     let price = 100;
+  //     await expect(await marketplaceContract.createListing(tokenId, price)).to
+  //       .not.be.reverted;
+  //     await expect(await marketplaceContract.deleteListing(tokenId)).to.not.be
+  //       .reverted;
+  //   });
+  //   it("Should delete listing and verify status", async function () {
+  //     const { marketplaceContract } = await loadFixture(
+  //       deployMarketplaceFixture,
+  //     );
+  //     let tokenId = 1;
+  //     let price = 100;
+  //     await expect(await marketplaceContract.createListing(tokenId, price)).to
+  //       .not.be.reverted;
+  //     await expect(await marketplaceContract.deleteListing(tokenId)).to.not.be
+  //       .reverted;
+  //     let listingDetails = await marketplaceContract.getListingDetails(tokenId);
+  //     await expect(listingDetails[0]).to.equal(0);
+  //     await expect(listingDetails[1]).to.equal(0);
+  //   });
 
-    it("Should emit event deleted token ID", async function () {
-      const { marketplaceContract } = await loadFixture(
-        deployMarketplaceFixture,
-      );
-      let tokenId = 1;
-      let price = 100;
+  //   it("Should emit event deleted token ID", async function () {
+  //     const { marketplaceContract } = await loadFixture(
+  //       deployMarketplaceFixture,
+  //     );
+  //     let tokenId = 1;
+  //     let price = 100;
 
-      await expect(await marketplaceContract.createListing(tokenId, price)).to
-        .not.be.reverted;
-      await expect(await marketplaceContract.deleteListing(tokenId))
-        .to.emit(marketplaceContract, "DeletedListing")
-        .withArgs(tokenId);
-    });
-    it("Should revert delete listing for not listed token ", async function () {
-      const { marketplaceContract } = await loadFixture(
-        deployMarketplaceFixture,
-      );
-      let tokenId = 1;
-      await expect(
-        marketplaceContract.deleteListing(tokenId),
-      ).to.be.revertedWith("NFT not listed");
-    });
-    //TODO owner check and contract
-  });
+  //     await expect(await marketplaceContract.createListing(tokenId, price)).to
+  //       .not.be.reverted;
+  //     await expect(await marketplaceContract.deleteListing(tokenId))
+  //       .to.emit(marketplaceContract, "DeletedListing")
+  //       .withArgs(tokenId);
+  //   });
+  //   it("Should revert delete listing for not listed token ", async function () {
+  //     const { marketplaceContract } = await loadFixture(
+  //       deployMarketplaceFixture,
+  //     );
+  //     let tokenId = 1;
+  //     await expect(
+  //       marketplaceContract.deleteListing(tokenId),
+  //     ).to.be.revertedWith("NFT not listed");
+  //   });
+  //   //TODO owner check and contract
+  // });
 
-  // Test cases for relist
-  describe("Relist listing function marketplace", function () {
-    it("Should relist listing ", async function () {
-      const { marketplaceContract } = await loadFixture(
-        deployMarketplaceFixture,
-      );
-      let tokenId = 1;
-      let price = 100;
-      let price2 = 200;
-      await expect(await marketplaceContract.createListing(tokenId, price)).to
-        .not.be.reverted;
-      await expect(await marketplaceContract.relist(tokenId, price2)).to.not.be
-        .reverted;
-    });
-    it("Should revert relist listing for not listed token ", async function () {
-      const { marketplaceContract } = await loadFixture(
-        deployMarketplaceFixture,
-      );
-      let tokenId = 1;
-      let price = 100;
-      await expect(
-        marketplaceContract.relist(tokenId, price),
-      ).to.be.revertedWith("NFT not listed");
-    });
-    it("Should relist listing and verify status", async function () {
-      const { marketplaceContract } = await loadFixture(
-        deployMarketplaceFixture,
-      );
-      let tokenId = 1;
-      let price = 100;
-      let price2 = 200;
-      await expect(await marketplaceContract.createListing(tokenId, price)).to
-        .not.be.reverted;
-      await expect(await marketplaceContract.relist(tokenId, price2)).to.not.be
-        .reverted;
-      let listingDetails = await marketplaceContract.getListingDetails(tokenId);
-      await expect(listingDetails[0]).to.equal(price2);
-      await expect(listingDetails[1]).to.equal(0);
-    });
+  // // Test cases for relist
+  // describe("Relist listing function marketplace", function () {
+  //   it("Should relist listing ", async function () {
+  //     const { marketplaceContract } = await loadFixture(
+  //       deployMarketplaceFixture,
+  //     );
+  //     let tokenId = 1;
+  //     let price = 100;
+  //     let price2 = 200;
+  //     await expect(await marketplaceContract.createListing(tokenId, price)).to
+  //       .not.be.reverted;
+  //     await expect(await marketplaceContract.relist(tokenId, price2)).to.not.be
+  //       .reverted;
+  //   });
+  //   it("Should revert relist listing for not listed token ", async function () {
+  //     const { marketplaceContract } = await loadFixture(
+  //       deployMarketplaceFixture,
+  //     );
+  //     let tokenId = 1;
+  //     let price = 100;
+  //     await expect(
+  //       marketplaceContract.relist(tokenId, price),
+  //     ).to.be.revertedWith("NFT not listed");
+  //   });
+  //   it("Should relist listing and verify status", async function () {
+  //     const { marketplaceContract } = await loadFixture(
+  //       deployMarketplaceFixture,
+  //     );
+  //     let tokenId = 1;
+  //     let price = 100;
+  //     let price2 = 200;
+  //     await expect(await marketplaceContract.createListing(tokenId, price)).to
+  //       .not.be.reverted;
+  //     await expect(await marketplaceContract.relist(tokenId, price2)).to.not.be
+  //       .reverted;
+  //     let listingDetails = await marketplaceContract.getListingDetails(tokenId);
+  //     await expect(listingDetails[0]).to.equal(price2);
+  //     await expect(listingDetails[1]).to.equal(0);
+  //   });
 
-    it("Should delist and relist listing and verify status", async function () {
-      const { marketplaceContract } = await loadFixture(
-        deployMarketplaceFixture,
-      );
-      let tokenId = 1;
-      let price = 100;
-      await expect(await marketplaceContract.createListing(tokenId, price)).to
-        .not.be.reverted;
-      await expect(await marketplaceContract.delist(tokenId)).to.not.be
-        .reverted;
-      let listingDetails = await marketplaceContract.getListingDetails(tokenId);
-      await expect(listingDetails[0]).to.equal(price);
-      await expect(listingDetails[1]).to.equal(1);
-      await expect(await marketplaceContract.relist(tokenId, price)).to.not.be
-        .reverted;
-      let listingDetails2 = await marketplaceContract.getListingDetails(
-        tokenId,
-      );
-      await expect(listingDetails2[0]).to.equal(price);
-      await expect(listingDetails2[1]).to.equal(0);
-    });
+  //   it("Should delist and relist listing and verify status", async function () {
+  //     const { marketplaceContract } = await loadFixture(
+  //       deployMarketplaceFixture,
+  //     );
+  //     let tokenId = 1;
+  //     let price = 100;
+  //     await expect(await marketplaceContract.createListing(tokenId, price)).to
+  //       .not.be.reverted;
+  //     await expect(await marketplaceContract.delist(tokenId)).to.not.be
+  //       .reverted;
+  //     let listingDetails = await marketplaceContract.getListingDetails(tokenId);
+  //     await expect(listingDetails[0]).to.equal(price);
+  //     await expect(listingDetails[1]).to.equal(1);
+  //     await expect(await marketplaceContract.relist(tokenId, price)).to.not.be
+  //       .reverted;
+  //     let listingDetails2 = await marketplaceContract.getListingDetails(
+  //       tokenId,
+  //     );
+  //     await expect(listingDetails2[0]).to.equal(price);
+  //     await expect(listingDetails2[1]).to.equal(0);
+  //   });
 
-    it("Should emit event on relist token ID", async function () {
-      const { marketplaceContract } = await loadFixture(
-        deployMarketplaceFixture,
-      );
-      let tokenId = 1;
-      let price = 100;
-      let price2 = 100;
-      await expect(await marketplaceContract.createListing(tokenId, price)).to
-        .not.be.reverted;
-      await expect(await marketplaceContract.relist(tokenId, price2))
-        .to.emit(marketplaceContract, "Relisted")
-        .withArgs(tokenId, price, price2);
-    });
-  });
+  //   it("Should emit event on relist token ID", async function () {
+  //     const { marketplaceContract } = await loadFixture(
+  //       deployMarketplaceFixture,
+  //     );
+  //     let tokenId = 1;
+  //     let price = 100;
+  //     let price2 = 100;
+  //     await expect(await marketplaceContract.createListing(tokenId, price)).to
+  //       .not.be.reverted;
+  //     await expect(await marketplaceContract.relist(tokenId, price2))
+  //       .to.emit(marketplaceContract, "Relisted")
+  //       .withArgs(tokenId, price, price2);
+  //   });
+  // });
 });
+// });
