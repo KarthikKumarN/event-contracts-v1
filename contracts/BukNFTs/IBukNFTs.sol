@@ -6,31 +6,17 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 interface IBukNFTs is IERC1155 {
 
     /**
-     * @dev To set the buk protocol role.
-     * @param _bukProtocolContract - Address of buk protocol contract
-     * @notice This function can only be called by addresses with `BUK_PROTOCOL_CONTRACT_ROLE`
-     */
-    function grantBukProtocolRole(address _bukProtocolContract) external;
-
-    /**
      * @dev Update the name of the contract.
      * @notice This function can only be called by addresses with `BUK_PROTOCOL_CONTRACT_ROLE`
      */
     function updateName(string memory _contractName) external;
 
     /**
-    * @dev Function to update the currency address.
-    * @param _currencyContract Address of the currency contract.
-     * @notice This function can only be called by addresses with `BUK_PROTOCOL_CONTRACT_ROLE`
+    * @dev Function to update the marketplace address.
+    * @param _marketplaceContract Address of the marketplace.
+     * @notice This function can only be called by addresses with `DEFAULT_ADMIN_ROLE`
     */
-    function setCurrency(address _currencyContract) external;
-
-    /**
-    * @dev Function to update the treasury address.
-    * @param _bukTreasuryContract Address of the treasury.
-     * @notice This function can only be called by addresses with `BUK_PROTOCOL_CONTRACT_ROLE`
-    */
-    function setTreasury(address _bukTreasuryContract) external;
+    function addMarketplace(address _marketplaceContract) external;
 
     /**
      * @dev Sets the URI for a specific token ID.
@@ -130,12 +116,6 @@ interface IBukNFTs is IERC1155 {
      * @param _id uint256: The ID of the token
      */
     function bookingTickets(uint256 _id) external view returns (string memory);
-
-    /**
-     * @dev Mapping to toggle the transferrability of Buk PoS NFTs
-     * @param _id uint256: The ID of the token
-     */
-    function transferStatus(uint256 _id) external view returns (bool);
 
     /**
      * @dev To retrieve information about the royalties associated with a specific token.

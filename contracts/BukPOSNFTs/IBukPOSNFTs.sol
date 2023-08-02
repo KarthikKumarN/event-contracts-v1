@@ -7,32 +7,11 @@ import "@openzeppelin/contracts/access/IAccessControl.sol";
 interface IBukPOSNFTs is IERC1155, IAccessControl {
 
     /**
-    * @dev Function to update the treasury address.
-    * @param _bukTreasuryContract Address of the treasury.
-     * @notice This function can only be called by a contract with `BUK_NFT_CONTRACT_ROLE`
-    */
-    function setTreasury(address _bukTreasuryContract) external;
-
-    /**
-    * @dev Function to update the currency address.
-    * @param _currencyContract Address of the currency contract.
-     * @notice This function can only be called by a contract with `BUK_NFT_CONTRACT_ROLE`
-    */
-    function setCurrency(address _currencyContract) external;
-
-    /**
      * @dev Function to grant the BukNFT role to a given contract
      * @param _nftContract address: The address of the NFT contract
      * @notice This function can only be called by a contract with `BUK_PROTOCOL_CONTRACT_ROLE`
      */
     function grantBukNFTRole(address _nftContract) external;
-
-    /**
-     * @dev To set the Buk Protocol role Access.
-     * @param _bukProtocolContract - Address of Buk Protocol contract
-     * @notice This function can only be called by a contract with `BUK_NFT_CONTRACT_ROLE`
-     */
-    function grantBukProtocolRole(address _bukProtocolContract) external;
 
     /**
      * @dev Function to set the URI for a given ID
@@ -47,14 +26,6 @@ interface IBukPOSNFTs is IERC1155, IAccessControl {
      * @notice This function can only be called by a contract with `BUK_NFT_CONTRACT_ROLE`
      */
     function updateName(string memory _contractName) external;
-
-    /**
-     * @dev Function to toggle the NFT transferability status
-     * @param _tokenId uint256: The ID of the token
-     * @param _isTranferable bool: Transferability status of the NFT
-     * @notice This function can only be called by a contract with `ADMIN_ROLE`
-     */
-    function toggleNftTransfer(uint256 _tokenId, bool _isTranferable) external;
 
     /**
      * @dev Function to mint tokens
@@ -129,12 +100,6 @@ interface IBukPOSNFTs is IERC1155, IAccessControl {
      * @param _id uint256: The ID of the token
      */
     function bookingTickets(uint256 _id) external view returns (string memory);
-
-    /**
-     * @dev Mapping to toggle the transferrability of Buk PoS NFTs
-     * @param _id uint256: The ID of the token
-     */
-    function transferStatus(uint256 _id) external view returns (bool);
 
     /**
      * @dev To retrieve information about the royalties associated with a specific token.
