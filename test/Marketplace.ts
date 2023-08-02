@@ -66,9 +66,7 @@ describe("Marketplace", function () {
     const BukPOSNFT = await ethers.getContractFactory("BukPOSNFTs");
     nftPosContract = await BukPOSNFT.deploy(
       "BUK_POS",
-      bukProtocolContract.getAddress(),
-      bukTreasuryContract.getAddress(),
-      stableTokenContract.getAddress(),
+      bukProtocolContract.getAddress()
     );
     console.log(await nftPosContract.getAddress(), " nftPosContract");
 
@@ -77,9 +75,7 @@ describe("Marketplace", function () {
     nftContract = await BukNFT.deploy(
       "BUK_NFT",
       nftPosContract.getAddress(),
-      bukProtocolContract.getAddress(),
-      bukTreasuryContract.getAddress(),
-      stableTokenContract.getAddress(),
+      bukProtocolContract.getAddress()
     );
     console.log(await nftContract.getAddress(), " nftContract");
 
@@ -90,7 +86,19 @@ describe("Marketplace", function () {
       nftContract.getAddress(),
       stableTokenContract.getAddress(),
     );
+
     console.log(await marketplaceContract.getAddress(), " marketplaceContract");
+
+    //Set BukNFTs address in Buk Protocol
+    const setBukNFTs = await bukProtocolContract.setBukNFTs(nftContract.getAddress())
+    console.log("🚀 ~ file: Marketplace.ts:94 ~ setBukNFTs:", setBukNFTs)
+
+    //Set BukPOSNFTs address in Buk Protocol
+    const setBukPoSNFTs = await bukProtocolContract.setBukPoSNFTs(nftPosContract.getAddress())
+    console.log("🚀 ~ file: Marketplace.ts:98 ~ setBukPoSNFTs:", setBukPoSNFTs)
+
+    //Set BukProtocol in BukNFTs and BukPOSNFTs
+    
   });
 
   describe("Deployment marketplace", function () {
@@ -199,13 +207,16 @@ describe("Marketplace", function () {
     it("Should book and mint and get details", async function () {
       let tokenId = 1;
       let price = 100;
+
       //Grant allowance permission
-      await stableTokenContract.approve(
+      const res = await stableTokenContract.approve(
         await bukProtocolContract.getAddress(),
         200000000000,
       );
-      // Book room and mint NFT
+      console.log("🚀 ~ ", await bukProtocolContract.nftContract())
+      console.log("🚀 ~ ", await bukProtocolContract.nftPoSContract())
 
+      // Book room and mint NFT
       expect(
         await bukProtocolContract.bookRoom(
           1,
@@ -213,6 +224,8 @@ describe("Marketplace", function () {
           [80000000],
           1691064540,
           1691150940,
+          12,
+          true
         ),
       ).not.be.reverted;
       //Mint
