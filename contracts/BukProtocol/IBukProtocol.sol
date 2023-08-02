@@ -26,10 +26,13 @@ interface IBukProtocol {
      * @var BookingStatus status      Booking status.
      * @var uint256 tokenID           Token ID.
      * @var address owner             Address of the booking owner.
-     * @var uint256 checkin          Check-in date.
+     * @var uint256 checkin           Check-in date.
      * @var uint256 checkout          Check-out date.
      * @var uint256 total             Total price.
      * @var uint256 baseRate          Base rate.
+     * @var uint256 minSalePrice      Min Sale Price.
+     * @var uint256 tradeTimeLimit    Buy will excecute if tradeLimitTime is not crossed (in hours)
+     * @var uint256 tradeable         Is the NFT .
      */
     struct Booking {
         uint256 id;
@@ -40,6 +43,9 @@ interface IBukProtocol {
         uint256 checkout;
         uint256 total;
         uint256 baseRate;
+        uint256 minSalePrice;
+        uint256 tradeTimeLimit;
+        bool tradeable;
     }
 
     /**
@@ -75,6 +81,16 @@ interface IBukProtocol {
      * @dev Emitted when currency is updated.
      */
     event SetCurrency(address indexed _currencyContract);
+
+    /**
+     * @dev Emitted when BukNFTs contract address is updated.
+     */
+    event SetBukNFTs(address indexed _nftContractAddr);
+
+    /**
+     * @dev Emitted when BukPOSNFTs contract address is updated.
+     */
+    event SetBukPoSNFTs(address indexed _nftPoSContractAddr);
 
     /**
      * @dev Emitted when treasury is updated.
@@ -153,6 +169,20 @@ interface IBukProtocol {
     function setCurrency(address _currencyContract) external;
 
     /**
+    * @dev Function to update the BukNFTs contract address.
+    * @param _nftContractAddr Address of the BukNFTs contract.
+    * @notice This function can only be called by `ADMIN_ROLE`
+    */
+    function setBukNFTs(address _nftContractAddr) external;
+
+    /**
+    * @dev Function to update the BukPOSNFTs contract address.
+    * @param _nftPoSContractAddr Address of the BukPOSNFTs contract.
+    * @notice This function can only be called by `ADMIN_ROLE`
+    */
+    function setBukPoSNFTs(address _nftPoSContractAddr) external;
+
+    /**
     * @dev Function to update the token uri.
     * @param _tokenId Token Id.
     * @notice This function can only be called by `ADMIN_ROLE`
@@ -198,13 +228,6 @@ interface IBukProtocol {
     function updateNFTName(string memory _contractName) external;
 
     /**
-     * @dev Function to grant the BUK Protocol role access to NFT and PoS contracts
-     * @param _newBukProtocol address: New Buk Protocol contract of the Buk NFTs
-     * @notice This function can only be called by `ADMIN_ROLE`
-     */
-    function grantBukProtocolRole(address _newBukProtocol) external;
-
-    /**
      * @dev Function to set the Buk commission percentage.
      * @param _commission Commission percentage.
      * @notice This function can only be called by `ADMIN_ROLE`
@@ -218,6 +241,8 @@ interface IBukProtocol {
      * @param _baseRate Base rate of the room.
      * @param _checkin Checkin date.
      * @param _checkout Checkout date.
+     * @param _tradeTimeLimit Trade Limit of NFT based on Checkin time.
+     * @param _tradeable Is the booking NFT tradeable.
      * @return ids IDs of the bookings.
      */
     function bookRoom(
@@ -225,7 +250,9 @@ interface IBukProtocol {
         uint256[] memory _total,
         uint256[] memory _baseRate,
         uint256 _checkin,
-        uint256 _checkout
+        uint256 _checkout,
+        uint256 _tradeTimeLimit,
+        bool _tradeable
     ) external returns (bool);
 
     /**
@@ -249,14 +276,20 @@ interface IBukProtocol {
         string[] memory _uri
     ) external;
 
-
-    //FIXME Need to confirm if checkin function needs to be added
+    /**
+     * @dev Function to checkin the rooms.
+     * @param _ids IDs of the bookings.
+     * @notice The booking status should be confirmed to checkin it.
+     * @notice Once checkedin the NFT becomes non-tradeable.
+     * @notice This function can only be called by `ADMIN_ROLE` or the owner of the booking NFT
+     */
+    function checkin(uint256[] memory _ids) external;
 
     /**
      * @dev Function to checkout the rooms.
      * @param _ids IDs of the bookings.
      * @notice Only the admin can checkout the rooms.
-     * @notice The booking status should be confirmed to checkout it.
+     * @notice The booking status should be checkedin to checkout it.
      * @notice The Active Booking NFTs are burnt from the owner's account.
      * @notice The Utility NFTs are minted to the owner of the booking.
      * @notice This function can only be called by `ADMIN_ROLE`

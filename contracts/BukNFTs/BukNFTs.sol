@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../BukPOSNFTs/IBukPOSNFTs.sol";
 import "../BukProtocol/IBukProtocol.sol";
+import "../BukTreasury/IBukTreasury.sol";
 
 /**
  * @title BUK Protocol NFT Contract
@@ -13,15 +14,6 @@ import "../BukProtocol/IBukProtocol.sol";
  * @dev Contract for managing hotel room-night inventory and ERC1155 token management for room-night NFTs
  */
 contract BukNFTs is AccessControl, ERC1155 {
-    /**
-     * @dev Address of the Buk treasury contract.
-     */
-    address private _bukTreasury;
-
-    /**
-     * @dev Address of the currency.
-     */
-    address private _currency;
 
     /**
      * @dev Name of the Buk PoS NFT collection contract
@@ -31,22 +23,17 @@ contract BukNFTs is AccessControl, ERC1155 {
     /**
      * @dev Address of the Buk PoS NFT collection contract
      */
-    address public nftPoSContract;
+    IBukPOSNFTs public nftPoSContract;
 
     /**
      * @dev Address of the Buk Protocol contract
      */
-    address public bukProtocolContract;
+    IBukProtocol public bukProtocolContract;
 
     /**
      * @dev Mapping for token URI's for booked tickets
      */
     mapping(uint256 => string) public bookingTickets; //tokenID -> uri
-
-    /**
-     * @dev Mapping to toggle the transferrability of Buk PoS NFTs
-     */
-    mapping(uint256 => bool) public transferStatus; //tokenID -> status
 
     /**
      * @dev Constant for the role of the Buk Protocol contract
@@ -61,14 +48,9 @@ contract BukNFTs is AccessControl, ERC1155 {
         keccak256("MARKETPLACE_CONTRACT");
 
     /**
-     * @dev Emitted when treasury is updated.
+     * @dev Emitted when marketplace role is granted.
      */
-    event SetTreasury(address indexed treasuryContract);
-
-    /**
-     * @dev Emitted when currency is updated.
-     */
-    event SetCurrency(address indexed _currencyContract);
+    event SetMarketplace(address indexed marketplaceContract);
 
     /**
      * @dev Event to update the contract name
@@ -89,71 +71,31 @@ contract BukNFTs is AccessControl, ERC1155 {
     event SetURI(uint256 indexed id, string indexed uri);
 
     /**
-     * @dev Event to set toggle NFT transfer status
-     */
-    event ToggleNFT(uint indexed id, bool isTranferable);
-
-    /**
      * @dev Constructor to initialize the contract
      * @param _contractName NFT contract name
      * @param _bukPoSContract Address of the Buk PoS NFTs contract
      * @param _bukProtocolContract Address of the buk protocol contract
-     * @param _marketplaceContract Address of the Marketplace contract
-     * @param _bukTreasuryContract Address of the treasury.
-     * @param _currencyContract Address of the currency.
      */
     constructor(
         string memory _contractName,
         address _bukPoSContract,
-        address _bukProtocolContract,
-        address _marketplaceContract,
-        address _bukTreasuryContract,
-        address _currencyContract
+        address _bukProtocolContract
     ) ERC1155("") {
         name = _contractName;
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(BUK_PROTOCOL_CONTRACT_ROLE, _bukProtocolContract);
+        nftPoSContract = IBukPOSNFTs(_bukPoSContract);
+        bukProtocolContract = IBukProtocol(_bukProtocolContract);
+    }
+
+    /**
+    * @dev Function to update the marketplace address.
+    * @param _marketplaceContract Address of the marketplace.
+     * @notice This function can only be called by addresses with `DEFAULT_ADMIN_ROLE`
+    */
+    function addMarketplace(address _marketplaceContract) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _grantRole(MARKETPLACE_CONTRACT_ROLE, _marketplaceContract);
-        nftPoSContract = _bukPoSContract;
-        bukProtocolContract = _bukProtocolContract;
-        _bukTreasury = _bukTreasuryContract;
-        _currency = _currencyContract;
-    }
-
-    /**
-    * @dev Function to update the treasury address.
-    * @param _bukTreasuryContract Address of the treasury.
-     * @notice This function can only be called by addresses with `BUK_PROTOCOL_CONTRACT_ROLE`
-    */
-    function setTreasury(address _bukTreasuryContract) external onlyRole(BUK_PROTOCOL_CONTRACT_ROLE) {
-        _bukTreasury = _bukTreasuryContract;
-        IBukPOSNFTs(nftPoSContract).setTreasury(_bukTreasuryContract);
-        emit SetTreasury(_bukTreasuryContract);
-    }
-
-    /**
-    * @dev Function to update the currency address.
-    * @param _currencyContract Address of the currency contract.
-     * @notice This function can only be called by addresses with `BUK_PROTOCOL_CONTRACT_ROLE`
-    */
-    function setCurrency(address _currencyContract) external onlyRole(BUK_PROTOCOL_CONTRACT_ROLE) {
-        _currency = _currencyContract;
-        IBukPOSNFTs(nftPoSContract).setCurrency(_currencyContract);
-        emit SetCurrency(_currencyContract);
-    }
-
-    /**
-     * @dev To set the buk protocol role.
-     * @param _bukProtocolContract - Address of buk protocol contract
-     * @notice This function can only be called by addresses with `BUK_PROTOCOL_CONTRACT_ROLE`
-     */
-    function grantBukProtocolRole(
-        address _bukProtocolContract
-    ) external onlyRole(BUK_PROTOCOL_CONTRACT_ROLE) {
-        IBukPOSNFTs(nftPoSContract).grantBukProtocolRole(_bukProtocolContract);
-        _grantRole(BUK_PROTOCOL_CONTRACT_ROLE, _bukProtocolContract);
-        revokeRole(BUK_PROTOCOL_CONTRACT_ROLE, _msgSender());
-        emit GrantBukProtocolRole(_msgSender(), _bukProtocolContract);
+        emit SetMarketplace(_marketplaceContract);
     }
 
     /**
@@ -164,22 +106,8 @@ contract BukNFTs is AccessControl, ERC1155 {
         string memory _contractName
     ) external onlyRole(BUK_PROTOCOL_CONTRACT_ROLE) {
         name = _contractName;
-        IBukPOSNFTs(nftPoSContract).updateName(_contractName);
+        nftPoSContract.updateName(_contractName);
         emit UpdateContractName(_contractName);
-    }
-
-    /**
-     * @dev Function to toggle the NFT transferability status
-     * @param _tokenId uint256: The ID of the token
-     * @param _isTranferable bool: Transferability status of the NFT
-     * @notice This function can only be called by a contract with `ADMIN_ROLE`
-     */
-    function toggleNftTransfer(
-        uint256 _tokenId,
-        bool _isTranferable
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        transferStatus[_tokenId] = _isTranferable;
-        emit ToggleNFT(_tokenId, _isTranferable);
     }
 
     /**
@@ -195,7 +123,7 @@ contract BukNFTs is AccessControl, ERC1155 {
         if (bytes(bookingTickets[_id]).length != 0) {
             _setURI(_id, _newuri);
         } else {
-            IBukPOSNFTs(nftPoSContract).setURI(_id, _newuri);
+            nftPoSContract.setURI(_id, _newuri);
         }
         emit SetURI(_id, _newuri);
     }
@@ -239,7 +167,7 @@ contract BukNFTs is AccessControl, ERC1155 {
         string memory uri_ = bookingTickets[_id];
         bookingTickets[_id] = "";
         if (_isPoSNFT) {
-            IBukPOSNFTs(nftPoSContract).mint(_account, _id, _amount, uri_, "");
+            nftPoSContract.mint(_account, _id, _amount, uri_, "");
         }
         _burn(_account, _id, _amount);
     }
@@ -257,9 +185,7 @@ contract BukNFTs is AccessControl, ERC1155 {
         view
         returns (address[] memory receivers, uint256[] memory royaltyAmounts)
     {
-        IBukProtocol.Royalty[] memory royaltyArray = IBukProtocol(
-            bukProtocolContract
-        ).getRoyaltyInfo(_tokenId);
+        IBukProtocol.Royalty[] memory royaltyArray = bukProtocolContract.getRoyaltyInfo(_tokenId);
         receivers = new address[](royaltyArray.length);
         royaltyAmounts = new uint256[](royaltyArray.length);
         for (uint i = 0; i < royaltyArray.length; i++) {
@@ -288,7 +214,8 @@ contract BukNFTs is AccessControl, ERC1155 {
         uint256 _amount,
         bytes memory _data
     ) public virtual override onlyRole(MARKETPLACE_CONTRACT_ROLE) {
-        require(transferStatus[_id], "This NFT is non transferable");
+        require(bukProtocolContract.getBookingDetails(_id).tradeable, "This NFT is non transferable");
+        require(balanceOf(_from, _id)>0, "From address does not own NFT");
         super._safeTransferFrom(_from, _to, _id, _amount, _data);
     }
 
@@ -311,7 +238,8 @@ contract BukNFTs is AccessControl, ERC1155 {
     ) public virtual override onlyRole(MARKETPLACE_CONTRACT_ROLE) {
         uint256 len = _ids.length;
         for(uint i=0; i<len; ++i) {
-            require(transferStatus[_ids[i]], "One of these NFT is non-transferable");
+            require(bukProtocolContract.getBookingDetails(_ids[i]).tradeable, "One of these NFT is non-transferable");
+            require(balanceOf(_from, _ids[i])>0, "From address does not own NFT");
         }
         //FIXME Is this condition necessary?
         require((_ids.length < 11), "Exceeds max booking transfer limit");

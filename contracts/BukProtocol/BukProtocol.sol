@@ -4,6 +4,7 @@ pragma solidity =0.8.19;
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "../BukPOSNFTs/IBukPOSNFTs.sol";
 import "../BukNFTs/IBukNFTs.sol";
 import "../BukTreasury/IBukTreasury.sol";
 import "./IBukProtocol.sol";
@@ -22,16 +23,15 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
      * @dev address nftPoSContract  Address of the Buk NFT PoS Contract.
      */
     address private _bukWallet;
-    address private _currency;
-    address private _bukTreasury;
-    address public nftContract;
-    address public nftPoSContract;
+    IERC20 private _currency;
+    IBukTreasury private _bukTreasury;
+    IBukNFTs public nftContract;
+    IBukPOSNFTs public nftPoSContract;
 
     //Buk and Hotel Royalties
     uint96 public bukRoyalty;
     uint96 public hotelRoyalty;
     uint96 public firstOwnerRoyalty;
-
 
     /**
      * @dev Commission charged on bookings.
@@ -39,12 +39,17 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     uint8 public commission = 5;
 
     /**
+     * @dev Minimum sale percentage.
+     */
+    uint8 public MIN_SALE_PERCENTAGE = 80;
+
+    /**
      * @dev Counters.Counter bookingIds    Counter for booking IDs.
      */
     uint256 private _bookingIds;
 
     //COMMENT Need to add comment to this
-    Royalty[] private _extraRoyalties;
+    Royalty[] private _otherRoyalties;
 
     /**
      * @dev Constant for the role of admin
@@ -56,15 +61,32 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
      */
     mapping(uint256 => Booking) public bookingDetails; //bookingID -> Booking Details
 
+    //Modifier to check if the sender is either admin or an owner of the booking
+    modifier onlyAdminOwner(uint256[] memory _ids) {
+        uint256 len = _ids.length;
+        for (uint8 i = 0; i < len; ++i) {
+            if (bookingDetails[_ids[i]].status == BookingStatus.checkedout) {
+                require(hasRole(ADMIN_ROLE, _msgSender()) || (nftPoSContract.balanceOf(_msgSender(), _ids[i])>0));
+            } else {
+                require(hasRole(ADMIN_ROLE, _msgSender()) || (nftContract.balanceOf(_msgSender(), _ids[i])>0));
+            }
+        }
+        _;
+    }
+
     /**
      * @dev Constructor to initialize the contract
      * @param _bukTreasuryContract Address of the treasury.
      * @param _currencyContract Address of the currency.
      * @param _bukWalletContract Address of the Buk wallet.
      */
-    constructor(address _bukTreasuryContract, address _currencyContract, address _bukWalletContract) {
-        _bukTreasury = _bukTreasuryContract;
-        _currency = _currencyContract;
+    constructor(
+        address _bukTreasuryContract,
+        address _currencyContract,
+        address _bukWalletContract
+    ) {
+        _bukTreasury = IBukTreasury(_bukTreasuryContract);
+        _currency = IERC20(_currencyContract);
         _bukWallet = _bukWalletContract;
         _setupRole(ADMIN_ROLE, _msgSender());
         _grantRole(ADMIN_ROLE, _msgSender());
@@ -73,19 +95,41 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     /**
      * @dev See {IBukProtocol-setTreasury}.
      */
-    function setTreasury(address _bukTreasuryContract) external onlyRole(ADMIN_ROLE) {
-        _bukTreasury = _bukTreasuryContract;
-        IBukNFTs(nftContract).setTreasury(_bukTreasuryContract);
+    function setTreasury(
+        address _bukTreasuryContract
+    ) external onlyRole(ADMIN_ROLE) {
+        _bukTreasury = IBukTreasury(_bukTreasuryContract);
         emit SetTreasury(_bukTreasuryContract);
     }
 
     /**
      * @dev See {IBukProtocol-setCurrency}.
      */
-    function setCurrency(address _currencyContract) external onlyRole(ADMIN_ROLE) {
-        _currency = _currencyContract;
-        IBukNFTs(nftContract).setCurrency(_currencyContract);
+    function setCurrency(
+        address _currencyContract
+    ) external onlyRole(ADMIN_ROLE) {
+        _currency = IERC20(_currencyContract);
         emit SetCurrency(_currencyContract);
+    }
+
+    /**
+     * @dev See {IBukProtocol-setBukNFTs}.
+     */
+    function setBukNFTs(
+        address _nftContractAddr
+    ) external onlyRole(ADMIN_ROLE) {
+        nftContract = IBukNFTs(_nftContractAddr);
+        emit SetBukNFTs(_nftContractAddr);
+    }
+
+    /**
+     * @dev See {IBukProtocol-setBukPosNFTs}.
+     */
+    function setBukPoSNFTs(
+        address _nftPoSContractAddr
+    ) external onlyRole(ADMIN_ROLE) {
+        nftPoSContract = IBukPOSNFTs(_nftPoSContractAddr);
+        emit SetBukPoSNFTs(_nftPoSContractAddr);
     }
 
     /**
@@ -110,35 +154,41 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
             _recipients.length == _royaltyFractions.length,
             "Input arrays must have the same length"
         );
-        delete _extraRoyalties;
+        delete _otherRoyalties;
         for (uint i = 0; i < _recipients.length; i++) {
             require(_royaltyFractions[i] <= 100, "Percentage is more than 100");
             Royalty memory newRoyalty = Royalty(
                 _recipients[i],
                 _royaltyFractions[i]
             );
-            _extraRoyalties.push(newRoyalty);
+            _otherRoyalties.push(newRoyalty);
         }
     }
 
     /**
      * @dev See {IBukProtocol-setBukRoyaltyInfo}.
      */
-    function setBukRoyaltyInfo(uint96 _royaltyFraction) external onlyRole(ADMIN_ROLE) {
+    function setBukRoyaltyInfo(
+        uint96 _royaltyFraction
+    ) external onlyRole(ADMIN_ROLE) {
         bukRoyalty = _royaltyFraction;
     }
 
     /**
      * @dev See {IBukProtocol-setHotelRoyaltyInfo}.
      */
-    function setHotelRoyaltyInfo(uint96 _royaltyFraction) external onlyRole(ADMIN_ROLE) {
+    function setHotelRoyaltyInfo(
+        uint96 _royaltyFraction
+    ) external onlyRole(ADMIN_ROLE) {
         hotelRoyalty = _royaltyFraction;
     }
 
     /**
      * @dev See {IBukProtocol-setFirstOwnerRoyaltyInfo}.
      */
-    function setFirstOwnerRoyaltyInfo(uint96 _royaltyFraction) external onlyRole(ADMIN_ROLE) {
+    function setFirstOwnerRoyaltyInfo(
+        uint96 _royaltyFraction
+    ) external onlyRole(ADMIN_ROLE) {
         firstOwnerRoyalty = _royaltyFraction;
     }
 
@@ -150,16 +200,6 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     ) external onlyRole(ADMIN_ROLE) {
         IBukNFTs(nftContract).updateName(_contractName);
         emit UpdateContractName(_contractName);
-    }
-
-    /**
-     * @dev See {IBukProtocol-grantBukProtocolRole}.
-     */
-    function grantBukProtocolRole(
-        address _newBukProtocol
-    ) external onlyRole(ADMIN_ROLE) {
-        IBukNFTs(nftContract).grantBukProtocolRole(_newBukProtocol);
-        emit GrantBukProtocolRole(address(this), _newBukProtocol);
     }
 
     /**
@@ -178,7 +218,9 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         uint256[] memory _total,
         uint256[] memory _baseRate,
         uint256 _checkin,
-        uint256 _checkout
+        uint256 _checkout,
+        uint256 _tradeTimeLimit,
+        bool _tradeable
     ) external nonReentrant returns (bool) {
         require(
             ((_total.length == _baseRate.length) &&
@@ -191,6 +233,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         uint commissionTotal = 0;
         for (uint8 i = 0; i < _count; ++i) {
             ++_bookingIds;
+            uint256 minSalePrice_ = (_total[i] * MIN_SALE_PERCENTAGE) / 100;
             bookingDetails[_bookingIds] = Booking(
                 _bookingIds,
                 BookingStatus.booked,
@@ -199,7 +242,10 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
                 _checkin,
                 _checkout,
                 _total[i],
-                _baseRate[i]
+                _baseRate[i],
+                minSalePrice_,
+                _tradeTimeLimit,
+                _tradeable
             );
             bookings[i] = _bookingIds;
             total += _total[i];
@@ -208,7 +254,6 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         }
         return _bookingPayment(commissionTotal, total);
     }
-
 
     /**
      * @dev See {IBukProtocol-bookingRefund}.
@@ -237,7 +282,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
                 (bookingDetails[_ids[i]].baseRate * commission) /
                 100;
         }
-        IBukTreasury(_bukTreasury).cancelUSDCRefund(total, _owner);
+        _bukTreasury.cancelUSDCRefund(total, _owner);
         emit BookingRefund(total, _owner);
     }
 
@@ -276,9 +321,10 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         emit MintBookingNFT(_ids, true);
     }
 
-    function checkin(uint256[] memory _ids) external onlyRole(ADMIN_ROLE) {
-        //FIXME Also the owner
-        //TODO Make the NFT non transferable
+    /**
+     * @dev See {IBukProtocol-checkin}.
+     */
+    function checkin(uint256[] memory _ids) external onlyAdminOwner(_ids) {
         uint256 len = _ids.length;
         require(((len > 0) && (len < 11)), "Not in max-min booking limit");
         for (uint8 i = 0; i < len; ++i) {
@@ -289,6 +335,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         }
         for (uint8 i = 0; i < len; ++i) {
             bookingDetails[_ids[i]].status = BookingStatus.checkedin;
+            bookingDetails[_ids[i]].tradeable = false;
         }
         emit CheckinRooms(_ids, true);
     }
@@ -336,12 +383,12 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         );
         IBukNFTs bukNftsContract = IBukNFTs(nftContract);
         bookingDetails[_id].status = BookingStatus.cancelled;
-        IBukTreasury(_bukTreasury).cancelUSDCRefund(_penalty, _bukWallet);
-        IBukTreasury(_bukTreasury).cancelUSDCRefund(
+        _bukTreasury.cancelUSDCRefund(_penalty, _bukWallet);
+        _bukTreasury.cancelUSDCRefund(
             _refund,
             bookingDetails[_id].firstOwner
         );
-        IBukTreasury(_bukTreasury).cancelUSDCRefund(_charges, _bukWallet);
+        _bukTreasury.cancelUSDCRefund(_charges, _bukWallet);
         bukNftsContract.burn(bookingDetails[_id].firstOwner, _id, 1, false);
         emit CancelRoom(_id, true);
     }
@@ -349,21 +396,28 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     /**
      * @dev See {IBukProtocol-getBookingDetails}.
      */
-    function getBookingDetails(uint256 _tokenId) external view returns (Booking memory) {
-        Booking memory bookingData =  bookingDetails[_tokenId];
+    function getBookingDetails(
+        uint256 _tokenId
+    ) external view returns (Booking memory) {
+        Booking memory bookingData = bookingDetails[_tokenId];
         return bookingData;
     }
 
     /**
      * @dev See {IBukProtocol-getRoyaltyInfo}.
      */
-    function getRoyaltyInfo(uint256 _tokenId) external view returns (Royalty[] memory) {
-        Royalty[] memory royalties = new Royalty[](_extraRoyalties.length + 3);
-        royalties[0] = Royalty(_bukTreasury, bukRoyalty);
-        royalties[1] = Royalty(_bukTreasury, hotelRoyalty);
-        royalties[2] = Royalty(bookingDetails[_tokenId].firstOwner, firstOwnerRoyalty);
-        for (uint i = 0; i < _extraRoyalties.length; i++) {
-            royalties[i+3] = _extraRoyalties[i];
+    function getRoyaltyInfo(
+        uint256 _tokenId
+    ) external view returns (Royalty[] memory) {
+        Royalty[] memory royalties = new Royalty[](_otherRoyalties.length + 3);
+        royalties[0] = Royalty(address(_bukTreasury), bukRoyalty);
+        royalties[1] = Royalty(address(_bukTreasury), hotelRoyalty);
+        royalties[2] = Royalty(
+            bookingDetails[_tokenId].firstOwner,
+            firstOwnerRoyalty
+        );
+        for (uint i = 0; i < _otherRoyalties.length; i++) {
+            royalties[i + 3] = _otherRoyalties[i];
         }
         return royalties;
     }
@@ -373,12 +427,26 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
      * @param _commission Total BUK commission.
      * @param _total Total Booking Charge Excluding BUK commission.
      */
+
     function _bookingPayment(
         uint256 _commission,
         uint256 _total
     ) internal returns (bool) {
-        IERC20(_currency).transferFrom(_msgSender(), _bukWallet, _commission);
-        IERC20(_currency).transferFrom(_msgSender(), _bukTreasury, _total);
+        require(
+            _currency.balanceOf(_msgSender()) >= _total + _commission,
+            "Insufficient balance for booking"
+        );
+
+        require(
+            _currency.transferFrom(_msgSender(), _bukWallet, _commission),
+            "Commission transfer failed"
+        );
+
+        require(
+            _currency.transferFrom(_msgSender(), address(_bukTreasury), _total),
+            "Booking payment failed"
+        );
+
         return true;
     }
 }
