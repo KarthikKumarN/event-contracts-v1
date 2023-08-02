@@ -137,6 +137,20 @@ interface IBukPOSNFTs is IERC1155, IAccessControl {
     function transferStatus(uint256 _id) external view returns (bool);
 
     /**
+     * @dev To retrieve information about the royalties associated with a specific token.
+     * @param _tokenId - The token ID of the NFT.
+     * @param _salePrice - The price at which the token is being sold.
+     */
+    function royaltyInfo(
+        uint256 _tokenId,
+        uint256 _salePrice
+    )
+        external
+        view
+        returns (address[] memory receivers, uint256[] memory royaltyAmounts);
+
+
+    /**
      * @dev Function to get the URI for a given ID
      * @param _id uint256: The ID of the token
      */
