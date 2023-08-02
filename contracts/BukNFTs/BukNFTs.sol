@@ -24,7 +24,7 @@ contract BukNFTs is AccessControl, ERC1155 {
     address private _currency;
 
     /**
-     * @dev Name of the collection contract
+     * @dev Name of the Buk PoS NFT collection contract
      */
     string public name;
 

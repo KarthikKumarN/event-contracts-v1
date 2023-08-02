@@ -111,6 +111,33 @@ interface IBukNFTs is IERC1155 {
     ) external;
 
     /**
+     * @dev name of the Buk PoS NFT contract
+     */
+    function name() external view returns (string memory);
+
+    /**
+     * @dev address of the Buk PoS NFT contract
+     */
+    function nftPoSContract() external view returns (address);
+
+    /**
+     * @dev address of the Buk Protocol contract
+     */
+    function bukProtocolContract() external view returns (address);
+
+    /**
+     * @dev Mapping for token URI's for Buk PoS NFTs
+     * @param _id uint256: The ID of the token
+     */
+    function bookingTickets(uint256 _id) external view returns (string memory);
+
+    /**
+     * @dev Mapping to toggle the transferrability of Buk PoS NFTs
+     * @param _id uint256: The ID of the token
+     */
+    function transferStatus(uint256 _id) external view returns (bool);
+
+    /**
      * @dev To retrieve information about the royalties associated with a specific token.
      * @param _tokenId - The token ID of the NFT.
      * @param _salePrice - The price at which the token is being sold.

@@ -282,6 +282,12 @@ interface IBukProtocol {
     ) external;
 
     /**
+     * @dev To get the booking details
+     * @param _tokenId ID of the booking.
+     */
+    function getBookingDetails(uint256 _tokenId) external view returns (Booking memory);
+
+    /**
      * @dev Function to retrieve royalty information.
      * @param _tokenId ID of the token
      * @notice Token ID and Booking ID are same.

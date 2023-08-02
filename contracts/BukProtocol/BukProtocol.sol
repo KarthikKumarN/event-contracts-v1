@@ -44,7 +44,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     uint256 private _bookingIds;
 
     //COMMENT Need to add comment to this
-    Royalty[] public extraRoyalties;
+    Royalty[] private _extraRoyalties;
 
     /**
      * @dev Constant for the role of admin
@@ -110,14 +110,14 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
             _recipients.length == _royaltyFractions.length,
             "Input arrays must have the same length"
         );
-        delete extraRoyalties;
+        delete _extraRoyalties;
         for (uint i = 0; i < _recipients.length; i++) {
             require(_royaltyFractions[i] <= 100, "Percentage is more than 100");
             Royalty memory newRoyalty = Royalty(
                 _recipients[i],
                 _royaltyFractions[i]
             );
-            extraRoyalties.push(newRoyalty);
+            _extraRoyalties.push(newRoyalty);
         }
     }
 
@@ -347,15 +347,23 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     }
 
     /**
+     * @dev See {IBukProtocol-getBookingDetails}.
+     */
+    function getBookingDetails(uint256 _tokenId) external view returns (Booking memory) {
+        Booking memory bookingData =  bookingDetails[_tokenId];
+        return bookingData;
+    }
+
+    /**
      * @dev See {IBukProtocol-getRoyaltyInfo}.
      */
     function getRoyaltyInfo(uint256 _tokenId) external view returns (Royalty[] memory) {
-        Royalty[] memory royalties = new Royalty[](extraRoyalties.length + 3);
+        Royalty[] memory royalties = new Royalty[](_extraRoyalties.length + 3);
         royalties[0] = Royalty(_bukTreasury, bukRoyalty);
         royalties[1] = Royalty(_bukTreasury, hotelRoyalty);
         royalties[2] = Royalty(bookingDetails[_tokenId].firstOwner, firstOwnerRoyalty);
-        for (uint i = 0; i < extraRoyalties.length; i++) {
-            royalties[i+3] = extraRoyalties[i];
+        for (uint i = 0; i < _extraRoyalties.length; i++) {
+            royalties[i+3] = _extraRoyalties[i];
         }
         return royalties;
     }
