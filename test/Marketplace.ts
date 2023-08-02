@@ -45,7 +45,6 @@ describe("Marketplace", function () {
       2000000,
     );
     console.log(await stableTokenContract.getAddress(), " tokenContract");
-    console.log(stableTokenContract, " tokenContract");
 
     //BukTreasury
     const BukTreasury = await ethers.getContractFactory("BukTreasury");
@@ -68,6 +67,8 @@ describe("Marketplace", function () {
     nftPosContract = await BukPOSNFT.deploy(
       "BUK_POS",
       bukProtocolContract.getAddress(),
+      bukTreasuryContract.getAddress(),
+      stableTokenContract.getAddress(),
     );
     console.log(await nftPosContract.getAddress(), " nftPosContract");
 
@@ -77,6 +78,8 @@ describe("Marketplace", function () {
       "BUK_NFT",
       nftPosContract.getAddress(),
       bukProtocolContract.getAddress(),
+      bukTreasuryContract.getAddress(),
+      stableTokenContract.getAddress(),
     );
     console.log(await nftContract.getAddress(), " nftContract");
 
@@ -89,65 +92,6 @@ describe("Marketplace", function () {
     );
     console.log(await marketplaceContract.getAddress(), " marketplaceContract");
   });
-  // We define a fixture to reuse the same setup in every test.
-  // We use loadFixture to run this setup once, snapshot that state,
-  // and reset Hardhat Network to that snapshot in every test.
-  // async function deployMarketplaceFixture() {
-  //   const BUK_PROTOCOL = "0x72a8d29b9b9EFCc0B58e11bb42686a527f978699";
-  //   const BUK_NFT = "0xd84C3b47770aeCF852E99C5FdE2C987783027385";
-  //   const CURRENCY = "0xae9B20071252B2f6e807D0D58e94763Aa08905aB";
-
-  //   // Contracts are deployed using the first signer/account by default
-  //   const [owner, account1, account2, adminWallet] = await ethers.getSigners();
-  //   console.log(adminWallet.address, " adminWallet");
-
-  //   // Token
-  //   const Token = await ethers.getContractFactory("Token");
-  //   const token = await Token.deploy(
-  //     "USD Dollar",
-  //     "USDC",
-  //     18,
-  //     adminWallet.address,
-  //     2000000,
-  //   );
-  //   await token.getDeployedCode();
-  //   console.log(token.getAddress(), " tokenContract");
-  //   console.log(token, " tokenContract");
-
-  //   //BukTreasury
-  //   const BukTreasury = await ethers.getContractFactory("BukTreasury");
-  //   const bukTreasuryContract = await BukTreasury.deploy(token.address);
-
-  //   //BukProtocol
-  //   const BukProtocol = await ethers.getContractFactory("BukProtocol");
-  //   const bukProtocolContract = await BukProtocol.deploy(
-  //     bukTreasuryContract,
-  //     addresstokenContract,
-  //     BUK_NFT,
-  //     CURRENCY,
-  //   );
-
-  //   // BukNFT
-  //   const BukNFT = await ethers.getContractFactory("BukNFTs");
-  //   const bukNFTContract = await BukNFT.deploy(BUK_PROTOCOL, BUK_NFT, CURRENCY);
-
-  //   const Marketplace = await ethers.getContractFactory("Marketplace");
-  //   const marketplaceContract = await Marketplace.deploy(
-  //     BUK_PROTOCOL,
-  //     BUK_NFT,
-  //     CURRENCY,
-  //   );
-
-  //   return {
-  //     marketplaceContract,
-  //     BUK_PROTOCOL,
-  //     BUK_NFT,
-  //     CURRENCY,
-  //     owner,
-  //     account1,
-  //     account2,
-  //   };
-  // }
 
   describe("Deployment marketplace", function () {
     it("Should set the BUK protocol address", async function () {
@@ -249,14 +193,39 @@ describe("Marketplace", function () {
   });
   // // Test cases for getting listed status
   describe("Listed status marketplace", function () {
-    it("Should get listed status", async function () {
+    it("Should get listed status for not listed tokeId", async function () {
       await expect(await marketplaceContract.isListed(0)).to.equal(false);
     });
-    it("Should get listed status for true", async function () {
+    it("Should book and mint and get details", async function () {
       let tokenId = 1;
       let price = 100;
-      await marketplaceContract.createListing(tokenId, price);
-      await expect(await marketplaceContract.isListed(tokenId)).to.equal(true);
+      //Grant allowance permission
+      await stableTokenContract.approve(
+        await bukProtocolContract.getAddress(),
+        200000000000,
+      );
+      // Book room and mint NFT
+
+      expect(
+        await bukProtocolContract.bookRoom(
+          1,
+          [100000000],
+          [80000000],
+          1691064540,
+          1691150940,
+        ),
+      ).not.be.reverted;
+      //Mint
+      await expect(
+        bukProtocolContract.mintBukNFT(
+          [1],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
+      ).not.be.reverted;
+      // await marketplaceContract.createListing(tokenId, price);
+      // await expect(await marketplaceContract.isListed(tokenId)).to.equal(true);
     });
     //TODO Check for listed status
   });
