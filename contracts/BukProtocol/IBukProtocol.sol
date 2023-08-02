@@ -2,7 +2,6 @@
 pragma solidity =0.8.19;
 
 interface IBukProtocol {
-    //FIXME Need to confirm if checkin status and checkout status need to be added
     /**
      * @dev Enum for booking statuses.
      * @var BookingStatus.nil         Booking has not yet been initiated.
