@@ -95,15 +95,17 @@ contract Marketplace is Context, IMarketplace, AccessControl {
     }
 
     /**
-     * @dev Refer IMarketplace
-     * @dev NFT owner can delist
+     * @dev Refer {IMarketplace-delist}.
+     * @dev Only NFT owner can delist
      * @param tokenId_ NFT id
      */
     function delist(uint256 tokenId_) external {
         require(isListed(tokenId_), "NFT not listed");
-        // TODO
-        // Get booking details form bukprotocol
-        // Validate owner, status
+        require(
+            _bukNFTContract.balanceOf(_msgSender(), tokenId_) == 1,
+            "Only owner can delist"
+        );
+
         _listedNFT[tokenId_].status = ListingStatus.inactive;
         emit Delisted(tokenId_);
     }

@@ -515,136 +515,150 @@ describe("Marketplace", function () {
     });
   });
 
-  // // Test cases for getting listing details
-  // describe("Listing details marketplace", function () {
-  //   it("Should get listed details should be zero", async function () {
-  //     const { marketplaceContract } = await loadFixture(
-  //       deployMarketplaceFixture,
-  //     );
-  //     let listingDetails = await marketplaceContract.getListingDetails(0);
-  //     await expect(listingDetails[0]).to.equal(0);
-  //     await expect(listingDetails[1]).to.equal(0);
-  //   });
-  //   it("Should get listed details and verify for valid values", async function () {
-  //     const { marketplaceContract } = await loadFixture(
-  //       deployMarketplaceFixture,
-  //     );
-  //     let tokenId = 1;
-  //     let price = 100;
-  //     await marketplaceContract.createListing(tokenId, price);
-  //     let listingDetails = await marketplaceContract.getListingDetails(tokenId);
-  //     await expect(listingDetails[0]).to.equal(price);
-  //     await expect(listingDetails[1]).to.equal(0);
-  //   });
-  //   //TODO Check for listed status
-  // });
+  // Test cases for getting listing details
+  describe("Listing details marketplace", function () {
+    it("Should get listed details should be zero", async function () {
+      let listingDetails = await marketplaceContract.getListingDetails(0);
+      await expect(listingDetails[0]).to.equal(0);
+      await expect(listingDetails[1]).to.equal(0);
+    });
+    it("Should get listed details and verify for valid values", async function () {
+      let tokenId = 1;
+      let price = 100000000;
+      let salePrice = 150000000;
+      let date = new Date();
+      let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
+      let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
-  // // Test cases for create listing
-  // describe("Crate Listing marketplace", function () {
-  //   it("Should create listing", async function () {
-  //     const { marketplaceContract } = await loadFixture(
-  //       deployMarketplaceFixture,
-  //     );
-  //     let tokenId = 1;
-  //     let price = 100;
-  //     await expect(await marketplaceContract.createListing(tokenId, price)).to
-  //       .not.be.reverted;
-  //   });
+      //Grant allowance permission
+      const res = await stableTokenContract.approve(
+        await bukProtocolContract.getAddress(),
+        200000000000,
+      );
 
-  //   it("Should create and verify listing", async function () {
-  //     const { marketplaceContract } = await loadFixture(
-  //       deployMarketplaceFixture,
-  //     );
-  //     let tokenId = 1;
-  //     let price = 100;
-  //     await marketplaceContract.createListing(tokenId, price);
-  //     let listingDetails = await marketplaceContract.getListingDetails(tokenId);
+      // Book room and mint NFT
+      expect(
+        await bukProtocolContract.bookRoom(
+          1,
+          [price],
+          [price],
+          checkin,
+          checkout,
+          24,
+          true,
+        ),
+      ).not.be.reverted;
 
-  //     await expect(listingDetails[0]).to.equal(price);
-  //     // Since listing with active status value will be 0
-  //     await expect(listingDetails[1]).to.equal(0);
-  //   });
+      //Mint
+      await expect(
+        bukProtocolContract.mintBukNFT(
+          [tokenId],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
+      ).not.be.reverted;
+      await marketplaceContract.createListing(tokenId, salePrice);
+      let listingDetails = await marketplaceContract.getListingDetails(tokenId);
+      await expect(listingDetails[0]).to.equal(salePrice);
+      await expect(listingDetails[1]).to.equal(0);
+    });
+  });
 
-  //   it("Should revert for already listed token ID", async function () {
-  //     const { marketplaceContract } = await loadFixture(
-  //       deployMarketplaceFixture,
-  //     );
-  //     let tokenId = 1;
-  //     let price = 100;
-  //     await marketplaceContract.createListing(tokenId, price);
-  //     await expect(
-  //       marketplaceContract.createListing(tokenId, price),
-  //     ).to.be.revertedWith("NFT already listed");
-  //   });
+  // Test cases for delist
+  describe("Delist function marketplace", function () {
+    it("Should delist and verify status", async function () {
+      let tokenId = 1;
+      let price = 100000000;
+      let salePrice = 150000000;
+      let date = new Date();
+      let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
+      let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
-  //   // it("Should emit event listed token ID", async function () {
-  //   //   const { marketplaceContract } = await loadFixture(
-  //   //     deployMarketplaceFixture,
-  //   //   );
-  //   //   let tokenId = 1;
-  //   //   let price = 100;
-  //   //   await expect(await marketplaceContract.createListing(tokenId, price))
-  //   //     .to.emit(marketplaceContract, "BukNFTSet")
-  //   //     .withArgs(oldAddress, newAddress);
-  //   // });
+      //Grant allowance permission
+      const res = await stableTokenContract.approve(
+        await bukProtocolContract.getAddress(),
+        200000000000,
+      );
 
-  //   //TODO Check emit event
-  // });
+      // Book room and mint NFT
+      expect(
+        await bukProtocolContract.bookRoom(
+          1,
+          [price],
+          [price],
+          checkin,
+          checkout,
+          24,
+          true,
+        ),
+      ).not.be.reverted;
 
-  // // Test cases for delist
-  // describe("Delist function marketplace", function () {
-  //   it("Should delist ", async function () {
-  //     const { marketplaceContract } = await loadFixture(
-  //       deployMarketplaceFixture,
-  //     );
-  //     let tokenId = 1;
-  //     let price = 100;
+      //Mint
+      await expect(
+        bukProtocolContract.mintBukNFT(
+          [tokenId],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
+      ).not.be.reverted;
+      await marketplaceContract.createListing(tokenId, salePrice);
+      await expect(await marketplaceContract.delist(tokenId)).to.not.be
+        .reverted;
+      let listingDetails = await marketplaceContract.getListingDetails(tokenId);
+      await expect(listingDetails[0]).to.equal(salePrice);
+      await expect(listingDetails[1]).to.equal(1);
+    });
+    it("Should emit event delisted token ID", async function () {
+      let tokenId = 1;
+      let price = 100000000;
+      let salePrice = 150000000;
+      let date = new Date();
+      let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
+      let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
-  //     await expect(await marketplaceContract.createListing(tokenId, price)).to
-  //       .not.be.reverted;
-  //     await expect(await marketplaceContract.delist(tokenId)).to.not.be
-  //       .reverted;
-  //   });
-  //   it("Should delist and verify delist status ", async function () {
-  //     const { marketplaceContract } = await loadFixture(
-  //       deployMarketplaceFixture,
-  //     );
-  //     let tokenId = 1;
-  //     let price = 100;
+      //Grant allowance permission
+      const res = await stableTokenContract.approve(
+        await bukProtocolContract.getAddress(),
+        200000000000,
+      );
 
-  //     await expect(await marketplaceContract.createListing(tokenId, price)).to
-  //       .not.be.reverted;
-  //     await expect(await marketplaceContract.delist(tokenId)).to.not.be
-  //       .reverted;
-  //     let listingDetails = await marketplaceContract.getListingDetails(tokenId);
-  //     await expect(listingDetails[0]).to.equal(price);
-  //     await expect(listingDetails[1]).to.equal(1);
-  //   });
+      // Book room and mint NFT
+      expect(
+        await bukProtocolContract.bookRoom(
+          1,
+          [price],
+          [price],
+          checkin,
+          checkout,
+          24,
+          true,
+        ),
+      ).not.be.reverted;
 
-  //   it("Should emit event delisted token ID", async function () {
-  //     const { marketplaceContract } = await loadFixture(
-  //       deployMarketplaceFixture,
-  //     );
-  //     let tokenId = 1;
-  //     let price = 100;
-
-  //     await expect(await marketplaceContract.createListing(tokenId, price)).to
-  //       .not.be.reverted;
-  //     await expect(await marketplaceContract.delist(tokenId))
-  //       .to.emit(marketplaceContract, "Delisted")
-  //       .withArgs(tokenId);
-  //   });
-  //   it("Should revert delist for not listed token ", async function () {
-  //     const { marketplaceContract } = await loadFixture(
-  //       deployMarketplaceFixture,
-  //     );
-  //     let tokenId = 1;
-  //     await expect(marketplaceContract.delist(tokenId)).to.be.revertedWith(
-  //       "NFT not listed",
-  //     );
-  //   });
-  //   // TODO for owner validation
-  // });
+      //Mint
+      await expect(
+        bukProtocolContract.mintBukNFT(
+          [tokenId],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
+      ).not.be.reverted;
+      await marketplaceContract.createListing(tokenId, salePrice);
+      await expect(await marketplaceContract.delist(tokenId))
+        .to.emit(marketplaceContract, "Delisted")
+        .withArgs(tokenId);
+    });
+    it("Should revert delist for not listed token ", async function () {
+      let tokenId = 1;
+      await expect(marketplaceContract.delist(tokenId)).to.be.revertedWith(
+        "NFT not listed",
+      );
+    });
+    // TODO for owner validation
+  });
 
   // // Test cases for delete
   // describe("Delete listing function marketplace", function () {
