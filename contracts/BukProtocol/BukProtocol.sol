@@ -66,9 +66,15 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         uint256 len = _ids.length;
         for (uint8 i = 0; i < len; ++i) {
             if (bookingDetails[_ids[i]].status == BookingStatus.checkedout) {
-                require(hasRole(ADMIN_ROLE, _msgSender()) || (nftPoSContract.balanceOf(_msgSender(), _ids[i])>0));
+                require(
+                    hasRole(ADMIN_ROLE, _msgSender()) ||
+                        (nftPoSContract.balanceOf(_msgSender(), _ids[i]) > 0)
+                );
             } else {
-                require(hasRole(ADMIN_ROLE, _msgSender()) || (nftContract.balanceOf(_msgSender(), _ids[i])>0));
+                require(
+                    hasRole(ADMIN_ROLE, _msgSender()) ||
+                        (nftContract.balanceOf(_msgSender(), _ids[i]) > 0)
+                );
             }
         }
         _;
@@ -384,10 +390,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         IBukNFTs bukNftsContract = IBukNFTs(nftContract);
         bookingDetails[_id].status = BookingStatus.cancelled;
         _bukTreasury.cancelUSDCRefund(_penalty, _bukWallet);
-        _bukTreasury.cancelUSDCRefund(
-            _refund,
-            bookingDetails[_id].firstOwner
-        );
+        _bukTreasury.cancelUSDCRefund(_refund, bookingDetails[_id].firstOwner);
         _bukTreasury.cancelUSDCRefund(_charges, _bukWallet);
         bukNftsContract.burn(bookingDetails[_id].firstOwner, _id, 1, false);
         emit CancelRoom(_id, true);
@@ -399,8 +402,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     function getBookingDetails(
         uint256 _tokenId
     ) external view returns (Booking memory) {
-        Booking memory bookingData = bookingDetails[_tokenId];
-        return bookingData;
+        return bookingDetails[_tokenId];
     }
 
     /**

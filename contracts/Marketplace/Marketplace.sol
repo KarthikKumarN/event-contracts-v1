@@ -6,6 +6,10 @@ import "contracts/Token//interface/IToken.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 import "contracts/Marketplace/Interface/IMarketplace.sol";
+import "contracts/BukProtocol/IBukProtocol.sol";
+import "contracts/BukNFTs/IBukNFTs.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
+import "hardhat/console.sol";
 
 contract Marketplace is Context, IMarketplace, AccessControl {
     using SafeERC20 for IToken;
@@ -13,8 +17,8 @@ contract Marketplace is Context, IMarketplace, AccessControl {
     bytes32 public constant BUK_PROTOCOL_ROLE = keccak256("BUK_PROTOCOL_ROLE");
 
     // Buk protocol address
-    address private _bukProtocalContract;
-    address private _bukNFTContract;
+    IBukProtocol private _bukProtocalContract;
+    IBukNFTs private _bukNFTContract;
 
     // Address of owner who can perform adminitotor work
     address private _owner;
@@ -30,30 +34,64 @@ contract Marketplace is Context, IMarketplace, AccessControl {
         address bukNFTContract_,
         address currency_
     ) {
-        _bukProtocalContract = bukProtocalAddress_;
-        _bukNFTContract = bukNFTContract_;
+        _bukProtocalContract = IBukProtocol(bukProtocalAddress_);
+        _bukNFTContract = IBukNFTs(bukNFTContract_);
         _stableToken = IToken(currency_);
 
         // Updating permission
-        _grantRole(ADMIN_ROLE, msg.sender);
+        _grantRole(ADMIN_ROLE, _msgSender());
         _grantRole(BUK_PROTOCOL_ROLE, address(bukProtocalAddress_));
     }
 
     /**
-     * @dev Refer IMarketplace
+     * @dev Refer {IMarketplace-createListing}.
      * @param tokenId_ room/booking NFT id
-     * @param price_  price of room/booking
+     * @param price_  Sale price of room/booking
      * @dev While listing will approve marketplace to excecute transfer
      */
     function createListing(uint256 tokenId_, uint256 price_) external {
         require(!isListed(tokenId_), "NFT already listed");
-        // TODO
-        // Get booking details form bukprotocol
-        // Validate owner, minSalePrice, status
-        // require(tardeTimeLimt_ > block.timestamp, "Trade limit time crossed");
+        require(
+            price_ >= _bukProtocalContract.getBookingDetails(tokenId_).baseRate,
+            "Sale price cann't be lessthan base price"
+        );
+        require(
+            _bukProtocalContract.getBookingDetails(tokenId_).status ==
+                IBukProtocol.BookingStatus.confirmed,
+            "Only confirmed can be tradable"
+        );
+        require(
+            _bukNFTContract.balanceOf(_msgSender(), tokenId_) == 1,
+            "Only owner can list"
+        );
+        // TODO tradetimelimit
+        // console.log(
+        //     _bukProtocalContract.getBookingDetails(tokenId_).checkin,
+        //     " Checkin"
+        // );
+        // console.log(
+        //     _bukProtocalContract.getBookingDetails(tokenId_).tradeTimeLimit,
+        //     " tradelimit"
+        // );
+        // console.log(
+        //     _bukProtocalContract.getBookingDetails(tokenId_).checkin -
+        //         _bukProtocalContract
+        //             .getBookingDetails(tokenId_)
+        //             .tradeTimeLimit *
+        //         3600,
+        //     " Difference"
+        // );
+        // console.log(block.timestamp, " block.timestamp");
+        require(
+            block.timestamp <
+                (_bukProtocalContract.getBookingDetails(tokenId_).checkin -
+                    (_bukProtocalContract
+                        .getBookingDetails(tokenId_)
+                        .tradeTimeLimit * 3600)),
+            "Trade limit time crossed"
+        );
         _listedNFT[tokenId_] = ListingDetails(price_, ListingStatus.active);
-        // TODO emit
-        // emit ListingCreated(owner, tokenId_, price_);
+        emit ListingCreated(_msgSender(), tokenId_, price_);
     }
 
     /**
@@ -113,8 +151,8 @@ contract Marketplace is Context, IMarketplace, AccessControl {
         address bukProtocol_
     ) external onlyRole(ADMIN_ROLE) {
         require(bukProtocol_ != address(0), "Invalid address");
-        address oldAddress = _bukProtocalContract;
-        _bukProtocalContract = bukProtocol_;
+        address oldAddress = address(_bukProtocalContract);
+        _bukProtocalContract = IBukProtocol(bukProtocol_);
 
         emit BukProtocolSet(oldAddress, bukProtocol_);
     }
@@ -125,8 +163,8 @@ contract Marketplace is Context, IMarketplace, AccessControl {
      */
     function setBukNFT(address bukNFT_) external onlyRole(ADMIN_ROLE) {
         require(bukNFT_ != address(0), "Invalid address");
-        address oldAddress = _bukNFTContract;
-        _bukNFTContract = bukNFT_;
+        address oldAddress = address(_bukNFTContract);
+        _bukNFTContract = IBukNFTs(bukNFT_);
 
         emit BukNFTSet(oldAddress, bukNFT_);
     }
