@@ -34,11 +34,13 @@ interface IMarketplace {
      * @param previousOwner, Address of the previous owner
      * @param newOwner, Address of the new owner
      * @param tokenId, TokenId of the bought booking
+     * @param price, Price of the bought booking
      */
     event RoomBought(
         address indexed previousOwner,
         address indexed newOwner,
-        uint256 tokenId
+        uint256 tokenId,
+        uint256 price
     );
 
     /**
@@ -90,10 +92,10 @@ interface IMarketplace {
 
     /**
      * @dev Function will create a listing of Booking/Room NFT
-     * @dev Only NFT owner can list
+     * @notice Only NFT owner can list
      * @param tokenId_ room/booking NFT id
-     * @param price_  price of room/booking
-     * @dev While listing will approve marketplace to excecute transfer
+     * @param price_  Sale price of room/booking
+     * @notice While listing will approve marketplace to excecute transfer
      */
     function createListing(uint256 tokenId_, uint256 price_) external;
 

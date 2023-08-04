@@ -414,8 +414,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     function getBookingDetails(
         uint256 _tokenId
     ) external view returns (Booking memory) {
-        Booking memory bookingData = bookingDetails[_tokenId];
-        return bookingData;
+        return bookingDetails[_tokenId];
     }
 
     /**
