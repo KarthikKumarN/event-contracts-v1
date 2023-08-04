@@ -431,6 +431,48 @@ describe("Marketplace", function () {
         marketplaceContract.createListing(tokenId, salePrice),
       ).to.be.revertedWith("Trade limit time crossed");
     });
+    it("Check for already listed NFT", async function () {
+      let tokenId = 1;
+      let price = 100000000;
+      let salePrice = 150000000;
+      let date = new Date();
+      let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
+      let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
+
+      //Grant allowance permission
+      const res = await stableTokenContract.approve(
+        await bukProtocolContract.getAddress(),
+        200000000000,
+      );
+
+      // Book room and mint NFT
+      expect(
+        await bukProtocolContract.bookRoom(
+          1,
+          [price],
+          [price],
+          checkin,
+          checkout,
+          24,
+          true,
+        ),
+      ).not.be.reverted;
+
+      //Mint
+      await expect(
+        bukProtocolContract.mintBukNFT(
+          [tokenId],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
+      ).not.be.reverted;
+      await expect(marketplaceContract.createListing(tokenId, salePrice)).not.to
+        .be.reverted;
+      await expect(
+        marketplaceContract.createListing(tokenId, salePrice),
+      ).to.be.revertedWith("NFT already listed");
+    });
     it("Create listing should emit event", async function () {
       let tokenId = 1;
       let price = 100000000;
