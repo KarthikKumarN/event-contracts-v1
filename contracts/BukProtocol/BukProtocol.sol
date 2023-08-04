@@ -66,9 +66,15 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         uint256 len = _ids.length;
         for (uint8 i = 0; i < len; ++i) {
             if (bookingDetails[_ids[i]].status == BookingStatus.checkedout) {
-                require(hasRole(ADMIN_ROLE, _msgSender()) || (nftPoSContract.balanceOf(_msgSender(), _ids[i])>0));
+                require(
+                    hasRole(ADMIN_ROLE, _msgSender()) ||
+                        (nftPoSContract.balanceOf(_msgSender(), _ids[i]) > 0)
+                );
             } else {
-                require(hasRole(ADMIN_ROLE, _msgSender()) || (nftContract.balanceOf(_msgSender(), _ids[i])>0));
+                require(
+                    hasRole(ADMIN_ROLE, _msgSender()) ||
+                        (nftContract.balanceOf(_msgSender(), _ids[i]) > 0)
+                );
             }
         }
         _;
@@ -88,6 +94,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         _bukTreasury = IBukTreasury(_bukTreasuryContract);
         _currency = IERC20(_currencyContract);
         _bukWallet = _bukWalletContract;
+        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setupRole(ADMIN_ROLE, _msgSender());
         _grantRole(ADMIN_ROLE, _msgSender());
     }
@@ -223,13 +230,25 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         bool _tradeable
     ) external nonReentrant returns (bool) {
         require(
-            ((_total.length == _baseRate.length) &&
-                (_total.length == _count) &&
-                (_count > 0)),
+            (_checkin > block.timestamp),
+            "Checkin date should be greater than current date"
+        );
+        require(
+            (_checkout > _checkin), "Checkout date should be greater than checkin date"
+        );
+        uint256 total = 0;
+        for (uint8 i = 0; i < _count; ++i) {
+            total += _total[i];
+        }
+        require(
+            (_currency.allowance(_msgSender(), address(this)) >= total),
+            "Check the allowance of the sender"
+        );
+        require(
+            ((_total.length == _baseRate.length) && (_total.length == _count) && (_count > 0)),
             "Array sizes mismatch"
         );
         uint256[] memory bookings = new uint256[](_count);
-        uint total = 0;
         uint commissionTotal = 0;
         for (uint8 i = 0; i < _count; ++i) {
             ++_bookingIds;
@@ -248,7 +267,6 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
                 _tradeable
             );
             bookings[i] = _bookingIds;
-            total += _total[i];
             commissionTotal += (_baseRate[i] * commission) / 100;
             emit BookRoom(_bookingIds);
         }
@@ -384,10 +402,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         IBukNFTs bukNftsContract = IBukNFTs(nftContract);
         bookingDetails[_id].status = BookingStatus.cancelled;
         _bukTreasury.cancelUSDCRefund(_penalty, _bukWallet);
-        _bukTreasury.cancelUSDCRefund(
-            _refund,
-            bookingDetails[_id].firstOwner
-        );
+        _bukTreasury.cancelUSDCRefund(_refund, bookingDetails[_id].firstOwner);
         _bukTreasury.cancelUSDCRefund(_charges, _bukWallet);
         bukNftsContract.burn(bookingDetails[_id].firstOwner, _id, 1, false);
         emit CancelRoom(_id, true);
