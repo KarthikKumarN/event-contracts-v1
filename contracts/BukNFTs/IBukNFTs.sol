@@ -12,6 +12,13 @@ interface IBukNFTs is IERC1155 {
     function updateName(string memory _contractName) external;
 
     /**
+    * @dev Function to update the treasury address.
+    * @param _bukTreasuryContract Address of the treasury.
+     * @notice This function can only be called by addresses with `BUK_PROTOCOL_CONTRACT_ROLE`
+    */
+    function setTreasury(address _bukTreasuryContract) external;
+
+    /**
     * @dev Function to update the marketplace address.
     * @param _marketplaceContract Address of the marketplace.
      * @notice This function can only be called by addresses with `DEFAULT_ADMIN_ROLE`
@@ -128,7 +135,7 @@ interface IBukNFTs is IERC1155 {
     )
         external
         view
-        returns (address[] memory receivers, uint256[] memory royaltyAmounts);
+        returns (address receiver, uint256 royaltyAmount);
 
 
     /**

@@ -15,6 +15,11 @@ import "../BukTreasury/IBukTreasury.sol";
  */
 contract BukPOSNFTs is AccessControl, ERC1155 {
     /**
+     * @dev Address of the Buk treasury contract.
+     */
+    IBukTreasury private _bukTreasury;
+
+    /**
      * @dev Name of the contract
      */
     string public name;
@@ -69,6 +74,11 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
     );
 
     /**
+     * @dev Emitted when treasury is updated.
+     */
+    event SetTreasury(address indexed treasuryContract);
+
+    /**
      * @dev Emitted when marketplace role is granted.
      */
     event SetMarketplace(address indexed marketplaceContract);
@@ -103,6 +113,16 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(ADMIN_ROLE, _msgSender());
         _grantRole(BUK_PROTOCOL_CONTRACT_ROLE, _bukProtocolContract);
+    }
+
+    /**
+    * @dev Function to update the treasury address.
+    * @param _bukTreasuryContract Address of the treasury.
+     * @notice This function can only be called by addresses with `BUK_PROTOCOL_CONTRACT_ROLE`
+    */
+    function setTreasury(address _bukTreasuryContract) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _bukTreasury = IBukTreasury(_bukTreasuryContract);
+        emit SetTreasury(_bukTreasuryContract);
     }
 
     /**
@@ -230,25 +250,23 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
      * @dev To retrieve information about the royalties associated with a specific token.
      * @param _tokenId - The token ID of the NFT.
      * @param _salePrice - The price at which the token is being sold.
+     * @return receiver - The address of the royalty receiver.
+     * @return royaltyAmount - The amount of royalty to be paid.
      */
     function royaltyInfo(
         uint256 _tokenId,
         uint256 _salePrice
     )
-        public
+        external
         view
-        returns (address[] memory receivers, uint256[] memory royaltyAmounts)
+        returns (address receiver, uint256 royaltyAmount)
     {
         IBukProtocol.Royalty[] memory royaltyArray = bukProtocolContract.getRoyaltyInfo(_tokenId);
-        receivers = new address[](royaltyArray.length);
-        royaltyAmounts = new uint256[](royaltyArray.length);
+        uint256 royaltyAmount_ = 0;
         for (uint i = 0; i < royaltyArray.length; i++) {
-            receivers[i] = royaltyArray[i].receiver;
-            royaltyAmounts[i] =
-                (_salePrice * royaltyArray[i].royaltyFraction) /
-                _feeDenominator();
+            royaltyAmount_ += ((_salePrice * royaltyArray[i].royaltyFraction)/_feeDenominator());
         }
-        return (receivers, royaltyAmounts);
+        return (address(_bukTreasury), royaltyAmount_);
     }
 
     /**

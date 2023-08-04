@@ -112,7 +112,7 @@ interface IBukPOSNFTs is IERC1155, IAccessControl {
     )
         external
         view
-        returns (address[] memory receivers, uint256[] memory royaltyAmounts);
+        returns (address receiver, uint256 royaltyAmount);
 
 
     /**
