@@ -25,7 +25,7 @@ describe("Marketplace", function () {
   let sellerWallet;
   let buyerWallet;
 
-  before("deploy the contract instance first", async function () {
+  beforeEach("deploy the contract instance first", async function () {
     [
       owner,
       account1,
@@ -44,14 +44,14 @@ describe("Marketplace", function () {
       owner.address,
       2000000,
     );
-    console.log(await stableTokenContract.getAddress(), " tokenContract");
+    // console.log(await stableTokenContract.getAddress(), " tokenContract");
 
     //BukTreasury
     const BukTreasury = await ethers.getContractFactory("BukTreasury");
     bukTreasuryContract = await BukTreasury.deploy(
       stableTokenContract.getAddress(),
     );
-    console.log(await bukTreasuryContract.getAddress(), " bukTreasuryContract");
+    // console.log(await bukTreasuryContract.getAddress(), " bukTreasuryContract");
 
     //BukProtocol
     const BukProtocol = await ethers.getContractFactory("BukProtocol");
@@ -60,24 +60,24 @@ describe("Marketplace", function () {
       stableTokenContract.getAddress(),
       bukWallet.address,
     );
-    console.log(await bukProtocolContract.getAddress(), " bukProtocolContract");
+    // console.log(await bukProtocolContract.getAddress(), " bukProtocolContract");
 
     // BukPOSNFT
     const BukPOSNFT = await ethers.getContractFactory("BukPOSNFTs");
     nftPosContract = await BukPOSNFT.deploy(
       "BUK_POS",
-      bukProtocolContract.getAddress()
+      bukProtocolContract.getAddress(),
     );
-    console.log(await nftPosContract.getAddress(), " nftPosContract");
+    // console.log(await nftPosContract.getAddress(), " nftPosContract");
 
     // BukNFT
     const BukNFT = await ethers.getContractFactory("BukNFTs");
     nftContract = await BukNFT.deploy(
       "BUK_NFT",
       nftPosContract.getAddress(),
-      bukProtocolContract.getAddress()
+      bukProtocolContract.getAddress(),
     );
-    console.log(await nftContract.getAddress(), " nftContract");
+    // console.log(await nftContract.getAddress(), " nftContract");
 
     //Marketplace
     const Marketplace = await ethers.getContractFactory("Marketplace");
@@ -87,18 +87,21 @@ describe("Marketplace", function () {
       stableTokenContract.getAddress(),
     );
 
-    console.log(await marketplaceContract.getAddress(), " marketplaceContract");
+    // console.log(await marketplaceContract.getAddress(), " marketplaceContract");
 
     //Set BukNFTs address in Buk Protocol
-    const setBukNFTs = await bukProtocolContract.setBukNFTs(nftContract.getAddress())
-    console.log("🚀 ~ file: Marketplace.ts:94 ~ setBukNFTs:", setBukNFTs)
+    const setBukNFTs = await bukProtocolContract.setBukNFTs(
+      nftContract.getAddress(),
+    );
+    // console.log("🚀 ~ file: Marketplace.ts:94 ~ setBukNFTs:");
 
     //Set BukPOSNFTs address in Buk Protocol
-    const setBukPoSNFTs = await bukProtocolContract.setBukPoSNFTs(nftPosContract.getAddress())
-    console.log("🚀 ~ file: Marketplace.ts:98 ~ setBukPoSNFTs:", setBukPoSNFTs)
+    const setBukPoSNFTs = await bukProtocolContract.setBukPoSNFTs(
+      nftPosContract.getAddress(),
+    );
+    // console.log("🚀 ~ file: Marketplace.ts:98 ~ setBukPoSNFTs:");
 
     //Set BukProtocol in BukNFTs and BukPOSNFTs
-    
   });
 
   describe("Deployment marketplace", function () {
@@ -199,11 +202,12 @@ describe("Marketplace", function () {
       );
     });
   });
-  // // Test cases for getting listed status
+  // Test cases for getting listed status
   describe("Listed status marketplace", function () {
     it("Should get listed status for not listed tokeId", async function () {
       await expect(await marketplaceContract.isListed(0)).to.equal(false);
     });
+
     it("Should book and mint and get details", async function () {
       let tokenId = 1;
       let price = 100;
@@ -213,8 +217,6 @@ describe("Marketplace", function () {
         await bukProtocolContract.getAddress(),
         200000000000,
       );
-      console.log("🚀 ~ ", await bukProtocolContract.nftContract())
-      console.log("🚀 ~ ", await bukProtocolContract.nftPoSContract())
 
       // Book room and mint NFT
       expect(
@@ -225,7 +227,7 @@ describe("Marketplace", function () {
           1691064540,
           1691150940,
           12,
-          true
+          true,
         ),
       ).not.be.reverted;
       //Mint
@@ -237,10 +239,238 @@ describe("Marketplace", function () {
           ],
         ),
       ).not.be.reverted;
-      // await marketplaceContract.createListing(tokenId, price);
-      // await expect(await marketplaceContract.isListed(tokenId)).to.equal(true);
+
+      let bookingDetails = await bukProtocolContract.getBookingDetails(1);
+      await expect(bookingDetails[5]).to.equal(1691150940);
     });
-    //TODO Check for listed status
+
+    it("Should book list for sale", async function () {
+      let tokenId = 1;
+      let price = 100000000;
+      let salePrice = 150000000;
+      let date = new Date();
+      let checkin = date.setDate(date.getDate() + 2);
+      let checkout = date.setDate(date.getDate() + 3);
+
+      //Grant allowance permission
+      const res = await stableTokenContract.approve(
+        await bukProtocolContract.getAddress(),
+        200000000000,
+      );
+
+      // Book room and mint NFT
+      expect(
+        await bukProtocolContract.bookRoom(
+          1,
+          [price],
+          [price],
+          checkin,
+          checkout,
+          12,
+          true,
+        ),
+      ).not.be.reverted;
+      //Mint
+      await expect(
+        bukProtocolContract.mintBukNFT(
+          [tokenId],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
+      ).not.be.reverted;
+      await expect(marketplaceContract.createListing(tokenId, salePrice)).not.be
+        .reverted;
+      await expect(await marketplaceContract.isListed(tokenId)).to.equal(true);
+    });
+    it("Should create list minSale check", async function () {
+      let tokenId = 1;
+      let price = 100000000;
+      let salePrice = 50000000;
+      let date = new Date();
+      let checkin = date.setDate(date.getDate() + 2);
+      let checkout = date.setDate(date.getDate() + 3);
+
+      //Grant allowance permission
+      const res = await stableTokenContract.approve(
+        await bukProtocolContract.getAddress(),
+        200000000000,
+      );
+
+      // Book room and mint NFT
+      expect(
+        await bukProtocolContract.bookRoom(
+          1,
+          [price],
+          [price],
+          checkin,
+          checkout,
+          12,
+          true,
+        ),
+      ).not.be.reverted;
+      //Mint
+      await expect(
+        bukProtocolContract.mintBukNFT(
+          [tokenId],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
+      ).not.be.reverted;
+      await expect(
+        marketplaceContract.createListing(tokenId, salePrice),
+      ).to.be.revertedWith("Sale price cann't be lessthan base price");
+    });
+    it("Create list only confirmed booking check", async function () {
+      let tokenId = 1;
+      let price = 100000000;
+      let salePrice = 150000000;
+      let date = new Date();
+      let checkin = date.setDate(date.getDate() + 2);
+      let checkout = date.setDate(date.getDate() + 3);
+
+      //Grant allowance permission
+      const res = await stableTokenContract.approve(
+        await bukProtocolContract.getAddress(),
+        200000000000,
+      );
+
+      // Book room and mint NFT
+      expect(
+        await bukProtocolContract.bookRoom(
+          1,
+          [price],
+          [price],
+          checkin,
+          checkout,
+          12,
+          true,
+        ),
+      ).not.be.reverted;
+      await expect(
+        marketplaceContract.createListing(tokenId, salePrice),
+      ).to.be.revertedWith("Only confirmed can be tradable");
+    });
+    it("Create list only owner can list", async function () {
+      let tokenId = 1;
+      let price = 100000000;
+      let salePrice = 150000000;
+      let date = new Date();
+      let checkin = date.setDate(date.getDate() + 2);
+      let checkout = date.setDate(date.getDate() + 3);
+
+      //Grant allowance permission
+      const res = await stableTokenContract.approve(
+        await bukProtocolContract.getAddress(),
+        200000000000,
+      );
+
+      // Book room and mint NFT
+      expect(
+        await bukProtocolContract.bookRoom(
+          1,
+          [price],
+          [price],
+          checkin,
+          checkout,
+          12,
+          true,
+        ),
+      ).not.be.reverted;
+      //Mint
+      await expect(
+        bukProtocolContract.mintBukNFT(
+          [tokenId],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
+      ).not.be.reverted;
+      await expect(
+        marketplaceContract.connect(account1).createListing(tokenId, salePrice),
+      ).to.be.revertedWith("Only owner can list");
+    });
+    it("Tradable time limit check", async function () {
+      let tokenId = 1;
+      let price = 100000000;
+      let salePrice = 150000000;
+      let date = new Date();
+      let checkin = Math.floor(date.setDate(date.getDate()) / 1000);
+      let checkout = Math.floor(date.setDate(date.getDate() + 1) / 1000);
+
+      //Grant allowance permission
+      const res = await stableTokenContract.approve(
+        await bukProtocolContract.getAddress(),
+        200000000000,
+      );
+
+      // Book room and mint NFT
+      expect(
+        await bukProtocolContract.bookRoom(
+          1,
+          [price],
+          [price],
+          checkin,
+          checkout,
+          24,
+          true,
+        ),
+      ).not.be.reverted;
+
+      //Mint
+      await expect(
+        bukProtocolContract.mintBukNFT(
+          [tokenId],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
+      ).not.be.reverted;
+      await expect(
+        marketplaceContract.createListing(tokenId, salePrice),
+      ).to.be.revertedWith("Trade limit time crossed");
+    });
+    it("Create listing should emit event", async function () {
+      let tokenId = 1;
+      let price = 100000000;
+      let salePrice = 150000000;
+      let date = new Date();
+      let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
+      let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
+
+      //Grant allowance permission
+      const res = await stableTokenContract.approve(
+        await bukProtocolContract.getAddress(),
+        200000000000,
+      );
+
+      // Book room and mint NFT
+      expect(
+        await bukProtocolContract.bookRoom(
+          1,
+          [price],
+          [price],
+          checkin,
+          checkout,
+          24,
+          true,
+        ),
+      ).not.be.reverted;
+
+      //Mint
+      await expect(
+        bukProtocolContract.mintBukNFT(
+          [tokenId],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
+      ).not.be.reverted;
+      await expect(marketplaceContract.createListing(tokenId, salePrice))
+        .to.emit(marketplaceContract, "ListingCreated")
+        .withArgs(owner.address, tokenId, salePrice);
+    });
   });
 
   // // Test cases for getting listing details
