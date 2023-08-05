@@ -64,24 +64,6 @@ contract Marketplace is Context, IMarketplace, AccessControl {
             _bukNFTContract.balanceOf(_msgSender(), tokenId_) == 1,
             "Only owner can list"
         );
-        // TODO tradetimelimit
-        // console.log(
-        //     _bukProtocalContract.getBookingDetails(tokenId_).checkin,
-        //     " Checkin"
-        // );
-        // console.log(
-        //     _bukProtocalContract.getBookingDetails(tokenId_).tradeTimeLimit,
-        //     " tradelimit"
-        // );
-        // console.log(
-        //     _bukProtocalContract.getBookingDetails(tokenId_).checkin -
-        //         _bukProtocalContract
-        //             .getBookingDetails(tokenId_)
-        //             .tradeTimeLimit *
-        //         3600,
-        //     " Difference"
-        // );
-        // console.log(block.timestamp, " block.timestamp");
         require(
             block.timestamp <
                 (_bukProtocalContract.getBookingDetails(tokenId_).checkin -
@@ -90,7 +72,12 @@ contract Marketplace is Context, IMarketplace, AccessControl {
                         .tradeTimeLimit * 3600)),
             "Trade limit time crossed"
         );
-        _listedNFT[tokenId_] = ListingDetails(price_, ListingStatus.active);
+        _listedNFT[tokenId_] = ListingDetails(
+            price_,
+            _msgSender(),
+            ListingStatus.active
+        );
+
         emit ListingCreated(_msgSender(), tokenId_, price_);
     }
 
@@ -116,6 +103,10 @@ contract Marketplace is Context, IMarketplace, AccessControl {
      */
     function deleteListing(uint256 tokenId_) external {
         require(isListed(tokenId_), "NFT not listed");
+        require(
+            _bukNFTContract.balanceOf(_msgSender(), tokenId_) == 1,
+            "Only owner can delist"
+        );
         // TODO
         // Get booking details form bukprotocol
         // Validate owner, status
@@ -140,10 +131,52 @@ contract Marketplace is Context, IMarketplace, AccessControl {
     }
 
     /**
-     * @dev Refer IMarketplace
+     * @dev Refer {IMarketplace-buyRoom}.
      * @param tokenId_ room/booking NFT id
      */
-    function buyRoom(uint256 tokenId_) external {}
+    function buyRoom(uint256 tokenId_) external {
+        require(
+            _listedNFT[tokenId_].status == ListingStatus.active,
+            "NFT not listed"
+        );
+        require(
+            _bukProtocalContract.getBookingDetails(tokenId_).status ==
+                IBukProtocol.BookingStatus.confirmed,
+            "Only availble booking can be tradable"
+        );
+        require(
+            block.timestamp <
+                (_bukProtocalContract.getBookingDetails(tokenId_).checkin -
+                    (_bukProtocalContract
+                        .getBookingDetails(tokenId_)
+                        .tradeTimeLimit * 3600)),
+            "Trade limit time crossed"
+        );
+        require(
+            (_stableToken.allowance(_msgSender(), address(this)) >=
+                _listedNFT[tokenId_].price),
+            "Check the allowance of the sender"
+        );
+        address nftOwner = _listedNFT[tokenId_].owner;
+        require(
+            _bukNFTContract.balanceOf(nftOwner, tokenId_) == 1,
+            "NFT owner mismatch"
+        );
+        (address royaltyAddress, uint256 amount) = _bukNFTContract.royaltyInfo(
+            tokenId_,
+            _listedNFT[tokenId_].price
+        );
+
+        _stableToken.safeTransferFrom(_msgSender(), royaltyAddress, amount);
+        _stableToken.safeTransferFrom(_msgSender(), nftOwner, amount);
+        _bukNFTContract.safeTransferFrom(
+            address(nftOwner),
+            _msgSender(),
+            tokenId_,
+            1,
+            ""
+        );
+    }
 
     /**
      * @dev Refer IMarketplace
