@@ -4,7 +4,6 @@ pragma solidity =0.8.19;
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 
 interface IBukNFTs is IERC1155 {
-
     /**
      * @dev Update the name of the contract.
      * @notice This function can only be called by addresses with `BUK_PROTOCOL_CONTRACT_ROLE`
@@ -12,18 +11,18 @@ interface IBukNFTs is IERC1155 {
     function updateName(string memory _contractName) external;
 
     /**
-    * @dev Function to update the treasury address.
-    * @param _bukTreasuryContract Address of the treasury.
+     * @dev Function to update the treasury address.
+     * @param _bukTreasuryContract Address of the treasury.
      * @notice This function can only be called by addresses with `BUK_PROTOCOL_CONTRACT_ROLE`
-    */
+     */
     function setTreasury(address _bukTreasuryContract) external;
 
     /**
-    * @dev Function to update the marketplace address.
-    * @param _marketplaceContract Address of the marketplace.
+     * @dev Function to update the marketplace address.
+     * @param _marketplaceContract Address of the marketplace.
      * @notice This function can only be called by addresses with `DEFAULT_ADMIN_ROLE`
-    */
-    function addMarketplace(address _marketplaceContract) external;
+     */
+    function setMarketplaceRole(address _marketplaceContract) external;
 
     /**
      * @dev Sets the URI for a specific token ID.
@@ -50,7 +49,6 @@ interface IBukNFTs is IERC1155 {
         bytes calldata _data,
         string calldata _uri
     ) external returns (uint256);
-
 
     /**
      * @dev Burn a specific NFT.
@@ -132,11 +130,7 @@ interface IBukNFTs is IERC1155 {
     function royaltyInfo(
         uint256 _tokenId,
         uint256 _salePrice
-    )
-        external
-        view
-        returns (address receiver, uint256 royaltyAmount);
-
+    ) external view returns (address receiver, uint256 royaltyAmount);
 
     /**
      * @dev Returns the URI associated with the token ID.
