@@ -108,7 +108,7 @@ import {
         await bukProtocolContract
         .connect(adminWallet)
         .setBukTreasury(account1))
-        .to.emit(bukProtocolContract, "SetTreasury")
+        .to.emit(bukProtocolContract, "SetBukTreasury")
         .withArgs(await account1.getAddress());
       });
       it("Should not set treasury if not admin", async function () {
