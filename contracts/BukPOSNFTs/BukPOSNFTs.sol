@@ -76,7 +76,7 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
     /**
      * @dev Emitted when treasury is updated.
      */
-    event SetTreasury(address indexed treasuryContract);
+    event SetBukTreasury(address indexed treasuryContract);
 
     /**
      * @dev Emitted when marketplace role is granted.
@@ -120,9 +120,9 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
     * @param _bukTreasuryContract Address of the treasury.
      * @notice This function can only be called by addresses with `BUK_PROTOCOL_CONTRACT_ROLE`
     */
-    function setTreasury(address _bukTreasuryContract) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setBukTreasury(address _bukTreasuryContract) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _bukTreasury = IBukTreasury(_bukTreasuryContract);
-        emit SetTreasury(_bukTreasuryContract);
+        emit SetBukTreasury(_bukTreasuryContract);
     }
 
     /**

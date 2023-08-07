@@ -109,7 +109,7 @@ describe("Marketplace", function () {
     await bukProtocolContract.setBukRoyaltyInfo(300);
     await bukProtocolContract.setHotelRoyaltyInfo(200);
     await bukProtocolContract.setFirstOwnerRoyaltyInfo(200);
-    await nftContract.setTreasury(await bukTreasuryContract.getAddress());
+    await nftContract.setBukTreasury(await bukTreasuryContract.getAddress());
     //Set BukProtocol in BukNFTs and BukPOSNFTs
   });
 
@@ -238,6 +238,7 @@ describe("Marketplace", function () {
           1,
           [100000000],
           [80000000],
+          [70000000],
           checkin,
           checkout,
           12,
@@ -261,6 +262,7 @@ describe("Marketplace", function () {
     it("Should book list for sale", async function () {
       let tokenId = 1;
       let price = 100000000;
+      let minSalePrice = 100000000;
       let salePrice = 150000000;
       let date = new Date();
       let checkin = date.setDate(date.getDate() + 2);
@@ -278,6 +280,7 @@ describe("Marketplace", function () {
           1,
           [price],
           [price],
+          [minSalePrice],
           checkin,
           checkout,
           12,
@@ -302,6 +305,7 @@ describe("Marketplace", function () {
     it("Should create list minSale check", async function () {
       let tokenId = 1;
       let price = 100000000;
+      let minSalePrice = 70000000;
       let salePrice = 50000000;
       let date = new Date();
       let checkin = date.setDate(date.getDate() + 2);
@@ -319,6 +323,7 @@ describe("Marketplace", function () {
           1,
           [price],
           [price],
+          [70000000],
           checkin,
           checkout,
           12,
@@ -429,7 +434,7 @@ describe("Marketplace", function () {
           [price],
           checkin,
           checkout,
-          24,
+          60,
           true,
         ),
       ).not.be.reverted;

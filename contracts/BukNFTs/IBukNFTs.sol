@@ -15,7 +15,7 @@ interface IBukNFTs is IERC1155 {
      * @param _bukTreasuryContract Address of the treasury.
      * @notice This function can only be called by addresses with `BUK_PROTOCOL_CONTRACT_ROLE`
      */
-    function setTreasury(address _bukTreasuryContract) external;
+    function setBukTreasury(address _bukTreasuryContract) external;
 
     /**
      * @dev Function to update the marketplace address.
