@@ -93,14 +93,23 @@ describe("Marketplace", function () {
     const setBukNFTs = await bukProtocolContract.setBukNFTs(
       nftContract.getAddress(),
     );
+    //Set marketplace role in BukNFT
+    await nftContract.setMarketplaceRole(
+      await marketplaceContract.getAddress(),
+    );
     // console.log("🚀 ~ file: Marketplace.ts:94 ~ setBukNFTs:");
 
     //Set BukPOSNFTs address in Buk Protocol
     const setBukPoSNFTs = await bukProtocolContract.setBukPoSNFTs(
       nftPosContract.getAddress(),
     );
-    // console.log("🚀 ~ file: Marketplace.ts:98 ~ setBukPoSNFTs:");
 
+    // console.log("🚀 ~ file: Marketplace.ts:98 ~ setBukPoSNFTs:");
+    // Set all required
+    await bukProtocolContract.setBukRoyaltyInfo(300);
+    await bukProtocolContract.setHotelRoyaltyInfo(200);
+    await bukProtocolContract.setFirstOwnerRoyaltyInfo(200);
+    await nftContract.setTreasury(await bukTreasuryContract.getAddress());
     //Set BukProtocol in BukNFTs and BukPOSNFTs
   });
 
@@ -205,12 +214,17 @@ describe("Marketplace", function () {
   // Test cases for getting listed status
   describe("Listed status marketplace", function () {
     it("Should get listed status for not listed tokeId", async function () {
-      await expect(await marketplaceContract.isListed(0)).to.equal(false);
+      await expect(await marketplaceContract.isBookingListed(0)).to.equal(
+        false,
+      );
     });
 
     it("Should book and mint and get details", async function () {
       let tokenId = 1;
       let price = 100;
+      let date = new Date();
+      let checkin = date.setDate(date.getDate() + 2);
+      let checkout = date.setDate(date.getDate() + 3);
 
       //Grant allowance permission
       const res = await stableTokenContract.approve(
@@ -224,8 +238,8 @@ describe("Marketplace", function () {
           1,
           [100000000],
           [80000000],
-          1701504548,
-          1701590948,
+          checkin,
+          checkout,
           12,
           true,
         ),
@@ -241,7 +255,7 @@ describe("Marketplace", function () {
       ).not.be.reverted;
 
       let bookingDetails = await bukProtocolContract.getBookingDetails(1);
-      await expect(bookingDetails[5]).to.equal(1701590948);
+      await expect(bookingDetails[5]).to.equal(checkout);
     });
 
     it("Should book list for sale", async function () {
@@ -281,7 +295,9 @@ describe("Marketplace", function () {
       ).not.be.reverted;
       await expect(marketplaceContract.createListing(tokenId, salePrice)).not.be
         .reverted;
-      await expect(await marketplaceContract.isListed(tokenId)).to.equal(true);
+      await expect(await marketplaceContract.isBookingListed(tokenId)).to.equal(
+        true,
+      );
     });
     it("Should create list minSale check", async function () {
       let tokenId = 1;
@@ -397,7 +413,7 @@ describe("Marketplace", function () {
       let salePrice = 150000000;
       let date = new Date();
       let checkin = Math.floor(date.setDate(date.getDate() + 1) / 1000);
-      let checkout = Math.floor(date.setDate(date.getDate() + 2) / 1000);
+      let checkout = Math.floor(date.setDate(date.getDate() + 1) / 1000);
 
       //Grant allowance permission
       const res = await stableTokenContract.approve(
@@ -515,12 +531,74 @@ describe("Marketplace", function () {
     });
   });
 
+  // Test cases for buy booking
+  describe("Buy listing on marketplace", function () {
+    it("Buy bookings", async function () {
+      let tokenId = 1;
+      let price = 100000000;
+      let salePrice = 110000000;
+      let transferMoney = 210000000;
+      let date = new Date();
+      let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
+      let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
+
+      //Grant allowance permission
+      const res = await stableTokenContract.approve(
+        await bukProtocolContract.getAddress(),
+        200000000000,
+      );
+
+      // Book room and mint NFT
+      expect(
+        await bukProtocolContract.bookRoom(
+          1,
+          [price],
+          [price],
+          checkin,
+          checkout,
+          24,
+          true,
+        ),
+      ).not.be.reverted;
+
+      //Mint
+      await expect(
+        bukProtocolContract.mintBukNFT(
+          [tokenId],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
+      ).not.be.reverted;
+
+      await expect(marketplaceContract.createListing(tokenId, salePrice)).not.to
+        .be.reverted;
+      //Approve and transfer amount for transaction for buyer
+      await stableTokenContract.transfer(
+        await account1.getAddress(),
+        transferMoney,
+      );
+      await stableTokenContract
+        .connect(account1)
+        .approve(await marketplaceContract.getAddress(), transferMoney);
+      console.log(
+        await stableTokenContract.balanceOf(await account1.getAddress()),
+        " Balance of ",
+      );
+      await expect(marketplaceContract.connect(account1).buyRoom(tokenId)).not
+        .to.be.reverted;
+      await expect(
+        await nftContract.balanceOf(await account1.getAddress(), tokenId),
+      ).to.equal(1);
+    });
+  });
+
   // Test cases for getting listing details
   describe("Listing details marketplace", function () {
     it("Should get listed details should be zero", async function () {
       let listingDetails = await marketplaceContract.getListingDetails(0);
       await expect(listingDetails[0]).to.equal(0);
-      await expect(listingDetails[1]).to.equal(0);
+      await expect(listingDetails[2]).to.equal(0);
     });
     it("Should get listed details and verify for valid values", async function () {
       let tokenId = 1;
@@ -561,7 +639,8 @@ describe("Marketplace", function () {
       await marketplaceContract.createListing(tokenId, salePrice);
       let listingDetails = await marketplaceContract.getListingDetails(tokenId);
       await expect(listingDetails[0]).to.equal(salePrice);
-      await expect(listingDetails[1]).to.equal(0);
+      await expect(listingDetails[1]).to.equal(await owner.getAddress());
+      await expect(listingDetails[2]).to.equal(0);
     });
   });
 
@@ -608,7 +687,7 @@ describe("Marketplace", function () {
         .reverted;
       let listingDetails = await marketplaceContract.getListingDetails(tokenId);
       await expect(listingDetails[0]).to.equal(salePrice);
-      await expect(listingDetails[1]).to.equal(1);
+      await expect(listingDetails[2]).to.equal(1);
     });
     it("Should emit event delisted token ID", async function () {
       let tokenId = 1;

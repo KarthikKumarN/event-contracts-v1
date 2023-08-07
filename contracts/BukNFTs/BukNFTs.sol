@@ -98,21 +98,25 @@ contract BukNFTs is AccessControl, ERC1155 {
     }
 
     /**
-    * @dev Function to update the treasury address.
-    * @param _bukTreasuryContract Address of the treasury.
+     * @dev Function to update the treasury address.
+     * @param _bukTreasuryContract Address of the treasury.
      * @notice This function can only be called by addresses with `BUK_PROTOCOL_CONTRACT_ROLE`
-    */
-    function setTreasury(address _bukTreasuryContract) external onlyRole(DEFAULT_ADMIN_ROLE) {
+     */
+    function setTreasury(
+        address _bukTreasuryContract
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _bukTreasury = IBukTreasury(_bukTreasuryContract);
         emit SetTreasury(_bukTreasuryContract);
     }
 
     /**
-    * @dev Function to update the marketplace address.
-    * @param _marketplaceContract Address of the marketplace.
+     * @dev Function to update the marketplace address.
+     * @param _marketplaceContract Address of the marketplace.
      * @notice This function can only be called by addresses with `DEFAULT_ADMIN_ROLE`
-    */
-    function addMarketplace(address _marketplaceContract) external onlyRole(DEFAULT_ADMIN_ROLE) {
+     */
+    function setMarketplaceRole(
+        address _marketplaceContract
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _grantRole(MARKETPLACE_CONTRACT_ROLE, _marketplaceContract);
         emit SetMarketplace(_marketplaceContract);
     }
@@ -201,15 +205,13 @@ contract BukNFTs is AccessControl, ERC1155 {
     function royaltyInfo(
         uint256 _tokenId,
         uint256 _salePrice
-    )
-        external
-        view
-        returns (address receiver, uint256 royaltyAmount)
-    {
-        IBukProtocol.Royalty[] memory royaltyArray = bukProtocolContract.getRoyaltyInfo(_tokenId);
+    ) external view returns (address receiver, uint256 royaltyAmount) {
+        IBukProtocol.Royalty[] memory royaltyArray = bukProtocolContract
+            .getRoyaltyInfo(_tokenId);
         uint256 royaltyAmount_ = 0;
         for (uint i = 0; i < royaltyArray.length; i++) {
-            royaltyAmount_ += ((_salePrice * royaltyArray[i].royaltyFraction)/_feeDenominator());
+            royaltyAmount_ += ((_salePrice * royaltyArray[i].royaltyFraction) /
+                _feeDenominator());
         }
         return (address(_bukTreasury), royaltyAmount_);
     }
@@ -262,9 +264,15 @@ contract BukNFTs is AccessControl, ERC1155 {
             "ERC1155: caller is not token owner or approved"
         );
         uint256 len = _ids.length;
-        for(uint i=0; i<len; ++i) {
-            require(bukProtocolContract.getBookingDetails(_ids[i]).tradeable, "One of these NFT is non-transferable");
-            require(balanceOf(_from, _ids[i])>0, "From address does not own NFT");
+        for (uint i = 0; i < len; ++i) {
+            require(
+                bukProtocolContract.getBookingDetails(_ids[i]).tradeable,
+                "One of these NFT is non-transferable"
+            );
+            require(
+                balanceOf(_from, _ids[i]) > 0,
+                "From address does not own NFT"
+            );
         }
         //FIXME Is this condition necessary?
         require((_ids.length < 11), "Exceeds max booking transfer limit");
