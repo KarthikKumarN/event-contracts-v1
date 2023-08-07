@@ -214,7 +214,9 @@ describe("Marketplace", function () {
   // Test cases for getting listed status
   describe("Listed status marketplace", function () {
     it("Should get listed status for not listed tokeId", async function () {
-      await expect(await marketplaceContract.isListed(0)).to.equal(false);
+      await expect(await marketplaceContract.isBookingListed(0)).to.equal(
+        false,
+      );
     });
 
     it("Should book and mint and get details", async function () {
@@ -293,7 +295,9 @@ describe("Marketplace", function () {
       ).not.be.reverted;
       await expect(marketplaceContract.createListing(tokenId, salePrice)).not.be
         .reverted;
-      await expect(await marketplaceContract.isListed(tokenId)).to.equal(true);
+      await expect(await marketplaceContract.isBookingListed(tokenId)).to.equal(
+        true,
+      );
     });
     it("Should create list minSale check", async function () {
       let tokenId = 1;
@@ -569,7 +573,7 @@ describe("Marketplace", function () {
 
       await expect(marketplaceContract.createListing(tokenId, salePrice)).not.to
         .be.reverted;
-      //Approve and transfer by buyer
+      //Approve and transfer amount for transaction for buyer
       await stableTokenContract.transfer(
         await account1.getAddress(),
         transferMoney,
@@ -581,7 +585,6 @@ describe("Marketplace", function () {
         await stableTokenContract.balanceOf(await account1.getAddress()),
         " Balance of ",
       );
-      console.log(await account1.getAddress(), " await account1.getAddress()");
       await expect(marketplaceContract.connect(account1).buyRoom(tokenId)).not
         .to.be.reverted;
       await expect(
