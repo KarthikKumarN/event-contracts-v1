@@ -77,6 +77,7 @@ contract Marketplace is Context, IMarketplace, AccessControl {
             _msgSender(),
             ListingStatus.active
         );
+        _bukNFTContract.setApprovalForAll(address(this), true);
 
         emit ListingCreated(_msgSender(), _tokenId, _price);
     }
