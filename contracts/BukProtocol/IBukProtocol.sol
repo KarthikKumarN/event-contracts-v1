@@ -77,11 +77,6 @@ interface IBukProtocol {
     event SetTokenURI(uint256 indexed nftId, string indexed uri);
 
     /**
-     * @dev Emitted when currency is updated.
-     */
-    event SetCurrency(address indexed _currencyContract);
-
-    /**
      * @dev Emitted when BukNFTs contract address is updated.
      */
     event SetBukNFTs(address indexed _nftContractAddr);
@@ -92,9 +87,19 @@ interface IBukProtocol {
     event SetBukPoSNFTs(address indexed _nftPoSContractAddr);
 
     /**
-     * @dev Emitted when treasury is updated.
+     * @dev Emitted when Buk treasury is updated.
      */
-    event SetTreasury(address indexed treasuryContract);
+    event SetBukTreasury(address indexed treasuryContract);
+
+    /**
+     * @dev Emitted when Buk Wallet is updated.
+     */
+    event SetBukWallet(address indexed bukWalletContract);
+
+    /**
+     * @dev Emitted when currency is updated.
+     */
+    event SetCurrency(address indexed _currencyContract);
 
     /**
      * @dev Emitted when new Buk royalty has been updated
@@ -158,7 +163,14 @@ interface IBukProtocol {
     * @param _bukTreasuryContract Address of the treasury.
     * @notice This function can only be called by `ADMIN_ROLE`
     */
-    function setTreasury(address _bukTreasuryContract) external;
+    function setBukTreasury(address _bukTreasuryContract) external;
+
+    /**
+    * @dev Function to update the Buk Wallet address to collect commission.
+    * @param _bukWalletContract Address of the Buk Wallet.
+    * @notice This function can only be called by `ADMIN_ROLE`
+    */
+    function setBukWallet(address _bukWalletContract) external;
 
     /**
     * @dev Function to update the currency address.
@@ -238,6 +250,7 @@ interface IBukProtocol {
      * @param _count Number of rooms to be booked.
      * @param _total Total amount to be paid.
      * @param _baseRate Base rate of the room.
+     * @param _minSalePrice Minimum sale price for the booking.
      * @param _checkin Checkin date.
      * @param _checkout Checkout date.
      * @param _tradeTimeLimit Trade Limit of NFT based on Checkin time.
@@ -248,6 +261,7 @@ interface IBukProtocol {
         uint256 _count,
         uint256[] memory _total,
         uint256[] memory _baseRate,
+        uint256[] memory _minSalePrice,
         uint256 _checkin,
         uint256 _checkout,
         uint256 _tradeTimeLimit,
@@ -312,6 +326,14 @@ interface IBukProtocol {
         uint256 _refund,
         uint256 _charges
     ) external;
+
+    /**
+     * Function to get wallet addresses
+     * @return bukTreasury The address of the bukTreasury contract
+     * @return bukWallet The address of the bukWallet contract
+     * @return currency The address of the currency contract
+     */
+    function getWallets() external view returns (address bukTreasury, address bukWallet, address currency);
 
     /**
      * @dev To get the booking details

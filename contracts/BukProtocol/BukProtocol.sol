@@ -39,11 +39,6 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     uint8 public commission = 5;
 
     /**
-     * @dev Minimum sale percentage.
-     */
-    uint8 public MIN_SALE_PERCENTAGE = 80;
-
-    /**
      * @dev Counters.Counter bookingIds    Counter for booking IDs.
      */
     uint256 private _bookingIds;
@@ -69,13 +64,13 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
                 require(
                     (hasRole(ADMIN_ROLE, _msgSender()) ||
                         (nftPoSContract.balanceOf(_msgSender(), _ids[i]) > 0)),
-                        "Only admin or owner of the NFT can access the booking"
+                    "Only admin or owner of the NFT can access the booking"
                 );
             } else {
                 require(
                     hasRole(ADMIN_ROLE, _msgSender()) ||
                         (nftContract.balanceOf(_msgSender(), _ids[i]) > 0),
-                        "Only admin or owner of the NFT can access the booking"
+                    "Only admin or owner of the NFT can access the booking"
                 );
             }
         }
@@ -102,13 +97,13 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     }
 
     /**
-     * @dev See {IBukProtocol-setTreasury}.
+     * @dev See {IBukProtocol-setBukTreasury}.
      */
-    function setTreasury(
+    function setBukTreasury(
         address _bukTreasuryContract
     ) external onlyRole(ADMIN_ROLE) {
         _bukTreasury = IBukTreasury(_bukTreasuryContract);
-        emit SetTreasury(_bukTreasuryContract);
+        emit SetBukTreasury(_bukTreasuryContract);
     }
 
     /**
@@ -119,6 +114,16 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     ) external onlyRole(ADMIN_ROLE) {
         _currency = IERC20(_currencyContract);
         emit SetCurrency(_currencyContract);
+    }
+
+    /**
+     * @dev See {IBukProtocol-setBukWallet}.
+     */
+    function setBukWallet(
+        address _bukWalletContract
+    ) external onlyRole(ADMIN_ROLE) {
+        _bukWallet = _bukWalletContract;
+        emit SetBukWallet(_bukWalletContract);
     }
 
     /**
@@ -164,8 +169,16 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
             "Input arrays must have the same length"
         );
         delete _otherRoyalties;
+        uint256 totalRoyalties_ = bukRoyalty + hotelRoyalty + firstOwnerRoyalty;
         for (uint i = 0; i < _recipients.length; i++) {
-            require(_royaltyFractions[i] <= 100, "Percentage is more than 100");
+            require(
+                (_royaltyFractions[i] + totalRoyalties_) < 10000,
+                "Total Royalties cannot be more than 10000"
+            );
+            require(
+                _royaltyFractions[i] <= 10000,
+                "Royalty fraction is more than 10000"
+            );
             Royalty memory newRoyalty = Royalty(
                 _recipients[i],
                 _royaltyFractions[i]
@@ -180,6 +193,10 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     function setBukRoyaltyInfo(
         uint96 _royaltyFraction
     ) external onlyRole(ADMIN_ROLE) {
+        require(
+            _royaltyFraction <= 10000,
+            "Royalty fraction is more than 10000"
+        );
         bukRoyalty = _royaltyFraction;
     }
 
@@ -189,6 +206,10 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     function setHotelRoyaltyInfo(
         uint96 _royaltyFraction
     ) external onlyRole(ADMIN_ROLE) {
+        require(
+            _royaltyFraction <= 10000,
+            "Royalty fraction is more than 10000"
+        );
         hotelRoyalty = _royaltyFraction;
     }
 
@@ -198,6 +219,10 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     function setFirstOwnerRoyaltyInfo(
         uint96 _royaltyFraction
     ) external onlyRole(ADMIN_ROLE) {
+        require(
+            _royaltyFraction <= 10000,
+            "Royalty fraction is more than 10000"
+        );
         firstOwnerRoyalty = _royaltyFraction;
     }
 
@@ -226,6 +251,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         uint256 _count,
         uint256[] memory _total,
         uint256[] memory _baseRate,
+        uint256[] memory _minSalePrice,
         uint256 _checkin,
         uint256 _checkout,
         uint256 _tradeTimeLimit,
@@ -236,7 +262,8 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
             "Checkin date should be greater than current date"
         );
         require(
-            (_checkout > _checkin), "Checkout date should be greater than checkin date"
+            (_checkout > _checkin),
+            "Checkout date should be greater than checkin date"
         );
         uint256 total = 0;
         for (uint8 i = 0; i < _count; ++i) {
@@ -247,14 +274,15 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
             "Check the allowance of the sender"
         );
         require(
-            ((_total.length == _baseRate.length) && (_total.length == _count) && (_count > 0)),
+            ((_total.length == _baseRate.length) &&
+                (_total.length == _count) &&
+                (_count > 0)),
             "Array sizes mismatch"
         );
         uint256[] memory bookings = new uint256[](_count);
         uint commissionTotal = 0;
         for (uint8 i = 0; i < _count; ++i) {
             ++_bookingIds;
-            uint256 minSalePrice_ = (_total[i] * MIN_SALE_PERCENTAGE) / 100;
             bookingDetails[_bookingIds] = Booking(
                 _bookingIds,
                 BookingStatus.booked,
@@ -264,7 +292,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
                 _checkout,
                 _total[i],
                 _baseRate[i],
-                minSalePrice_,
+                _minSalePrice[i],
                 _tradeTimeLimit,
                 _tradeable
             );
@@ -400,8 +428,9 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         uint256 _charges
     ) external onlyRole(ADMIN_ROLE) {
         require(
-            (bookingDetails[_id].status == BookingStatus.confirmed),
-            "Not a confirmed Booking"
+            ((bookingDetails[_id].status == BookingStatus.confirmed) ||
+                (bookingDetails[_id].status == BookingStatus.checkedin)),
+            "Not a confirmed or checkedin Booking"
         );
         require(
             ((_penalty + _refund + _charges) < (bookingDetails[_id].total + 1)),
@@ -414,6 +443,18 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         _bukTreasury.cancelUSDCRefund(_charges, _bukWallet);
         bukNftsContract.burn(bookingDetails[_id].firstOwner, _id, 1, false);
         emit CancelRoom(_id, true);
+    }
+
+    /**
+     * @dev See {IBukProtocol-getWallets}.
+     */
+    function getWallets()
+        external
+        view
+        onlyRole(ADMIN_ROLE)
+        returns (address bukTreasury, address bukWallet, address currency)
+    {
+        return (address(_bukTreasury), address(_bukWallet), address(_currency));
     }
 
     /**
