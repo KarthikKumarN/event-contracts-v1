@@ -336,7 +336,7 @@ describe("Marketplace", function () {
       ).not.be.reverted;
       await expect(
         marketplaceContract.createListing(tokenId, salePrice),
-      ).to.be.revertedWith("Sale price cann't be lessthan base price");
+      ).to.be.revertedWith("Sale price cann't be lessthan minimum sale price");
     });
     it("Create list only confirmed booking check", async function () {
       let tokenId = 1;
