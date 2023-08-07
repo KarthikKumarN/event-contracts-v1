@@ -94,37 +94,38 @@ interface IMarketplace {
     /**
      * @dev Function will create a listing of Booking/Room NFT
      * @notice Only NFT owner can list
-     * @param tokenId_ room/booking NFT id
-     * @param price_  Sale price of room/booking
+     * @param _tokenId room/booking NFT id
+     * @param _price  Sale price of room/booking
      * @notice While listing will approve marketplace to excecute transfer
      */
-    function createListing(uint256 tokenId_, uint256 price_) external;
+    function createListing(uint256 _tokenId, uint256 _price) external;
 
     /**
      * @dev Function will delist of NFT
      * @dev NFT owner can delist
-     * @param tokenId_ NFT id
+     * @param _tokenId NFT id
      */
-    function delist(uint256 tokenId_) external;
+    function delist(uint256 _tokenId) external;
 
     /**
      * @dev Function will delete listing
      * @dev NFT owner or BukProtocal can delete lisitng
      * @dev When user checkin, buk protocol call this function
-     * @param tokenId_ NFT id
+     * @param _tokenId NFT id
      */
-    function deleteListing(uint256 tokenId_) external;
+    function deleteListing(uint256 _tokenId) external;
 
     /**
      * @dev Function will set price and status for listed of NFT
      * @dev Only NFT owner can update
-     * @param tokenId_ NFT id
+     * @param _tokenId NFT id
+     * @param _newPrice New price for NFT/Room
      */
-    function relist(uint256 tokenId_, uint256 newPrice_) external;
+    function relist(uint256 _tokenId, uint256 _newPrice) external;
 
     /**
      * @dev Function will enble user buy this room/booking NFT
-     * @param tokenId_ room/booking NFT id
+     * @param _tokenId room/booking NFT id
      * @dev Calculate buk, hotel and first buyer royalty amount and
      * transfer to corresponding wallets
      * @dev Transfers NFT/Booking to buyer
@@ -132,19 +133,26 @@ interface IMarketplace {
      * @dev Buy will excecute if tradeLimitTime is not crossed and in active status
      * @dev Will delete a entry once bought
      */
-    function buyRoom(uint256 tokenId_) external;
+    function buyRoom(uint256 _tokenId) external;
 
     /**
      * @dev Function will set new buk protocol address
-     * @param bukProtocol_ address of new buk protocol
+     * @param _bukProtocol address of new buk protocol
      */
-    function setBukProtocol(address bukProtocol_) external;
+    function setBukProtocol(address _bukProtocol) external;
 
     /**
      * @dev Function will set new buk NFT address
-     * @param bukNFT_ address of new buk protocol
+     * @param _bukNFT address of new buk protocol
      */
-    function setBukNFT(address bukNFT_) external;
+    function setBukNFT(address _bukNFT) external;
+
+    /**
+     * @dev Function will set new stable token address
+     * @param _tokenAddress address of new token address
+     * @notice This token is used for transaction to make payments
+     */
+    function setStableToken(address _tokenAddress) external;
 
     /**
      * @dev Gets stable token address
@@ -166,15 +174,15 @@ interface IMarketplace {
 
     /**
      * @dev Function will provide Lisiting details of booking
-     * @param tokenId_ room/booking NFT id
+     * @param _tokenId room/booking NFT id
      */
     function getListingDetails(
-        uint256 tokenId_
+        uint256 _tokenId
     ) external view returns (ListingDetails calldata);
 
     /**
      * @dev Function check is NFT/Booking listed
-     * @param tokenId_ TokenID of booking
+     * @param _tokenId TokenID of booking
      */
-    function isListed(uint256 tokenId_) external view returns (bool);
+    function isBookingListed(uint256 _tokenId) external view returns (bool);
 }
