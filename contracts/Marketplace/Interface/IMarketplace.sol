@@ -2,7 +2,7 @@
 pragma solidity =0.8.19;
 
 /**
- * @title Interface to define the buk marketplace
+ * @title Interface to define the BUK marketplace
  * @author Buk.technology
  * @dev Collection of all procedures related to the marketplace
  */
@@ -10,6 +10,7 @@ interface IMarketplace {
     /**
      * @title Struct to define the booking/room listing details
      * @param price, price of room/booking
+     * @param owner, Owner of room/booking
      * @param status, status of listing
      */
     struct ListingDetails {
@@ -20,7 +21,7 @@ interface IMarketplace {
 
     /**
      * @dev Enum for listing statuses.
-     * @var ListingStatus.active      Listing has been active.
+     * @var ListingStatus.active     Listing has been active.
      * @var ListingStatus.inactive   Listing has been inactive
      * @var ListingStatus.sold   Listing has been sold
      */
@@ -45,10 +46,10 @@ interface IMarketplace {
     );
 
     /**
-     * @dev Emitted when a room/booking NFT is listed
+     * @dev Emitted when a room/booking NFT is listed for sale
      * @param owner, Address of the initial owner
      * @param tokenId, tokenId is the unique identifier of booking NFT
-     * @param price, Price of room/booking
+     * @param price, Sale price of room/booking
      */
     event ListingCreated(
         address indexed owner,
@@ -58,7 +59,7 @@ interface IMarketplace {
 
     /**
      * @dev Emitted when an booking/room NFT is relisted
-     * @param tokenId, unique number of the booking NFT
+     * @param tokenId, unique ID of the booking NFT
      * @param oldPrice, old price of the room/booking
      * @param newPrice, new price of the room/booking
      */
@@ -67,13 +68,13 @@ interface IMarketplace {
     /**
      * @dev Emitted when an booking/room is delisted
      * @dev Updates status to ListingStatus.inactive
-     * @param tokenId, unique number of the booking NFT
+     * @param tokenId, unique ID of the booking NFT
      */
     event Delisted(uint256 indexed tokenId);
 
     /**
      * @dev Emitted when an booking/room is deleted from list
-     * @param tokenId, unique number of the booking NFT
+     * @param tokenId, unique ID of the booking NFT
      */
     event DeletedListing(uint256 indexed tokenId);
 
@@ -92,18 +93,27 @@ interface IMarketplace {
     event BukNFTSet(address oldAddress, address newAddress);
 
     /**
+     * @dev Emitted when new Stable token address has been updated
+     * @param oldAddress, Address of the old address
+     * @param newAddress, Address of the new address
+     */
+    event StableTokenSet(address oldAddress, address newAddress);
+
+    /**
      * @dev Function will create a listing of Booking/Room NFT
      * @notice Only NFT owner can list
      * @param _tokenId room/booking NFT id
      * @param _price  Sale price of room/booking
-     * @notice While listing will approve marketplace to excecute transfer
+     * @notice Will validate with room has not been checkedin and tradable shuld be true
+     * @notice Price shouldn't be lessthan minimum sale price
+     * @notice Trade time limit hours not crossed. Ex:Only able to trade before 12 hours of checkin
      */
     function createListing(uint256 _tokenId, uint256 _price) external;
 
     /**
      * @dev Function will delist of NFT
      * @dev NFT owner can delist
-     * @param _tokenId NFT id
+     * @param _tokenId Unique ID
      */
     function delist(uint256 _tokenId) external;
 
@@ -111,39 +121,39 @@ interface IMarketplace {
      * @dev Function will delete listing
      * @dev NFT owner or BukProtocol can delete lisitng
      * @notice When user checkin, Buk protocol can call this function
-     * @param _tokenId NFT id
+     * @param _tokenId Unique ID
      */
     function deleteListing(uint256 _tokenId) external;
 
     /**
-     * @dev Function will set price and status for listed of NFT
+     * @dev Function will update price and status for listed NFT
      * @dev Only NFT owner can update
-     * @param _tokenId NFT id
+     * @param _tokenId Unique ID
      * @param _newPrice New price for NFT/Room
      */
     function relist(uint256 _tokenId, uint256 _newPrice) external;
 
     /**
-     * @dev Function will enble user to buy this room/booking NFT
+     * @dev Function will enable user to buy this room/booking NFT
      * @param _tokenId room/booking NFT id
      * @dev Gets royalty details from BUK NFT and transfer the royalties
-     * @dev Owner should have approved marketplace to transfer its booking
-     * @dev Buyer should have approved marketplace to transfer its ERC20 tokens to pay price and fees
+     * @dev NFT Owner should give approve marketplace to transfer booking
+     * @dev Buyer should have approve marketplace to transfer its ERC20 tokens to pay price and royalties
      * @dev Only Marketplace contract can excecute transfer
-     * @dev Buy will excecute only if, tradeLimitTime is not crossed and in active status and not checkedin bookings
+     * @notice Buy will excecute only if, tradeLimitTime is not crossed and in active status and not checkedin bookings
      * @dev Will delete a entry once bought
      */
     function buyRoom(uint256 _tokenId) external;
 
     /**
-     * @dev Function will set new buk protocol address
-     * @param _bukProtocol address of new buk protocol
+     * @dev Function will set new BUK protocol address
+     * @param _bukProtocol address of new BUK protocol
      */
     function setBukProtocol(address _bukProtocol) external;
 
     /**
-     * @dev Function will set new buk NFT address
-     * @param _bukNFT address of new buk protocol
+     * @dev Function will set new BUK NFT address
+     * @param _bukNFT address of new BUK protocol
      */
     function setBukNFT(address _bukNFT) external;
 
@@ -161,14 +171,14 @@ interface IMarketplace {
     function getStableToken() external view returns (address);
 
     /**
-     * @dev Gets current buk protocol address
-     * @return address, Address of the buk protocol contract
+     * @dev Gets current BUK protocol address
+     * @return address, Address of the BUK protocol contract
      */
     function getBukProtocol() external view returns (address);
 
     /**
-     * @dev Gets current buk NFT address
-     * @return address, Address of the buk NFT contract
+     * @dev Gets current BUK NFT address
+     * @return address, Address of the BUK NFT contract
      */
     function getBukNFT() external view returns (address);
 
