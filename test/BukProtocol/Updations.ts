@@ -58,20 +58,22 @@ import {
         bukWallet.address,
       );
   
-      // BukPOSNFT
-      const BukPOSNFT = await ethers.getContractFactory("BukPOSNFTs");
-      nftPosContract = await BukPOSNFT.deploy(
-        "BUK_POS",
-        bukProtocolContract.getAddress(),
-      );
-  
-      // BukNFT
-      const BukNFT = await ethers.getContractFactory("BukNFTs");
-      nftContract = await BukNFT.deploy(
-        "BUK_NFT",
-        nftPosContract.getAddress(),
-        bukProtocolContract.getAddress(),
-      );
+    // BukPOSNFT
+    const BukPOSNFT = await ethers.getContractFactory("BukPOSNFTs");
+    nftPosContract = await BukPOSNFT.deploy(
+      "BUK_POS",
+      bukProtocolContract.getAddress(),
+      bukTreasuryContract.getAddress(),
+    );
+
+    // BukNFT
+    const BukNFT = await ethers.getContractFactory("BukNFTs");
+    nftContract = await BukNFT.deploy(
+      "BUK_NFT",
+      nftPosContract.getAddress(),
+      bukProtocolContract.getAddress(),
+      bukTreasuryContract.getAddress(),
+    );
   
       //Marketplace
       const Marketplace = await ethers.getContractFactory("Marketplace");

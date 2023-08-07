@@ -4,11 +4,6 @@ pragma solidity =0.8.19;
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 
 interface IBukNFTs is IERC1155 {
-    /**
-     * @dev Update the name of the contract.
-     * @notice This function can only be called by addresses with `BUK_PROTOCOL_CONTRACT_ROLE`
-     */
-    function updateName(string memory _contractName) external;
 
     /**
      * @dev Function to update the treasury address.
@@ -18,11 +13,31 @@ interface IBukNFTs is IERC1155 {
     function setBukTreasury(address _bukTreasuryContract) external;
 
     /**
+     * @dev Function to update the Buk Protocol Contract address.
+     * @param _bukProtocolContract Address of the Buk Protocol Contract.
+     * @notice This function can only be called by addresses with `DEFAULT_ADMIN_ROLE`
+     */
+    function setBukProtocol(address _bukProtocolContract) external;
+
+    /**
      * @dev Function to update the marketplace address.
      * @param _marketplaceContract Address of the marketplace.
      * @notice This function can only be called by addresses with `DEFAULT_ADMIN_ROLE`
      */
     function setMarketplaceRole(address _marketplaceContract) external;
+
+    /**
+     * @dev Update the name of the contract.
+     * @notice This function can only be called by addresses with `BUK_PROTOCOL_CONTRACT_ROLE`
+     */
+    function updateName(string memory _contractName) external;
+
+    /**
+     * @dev Function to update the BukPOSNFT to the contract
+     * @param _nftPoSContract address: The address of the NFT contract
+     * @notice This function can only be called by a contract with `DEFAULT_ADMIN_ROLE`
+     */
+    function grantBukPOSNFTRole(address _nftPoSContract) external;
 
     /**
      * @dev Sets the URI for a specific token ID.

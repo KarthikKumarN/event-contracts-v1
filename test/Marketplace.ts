@@ -67,6 +67,7 @@ describe("Marketplace", function () {
     nftPosContract = await BukPOSNFT.deploy(
       "BUK_POS",
       bukProtocolContract.getAddress(),
+      bukTreasuryContract.getAddress(),
     );
     // console.log(await nftPosContract.getAddress(), " nftPosContract");
 
@@ -76,6 +77,7 @@ describe("Marketplace", function () {
       "BUK_NFT",
       nftPosContract.getAddress(),
       bukProtocolContract.getAddress(),
+      bukTreasuryContract.getAddress(),
     );
     // console.log(await nftContract.getAddress(), " nftContract");
 

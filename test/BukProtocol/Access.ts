@@ -63,14 +63,16 @@ describe("BukProtocol Access Control", function () {
     nftPosContract = await BukPOSNFT.deploy(
       "BUK_POS",
       bukProtocolContract.getAddress(),
+      bukTreasuryContract.getAddress(),
     );
-
+    
     // BukNFT
     const BukNFT = await ethers.getContractFactory("BukNFTs");
     nftContract = await BukNFT.deploy(
       "BUK_NFT",
-      nftPosContract.getAddress(),
-      bukProtocolContract.getAddress(),
+      await nftPosContract.getAddress(),
+      await bukProtocolContract.getAddress(),
+      await bukTreasuryContract.getAddress(),
     );
 
     //Marketplace
@@ -96,8 +98,9 @@ describe("BukProtocol Access Control", function () {
   });
 
   describe("Manage Admin Role", function () {
-    it("Should set add new admin", async function () {      
+    it("Should add new admin", async function () {      
       //Add new address to Admin role
+      console.log("🚀 ~ file: Access.ts:108 ~ bukProtocolContract:", bukProtocolContract.getAddress())
       expect(
         await bukProtocolContract.connect(adminWallet).grantRole(
           "0xdf8b4c520ffe197c5343c6f5aec59570151ef9a492f2c624fd45ddde6135ec42",

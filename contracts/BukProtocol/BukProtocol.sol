@@ -88,9 +88,9 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         address _currencyContract,
         address _bukWalletContract
     ) {
-        _bukTreasury = IBukTreasury(_bukTreasuryContract);
-        _currency = IERC20(_currencyContract);
-        _bukWallet = _bukWalletContract;
+        _setBukTreasury(_bukTreasuryContract);
+        _setCurrency(_currencyContract);
+        _setBukWallet(_bukWalletContract);
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setupRole(ADMIN_ROLE, _msgSender());
         _grantRole(ADMIN_ROLE, _msgSender());
@@ -102,8 +102,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     function setBukTreasury(
         address _bukTreasuryContract
     ) external onlyRole(ADMIN_ROLE) {
-        _bukTreasury = IBukTreasury(_bukTreasuryContract);
-        emit SetBukTreasury(_bukTreasuryContract);
+        _setBukTreasury(_bukTreasuryContract);
     }
 
     /**
@@ -112,8 +111,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     function setCurrency(
         address _currencyContract
     ) external onlyRole(ADMIN_ROLE) {
-        _currency = IERC20(_currencyContract);
-        emit SetCurrency(_currencyContract);
+        _setCurrency(_currencyContract);
     }
 
     /**
@@ -122,8 +120,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     function setBukWallet(
         address _bukWalletContract
     ) external onlyRole(ADMIN_ROLE) {
-        _bukWallet = _bukWalletContract;
-        emit SetBukWallet(_bukWalletContract);
+        _setBukWallet(_bukWalletContract);
     }
 
     /**
@@ -484,6 +481,40 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         }
         return royalties;
     }
+
+    /**
+     * Internal function to set the BukTreasury contract address
+     * @param _bukTreasuryContract The address of the BukTreasury contract
+     */
+    function _setBukTreasury(
+        address _bukTreasuryContract
+    ) internal {
+        _bukTreasury = IBukTreasury(_bukTreasuryContract);
+        emit SetBukTreasury(_bukTreasuryContract);
+    }
+
+    /**
+     * Internal function to set the BukWallet contract address
+     * @param _bukWalletContract The address of the BukWallet contract
+     */
+    function _setBukWallet(
+        address _bukWalletContract
+    ) internal {
+        _bukWallet = _bukWalletContract;
+        emit SetBukWallet(_bukWalletContract);
+    }
+
+    /**
+     * Internal function to set the currency contract address
+     * @param _currencyContract The address of the currency contract
+     */
+    function _setCurrency(
+        address _currencyContract
+    ) internal {
+        _currency = IERC20(_currencyContract);
+        emit SetCurrency(_currencyContract);
+    }
+
 
     /**
      * @dev Function to do the booking payment.

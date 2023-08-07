@@ -5,13 +5,32 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "@openzeppelin/contracts/access/IAccessControl.sol";
 
 interface IBukPOSNFTs is IERC1155, IAccessControl {
+    /**
+     * @dev Function to update the treasury address.
+     * @param _bukTreasuryContract Address of the treasury.
+     * @notice This function can only be called by addresses with `BUK_PROTOCOL_CONTRACT_ROLE`
+     */
+    function setBukTreasury(address _bukTreasuryContract) external;
+
+    /**
+     * @dev Function to update the marketplace address.
+     * @param _marketplaceContract Address of the marketplace.
+     * @notice This function can only be called by addresses with `DEFAULT_ADMIN_ROLE`
+     */
+    function addMarketplace(address _marketplaceContract) external;
 
     /**
      * @dev Function to grant the BukNFT role to a given contract
      * @param _nftContract address: The address of the NFT contract
-     * @notice This function can only be called by a contract with `BUK_PROTOCOL_CONTRACT_ROLE`
+     * @notice This function can only be called by a contract with `ADMIN_ROLE`
      */
     function grantBukNFTRole(address _nftContract) external;
+
+    /**
+     * @dev Function to update the contract name
+     * @notice This function can only be called by a contract with `BUK_NFT_CONTRACT_ROLE`
+     */
+    function updateName(string memory _contractName) external;
 
     /**
      * @dev Function to set the URI for a given ID
@@ -20,12 +39,6 @@ interface IBukPOSNFTs is IERC1155, IAccessControl {
      * @notice This function can only be called by a contract with `BUK_NFT_CONTRACT_ROLE`
      */
     function setURI(uint256 _id, string memory _newuri) external;
-
-    /**
-     * @dev Function to update the contract name
-     * @notice This function can only be called by a contract with `BUK_NFT_CONTRACT_ROLE`
-     */
-    function updateName(string memory _contractName) external;
 
     /**
      * @dev Function to mint tokens
@@ -109,11 +122,7 @@ interface IBukPOSNFTs is IERC1155, IAccessControl {
     function royaltyInfo(
         uint256 _tokenId,
         uint256 _salePrice
-    )
-        external
-        view
-        returns (address receiver, uint256 royaltyAmount);
-
+    ) external view returns (address receiver, uint256 royaltyAmount);
 
     /**
      * @dev Function to get the URI for a given ID

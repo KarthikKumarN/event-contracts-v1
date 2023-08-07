@@ -52,6 +52,11 @@ contract BukNFTs is AccessControl, ERC1155 {
         keccak256("MARKETPLACE_CONTRACT");
 
     /**
+     * @dev Emitted when Buk Protocol Address is updated.
+     */
+    event SetBukProtocol(address indexed bukProtocolContract);
+
+    /**
      * @dev Emitted when treasury is updated.
      */
     event SetBukTreasury(address indexed treasuryContract);
@@ -75,6 +80,11 @@ contract BukNFTs is AccessControl, ERC1155 {
     );
 
     /**
+     * @dev Event to grant NFT contract role
+     */
+    event GrantNftPoSContractRole(address indexed nftPoSContractAddr);
+
+    /**
      * @dev Event to set token URI
      */
     event SetURI(uint256 indexed id, string indexed uri);
@@ -84,17 +94,20 @@ contract BukNFTs is AccessControl, ERC1155 {
      * @param _contractName NFT contract name
      * @param _bukPoSContract Address of the Buk PoS NFTs contract
      * @param _bukProtocolContract Address of the buk protocol contract
+     * @param _bukTreasuryContract Address of the Buk treasury contract.
      */
     constructor(
         string memory _contractName,
         address _bukPoSContract,
-        address _bukProtocolContract
+        address _bukProtocolContract,
+        address _bukTreasuryContract
     ) ERC1155("") {
-        name = _contractName;
+        _updateName(_contractName);
+        _setBukTreasury(_bukTreasuryContract);
+        _grantBukPOSNFTRole(_bukPoSContract);
+        _setBukProtocol(_bukProtocolContract);
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(BUK_PROTOCOL_CONTRACT_ROLE, _bukProtocolContract);
-        nftPoSContract = IBukPOSNFTs(_bukPoSContract);
-        bukProtocolContract = IBukProtocol(_bukProtocolContract);
     }
 
     /**
@@ -105,8 +118,18 @@ contract BukNFTs is AccessControl, ERC1155 {
     function setBukTreasury(
         address _bukTreasuryContract
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        _bukTreasury = IBukTreasury(_bukTreasuryContract);
-        emit SetBukTreasury(_bukTreasuryContract);
+        _setBukTreasury(_bukTreasuryContract);
+    }
+
+    /**
+     * @dev Function to update the Buk Protocol Contract address.
+     * @param _bukProtocolContract Address of the Buk Protocol Contract.
+     * @notice This function can only be called by addresses with `DEFAULT_ADMIN_ROLE`
+     */
+    function setBukProtocol(
+        address _bukProtocolContract
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _setBukProtocol(_bukProtocolContract);
     }
 
     /**
@@ -128,10 +151,21 @@ contract BukNFTs is AccessControl, ERC1155 {
     function updateName(
         string memory _contractName
     ) external onlyRole(BUK_PROTOCOL_CONTRACT_ROLE) {
-        name = _contractName;
         nftPoSContract.updateName(_contractName);
-        emit UpdateContractName(_contractName);
+        _updateName(_contractName);
     }
+
+    /**
+     * @dev Function to update the BukPOSNFT to the contract
+     * @param _nftPoSContract address: The address of the NFT contract
+     * @notice This function can only be called by a contract with `DEFAULT_ADMIN_ROLE`
+     */
+    function grantBukPOSNFTRole(
+        address _nftPoSContract
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _grantBukPOSNFTRole(_nftPoSContract);
+    }
+
 
     /**
      * @dev Sets the URI for a specific token ID.
@@ -274,8 +308,6 @@ contract BukNFTs is AccessControl, ERC1155 {
                 "From address does not own NFT"
             );
         }
-        //FIXME Is this condition necessary?
-        require((_ids.length < 11), "Exceeds max booking transfer limit");
         super._safeBatchTransferFrom(_from, _to, _ids, _amounts, _data);
     }
 
@@ -297,6 +329,43 @@ contract BukNFTs is AccessControl, ERC1155 {
         bytes4 interfaceId
     ) public view override(AccessControl, ERC1155) returns (bool) {
         return super.supportsInterface(interfaceId);
+    }
+
+    /**
+     * Internal function to update the contract name
+     * @param _contractName The new name for the contract
+     */
+    function _updateName(string memory _contractName) internal {
+        name = _contractName;
+        emit UpdateContractName(_contractName);
+    }
+
+    /**
+     * Internal function to set the Buk Protocol Contract address.
+     * @param _bukProtocolContract The address of the BukTreasury contract
+     */
+    function _setBukProtocol(address _bukProtocolContract) internal {
+        bukProtocolContract = IBukProtocol(_bukProtocolContract);
+        emit SetBukProtocol(_bukProtocolContract);
+    }
+
+    /**
+     * Internal function to set the BukTreasury contract address
+     * @param _bukTreasuryContract The address of the BukTreasury contract
+     */
+    function _setBukTreasury(address _bukTreasuryContract) internal {
+        _bukTreasury = IBukTreasury(_bukTreasuryContract);
+        emit SetBukTreasury(_bukTreasuryContract);
+    }
+    /**
+     * Internal function to grant the role to a BukPOSNFT contract
+     * @param _nftPoSContract The address of the BukPOSNFT contract to grant the role to
+     */
+    function _grantBukPOSNFTRole(
+        address _nftPoSContract
+    ) internal {
+        nftPoSContract = IBukPOSNFTs(_nftPoSContract);
+        emit GrantNftPoSContractRole(_nftPoSContract);
     }
 
     /**

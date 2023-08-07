@@ -56,13 +56,14 @@ describe("BukProtocol Bookings", function () {
       bukTreasuryContract.getAddress(),
       stableTokenContract.getAddress(),
       bukWallet.address,
-    );
+      );
 
     // BukPOSNFT
     const BukPOSNFT = await ethers.getContractFactory("BukPOSNFTs");
     nftPosContract = await BukPOSNFT.deploy(
       "BUK_POS",
       bukProtocolContract.getAddress(),
+      bukTreasuryContract.getAddress(),
     );
 
     // BukNFT
@@ -71,6 +72,7 @@ describe("BukProtocol Bookings", function () {
       "BUK_NFT",
       nftPosContract.getAddress(),
       bukProtocolContract.getAddress(),
+      bukTreasuryContract.getAddress(),
     );
 
     //Marketplace
