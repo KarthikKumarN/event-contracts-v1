@@ -363,6 +363,7 @@ describe("Marketplace", function () {
           1,
           [price],
           [price],
+          [price],
           checkin,
           checkout,
           12,
@@ -391,6 +392,7 @@ describe("Marketplace", function () {
       expect(
         await bukProtocolContract.bookRoom(
           1,
+          [price],
           [price],
           [price],
           checkin,
@@ -430,6 +432,7 @@ describe("Marketplace", function () {
       expect(
         await bukProtocolContract.bookRoom(
           1,
+          [price],
           [price],
           [price],
           checkin,
@@ -472,6 +475,7 @@ describe("Marketplace", function () {
           1,
           [price],
           [price],
+          [price],
           checkin,
           checkout,
           24,
@@ -512,6 +516,7 @@ describe("Marketplace", function () {
       expect(
         await bukProtocolContract.bookRoom(
           1,
+          [price],
           [price],
           [price],
           checkin,
@@ -557,6 +562,7 @@ describe("Marketplace", function () {
       expect(
         await bukProtocolContract.bookRoom(
           1,
+          [price],
           [price],
           [price],
           checkin,
@@ -625,6 +631,7 @@ describe("Marketplace", function () {
           1,
           [price],
           [price],
+          [price],
           checkin,
           checkout,
           24,
@@ -671,6 +678,7 @@ describe("Marketplace", function () {
           1,
           [price],
           [price],
+          [price],
           checkin,
           checkout,
           24,
@@ -712,6 +720,7 @@ describe("Marketplace", function () {
       expect(
         await bukProtocolContract.bookRoom(
           1,
+          [price],
           [price],
           [price],
           checkin,
