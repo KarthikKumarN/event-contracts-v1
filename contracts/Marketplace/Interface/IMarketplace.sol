@@ -109,8 +109,8 @@ interface IMarketplace {
 
     /**
      * @dev Function will delete listing
-     * @dev NFT owner or BukProtocal can delete lisitng
-     * @dev When user checkin, buk protocol call this function
+     * @dev NFT owner or BukProtocol can delete lisitng
+     * @notice When user checkin, Buk protocol can call this function
      * @param _tokenId NFT id
      */
     function deleteListing(uint256 _tokenId) external;
@@ -124,13 +124,13 @@ interface IMarketplace {
     function relist(uint256 _tokenId, uint256 _newPrice) external;
 
     /**
-     * @dev Function will enble user buy this room/booking NFT
+     * @dev Function will enble user to buy this room/booking NFT
      * @param _tokenId room/booking NFT id
-     * @dev Calculate buk, hotel and first buyer royalty amount and
-     * transfer to corresponding wallets
-     * @dev Transfers NFT/Booking to buyer
+     * @dev Gets royalty details from BUK NFT and transfer the royalties
+     * @dev Owner should have approved marketplace to transfer its booking
+     * @dev Buyer should have approved marketplace to transfer its ERC20 tokens to pay price and fees
      * @dev Only Marketplace contract can excecute transfer
-     * @dev Buy will excecute if tradeLimitTime is not crossed and in active status
+     * @dev Buy will excecute only if, tradeLimitTime is not crossed and in active status and not checkedin bookings
      * @dev Will delete a entry once bought
      */
     function buyRoom(uint256 _tokenId) external;
