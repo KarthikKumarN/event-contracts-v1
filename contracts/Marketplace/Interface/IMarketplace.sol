@@ -32,15 +32,15 @@ interface IMarketplace {
 
     /**
      * @dev Emitted when room/booking NFT bought
+     * @param tokenId, TokenId of the bought booking
      * @param previousOwner, Address of the previous owner
      * @param newOwner, Address of the new owner
-     * @param tokenId, TokenId of the bought booking
      * @param price, Price of the bought booking
      */
     event RoomBought(
+        uint256 tokenId,
         address indexed previousOwner,
         address indexed newOwner,
-        uint256 tokenId,
         uint256 price
     );
 
