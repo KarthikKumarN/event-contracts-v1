@@ -224,8 +224,8 @@ describe("Marketplace", function () {
           1,
           [100000000],
           [80000000],
-          1691064540,
-          1691150940,
+          1701504548,
+          1701590948,
           12,
           true,
         ),
@@ -241,7 +241,7 @@ describe("Marketplace", function () {
       ).not.be.reverted;
 
       let bookingDetails = await bukProtocolContract.getBookingDetails(1);
-      await expect(bookingDetails[5]).to.equal(1691150940);
+      await expect(bookingDetails[5]).to.equal(1701590948);
     });
 
     it("Should book list for sale", async function () {
@@ -396,8 +396,8 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let checkin = Math.floor(date.setDate(date.getDate()) / 1000);
-      let checkout = Math.floor(date.setDate(date.getDate() + 1) / 1000);
+      let checkin = Math.floor(date.setDate(date.getDate() + 1) / 1000);
+      let checkout = Math.floor(date.setDate(date.getDate() + 2) / 1000);
 
       //Grant allowance permission
       const res = await stableTokenContract.approve(
@@ -413,7 +413,7 @@ describe("Marketplace", function () {
           [price],
           checkin,
           checkout,
-          24,
+          60,
           true,
         ),
       ).not.be.reverted;

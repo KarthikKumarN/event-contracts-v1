@@ -67,13 +67,15 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         for (uint8 i = 0; i < len; ++i) {
             if (bookingDetails[_ids[i]].status == BookingStatus.checkedout) {
                 require(
-                    hasRole(ADMIN_ROLE, _msgSender()) ||
-                        (nftPoSContract.balanceOf(_msgSender(), _ids[i]) > 0)
+                    (hasRole(ADMIN_ROLE, _msgSender()) ||
+                        (nftPoSContract.balanceOf(_msgSender(), _ids[i]) > 0)),
+                        "Only admin or owner of the NFT can access the booking"
                 );
             } else {
                 require(
                     hasRole(ADMIN_ROLE, _msgSender()) ||
-                        (nftContract.balanceOf(_msgSender(), _ids[i]) > 0)
+                        (nftContract.balanceOf(_msgSender(), _ids[i]) > 0),
+                        "Only admin or owner of the NFT can access the booking"
                 );
             }
         }
@@ -365,9 +367,15 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         uint256 len = _ids.length;
         require(((len > 0) && (len < 11)), "Not in max-min booking limit");
         for (uint8 i = 0; i < len; ++i) {
+            //Check if the booking is checkedin
             require(
                 bookingDetails[_ids[i]].status == BookingStatus.checkedin,
                 "Check the Booking status"
+            );
+            //Check if the checkout date is less than current date
+            require(
+                (bookingDetails[_ids[i]].checkout < block.timestamp),
+                "Checkout date should be less than current date"
             );
         }
         for (uint8 i = 0; i < len; ++i) {

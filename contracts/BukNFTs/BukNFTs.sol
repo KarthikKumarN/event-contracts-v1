@@ -231,6 +231,10 @@ contract BukNFTs is AccessControl, ERC1155 {
         uint256 _amount,
         bytes memory _data
     ) public virtual override onlyRole(MARKETPLACE_CONTRACT_ROLE) {
+        require(
+            _from == _msgSender() || isApprovedForAll(_from, _msgSender()),
+            "ERC1155: caller is not token owner or approved"
+        );
         require(bukProtocolContract.getBookingDetails(_id).tradeable, "This NFT is non transferable");
         require(balanceOf(_from, _id)>0, "From address does not own NFT");
         super._safeTransferFrom(_from, _to, _id, _amount, _data);
@@ -253,6 +257,10 @@ contract BukNFTs is AccessControl, ERC1155 {
         uint256[] memory _amounts,
         bytes memory _data
     ) public virtual override onlyRole(MARKETPLACE_CONTRACT_ROLE) {
+        require(
+            _from == _msgSender() || isApprovedForAll(_from, _msgSender()),
+            "ERC1155: caller is not token owner or approved"
+        );
         uint256 len = _ids.length;
         for(uint i=0; i<len; ++i) {
             require(bukProtocolContract.getBookingDetails(_ids[i]).tradeable, "One of these NFT is non-transferable");
