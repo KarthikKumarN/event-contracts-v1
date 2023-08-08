@@ -58,7 +58,7 @@ interface IMarketplace {
     );
 
     /**
-     * @dev Emitted when an booking/room NFT is relisted
+     * @dev Emitted when a booking/room NFT is relisted
      * @param tokenId, unique ID of the booking NFT
      * @param oldPrice, old price of the room/booking
      * @param newPrice, new price of the room/booking
@@ -66,14 +66,14 @@ interface IMarketplace {
     event Relisted(uint256 indexed tokenId, uint256 oldPrice, uint256 newPrice);
 
     /**
-     * @dev Emitted when an booking/room is delisted
+     * @dev Emitted when a booking/room is delisted
      * @dev Updates status to ListingStatus.inactive
      * @param tokenId, unique ID of the booking NFT
      */
     event Delisted(uint256 indexed tokenId);
 
     /**
-     * @dev Emitted when an booking/room is deleted from list
+     * @dev Emitted when a booking/room is deleted from list
      * @param tokenId, unique ID of the booking NFT
      */
     event DeletedListing(uint256 indexed tokenId);
