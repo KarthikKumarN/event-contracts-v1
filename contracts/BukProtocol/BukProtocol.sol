@@ -49,7 +49,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     /**
      * @dev Constant for the role of admin
      */
-    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN");
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
     /**
      * @dev mapping(uint256 => Booking) bookingDetails   Mapping of booking IDs to booking details.
@@ -60,19 +60,11 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     modifier onlyAdminOwner(uint256[] memory _ids) {
         uint256 len = _ids.length;
         for (uint8 i = 0; i < len; ++i) {
-            if (bookingDetails[_ids[i]].status == BookingStatus.checkedout) {
-                require(
-                    (hasRole(ADMIN_ROLE, _msgSender()) ||
-                        (nftPoSContract.balanceOf(_msgSender(), _ids[i]) > 0)),
-                    "Only admin or owner of the NFT can access the booking"
-                );
-            } else {
-                require(
-                    hasRole(ADMIN_ROLE, _msgSender()) ||
-                        (nftContract.balanceOf(_msgSender(), _ids[i]) > 0),
-                    "Only admin or owner of the NFT can access the booking"
-                );
-            }
+            require(
+                hasRole(ADMIN_ROLE, _msgSender()) ||
+                (nftContract.balanceOf(_msgSender(), _ids[i]) > 0),
+                "Only admin or owner of the NFT can access the booking"
+            );
         }
         _;
     }

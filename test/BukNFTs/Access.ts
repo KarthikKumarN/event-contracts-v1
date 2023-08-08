@@ -1,15 +1,8 @@
-import {
-    time,
-    loadFixture,
-  } from "@nomicfoundation/hardhat-toolbox/network-helpers";
-  import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
   import { expect } from "chai";
   import { ethers } from "hardhat";
-  import { ContractTransactionResponse } from "ethers";
-  import { BukProtocol } from "../typechain-types";
-  import { bukNfTs } from "../typechain-types/contracts";
+  import {  keccak256, toUtf8Bytes } from "ethers";
   
-  describe("BukProtocol Access Control", function () {
+  describe("BukNFTs Access Control", function () {
     let stableTokenContract;
     let bukProtocolContract;
     let marketplaceContract;
@@ -98,12 +91,14 @@ import {
     });
   
     describe("Manage Admin Role", function () {
-      it("Should add new admin", async function () {      
+      it("Should add new admin", async function () { 
+        //Get the keccak256 hash of the ADMIN_ROLE
+        const ADMIN_ROLE = keccak256(toUtf8Bytes("ADMIN_ROLE"));
+
         //Add new address to Admin role
-        console.log("🚀 ~ file: Access.ts:108 ~ bukProtocolContract:", bukProtocolContract.getAddress())
         expect(
           await bukProtocolContract.connect(adminWallet).grantRole(
-            "0xdf8b4c520ffe197c5343c6f5aec59570151ef9a492f2c624fd45ddde6135ec42",
+            ADMIN_ROLE,
             account1
           ),
         ).not.be.reverted;
@@ -111,16 +106,19 @@ import {
         //Check if the new admin has ADMIN_ROLE
         expect(
           await bukProtocolContract.connect(adminWallet).hasRole(
-            "0xdf8b4c520ffe197c5343c6f5aec59570151ef9a492f2c624fd45ddde6135ec42",
+            ADMIN_ROLE,
             account1
           ),
         ).to.equal(true)
       });
-      it("Should set new admin and revoke old admin", async function () {
+      it("Should set new admin and revoke old admin", async function () { 
+        //Get the keccak256 hash of the ADMIN_ROLE
+        const ADMIN_ROLE = keccak256(toUtf8Bytes("ADMIN_ROLE"));
+
         //Add new address to Admin role
         expect(
           await bukProtocolContract.connect(adminWallet).grantRole(
-            "0xdf8b4c520ffe197c5343c6f5aec59570151ef9a492f2c624fd45ddde6135ec42",
+            ADMIN_ROLE,
             account1
           ),
         ).not.be.reverted;
@@ -128,7 +126,7 @@ import {
         //Check if the new admin has ADMIN_ROLE
         expect(
           await bukProtocolContract.connect(adminWallet).hasRole(
-            "0xdf8b4c520ffe197c5343c6f5aec59570151ef9a492f2c624fd45ddde6135ec42",
+            ADMIN_ROLE,
             account1
           ),
         ).to.equal(true)
@@ -136,7 +134,7 @@ import {
         //Revoke the new admin's access
         expect(
           await bukProtocolContract.connect(adminWallet).revokeRole(
-            "0xdf8b4c520ffe197c5343c6f5aec59570151ef9a492f2c624fd45ddde6135ec42",
+            ADMIN_ROLE,
             account1
           ),
         ).not.be.reverted;
@@ -145,17 +143,20 @@ import {
         //Check if the new admin still has ADMIN_ROLE
         expect(
           await bukProtocolContract.connect(adminWallet).hasRole(
-            "0xdf8b4c520ffe197c5343c6f5aec59570151ef9a492f2c624fd45ddde6135ec42",
+            ADMIN_ROLE,
             account1
           ),
         ).to.equal(false)
         
       });
-      it("Should execute function with new admin", async function () {      
+      it("Should execute function with new admin", async function () {       
+        //Get the keccak256 hash of the ADMIN_ROLE
+        const ADMIN_ROLE = keccak256(toUtf8Bytes("ADMIN_ROLE"));
+
         //Add new address to Admin role
         expect(
           await bukProtocolContract.connect(adminWallet).grantRole(
-            "0xdf8b4c520ffe197c5343c6f5aec59570151ef9a492f2c624fd45ddde6135ec42",
+            ADMIN_ROLE,
             account1
           ),
         ).not.be.reverted;
@@ -163,7 +164,7 @@ import {
         //Check if the new admin has ADMIN_ROLE
         expect(
           await bukProtocolContract.connect(adminWallet).hasRole(
-            "0xdf8b4c520ffe197c5343c6f5aec59570151ef9a492f2c624fd45ddde6135ec42",
+            ADMIN_ROLE,
             account1
           ),
         ).to.equal(true)

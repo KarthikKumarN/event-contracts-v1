@@ -636,6 +636,7 @@ describe("Marketplace", function () {
           true,
         ),
       ).not.to.be.reverted;
+      
       //Approve and transfer amount for transaction for buyer
       await stableTokenContract.transfer(
         await account1.getAddress(),

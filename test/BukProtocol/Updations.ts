@@ -1,13 +1,5 @@
-import {
-  time,
-  loadFixture,
-} from "@nomicfoundation/hardhat-toolbox/network-helpers";
-import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { ContractTransactionResponse } from "ethers";
-import { BukProtocol } from "../../typechain-types";
-import { bukNfTs } from "../../typechain-types/contracts";
     /**
      * The above function is a TypeScript function that retrieves the current timestamp of the latest
      * block in the Ethereum blockchain and saves an initial snapshot of the blockchain state.
@@ -194,25 +186,25 @@ describe("BukProtocol Updations", function () {
     });
   });
 
-  describe("Set Currency in BukProtocol", function () {
-    it("Should set Currency by admin", async function () {
-      //Set Currency
-      expect(await bukProtocolContract.connect(adminWallet).setCurrency(account1)).not.be.reverted;
+  describe("Set stable token in BukProtocol", function () {
+    it("Should set stable token by admin", async function () {
+      //Set Stable Token
+      expect(await bukProtocolContract.connect(adminWallet).setStableToken(account1)).not.be.reverted;
       const addresses = await bukProtocolContract.connect(adminWallet).getWallets()
       expect(addresses[2]).to.equal(await account1.getAddress());
     });
-    it("Should set Currency and emit events", async function () {
-      //Set Currency
+    it("Should set stable token and emit events", async function () {
+      //Set Stable Token
       expect(
         await bukProtocolContract
           .connect(adminWallet)
-          .setCurrency(account1))
-        .to.emit(bukProtocolContract, "SetCurrency")
+          .setStableToken(account1))
+        .to.emit(bukProtocolContract, "SetStableToken")
         .withArgs(await account1.getAddress());
     });
-    it("Should not set Currency if not admin", async function () {
-      //Set Currency
-      await expect(bukProtocolContract.connect(account2).setCurrency(account1)).to.be.reverted;
+    it("Should not set stable token if not admin", async function () {
+      //Set Stable Token
+      await expect(bukProtocolContract.connect(account2).setStableToken(account1)).to.be.reverted;
     });
   });
 
@@ -304,7 +296,7 @@ describe("BukProtocol Updations", function () {
           1,
           newUri,
         )).not.be.reverted;
-      const uri = await nftContract.bookingTickets(1);
+      const uri = await nftContract.uri(1);
       expect(uri).to.equal(newUri);
     });
     it("Should set Token URIs for BukPOSNFTs by admin", async function () {
@@ -347,9 +339,6 @@ describe("BukProtocol Updations", function () {
 
       await fastForwardTo(1701590949);
 
-
-      //TODO We can do this only after implementing checkout.
-
       //Check-out NFT
       await expect(
         bukProtocolContract.connect(adminWallet).checkout(
@@ -364,7 +353,7 @@ describe("BukProtocol Updations", function () {
           1,
           newUri,
         )).not.be.reverted;
-      const uri = await nftPosContract.bookingTickets(1);
+      const uri = await nftPosContract.uri(1);
       expect(uri).to.equal(newUri);
     });
     it("Should set Token URIs and emit events", async function () {
@@ -405,7 +394,7 @@ describe("BukProtocol Updations", function () {
           1,
           newUri,
         )) 
-        .to.emit(bukProtocolContract, "SetCurrency")
+        .to.emit(bukProtocolContract, "SetStableToken")
         .withArgs(1, newUri);
     });
     it("Should not set Token URIs if not admin", async function () {
@@ -460,7 +449,7 @@ describe("BukProtocol Updations", function () {
     it("Should set Buk Royalty and emit events", async function () {
       //Set Buk Royalty
       expect(await bukProtocolContract.connect(adminWallet).setBukRoyaltyInfo(200))
-        .to.emit(bukProtocolContract, "SetCurrency")
+        .to.emit(bukProtocolContract, "SetStableToken")
         .withArgs(await account1.getAddress());
     });
     it("Should not set Buk Royalty if not admin", async function () {
@@ -482,7 +471,7 @@ describe("BukProtocol Updations", function () {
     it("Should set Hotel Royalty and emit events", async function () {
       //Set Hotel Royalty
       expect(await bukProtocolContract.connect(adminWallet).setHotelRoyaltyInfo(200))
-        .to.emit(bukProtocolContract, "SetCurrency")
+        .to.emit(bukProtocolContract, "SetStableToken")
         .withArgs(await account1.getAddress());
     });
     it("Should not set Hotel Royalty if not admin", async function () {
@@ -504,7 +493,7 @@ describe("BukProtocol Updations", function () {
     it("Should set First Owner Royalty and emit events", async function () {
       //Set First Owner Royalty
       expect(await bukProtocolContract.connect(adminWallet).setFirstOwnerRoyaltyInfo(200))
-        .to.emit(bukProtocolContract, "SetCurrency")
+        .to.emit(bukProtocolContract, "SetStableToken")
         .withArgs(await account1.getAddress());
     });
     it("Should not set First Owner Royalty if not admin", async function () {
@@ -622,6 +611,14 @@ describe("BukProtocol Updations", function () {
       await expect(bukProtocolContract.connect(account1)
       .setOtherRoyaltyInfo(recipients, royaltyFractions))
       .to.be.reverted;
+    });
+    it("Should not set other Royalty if array size mismatch is there", async function () {
+      //Set Other Royalty
+      const recipients = [await account1.getAddress(), await account2.getAddress()]
+      const royaltyFractions = [2000]
+      await expect(bukProtocolContract.connect(adminWallet)
+      .setOtherRoyaltyInfo(recipients, royaltyFractions))
+      .to.be.revertedWith("Input arrays must have the same length");
     });
     it("Should not set other Royalty if total royalty fee is more than 10000", async function () {
       //Set Other Royalty

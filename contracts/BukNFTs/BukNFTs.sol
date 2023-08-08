@@ -43,13 +43,13 @@ contract BukNFTs is AccessControl, ERC1155 {
      * @dev Constant for the role of the Buk Protocol contract
      */
     bytes32 public constant BUK_PROTOCOL_CONTRACT_ROLE =
-        keccak256("BUK_PROTOCOL_CONTRACT");
+        keccak256("BUK_PROTOCOL_CONTRACT_ROLE");
 
     /**
      * @dev Constant for the role of the marketplace contract
      */
     bytes32 public constant MARKETPLACE_CONTRACT_ROLE =
-        keccak256("MARKETPLACE_CONTRACT");
+        keccak256("MARKETPLACE_CONTRACT_ROLE");
 
     /**
      * @dev Emitted when Buk Protocol Address is updated.
@@ -111,17 +111,6 @@ contract BukNFTs is AccessControl, ERC1155 {
     }
 
     /**
-     * @dev Function to update the treasury address.
-     * @param _bukTreasuryContract Address of the treasury.
-     * @notice This function can only be called by addresses with `BUK_PROTOCOL_CONTRACT_ROLE`
-     */
-    function setBukTreasury(
-        address _bukTreasuryContract
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        _setBukTreasury(_bukTreasuryContract);
-    }
-
-    /**
      * @dev Function to update the Buk Protocol Contract address.
      * @param _bukProtocolContract Address of the Buk Protocol Contract.
      * @notice This function can only be called by addresses with `DEFAULT_ADMIN_ROLE`
@@ -130,6 +119,17 @@ contract BukNFTs is AccessControl, ERC1155 {
         address _bukProtocolContract
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _setBukProtocol(_bukProtocolContract);
+    }
+
+    /**
+     * @dev Function to update the treasury address.
+     * @param _bukTreasuryContract Address of the treasury.
+     * @notice This function can only be called by addresses with `BUK_PROTOCOL_CONTRACT_ROLE`
+     */
+    function setBukTreasury(
+        address _bukTreasuryContract
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _setBukTreasury(_bukTreasuryContract);
     }
 
     /**
@@ -145,17 +145,6 @@ contract BukNFTs is AccessControl, ERC1155 {
     }
 
     /**
-     * @dev Update the name of the contract.
-     * @notice This function can only be called by addresses with `BUK_PROTOCOL_CONTRACT_ROLE`
-     */
-    function updateName(
-        string memory _contractName
-    ) external onlyRole(BUK_PROTOCOL_CONTRACT_ROLE) {
-        nftPoSContract.updateName(_contractName);
-        _updateName(_contractName);
-    }
-
-    /**
      * @dev Function to update the BukPOSNFT to the contract
      * @param _nftPoSContract address: The address of the NFT contract
      * @notice This function can only be called by a contract with `DEFAULT_ADMIN_ROLE`
@@ -164,6 +153,17 @@ contract BukNFTs is AccessControl, ERC1155 {
         address _nftPoSContract
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _grantBukPOSNFTRole(_nftPoSContract);
+    }
+
+    /**
+     * @dev Update the name of the contract.
+     * @notice This function can only be called by addresses with `BUK_PROTOCOL_CONTRACT_ROLE`
+     */
+    function updateName(
+        string memory _contractName
+    ) external onlyRole(BUK_PROTOCOL_CONTRACT_ROLE) {
+        nftPoSContract.updateName(_contractName);
+        _updateName(_contractName);
     }
 
 
@@ -342,7 +342,7 @@ contract BukNFTs is AccessControl, ERC1155 {
 
     /**
      * Internal function to set the Buk Protocol Contract address.
-     * @param _bukProtocolContract The address of the BukTreasury contract
+     * @param _bukProtocolContract The address of the Buk Protocol contract
      */
     function _setBukProtocol(address _bukProtocolContract) internal {
         bukProtocolContract = IBukProtocol(_bukProtocolContract);

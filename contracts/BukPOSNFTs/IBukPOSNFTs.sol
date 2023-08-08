@@ -5,6 +5,14 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "@openzeppelin/contracts/access/IAccessControl.sol";
 
 interface IBukPOSNFTs is IERC1155, IAccessControl {
+
+    /**
+     * @dev Function to update the Buk Protocol Contract address.
+     * @param _bukProtocolContract Address of the Buk Protocol Contract.
+     * @notice This function can only be called by addresses with `DEFAULT_ADMIN_ROLE`
+     */
+    function setBukProtocol(address _bukProtocolContract) external;
+    
     /**
      * @dev Function to update the treasury address.
      * @param _bukTreasuryContract Address of the treasury.
@@ -17,7 +25,7 @@ interface IBukPOSNFTs is IERC1155, IAccessControl {
      * @param _marketplaceContract Address of the marketplace.
      * @notice This function can only be called by addresses with `DEFAULT_ADMIN_ROLE`
      */
-    function addMarketplace(address _marketplaceContract) external;
+    function setMarketplaceRole(address _marketplaceContract) external;
 
     /**
      * @dev Function to grant the BukNFT role to a given contract

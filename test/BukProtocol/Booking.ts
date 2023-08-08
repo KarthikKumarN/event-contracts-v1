@@ -1,15 +1,5 @@
-import {
-  time,
-  loadFixture,
-} from "@nomicfoundation/hardhat-toolbox/network-helpers";
-import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { ContractTransactionResponse } from "ethers";
-import { BukProtocol } from "../../typechain-types";
-import { bukNfTs } from "../../typechain-types/contracts";
-import { Contract } from "@ethersproject/contracts";
-import { Signer } from "@ethersproject/abstract-signer";
 
 describe("BukProtocol Bookings", function () {
   let stableTokenContract;
@@ -43,7 +33,7 @@ describe("BukProtocol Bookings", function () {
       "USDC",
       18,
       owner.address,
-      10000000000,
+      100000000000,
     );
 
     //BukTreasury
@@ -471,7 +461,6 @@ describe("BukProtocol Bookings", function () {
         ),
       ).not.be.reverted;
 
-      //TODO Mint NFT
       expect((await
         bukProtocolContract.connect(owner).mintBukNFT(
           [1],
@@ -605,7 +594,45 @@ describe("BukProtocol Bookings", function () {
   });
 
   describe("Check-in for a booking in Buk Protocol", function () {
-    it("Should check-in successfully", async function () {
+    it("Should check-in successfully by admin", async function () {
+      //Grant allowance permission
+      const res = await stableTokenContract.connect(owner).approve(
+        await bukProtocolContract.getAddress(),
+        150000000,
+      );
+
+      //Book room
+      expect(
+        await bukProtocolContract.connect(owner).bookRoom(
+          1,
+          [100000000],
+          [80000000],
+          [70000000],
+          1701504548,
+          1701590948,
+          12,
+          true,
+        ),
+      ).not.be.reverted;
+
+      //Mint NFT
+      await expect(
+        bukProtocolContract.connect(owner).mintBukNFT(
+          [1],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
+      ).not.be.reverted;
+
+      //Check-in NFT
+      await expect(
+        bukProtocolContract.connect(adminWallet).checkin(
+          [1]
+        ),
+      ).not.be.reverted;
+    });
+        it("Should check-in successfully by owner", async function () {
       //Grant allowance permission
       const res = await stableTokenContract.connect(owner).approve(
         await bukProtocolContract.getAddress(),
@@ -706,26 +733,52 @@ describe("BukProtocol Bookings", function () {
         ),
       ).not.be.reverted;
 
-      //TODO Needs tradeability here.
-      //Check if NFT is transferable or not
-      //Transfer NFT to another account
-      // await expect(marketplaceContract.createListing(1, 110000000)).not.be
-      // .reverted;
-      // await expect(
-      //   nftContract.connect(owner).transferFrom(
-      //     owner.getAddress(),
-      //     account1.getAddress(),
-      //     1,
-      //   ),
-      // ).not.be.reverted
+      let tokenId = 1;
+      let salePrice = 110000000;
+      let transferMoney = 210000000;
+
+      await expect(marketplaceContract.connect(owner).createListing(tokenId, salePrice)).not.to
+        .be.reverted;
+
+      //Grant permission to the marketplace
+      await expect(
+        nftContract.connect(owner).setApprovalForAll(
+          await marketplaceContract.getAddress(),
+          true,
+        ),
+      ).not.to.be.reverted;
+
+      //Set Marketplace role in BukNFTs
+      expect(await nftContract.connect(adminWallet).setMarketplaceRole(marketplaceContract.getAddress()))
+        .not.be.reverted;
+
+      //Transfer tokens to buyer
+      await stableTokenContract.connect(owner).transfer(
+        await account1.getAddress(),
+        transferMoney,
+      );
+
+      //Approve tokens to marketplace by buyer
+      await stableTokenContract
+        .connect(account1)
+        .approve(await marketplaceContract.getAddress(), transferMoney);
+
+        //Buy NFT
+      await expect(marketplaceContract.connect(account1).buyRoom(tokenId)).not
+        .to.be.reverted;
+      
+      //Check NFT balance
+      await expect(
+        await nftContract.balanceOf(await account1.getAddress(), tokenId),
+      ).to.equal(1);
 
 
-      //Check-in NFT
-      // await expect(
-      //   bukProtocolContract.connect(owner).checkin(
-      //     [1]
-      //   ),
-      // ).not.be.reverted;
+      //Check-in NFT by new owner
+      await expect(
+        bukProtocolContract.connect(account1).checkin(
+          [1]
+        ),
+      ).not.be.reverted;
     });
     it("Should not check-in with empty array", async function () {
       //Grant allowance permission
