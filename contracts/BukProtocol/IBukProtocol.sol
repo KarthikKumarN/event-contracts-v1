@@ -102,18 +102,19 @@ interface IBukProtocol {
     event SetCurrency(address indexed _currencyContract);
 
     /**
-     * @dev Emitted when new Buk royalty has been updated
+     * @dev Emitted when new royalty has been updated
      * @param oldRoyalty, old buk royalty
      * @param newRoyalty, new buk royalty
+     * @notice This event is used when Buk, Hotel and First Owner royalties are updated
      */
-    event SetBukRoyalty(uint8 oldRoyalty, uint8 newRoyalty);
+    event SetRoyalty(uint96 oldRoyalty, uint96 newRoyalty);
 
     /**
-     * @dev Emitted when new hotel royalty has been updated
-     * @param oldRoyalty, old hotel royalty
-     * @param newRoyalty, new hotel royalty
+     * @dev Emitted when other royalties are updated
+     * @param oldRoyalty, array of old royalties
+     * @param newRoyalty, array od new royalties
      */
-    event SetHotelRoyalty(uint8 oldRoyalty, uint8 newRoyalty);
+    event SetOtherRoyalties(uint96[] oldRoyalty, uint96[] newRoyalty);
 
     /**
      * @dev Emitted when single room is booked.
@@ -201,17 +202,6 @@ interface IBukProtocol {
     function setTokenUri(uint _tokenId, string memory _newUri) external;
 
     /**
-    * @dev Function to define the royalties.
-    * @param _recipients Array of recipients of royalties
-    * @param _royaltyFractions Array of percentages for each recipients in the _recipients[] order.
-    * @notice This function can only be called by `ADMIN_ROLE`
-    */
-    function setOtherRoyaltyInfo(
-        address[] memory _recipients,
-        uint96[] memory _royaltyFractions
-    ) external;
-
-    /**
     * @dev Function to define the royalty Fraction for Buk.
     * @param _royaltyFraction Royalty Fraction.
     * @notice This function can only be called by `ADMIN_ROLE`
@@ -231,6 +221,17 @@ interface IBukProtocol {
     * @notice This function can only be called by `ADMIN_ROLE`
     */
     function setFirstOwnerRoyaltyInfo(uint96 _royaltyFraction) external;
+
+    /**
+    * @dev Function to define the royalties.
+    * @param _recipients Array of recipients of royalties
+    * @param _royaltyFractions Array of percentages for each recipients in the _recipients[] order.
+    * @notice This function can only be called by `ADMIN_ROLE`
+    */
+    function setOtherRoyaltyInfo(
+        address[] memory _recipients,
+        uint96[] memory _royaltyFractions
+    ) external;
 
     /**
      * @dev Update the name of the contract.

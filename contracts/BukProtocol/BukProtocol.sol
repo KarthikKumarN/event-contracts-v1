@@ -28,10 +28,11 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     IBukNFTs public nftContract;
     IBukPOSNFTs public nftPoSContract;
 
-    //Buk and Hotel Royalties
+    //Buk, Hotel, First Owner and other Royalties
     uint96 public bukRoyalty;
     uint96 public hotelRoyalty;
     uint96 public firstOwnerRoyalty;
+    Royalty[] public otherRoyalties;
 
     /**
      * @dev Commission charged on bookings.
@@ -44,7 +45,6 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     uint256 private _bookingIds;
 
     //COMMENT Need to add comment to this
-    Royalty[] private _otherRoyalties;
 
     /**
      * @dev Constant for the role of admin
@@ -155,36 +155,6 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     }
 
     /**
-     * @dev See {IBukProtocol-setRoyaltyInfo}.
-     */
-    function setOtherRoyaltyInfo(
-        address[] memory _recipients,
-        uint96[] memory _royaltyFractions
-    ) external onlyRole(ADMIN_ROLE) {
-        require(
-            _recipients.length == _royaltyFractions.length,
-            "Input arrays must have the same length"
-        );
-        delete _otherRoyalties;
-        uint256 totalRoyalties_ = bukRoyalty + hotelRoyalty + firstOwnerRoyalty;
-        for (uint i = 0; i < _recipients.length; i++) {
-            require(
-                (_royaltyFractions[i] + totalRoyalties_) < 10000,
-                "Total Royalties cannot be more than 10000"
-            );
-            require(
-                _royaltyFractions[i] <= 10000,
-                "Royalty fraction is more than 10000"
-            );
-            Royalty memory newRoyalty = Royalty(
-                _recipients[i],
-                _royaltyFractions[i]
-            );
-            _otherRoyalties.push(newRoyalty);
-        }
-    }
-
-    /**
      * @dev See {IBukProtocol-setBukRoyaltyInfo}.
      */
     function setBukRoyaltyInfo(
@@ -194,7 +164,9 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
             _royaltyFraction <= 10000,
             "Royalty fraction is more than 10000"
         );
+        uint96 bukRoyalty_ = bukRoyalty;
         bukRoyalty = _royaltyFraction;
+        emit SetRoyalty(bukRoyalty_, _royaltyFraction);
     }
 
     /**
@@ -207,7 +179,9 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
             _royaltyFraction <= 10000,
             "Royalty fraction is more than 10000"
         );
+        uint96 hotelRoyalty_ = hotelRoyalty;
         hotelRoyalty = _royaltyFraction;
+        emit SetRoyalty(hotelRoyalty_, _royaltyFraction);
     }
 
     /**
@@ -220,7 +194,47 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
             _royaltyFraction <= 10000,
             "Royalty fraction is more than 10000"
         );
+        uint96 firstOwnerRoyalty_ = firstOwnerRoyalty;
         firstOwnerRoyalty = _royaltyFraction;
+        emit SetRoyalty(firstOwnerRoyalty_, _royaltyFraction);
+    }
+
+    /**
+     * @dev See {IBukProtocol-setRoyaltyInfo}.
+     */
+    function setOtherRoyaltyInfo(
+        address[] memory _recipients,
+        uint96[] memory _royaltyFractions
+    ) external onlyRole(ADMIN_ROLE) {
+        require(
+            _recipients.length == _royaltyFractions.length,
+            "Input arrays must have the same length"
+        );
+        uint96[] memory oldRoyalties_ = new uint96[](otherRoyalties.length);
+        for (uint i = 0; i < otherRoyalties.length; i++) {
+            oldRoyalties_[i] = otherRoyalties[i].royaltyFraction;
+        }
+        uint256 totalRoyalties_ = bukRoyalty + hotelRoyalty + firstOwnerRoyalty;
+        for (uint i = 0; i < _recipients.length; i++) {
+            require(
+                _royaltyFractions[i] <= 10000,
+                "Royalty fraction is more than 10000"
+            );
+            totalRoyalties_ += _royaltyFractions[i];
+        }
+        require(
+            totalRoyalties_ < 10000,
+            "Total Royalties cannot be more than 10000"
+        );
+        delete otherRoyalties;
+        for (uint i = 0; i < _recipients.length; i++) {
+            Royalty memory newRoyalty = Royalty(
+                _recipients[i],
+                _royaltyFractions[i]
+            );
+            otherRoyalties.push(newRoyalty);
+        }
+        emit SetOtherRoyalties(oldRoyalties_, _royaltyFractions);
     }
 
     /**
@@ -469,15 +483,15 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     function getRoyaltyInfo(
         uint256 _tokenId
     ) external view returns (Royalty[] memory) {
-        Royalty[] memory royalties = new Royalty[](_otherRoyalties.length + 3);
+        Royalty[] memory royalties = new Royalty[](otherRoyalties.length + 3);
         royalties[0] = Royalty(address(_bukTreasury), bukRoyalty);
         royalties[1] = Royalty(address(_bukTreasury), hotelRoyalty);
         royalties[2] = Royalty(
             bookingDetails[_tokenId].firstOwner,
             firstOwnerRoyalty
         );
-        for (uint i = 0; i < _otherRoyalties.length; i++) {
-            royalties[i + 3] = _otherRoyalties[i];
+        for (uint i = 0; i < otherRoyalties.length; i++) {
+            royalties[i + 3] = otherRoyalties[i];
         }
         return royalties;
     }
