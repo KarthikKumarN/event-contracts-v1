@@ -2,7 +2,7 @@
 pragma solidity =0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "contracts/Token//interface/IToken.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 import "contracts/Marketplace/Interface/IMarketplace.sol";
@@ -11,7 +11,7 @@ import "contracts/BukNFTs/IBukNFTs.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract Marketplace is Context, IMarketplace, AccessControl {
-    using SafeERC20 for IToken;
+    using SafeERC20 for IERC20;
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
     bytes32 public constant BUK_PROTOCOL_ROLE = keccak256("BUK_PROTOCOL_ROLE");
 
@@ -19,11 +19,11 @@ contract Marketplace is Context, IMarketplace, AccessControl {
     IBukProtocol private _bukProtocalContract;
     IBukNFTs private _bukNFTContract;
 
-    // Address of owner who can perform adminitotor work
+    // Address of owner who can perform administrator work
     address private _owner;
 
     // Currency used for transaction
-    IToken private _stableToken;
+    IERC20 private _stableToken;
 
     // Captures listed bookings for sale
     mapping(uint256 => ListingDetails) private _listedNFT;
@@ -253,7 +253,7 @@ contract Marketplace is Context, IMarketplace, AccessControl {
     function _setStableToken(address _tokenAddress) private {
         require(_tokenAddress != address(0), "Invalid address");
         address oldAddress = address(_stableToken);
-        _stableToken = IToken(_tokenAddress);
+        _stableToken = IERC20(_tokenAddress);
 
         emit BukNFTSet(oldAddress, _tokenAddress);
     }

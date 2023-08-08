@@ -862,7 +862,7 @@ describe("Marketplace", function () {
       let listingDetails = await marketplaceContract.getListingDetails(tokenId);
       await expect(listingDetails[0]).to.equal(salePrice);
       await expect(listingDetails[1]).to.equal(await owner.getAddress());
-      await expect(listingDetails[2]).to.equal(0);
+      await expect(listingDetails[2]).to.equal(1);
     });
   });
 
@@ -910,7 +910,7 @@ describe("Marketplace", function () {
         .reverted;
       let listingDetails = await marketplaceContract.getListingDetails(tokenId);
       await expect(listingDetails[0]).to.equal(salePrice);
-      await expect(listingDetails[2]).to.equal(1);
+      await expect(listingDetails[2]).to.equal(0);
     });
     it("Should emit event delisted token ID", async function () {
       let tokenId = 1;
@@ -1280,7 +1280,7 @@ describe("Marketplace", function () {
         .be.reverted;
       let listingDetails = await marketplaceContract.getListingDetails(tokenId);
       await expect(listingDetails[0]).to.equal(newPrice);
-      await expect(listingDetails[2]).to.equal(0);
+      await expect(listingDetails[2]).to.equal(1);
     });
     it("Should owner only can relist listing", async function () {
       let tokenId = 1;
