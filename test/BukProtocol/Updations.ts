@@ -567,6 +567,54 @@ describe("BukProtocol Updations", function () {
         .to.emit(bukProtocolContract, "SetOtherRoyalties")
         .withArgs([], [2000, 3000]);
     });
+    it("Should set and replace the existing other royalties by admin", async function () {
+            //Grant allowance permission
+            const res = await stableTokenContract.connect(owner).approve(
+              await bukProtocolContract.getAddress(),
+              150000000,
+            );
+      
+            //Book room
+            expect(
+              await bukProtocolContract.connect(owner).bookRoom(
+                1,
+                [100000000],
+                [80000000],
+                [70000000],
+                1701504548,
+                1701590948,
+                12,
+                true,
+              ),
+            ).not.be.reverted;
+      
+            //Mint NFT
+            await expect(
+              bukProtocolContract.connect(owner).mintBukNFT(
+                [1],
+                [
+                  "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+                ],
+              ),
+            ).not.be.reverted;
+            
+      //Set Other Royalty
+      const recipients = [await account1.getAddress(), await account2.getAddress()]
+      const royaltyFractions = [2000, 3000]
+      expect(await bukProtocolContract.connect(adminWallet).setOtherRoyaltyInfo(recipients, royaltyFractions)).not.be.reverted;
+      const royaltyInfo = await bukProtocolContract.getRoyaltyInfo(1);
+      for(let i=3; i<royaltyInfo.length; i++) {
+        expect(royaltyFractions[i-3]).to.equal(royaltyInfo[i][1]);
+      }
+
+      //Setting new royalties and check the update
+      const newRoyaltyFractions = [4000, 1000]
+      expect(await bukProtocolContract.connect(adminWallet).setOtherRoyaltyInfo(recipients, newRoyaltyFractions)).not.be.reverted;
+      const newRoyaltyInfo = await bukProtocolContract.getRoyaltyInfo(1);
+      for(let i=3; i<newRoyaltyInfo.length; i++) {
+        expect(newRoyaltyFractions[i-3]).to.equal(newRoyaltyInfo[i][1]);
+      }
+    });
     it("Should not set other Royalty if not admin", async function () {
       //Set Other Royalty
       const recipients = [await account1.getAddress(), await account2.getAddress()]
