@@ -1,7 +1,52 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { keccak256, toUtf8Bytes } from "ethers";
+    /**
+ * The above function is a TypeScript function that retrieves the current timestamp of the latest
+ * block in the Ethereum blockchain and saves an initial snapshot of the blockchain state.
+ * @returns The function `getCurrentTime` returns a Promise that resolves to a number, which is the
+ * current timestamp of the latest block.
+ */
+    const getCurrentTime = async (): Promise<number> => {
+      const block: any = await ethers.provider.getBlock("latest");
+      return block.timestamp;
+    };
+    let initialSnapshotId: number;
+    const saveInitialSnapshot = async () => {
+      const response = await ethers.provider.send("evm_snapshot");
+      initialSnapshotId = response;
+    };
+    /**
+     * The function `restoreInitialSnapshot` reverts the Ethereum Virtual Machine (EVM) state to the
+     * initial snapshot identified by `initialSnapshotId`.
+     */
+    const restoreInitialSnapshot = async () => {
+      await ethers.provider.send("evm_revert", [initialSnapshotId]);
+    };
+    /**
+     * The function `fastForwardTo` allows you to fast forward the Ethereum Virtual Machine (EVM) to
+     * a specific timestamp.
+     * @param {number} timestamp - The `timestamp` parameter is a number representing the desired
+     * timestamp to fast forward to. It is the target time that you want to set for the Ethereum
+     * Virtual Machine (EVM) during testing or development.
+     */
+    const fastForwardTo = async (timestamp: number): Promise<void> => {
+      const currentTime = await getCurrentTime();
+      const diff = timestamp - currentTime;
 
+      if (diff > 0) {
+        await ethers.provider.send("evm_increaseTime", [diff]);
+        await ethers.provider.send("evm_mine");
+      } else {
+        await restoreInitialSnapshot();
+        const currentTime = await getCurrentTime(); // Store current time before calculating difference
+        const remainingDiff = timestamp - currentTime;
+        if (remainingDiff > 0) {
+          await ethers.provider.send("evm_increaseTime", [remainingDiff]);
+          await ethers.provider.send("evm_mine");
+        }
+      }
+    };
 describe("BukPOSNFTs Updations", function () {
   let stableTokenContract;
   let bukProtocolContract;
@@ -121,10 +166,18 @@ describe("BukPOSNFTs Updations", function () {
         ],
       ),
     ).not.be.reverted;
+
+
+    //Check-in NFT
+    await expect(
+      bukProtocolContract.connect(owner).checkin(
+        [1]
+      ),
+    ).not.be.reverted;
   });
 
-  describe("Set Buk Protocol in BukNFTs", function () {
-    it("Should set Buk Protocol in BukNFTs", async function () {
+  describe("Set Buk Protocol in BukPOSNFTs", function () {
+    it("Should set Buk Protocol in BukPOSNFTs", async function () {
       expect(await nftPosContract.setBukProtocol(await bukProtocolContract.getAddress()))
         .not.be.reverted;
 
@@ -142,11 +195,27 @@ describe("BukPOSNFTs Updations", function () {
     })
   });
 
-  describe("Set Marketplace Role in BukNFTs", function () {
+  describe("Set Buk Treasury in BukPOSNFTs", function () {
+    it("Should set Buk Treasury in BukPOSNFTs", async function () {
+      expect(await nftPosContract.setBukTreasury(await bukTreasuryContract.getAddress()))
+        .not.be.reverted;
+    });
+    it("Should set Buk Treasury and emit event", async function () {
+      expect(await nftPosContract.setBukTreasury(bukTreasuryContract.getAddress()))
+        .to.emit(nftPosContract, "SetBukTreasury")
+        .withArgs(bukTreasuryContract.getAddress());
+    });
+    it("Should revert if not called by admin", async function () {
+      await expect(nftPosContract.connect(account1)
+        .setBukTreasury(bukTreasuryContract.getAddress())).to.be.reverted;
+    })
+  });
+
+  describe("Set Marketplace Role in BukPOSNFTs", function () {
     //Get the keccak256 hash of the MARKETPLACE_ROLE
     const MARKETPLACE_ROLE = keccak256(toUtf8Bytes("MARKETPLACE_ROLE"));
 
-    it("Should set Marketplace in BukNFTs", async function () {
+    it("Should set Marketplace in BukPOSNFTs", async function () {
       expect(await nftPosContract.setMarketplaceRole(marketplaceContract.getAddress()))
         .not.be.reverted;
       //Check if Marketplace is set
@@ -186,19 +255,35 @@ describe("BukPOSNFTs Updations", function () {
   });
 
   describe("Safe transfer of Buk PoS NFTs", function () {
+    /* The above code is using the Chai testing framework to define a "before" and "after" hook. */
+    beforeEach(async function () {
+      await saveInitialSnapshot();
+
+      await fastForwardTo(1701590949);
+
+      //Check-out NFT
+      await expect(
+        bukProtocolContract.connect(adminWallet).checkout(
+          [1]
+        ),
+      ).not.be.reverted;
+    });
+    afterEach(async function () {
+      await restoreInitialSnapshot();
+    });
     it("Should safe transfer Buk PoS NFTs", async function () {
       //Approve marketplace
-      await expect(nftContract.connect(owner)
+      await expect(nftPosContract.connect(owner)
         .setApprovalForAll(await testMarketplace1.getAddress(), 1)
       ).not.be.reverted;
 
       //Check the allowance
-      const allowance = await nftContract.connect(owner).isApprovedForAll(owner.address, await testMarketplace1.getAddress())
+      const allowance = await nftPosContract.connect(owner).isApprovedForAll(owner.address, await testMarketplace1.getAddress())
 
-      expect(await nftContract.setMarketplaceRole(testMarketplace1.getAddress()))
+      expect(await nftPosContract.setMarketplaceRole(testMarketplace1.getAddress()))
         .not.be.reverted;
       expect(
-        await nftContract.connect(testMarketplace1).safeTransferFrom(
+        await nftPosContract.connect(testMarketplace1).safeTransferFrom(
           await owner.getAddress(),
           await account1.getAddress(),
           1,
@@ -211,17 +296,17 @@ describe("BukPOSNFTs Updations", function () {
 
     it("Should safe transfer Buk PoS NFTs and emit event", async function () {
       //Approve marketplace
-      await expect(nftContract.connect(owner)
+      await expect(nftPosContract.connect(owner)
         .setApprovalForAll(await testMarketplace1.getAddress(), 1)
       ).not.be.reverted;
 
       //Check the allowance
-      const allowance = await nftContract.connect(owner).isApprovedForAll(owner.address, await testMarketplace1.getAddress())
+      const allowance = await nftPosContract.connect(owner).isApprovedForAll(owner.address, await testMarketplace1.getAddress())
 
-      expect(await nftContract.setMarketplaceRole(testMarketplace1.getAddress()))
+      expect(await nftPosContract.setMarketplaceRole(testMarketplace1.getAddress()))
         .not.be.reverted;
       expect(
-        await nftContract.connect(testMarketplace1).safeTransferFrom(
+        await nftPosContract.connect(testMarketplace1).safeTransferFrom(
           await owner.getAddress(),
           await account1.getAddress(),
           1,
@@ -229,24 +314,24 @@ describe("BukPOSNFTs Updations", function () {
           "0x"
         )
       )
-        .to.emit(nftContract, "TransferSingle")
+        .to.emit(nftPosContract, "TransferSingle")
         .withArgs(await testMarketplace1.getAddress(), owner.getAddress(), account1.getAddress(), 1, 1);
 
     })
 
     it("Should revert if not called by marketplace", async function () {
       //Approve marketplace
-      await expect(nftContract.connect(owner)
+      await expect(nftPosContract.connect(owner)
         .setApprovalForAll(await testMarketplace1.getAddress(), 1)
       ).not.be.reverted;
 
       //Check the allowance
-      const allowance = await nftContract.connect(owner).isApprovedForAll(owner.address, await testMarketplace1.getAddress())
+      const allowance = await nftPosContract.connect(owner).isApprovedForAll(owner.address, await testMarketplace1.getAddress())
 
-      expect(await nftContract.setMarketplaceRole(testMarketplace1.getAddress()))
+      expect(await nftPosContract.setMarketplaceRole(testMarketplace1.getAddress()))
         .not.be.reverted;
       await expect(
-        nftContract.connect(account1).safeTransferFrom(
+        nftPosContract.connect(account1).safeTransferFrom(
           await owner.getAddress(),
           await account1.getAddress(),
           1,
@@ -260,17 +345,17 @@ describe("BukPOSNFTs Updations", function () {
   describe("Safe batch transfer of Buk PoS NFTs", function () {
     it("Should safe batch transfer Buk PoS NFTs", async function () {
       //Approve marketplace
-      await expect(nftContract.connect(owner)
+      await expect(nftPosContract.connect(owner)
         .setApprovalForAll(await testMarketplace1.getAddress(), 1)
       ).not.be.reverted;
 
       //Check the allowance
-      const allowance = await nftContract.connect(owner).isApprovedForAll(owner.address, await testMarketplace1.getAddress())
+      const allowance = await nftPosContract.connect(owner).isApprovedForAll(owner.address, await testMarketplace1.getAddress())
 
-      expect(await nftContract.setMarketplaceRole(testMarketplace1.getAddress()))
+      expect(await nftPosContract.setMarketplaceRole(testMarketplace1.getAddress()))
         .not.be.reverted;
       expect(
-        await nftContract.connect(testMarketplace1).safeBatchTransferFrom(
+        await nftPosContract.connect(testMarketplace1).safeBatchTransferFrom(
           await owner.getAddress(),
           await account1.getAddress(),
           [1],
@@ -280,23 +365,23 @@ describe("BukPOSNFTs Updations", function () {
       ).not.be.reverted;
 
     })
-    
+
     it("Should safe batch transfer Buk PoS NFTs and emit event", async function () {
       //Approve marketplace
-      await expect(nftContract.connect(owner)
+      await expect(nftPosContract.connect(owner)
         .setApprovalForAll(await testMarketplace1.getAddress(), 1)
       ).not.be.reverted;
 
       //Check the allowance
-      const allowance = await nftContract.connect(owner).isApprovedForAll(owner.address, await testMarketplace1.getAddress())
+      const allowance = await nftPosContract.connect(owner).isApprovedForAll(owner.address, await testMarketplace1.getAddress())
 
       //Set Marketplace
-      expect(await nftContract.setMarketplaceRole(testMarketplace1.getAddress()))
+      expect(await nftPosContract.setMarketplaceRole(testMarketplace1.getAddress()))
         .not.be.reverted;
 
       //Safe batch transfer
       expect(
-        await nftContract.connect(testMarketplace1).safeBatchTransferFrom(
+        await nftPosContract.connect(testMarketplace1).safeBatchTransferFrom(
           await owner.getAddress(),
           await account1.getAddress(),
           [1],
@@ -304,26 +389,26 @@ describe("BukPOSNFTs Updations", function () {
           "0x"
         )
       )
-        .to.emit(nftContract, "TransferBatch")
+        .to.emit(nftPosContract, "TransferBatch")
         .withArgs(await testMarketplace1.getAddress(), owner.getAddress(), account1.getAddress(), [1], [1]);
 
     })
 
     it("Should revert if not called by marketplace", async function () {
       //Approve marketplace
-      await expect(nftContract.connect(owner)
+      await expect(nftPosContract.connect(owner)
         .setApprovalForAll(await testMarketplace1.getAddress(), 1)
       ).not.be.reverted;
 
       //Check the allowance
-      const allowance = await nftContract.connect(owner).isApprovedForAll(owner.address, await testMarketplace1.getAddress())
+      const allowance = await nftPosContract.connect(owner).isApprovedForAll(owner.address, await testMarketplace1.getAddress())
 
-      //Set Marketplace role in BukNFTs
-      expect(await nftContract.setMarketplaceRole(testMarketplace1.getAddress()))
+      //Set Marketplace role in BukPOSNFTs
+      expect(await nftPosContract.setMarketplaceRole(testMarketplace1.getAddress()))
         .not.be.reverted;
-        
+
       await expect(
-        nftContract.connect(account1).safeBatchTransferFrom(
+        nftPosContract.connect(account1).safeBatchTransferFrom(
           await owner.getAddress(),
           await account1.getAddress(),
           [1],

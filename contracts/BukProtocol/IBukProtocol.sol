@@ -64,14 +64,6 @@ interface IBukProtocol {
     event SetCommission(uint256 indexed commission);
 
     /**
-     * @dev Emitted when Buk Protocol role access is granted for NFT and PoS contracts
-     */
-    event GrantBukProtocolRole(
-        address indexed oldAddress,
-        address indexed newAddress
-    );
-
-    /**
      * @dev Emitted when token uri is set.
      */
     event SetTokenURI(uint256 indexed nftId, string indexed uri);
@@ -115,6 +107,12 @@ interface IBukProtocol {
      * @param newRoyalty, array od new royalties
      */
     event SetOtherRoyalties(uint96[] oldRoyalty, uint96[] newRoyalty);
+
+    /**
+     * @dev Emitted when the tradeability of a Buk NFT is toggled.
+     * @param _tokenId Token Id whose tradeability is being toggled.
+     */
+    event ToggleTradeability(uint256 indexed _tokenId, bool _tradeable);
 
     /**
      * @dev Emitted when single room is booked.
@@ -236,6 +234,12 @@ interface IBukProtocol {
      * @notice This function can only be called by `ADMIN_ROLE`
      */
     function setCommission(uint8 _commission) external;
+
+    /**
+     * @dev Function to toggle the tradeability of an asset.
+    * @param _tokenId Token Id whose tradeability is being toggled.
+     */
+    function toggleTradeability(uint256 _tokenId) external;
 
     /**
      * @dev Function to book rooms.

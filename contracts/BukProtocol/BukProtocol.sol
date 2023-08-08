@@ -248,6 +248,18 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     }
 
     /**
+     * @dev See {IBukProtocol-toggleTradeability}.
+     */
+    function toggleTradeability(uint256 _tokenId) external onlyRole(ADMIN_ROLE) {
+        require(
+            bookingDetails[_tokenId].status == BookingStatus.booked,
+            "Check the Booking status"
+        );
+        bookingDetails[_tokenId].tradeable = !bookingDetails[_tokenId].tradeable;
+        emit ToggleTradeability(_tokenId, bookingDetails[_tokenId].tradeable);
+    }
+
+    /**
      * @dev See {IBukProtocol-bookRoom}.
      */
     function bookRoom(
@@ -407,6 +419,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         }
         for (uint8 i = 0; i < len; ++i) {
             bookingDetails[_ids[i]].status = BookingStatus.checkedout;
+            bookingDetails[_ids[i]].tradeable = false;
             IBukNFTs(nftContract).burn(
                 bookingDetails[_ids[i]].firstOwner,
                 _ids[i],

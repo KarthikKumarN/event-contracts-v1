@@ -132,9 +132,25 @@ describe("BukNFTs Updations", function () {
         .to.emit(nftContract, "SetBukProtocol")
         .withArgs(bukProtocolContract.getAddress());
     });
-    it("Should revert if not called by owner", async function () {
+    it("Should revert if not called by admin", async function () {
       await expect(nftContract.connect(account1)
         .setBukProtocol(bukProtocolContract.getAddress())).to.be.reverted;
+    })
+  });
+
+  describe("Set Buk Treasury in BukNFTs", function () {
+    it("Should set Buk Treasury in BukNFTs", async function () {
+      expect(await nftContract.setBukTreasury(await bukTreasuryContract.getAddress()))
+        .not.be.reverted;
+    });
+    it("Should set Buk Treasury and emit event", async function () {
+      expect(await nftContract.setBukTreasury(bukTreasuryContract.getAddress()))
+        .to.emit(nftContract, "SetBukTreasury")
+        .withArgs(bukTreasuryContract.getAddress());
+    });
+    it("Should revert if not called by admin", async function () {
+      await expect(nftContract.connect(account1)
+        .setBukTreasury(bukTreasuryContract.getAddress())).to.be.reverted;
     })
   });
 
@@ -154,7 +170,7 @@ describe("BukNFTs Updations", function () {
         .to.emit(nftContract, "SetMarketplace")
         .withArgs(marketplaceContract.getAddress());
     });
-    it("Should revert if not called by owner", async function () {
+    it("Should revert if not called by admin", async function () {
       await expect(nftContract.connect(account1)
         .setMarketplaceRole(marketplaceContract.getAddress())).to.be.reverted;
     })
@@ -173,7 +189,7 @@ describe("BukNFTs Updations", function () {
         .to.emit(nftContract, "GrantNftPoSContractRole")
         .withArgs(await nftPosContract.getAddress());
     })
-    it("Should revert if not called by owner", async function () {
+    it("Should revert if not called by admin", async function () {
       await expect(nftContract.connect(account1)
         .grantBukPOSNFTRole(await nftPosContract.getAddress()))
         .to.be.reverted;

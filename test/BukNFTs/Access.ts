@@ -92,13 +92,13 @@
   
     describe("Manage Admin Role", function () {
       it("Should add new admin", async function () { 
-        //Get the keccak256 hash of the ADMIN_ROLE
-        const ADMIN_ROLE = keccak256(toUtf8Bytes("ADMIN_ROLE"));
+        //Get the keccak256 hash of the DEFAULT_ADMIN_ROLE
+        const DEFAULT_ADMIN_ROLE = keccak256(toUtf8Bytes("DEFAULT_ADMIN_ROLE"));
 
         //Add new address to Admin role
         expect(
           await bukProtocolContract.connect(adminWallet).grantRole(
-            ADMIN_ROLE,
+            DEFAULT_ADMIN_ROLE,
             account1
           ),
         ).not.be.reverted;
@@ -106,27 +106,27 @@
         //Check if the new admin has ADMIN_ROLE
         expect(
           await bukProtocolContract.connect(adminWallet).hasRole(
-            ADMIN_ROLE,
+            DEFAULT_ADMIN_ROLE,
             account1
           ),
         ).to.equal(true)
       });
       it("Should set new admin and revoke old admin", async function () { 
         //Get the keccak256 hash of the ADMIN_ROLE
-        const ADMIN_ROLE = keccak256(toUtf8Bytes("ADMIN_ROLE"));
+        const DEFAULT_ADMIN_ROLE = keccak256(toUtf8Bytes("DEFAULT_ADMIN_ROLE"));
 
         //Add new address to Admin role
         expect(
           await bukProtocolContract.connect(adminWallet).grantRole(
-            ADMIN_ROLE,
+            DEFAULT_ADMIN_ROLE,
             account1
           ),
         ).not.be.reverted;
   
-        //Check if the new admin has ADMIN_ROLE
+        //Check if the new admin has DEFAULT_ADMIN_ROLE
         expect(
           await bukProtocolContract.connect(adminWallet).hasRole(
-            ADMIN_ROLE,
+            DEFAULT_ADMIN_ROLE,
             account1
           ),
         ).to.equal(true)
@@ -134,37 +134,37 @@
         //Revoke the new admin's access
         expect(
           await bukProtocolContract.connect(adminWallet).revokeRole(
-            ADMIN_ROLE,
+            DEFAULT_ADMIN_ROLE,
             account1
           ),
         ).not.be.reverted;
   
   
-        //Check if the new admin still has ADMIN_ROLE
+        //Check if the new admin still has DEFAULT_ADMIN_ROLE
         expect(
           await bukProtocolContract.connect(adminWallet).hasRole(
-            ADMIN_ROLE,
+            DEFAULT_ADMIN_ROLE,
             account1
           ),
         ).to.equal(false)
         
       });
       it("Should execute function with new admin", async function () {       
-        //Get the keccak256 hash of the ADMIN_ROLE
-        const ADMIN_ROLE = keccak256(toUtf8Bytes("ADMIN_ROLE"));
+        //Get the keccak256 hash of the DEFAULT_ADMIN_ROLE
+        const DEFAULT_ADMIN_ROLE = keccak256(toUtf8Bytes("DEFAULT_ADMIN_ROLE"));
 
         //Add new address to Admin role
         expect(
           await bukProtocolContract.connect(adminWallet).grantRole(
-            ADMIN_ROLE,
+            DEFAULT_ADMIN_ROLE,
             account1
           ),
         ).not.be.reverted;
   
-        //Check if the new admin has ADMIN_ROLE
+        //Check if the new admin has DEFAULT_ADMIN_ROLE
         expect(
           await bukProtocolContract.connect(adminWallet).hasRole(
-            ADMIN_ROLE,
+            DEFAULT_ADMIN_ROLE,
             account1
           ),
         ).to.equal(true)
@@ -173,5 +173,7 @@
         ).not.be.reverted;
       });
     });
+
+
   });
   
