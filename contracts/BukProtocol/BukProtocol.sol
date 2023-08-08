@@ -252,7 +252,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
      */
     function toggleTradeability(uint256 _tokenId) external onlyRole(ADMIN_ROLE) {
         require(
-            bookingDetails[_tokenId].status == BookingStatus.booked,
+            bookingDetails[_tokenId].status != BookingStatus.nil,
             "Check the Booking status"
         );
         bookingDetails[_tokenId].tradeable = !bookingDetails[_tokenId].tradeable;

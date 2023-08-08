@@ -255,6 +255,7 @@ describe("BukPOSNFTs Updations", function () {
   });
 
   describe("Safe transfer of Buk PoS NFTs", function () {
+
     /* The above code is using the Chai testing framework to define a "before" and "after" hook. */
     beforeEach(async function () {
       await saveInitialSnapshot();
@@ -267,10 +268,15 @@ describe("BukPOSNFTs Updations", function () {
           [1]
         ),
       ).not.be.reverted;
+
+      //Toggle tradeability
+      const toggle = await bukProtocolContract.toggleTradeability(1);
+      
     });
     afterEach(async function () {
       await restoreInitialSnapshot();
     });
+
     it("Should safe transfer Buk PoS NFTs", async function () {
       //Approve marketplace
       await expect(nftPosContract.connect(owner)
@@ -343,7 +349,30 @@ describe("BukPOSNFTs Updations", function () {
   });
 
   describe("Safe batch transfer of Buk PoS NFTs", function () {
+    
+        /* The above code is using the Chai testing framework to define a "before" and "after" hook. */
+        beforeEach(async function () {
+          await saveInitialSnapshot();
+    
+          await fastForwardTo(1701590949);
+    
+          //Check-out NFT
+          await expect(
+            bukProtocolContract.connect(adminWallet).checkout(
+              [1]
+            ),
+          ).not.be.reverted;
+    
+          //Toggle tradeability
+          const toggle = await bukProtocolContract.toggleTradeability(1);
+          
+        });
+        afterEach(async function () {
+          await restoreInitialSnapshot();
+        });
+
     it("Should safe batch transfer Buk PoS NFTs", async function () {
+
       //Approve marketplace
       await expect(nftPosContract.connect(owner)
         .setApprovalForAll(await testMarketplace1.getAddress(), 1)
