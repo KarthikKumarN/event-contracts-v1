@@ -50,15 +50,16 @@ contract Marketplace is Context, IMarketplace, AccessControl {
      */
     function createListing(uint256 _tokenId, uint256 _price) external {
         require(!isBookingListed(_tokenId), "NFT already listed");
+        IBukProtocol.Booking memory bookingDetails = _bukProtocalContract
+            .getBookingDetails(_tokenId);
         require(
-            _price >=
-                _bukProtocalContract.getBookingDetails(_tokenId).minSalePrice,
+            _price >= bookingDetails.minSalePrice,
             "Sale price cann't be lessthan minimum sale price"
         );
         require(
-            _bukProtocalContract.getBookingDetails(_tokenId).status ==
-                IBukProtocol.BookingStatus.confirmed,
-            "Only confirmed can be tradable"
+            bookingDetails.status == IBukProtocol.BookingStatus.confirmed &&
+                bookingDetails.tradeable,
+            "Only available booking can be tradable"
         );
         require(
             _bukNFTContract.balanceOf(_msgSender(), _tokenId) == 1,
@@ -66,7 +67,7 @@ contract Marketplace is Context, IMarketplace, AccessControl {
         );
         require(
             block.timestamp <
-                (_bukProtocalContract.getBookingDetails(_tokenId).checkin -
+                (bookingDetails.checkin -
                     (_bukProtocalContract
                         .getBookingDetails(_tokenId)
                         .tradeTimeLimit * 3600)),
@@ -77,7 +78,6 @@ contract Marketplace is Context, IMarketplace, AccessControl {
             _msgSender(),
             ListingStatus.active
         );
-        _bukNFTContract.setApprovalForAll(address(this), true);
 
         emit ListingCreated(_msgSender(), _tokenId, _price);
     }
@@ -140,6 +140,10 @@ contract Marketplace is Context, IMarketplace, AccessControl {
      * @param _tokenId room/booking NFT id
      */
     function buyRoom(uint256 _tokenId) external {
+        require(
+            _listedNFT[_tokenId].status == ListingStatus.active,
+            "NFT not listed"
+        );
         _buy(_tokenId);
     }
 
@@ -260,21 +264,17 @@ contract Marketplace is Context, IMarketplace, AccessControl {
      * @param _tokenId, NFT/Booking ID
      */
     function _buy(uint256 _tokenId) private {
+        IBukProtocol.Booking memory bookingDetails = _bukProtocalContract
+            .getBookingDetails(_tokenId);
         require(
-            _listedNFT[_tokenId].status == ListingStatus.active,
-            "NFT not listed"
-        );
-        require(
-            _bukProtocalContract.getBookingDetails(_tokenId).status ==
-                IBukProtocol.BookingStatus.confirmed,
+            bookingDetails.status == IBukProtocol.BookingStatus.confirmed &&
+                bookingDetails.tradeable,
             "Only available booking can be tradable"
         );
         require(
             block.timestamp <
-                (_bukProtocalContract.getBookingDetails(_tokenId).checkin -
-                    (_bukProtocalContract
-                        .getBookingDetails(_tokenId)
-                        .tradeTimeLimit * 3600)),
+                (bookingDetails.checkin -
+                    (bookingDetails.tradeTimeLimit * 3600)),
             "Trade limit time crossed"
         );
         require(
@@ -300,7 +300,6 @@ contract Marketplace is Context, IMarketplace, AccessControl {
             nftOwner,
             _listedNFT[_tokenId].price - royaltyAmount
         );
-        // Transfer booking
         _bukNFTContract.safeTransferFrom(
             address(nftOwner),
             _msgSender(),
@@ -309,9 +308,9 @@ contract Marketplace is Context, IMarketplace, AccessControl {
             ""
         );
         emit RoomBought(
+            _tokenId,
             nftOwner,
             _msgSender(),
-            _tokenId,
             _listedNFT[_tokenId].price
         );
     }
