@@ -8,7 +8,8 @@ interface IBukProtocol {
      * @var BookingStatus.booked      Booking has been initiated but not yet confirmed.
      * @var BookingStatus.confirmed   Booking has been confirmed.
      * @var BookingStatus.cancelled   Booking has been cancelled.
-     * @var BookingStatus.expired     Booking has expired.
+     * @var BookingStatus.checkedin   Booking has been checked-in.
+     * @var BookingStatus.checkedout  Booking has been checked-out.
      */
     enum BookingStatus {
         nil,
@@ -21,17 +22,17 @@ interface IBukProtocol {
 
     /**
      * @dev Struct for booking details.
-     * @var uint256 id                Booking ID.
-     * @var BookingStatus status      Booking status.
-     * @var uint256 tokenID           Token ID.
-     * @var address owner             Address of the booking owner.
-     * @var uint256 checkin           Check-in date.
-     * @var uint256 checkout          Check-out date.
-     * @var uint256 total             Total price.
-     * @var uint256 baseRate          Base rate.
-     * @var uint256 minSalePrice      Min Sale Price.
-     * @var uint256 tradeTimeLimit    Buy will excecute if tradeLimitTime is not crossed (in hours)
-     * @var uint256 tradeable         Is the NFT .
+     * @param uint256 id                Booking ID.
+     * @param BookingStatus status      Booking status.
+     * @param uint256 tokenID           Token ID.
+     * @param address owner             Address of the booking owner.
+     * @param uint256 checkin           Check-in date.
+     * @param uint256 checkout          Check-out date.
+     * @param uint256 total             Total price.
+     * @param uint256 baseRate          Base rate.
+     * @param uint256 minSalePrice      Min Sale Price.
+     * @param uint256 tradeTimeLimit    Buy will excecute if tradeLimitTime is not crossed (in hours)
+     * @param bool tradeable            Is the NFT Tradeable.
      */
     struct Booking {
         uint256 id;
@@ -49,8 +50,8 @@ interface IBukProtocol {
 
     /**
      * @dev Struct named Royalty to store royalty information.
-     * @var address receiver           The address of the receiver who will receive the royalty
-     * @var uint96 royaltyFraction     The fraction of the royalty to be paid, expressed as an unsigned 96-bit integer
+     * @param address receiver           The address of the receiver who will receive the royalty
+     * @param uint96 royaltyFraction     The fraction of the royalty to be paid, expressed as an unsigned 96-bit integer
      */
     struct Royalty {
         address receiver;
@@ -60,12 +61,11 @@ interface IBukProtocol {
     /**
      * @dev Emitted when the commission is set.
      */
-
     event SetCommission(uint256 indexed commission);
+
     /**
      * @dev Emitted when Buk Protocol role access is granted for NFT and PoS contracts
      */
-
     event GrantBukProtocolRole(
         address indexed oldAddress,
         address indexed newAddress
@@ -79,12 +79,12 @@ interface IBukProtocol {
     /**
      * @dev Emitted when BukNFTs contract address is updated.
      */
-    event SetBukNFTs(address indexed _nftContractAddr);
+    event SetBukNFTs(address indexed nftContractAddress);
 
     /**
      * @dev Emitted when BukPOSNFTs contract address is updated.
      */
-    event SetBukPoSNFTs(address indexed _nftPoSContractAddr);
+    event SetBukPoSNFTs(address indexed nftPoSContractAddress);
 
     /**
      * @dev Emitted when Buk treasury is updated.
@@ -97,9 +97,9 @@ interface IBukProtocol {
     event SetBukWallet(address indexed bukWalletContract);
 
     /**
-     * @dev Emitted when currency is updated.
+     * @dev Emitted when stable token is updated.
      */
-    event SetCurrency(address indexed _currencyContract);
+    event SetStableToken(address indexed _stableToken);
 
     /**
      * @dev Emitted when new royalty has been updated
@@ -120,15 +120,6 @@ interface IBukProtocol {
      * @dev Emitted when single room is booked.
      */
     event BookRoom(uint256 indexed booking);
-
-    /**
-     * @dev Emitted when multiple rooms are booked together.
-     */
-    event BookRooms(
-        uint256[] indexed bookings,
-        uint256 indexed total,
-        uint256 indexed commission
-    );
 
     /**
      * @dev Emitted when booking refund is done.
@@ -174,11 +165,11 @@ interface IBukProtocol {
     function setBukWallet(address _bukWalletContract) external;
 
     /**
-    * @dev Function to update the currency address.
-    * @param _currencyContract Address of the currency contract.
+    * @dev Function to update the stable token address.
+    * @param _stableToken Address of the stable token contract.
     * @notice This function can only be called by `ADMIN_ROLE`
     */
-    function setCurrency(address _currencyContract) external;
+    function setStableToken(address _stableToken) external;
 
     /**
     * @dev Function to update the BukNFTs contract address.
@@ -270,17 +261,19 @@ interface IBukProtocol {
     ) external returns (bool);
 
     /**
-     * @dev Function to refund the amount for the failure scenarios.
-     * @param _ids IDs of the bookings.
+     * @dev Allows the admin to refund a booking by canceling it and transferring the amount to the owner.
+     * @param _ids An array of booking IDs that need to be refunded.
+     * @param _owner The address of the owner of the bookings.
+     * @notice This function is usually executed when the booking is unsuccessful from the hotel's end.
      * @notice This function can only be called by `ADMIN_ROLE`
      */
     function bookingRefund(uint256[] memory _ids, address _owner) external;
 
-    /**
-     * @dev Function to confirm the room bookings and mint NFT.
-     * @param _ids IDs of the bookings.
-     * @param _uri URIs of the NFTs.
-     * @notice Only the owner of the booking can confirm the rooms.
+     /**
+     * @dev Function to mint new BukNFT tokens based on the provided booking IDs and URIs.
+     * @param _ids An array of booking IDs representing the unique identifier for each BukNFT token.
+     * @param _uri An array of URIs corresponding to each booking ID, which will be associated with the Buk NFTs.
+     * @notice Only the owner of the booking can book the NFTs and confirm the rooms.
      * @notice The number of bookings and URIs should be same.
      * @notice The booking status should be booked to confirm it.
      * @notice The NFTs are minted to the owner of the booking.
@@ -292,7 +285,7 @@ interface IBukProtocol {
 
     /**
      * @dev Function to checkin the rooms.
-     * @param _ids IDs of the bookings.
+     * @param _ids An array of booking IDs representing the unique identifier for each BukNFT token.
      * @notice The booking status should be confirmed to checkin it.
      * @notice Once checkedin the NFT becomes non-tradeable.
      * @notice This function can only be called by `ADMIN_ROLE` or the owner of the booking NFT
@@ -332,9 +325,9 @@ interface IBukProtocol {
      * Function to get wallet addresses
      * @return bukTreasury The address of the bukTreasury contract
      * @return bukWallet The address of the bukWallet contract
-     * @return currency The address of the currency contract
+     * @return stableToken The address of the stable token contract
      */
-    function getWallets() external view returns (address bukTreasury, address bukWallet, address currency);
+    function getWallets() external view returns (address bukTreasury, address bukWallet, address stableToken);
 
     /**
      * @dev To get the booking details

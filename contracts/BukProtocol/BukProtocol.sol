@@ -17,13 +17,13 @@ import "./IBukProtocol.sol";
 contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     /**
      * @dev address _bukWallet        Address of the Buk wallet.
-     * @dev address _currency          Address of the currency.
+     * @dev address _stableToken          Address of the stable token.
      * @dev address _bukTreasury          Address of the Buk treasury contract.
      * @dev address nftContract Address of the Buk NFT contract.
      * @dev address nftPoSContract  Address of the Buk NFT PoS Contract.
      */
     address private _bukWallet;
-    IERC20 private _currency;
+    IERC20 private _stableToken;
     IBukTreasury private _bukTreasury;
     IBukNFTs public nftContract;
     IBukPOSNFTs public nftPoSContract;
@@ -80,16 +80,16 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     /**
      * @dev Constructor to initialize the contract
      * @param _bukTreasuryContract Address of the treasury.
-     * @param _currencyContract Address of the currency.
+     * @param _stableTokenContract Address of the stable token.
      * @param _bukWalletContract Address of the Buk wallet.
      */
     constructor(
         address _bukTreasuryContract,
-        address _currencyContract,
+        address _stableTokenContract,
         address _bukWalletContract
     ) {
         _setBukTreasury(_bukTreasuryContract);
-        _setCurrency(_currencyContract);
+        _setStableToken(_stableTokenContract);
         _setBukWallet(_bukWalletContract);
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setupRole(ADMIN_ROLE, _msgSender());
@@ -106,12 +106,12 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     }
 
     /**
-     * @dev See {IBukProtocol-setCurrency}.
+     * @dev See {IBukProtocol-setStableToken}.
      */
-    function setCurrency(
-        address _currencyContract
+    function setStableToken(
+        address _stableTokenContract
     ) external onlyRole(ADMIN_ROLE) {
-        _setCurrency(_currencyContract);
+        _setStableToken(_stableTokenContract);
     }
 
     /**
@@ -269,25 +269,21 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         bool _tradeable
     ) external nonReentrant returns (bool) {
         require(
-            (_checkin > block.timestamp),
-            "Checkin date should be greater than current date"
+            (_checkin > block.timestamp), "Checkin date should be greater than current date"
         );
         require(
-            (_checkout > _checkin),
-            "Checkout date should be greater than checkin date"
+            (_checkout > _checkin), "Checkout date should be greater than checkin date"
         );
         uint256 total = 0;
         for (uint8 i = 0; i < _count; ++i) {
             total += _total[i];
         }
         require(
-            (_currency.allowance(_msgSender(), address(this)) >= total),
+            (_stableToken.allowance(_msgSender(), address(this)) >= total),
             "Check the allowance of the sender"
         );
         require(
-            ((_total.length == _baseRate.length) &&
-                (_total.length == _count) &&
-                (_count > 0)),
+            ((_total.length == _baseRate.length) && (_total.length == _count) &&  (_count > 0)),
             "Array sizes mismatch"
         );
         uint256[] memory bookings = new uint256[](_count);
@@ -463,9 +459,9 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         external
         view
         onlyRole(ADMIN_ROLE)
-        returns (address bukTreasury, address bukWallet, address currency)
+        returns (address bukTreasury, address bukWallet, address stableToken)
     {
-        return (address(_bukTreasury), address(_bukWallet), address(_currency));
+        return (address(_bukTreasury), address(_bukWallet), address(_stableToken));
     }
 
     /**
@@ -500,9 +496,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
      * Internal function to set the BukTreasury contract address
      * @param _bukTreasuryContract The address of the BukTreasury contract
      */
-    function _setBukTreasury(
-        address _bukTreasuryContract
-    ) internal {
+    function _setBukTreasury(address _bukTreasuryContract) internal {
         _bukTreasury = IBukTreasury(_bukTreasuryContract);
         emit SetBukTreasury(_bukTreasuryContract);
     }
@@ -511,24 +505,19 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
      * Internal function to set the BukWallet contract address
      * @param _bukWalletContract The address of the BukWallet contract
      */
-    function _setBukWallet(
-        address _bukWalletContract
-    ) internal {
+    function _setBukWallet(address _bukWalletContract) internal {
         _bukWallet = _bukWalletContract;
         emit SetBukWallet(_bukWalletContract);
     }
 
     /**
-     * Internal function to set the currency contract address
-     * @param _currencyContract The address of the currency contract
+     * Internal function to set the stable token contract address
+     * @param _stableTokenContract The address of the stable token contract
      */
-    function _setCurrency(
-        address _currencyContract
-    ) internal {
-        _currency = IERC20(_currencyContract);
-        emit SetCurrency(_currencyContract);
+    function _setStableToken(address _stableTokenContract) internal {
+        _stableToken = IERC20(_stableTokenContract);
+        emit SetStableToken(_stableTokenContract);
     }
-
 
     /**
      * @dev Function to do the booking payment.
@@ -541,17 +530,17 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         uint256 _total
     ) internal returns (bool) {
         require(
-            _currency.balanceOf(_msgSender()) >= _total + _commission,
+            _stableToken.balanceOf(_msgSender()) >= _total + _commission,
             "Insufficient balance for booking"
         );
 
         require(
-            _currency.transferFrom(_msgSender(), _bukWallet, _commission),
+            _stableToken.transferFrom(_msgSender(), _bukWallet, _commission),
             "Commission transfer failed"
         );
 
         require(
-            _currency.transferFrom(_msgSender(), address(_bukTreasury), _total),
+            _stableToken.transferFrom(_msgSender(), address(_bukTreasury), _total),
             "Booking payment failed"
         );
 
