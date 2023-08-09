@@ -9,14 +9,14 @@ interface IBukPOSNFTs is IERC1155, IAccessControl {
     /**
      * @dev Function to update the Buk Protocol Contract address.
      * @param _bukProtocolContract Address of the Buk Protocol Contract.
-     * @notice This function can only be called by addresses with `DEFAULT_ADMIN_ROLE`
+     * @notice This function can only be called by addresses with `ADMIN_ROLE`
      */
     function setBukProtocol(address _bukProtocolContract) external;
     
     /**
      * @dev Function to update the treasury address.
      * @param _bukTreasuryContract Address of the treasury.
-     * @notice This function can only be called by addresses with `BUK_PROTOCOL_CONTRACT_ROLE`
+     * @notice This function can only be called by addresses with `ADMIN_ROLE`
      */
     function setBukTreasury(address _bukTreasuryContract) external;
 
@@ -28,10 +28,10 @@ interface IBukPOSNFTs is IERC1155, IAccessControl {
     function grantBukNFTRole(address _nftContract) external;
 
     /**
-     * @dev Function to update the contract name
+     * @dev Function to set the contract name
      * @notice This function can only be called by a contract with `BUK_NFT_CONTRACT_ROLE`
      */
-    function updateName(string memory _contractName) external;
+    function setNFTName(string memory _contractName) external;
 
     /**
      * @dev Function to set the URI for a given ID

@@ -230,12 +230,12 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     }
 
     /**
-     * @dev See {IBukProtocol-updateNFTName}.
+     * @dev See {IBukProtocol-setNFTName}.
      */
-    function updateNFTName(
+    function setNFTName(
         string memory _contractName
     ) external onlyRole(ADMIN_ROLE) {
-        IBukNFTs(nftContract).updateName(_contractName);
+        IBukNFTs(nftContract).setNFTName(_contractName);
         emit UpdateContractName(_contractName);
     }
 

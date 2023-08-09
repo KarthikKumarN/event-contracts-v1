@@ -292,7 +292,7 @@ describe("BukNFTs Updations", function () {
       ).not.be.reverted;
 
     })
-    
+
     it("Should safe batch transfer Buk PoS NFTs and emit event", async function () {
       //Approve marketplace
       await expect(nftContract.connect(owner)
@@ -333,7 +333,7 @@ describe("BukNFTs Updations", function () {
       //Set Marketplace role in BukNFTs
       expect(await nftContract.setMarketplaceRole(testMarketplace1.getAddress()))
         .not.be.reverted;
-        
+
       await expect(
         nftContract.connect(account1).safeBatchTransferFrom(
           await owner.getAddress(),

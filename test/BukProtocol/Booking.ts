@@ -632,7 +632,7 @@ describe("BukProtocol Bookings", function () {
         ),
       ).not.be.reverted;
     });
-        it("Should check-in successfully by owner", async function () {
+    it("Should check-in successfully by owner", async function () {
       //Grant allowance permission
       const res = await stableTokenContract.connect(owner).approve(
         await bukProtocolContract.getAddress(),
@@ -763,10 +763,10 @@ describe("BukProtocol Bookings", function () {
         .connect(account1)
         .approve(await marketplaceContract.getAddress(), transferMoney);
 
-        //Buy NFT
+      //Buy NFT
       await expect(marketplaceContract.connect(account1).buyRoom(tokenId)).not
         .to.be.reverted;
-      
+
       //Check NFT balance
       await expect(
         await nftContract.balanceOf(await account1.getAddress(), tokenId),
@@ -1041,12 +1041,12 @@ describe("BukProtocol Bookings", function () {
       await fastForwardTo(1701590949);
 
       //Check-out NFT
-      expect(await 
+      expect(await
         bukProtocolContract.connect(adminWallet).checkout(
           [1]
         )
       ).to.emit(bukProtocolContract, "CheckoutRooms")
-      .withArgs([1], true);
+        .withArgs([1], true);
     });
     it("Should not check-out with empty array", async function () {
       //Grant allowance permission
@@ -1185,7 +1185,7 @@ describe("BukProtocol Bookings", function () {
         bukProtocolContract.connect(adminWallet).checkout(
           [1]
         ),
-        ).to.be.revertedWith("Checkout date should be less than current date");
+      ).to.be.revertedWith("Checkout date should be less than current date");
 
     });
     it("Should not check-out when the booking status is not checkedin", async function () {

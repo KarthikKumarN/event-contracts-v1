@@ -52,6 +52,12 @@ contract BukNFTs is AccessControl, ERC1155 {
         keccak256("MARKETPLACE_CONTRACT_ROLE");
 
     /**
+     * @dev Constant for the role of the admin
+     */
+    bytes32 public constant ADMIN_ROLE =
+        keccak256("ADMIN_ROLE");
+
+    /**
      * @dev Emitted when Buk Protocol Address is updated.
      */
     event SetBukProtocol(address indexed bukProtocolContract);
@@ -102,44 +108,45 @@ contract BukNFTs is AccessControl, ERC1155 {
         address _bukProtocolContract,
         address _bukTreasuryContract
     ) ERC1155("") {
-        _updateName(_contractName);
+        _setNFTName(_contractName);
         _setBukTreasury(_bukTreasuryContract);
         _grantBukPOSNFTRole(_bukPoSContract);
         _setBukProtocol(_bukProtocolContract);
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
+        _grantRole(ADMIN_ROLE, _msgSender());
         _grantRole(BUK_PROTOCOL_CONTRACT_ROLE, _bukProtocolContract);
     }
 
     /**
      * @dev Function to update the Buk Protocol Contract address.
      * @param _bukProtocolContract Address of the Buk Protocol Contract.
-     * @notice This function can only be called by addresses with `DEFAULT_ADMIN_ROLE`
+     * @notice This function can only be called by addresses with `ADMIN_ROLE`
      */
     function setBukProtocol(
         address _bukProtocolContract
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(ADMIN_ROLE) {
         _setBukProtocol(_bukProtocolContract);
     }
 
     /**
      * @dev Function to update the treasury address.
      * @param _bukTreasuryContract Address of the treasury.
-     * @notice This function can only be called by addresses with `BUK_PROTOCOL_CONTRACT_ROLE`
+     * @notice This function can only be called by addresses with `ADMIN_ROLE`
      */
     function setBukTreasury(
         address _bukTreasuryContract
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(ADMIN_ROLE) {
         _setBukTreasury(_bukTreasuryContract);
     }
 
     /**
      * @dev Function to update the marketplace address.
      * @param _marketplaceContract Address of the marketplace.
-     * @notice This function can only be called by addresses with `DEFAULT_ADMIN_ROLE`
+     * @notice This function can only be called by addresses with `ADMIN_ROLE`
      */
     function setMarketplaceRole(
         address _marketplaceContract
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(ADMIN_ROLE) {
         _grantRole(MARKETPLACE_CONTRACT_ROLE, _marketplaceContract);
         emit SetMarketplace(_marketplaceContract);
     }
@@ -147,23 +154,23 @@ contract BukNFTs is AccessControl, ERC1155 {
     /**
      * @dev Function to update the BukPOSNFT to the contract
      * @param _nftPoSContract address: The address of the NFT contract
-     * @notice This function can only be called by a contract with `DEFAULT_ADMIN_ROLE`
+     * @notice This function can only be called by a contract with `ADMIN_ROLE`
      */
     function grantBukPOSNFTRole(
         address _nftPoSContract
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(ADMIN_ROLE) {
         _grantBukPOSNFTRole(_nftPoSContract);
     }
 
     /**
-     * @dev Update the name of the contract.
+     * @dev Set the name of the contract.
      * @notice This function can only be called by addresses with `BUK_PROTOCOL_CONTRACT_ROLE`
      */
-    function updateName(
+    function setNFTName(
         string memory _contractName
     ) external onlyRole(BUK_PROTOCOL_CONTRACT_ROLE) {
-        nftPoSContract.updateName(_contractName);
-        _updateName(_contractName);
+        nftPoSContract.setNFTName(_contractName);
+        _setNFTName(_contractName);
     }
 
 
@@ -335,7 +342,7 @@ contract BukNFTs is AccessControl, ERC1155 {
      * Internal function to update the contract name
      * @param _contractName The new name for the contract
      */
-    function _updateName(string memory _contractName) internal {
+    function _setNFTName(string memory _contractName) internal {
         name = _contractName;
         emit UpdateContractName(_contractName);
     }

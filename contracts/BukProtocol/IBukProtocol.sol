@@ -223,10 +223,10 @@ interface IBukProtocol {
     ) external;
 
     /**
-     * @dev Update the name of the contract.
+     * @dev Set the name of the contract.
      * @notice This function can only be called by addresses with `ADMIN_ROLE`
      */
-    function updateNFTName(string memory _contractName) external;
+    function setNFTName(string memory _contractName) external;
 
     /**
      * @dev Function to set the Buk commission percentage.

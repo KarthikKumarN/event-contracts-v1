@@ -92,8 +92,8 @@ describe("BukPoSNFTs Access Control", function () {
 
   describe("Manage Default Admin Role", function () {
     it("Should set new default admin", async function () {
-      //Get the keccak256 hash of the DEFAULT_ADMIN_ROLE
-      const DEFAULT_ADMIN_ROLE = keccak256(toUtf8Bytes("DEFAULT_ADMIN_ROLE"));
+      //Assign the value of DEFAULT_ADMIN_ROLE
+      const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
       //Add new address to Admin role
       expect(
@@ -112,8 +112,8 @@ describe("BukPoSNFTs Access Control", function () {
       ).to.equal(true)
     })
     it("Should set new default admin and revoke old one", async function () {
-      //Get the keccak256 hash of the DEFAULT_ADMIN_ROLE
-      const DEFAULT_ADMIN_ROLE = keccak256(toUtf8Bytes("DEFAULT_ADMIN_ROLE"));
+      //Assign the value of DEFAULT_ADMIN_ROLE
+      const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
       //Add new address to Admin role
       expect(
@@ -148,8 +148,8 @@ describe("BukPoSNFTs Access Control", function () {
       ).to.equal(false)
     })
     it("Should set new default admin and check function with new one", async function () {
-      // Get the keccak256 hash of the DEFAULT_ADMIN_ROLE
-      const DEFAULT_ADMIN_ROLE = keccak256(toUtf8Bytes("DEFAULT_ADMIN_ROLE"));
+      // Assign the value of DEFAULT_ADMIN_ROLE
+      const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
       // Add new address to default admin role
       await expect(
@@ -175,71 +175,56 @@ describe("BukPoSNFTs Access Control", function () {
         ),
       ).not.be.reverted;
 
-      await expect(nftPosContract.connect(account1).setBukProtocol(await bukProtocolContract.getAddress()))
-        .not.be.reverted;
+      await expect(
+        nftPosContract.connect(account1).grantRole(
+          DEFAULT_ADMIN_ROLE,
+          await account1.getAddress()
+        )
+      ).to.not.be.reverted;
     })
-    
-    it("Should set new Buk Protocol and check function with old one", async function () {
-      //Get the keccak256 hash of the DEFAULT_ADMIN_ROLE
-      const DEFAULT_ADMIN_ROLE = keccak256(toUtf8Bytes("DEFAULT_ADMIN_ROLE"));
 
-      //Add new address to Admin role
-      expect(
-        await nftPosContract.connect(adminWallet).grantRole(
+    it("Should set new default admin and check function with old one", async function () {
+      // Assign the value of DEFAULT_ADMIN_ROLE
+      const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
+
+      // Add new address to default admin role
+      await expect(
+        nftPosContract.connect(adminWallet).grantRole(
           DEFAULT_ADMIN_ROLE,
-          account1
+          await account1.getAddress()
+        )
+      ).to.not.be.reverted;
+
+      // Check if the new admin has DEFAULT_ADMIN_ROLE
+      expect(
+        await nftPosContract.connect(account1).hasRole(
+          DEFAULT_ADMIN_ROLE,
+          await account1.getAddress()
+        )
+      ).to.equal(true);
+
+      //Revoke the old admin's access
+      expect(
+        await nftPosContract.connect(adminWallet).revokeRole(
+          DEFAULT_ADMIN_ROLE,
+          await adminWallet.getAddress()
         ),
       ).not.be.reverted;
 
-      //Check if the new admin has DEFAULT_ADMIN_ROLE
-      expect(
-        await nftPosContract.connect(adminWallet).hasRole(
+      await expect(
+        nftPosContract.connect(adminWallet).grantRole(
           DEFAULT_ADMIN_ROLE,
-          account1
-        ),
-      ).to.equal(true)
-
-      // Get the keccak256 hash of the DEFAULT_ADMIN_ROLE
-      const BUK_PROTOCOL_CONTRACT_ROLE = keccak256(toUtf8Bytes("BUK_PROTOCOL_CONTRACT_ROLE"));
-      //Add new address to Buk Protocol role
-      expect(
-        await nftPosContract.connect(adminWallet).grantRole(
-          BUK_PROTOCOL_CONTRACT_ROLE,
-          await bukProtocolContract.getAddress()
-        ),
-      ).not.be.reverted;
-    });
-
-    // it("Should set new default admin and check function with old one", async function () {
-    //   // Get the keccak256 hash of the DEFAULT_ADMIN_ROLE
-    //   const DEFAULT_ADMIN_ROLE = keccak256(toUtf8Bytes("DEFAULT_ADMIN_ROLE"));
-
-    //   // Add new address to Admin role
-    //   await expect(
-    //     nftPosContract.connect(adminWallet).grantRole(
-    //       DEFAULT_ADMIN_ROLE,
-    //       account1
-    //     )
-    //   ).to.not.be.reverted;
-
-    //   // Check if the new admin has DEFAULT_ADMIN_ROLE
-    //   expect(
-    //     await nftPosContract.connect(account1).hasRole(
-    //       DEFAULT_ADMIN_ROLE,
-    //       account1
-    //     )
-    //   ).to.equal(true);
-
-    //   expect(await nftPosContract.connect(account1).setBukProtocol(await bukProtocolContract.getAddress()))
-    //     .to.be.reverted;
-    // })
+          await account1.getAddress()
+        )
+      ).to.be.reverted;
+    })
   })
 
   describe("Manage Admin Role", function () {
 
     it("Should add new admin", async function () {
-      //Get the keccak256 hash of the DEFAULT_ADMIN_ROLE
-      const DEFAULT_ADMIN_ROLE = keccak256(toUtf8Bytes("DEFAULT_ADMIN_ROLE"));
+      //Assign the value of DEFAULT_ADMIN_ROLE
+      const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
       //Add new address to Admin role
       expect(
@@ -259,8 +244,8 @@ describe("BukPoSNFTs Access Control", function () {
     });
 
     it("Should set new admin and revoke old admin", async function () {
-      //Get the keccak256 hash of the DEFAULT_ADMIN_ROLE
-      const DEFAULT_ADMIN_ROLE = keccak256(toUtf8Bytes("DEFAULT_ADMIN_ROLE"));
+      //Assign the value of DEFAULT_ADMIN_ROLE
+      const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
       //Add new address to Admin role
       expect(
@@ -296,8 +281,8 @@ describe("BukPoSNFTs Access Control", function () {
     });
 
     it("Should set new admin and check function with new admin", async function () {
-      // Get the keccak256 hash of the DEFAULT_ADMIN_ROLE
-      const DEFAULT_ADMIN_ROLE = keccak256(toUtf8Bytes("DEFAULT_ADMIN_ROLE"));
+      // Assign the value of DEFAULT_ADMIN_ROLE
+      const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
       // Add new address to Admin role
       await expect(

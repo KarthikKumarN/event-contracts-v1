@@ -1,52 +1,52 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { keccak256, toUtf8Bytes } from "ethers";
-    /**
- * The above function is a TypeScript function that retrieves the current timestamp of the latest
- * block in the Ethereum blockchain and saves an initial snapshot of the blockchain state.
- * @returns The function `getCurrentTime` returns a Promise that resolves to a number, which is the
- * current timestamp of the latest block.
+/**
+* The above function is a TypeScript function that retrieves the current timestamp of the latest
+* block in the Ethereum blockchain and saves an initial snapshot of the blockchain state.
+* @returns The function `getCurrentTime` returns a Promise that resolves to a number, which is the
+* current timestamp of the latest block.
+*/
+const getCurrentTime = async (): Promise<number> => {
+  const block: any = await ethers.provider.getBlock("latest");
+  return block.timestamp;
+};
+let initialSnapshotId: number;
+const saveInitialSnapshot = async () => {
+  const response = await ethers.provider.send("evm_snapshot");
+  initialSnapshotId = response;
+};
+/**
+ * The function `restoreInitialSnapshot` reverts the Ethereum Virtual Machine (EVM) state to the
+ * initial snapshot identified by `initialSnapshotId`.
  */
-    const getCurrentTime = async (): Promise<number> => {
-      const block: any = await ethers.provider.getBlock("latest");
-      return block.timestamp;
-    };
-    let initialSnapshotId: number;
-    const saveInitialSnapshot = async () => {
-      const response = await ethers.provider.send("evm_snapshot");
-      initialSnapshotId = response;
-    };
-    /**
-     * The function `restoreInitialSnapshot` reverts the Ethereum Virtual Machine (EVM) state to the
-     * initial snapshot identified by `initialSnapshotId`.
-     */
-    const restoreInitialSnapshot = async () => {
-      await ethers.provider.send("evm_revert", [initialSnapshotId]);
-    };
-    /**
-     * The function `fastForwardTo` allows you to fast forward the Ethereum Virtual Machine (EVM) to
-     * a specific timestamp.
-     * @param {number} timestamp - The `timestamp` parameter is a number representing the desired
-     * timestamp to fast forward to. It is the target time that you want to set for the Ethereum
-     * Virtual Machine (EVM) during testing or development.
-     */
-    const fastForwardTo = async (timestamp: number): Promise<void> => {
-      const currentTime = await getCurrentTime();
-      const diff = timestamp - currentTime;
+const restoreInitialSnapshot = async () => {
+  await ethers.provider.send("evm_revert", [initialSnapshotId]);
+};
+/**
+ * The function `fastForwardTo` allows you to fast forward the Ethereum Virtual Machine (EVM) to
+ * a specific timestamp.
+ * @param {number} timestamp - The `timestamp` parameter is a number representing the desired
+ * timestamp to fast forward to. It is the target time that you want to set for the Ethereum
+ * Virtual Machine (EVM) during testing or development.
+ */
+const fastForwardTo = async (timestamp: number): Promise<void> => {
+  const currentTime = await getCurrentTime();
+  const diff = timestamp - currentTime;
 
-      if (diff > 0) {
-        await ethers.provider.send("evm_increaseTime", [diff]);
-        await ethers.provider.send("evm_mine");
-      } else {
-        await restoreInitialSnapshot();
-        const currentTime = await getCurrentTime(); // Store current time before calculating difference
-        const remainingDiff = timestamp - currentTime;
-        if (remainingDiff > 0) {
-          await ethers.provider.send("evm_increaseTime", [remainingDiff]);
-          await ethers.provider.send("evm_mine");
-        }
-      }
-    };
+  if (diff > 0) {
+    await ethers.provider.send("evm_increaseTime", [diff]);
+    await ethers.provider.send("evm_mine");
+  } else {
+    await restoreInitialSnapshot();
+    const currentTime = await getCurrentTime(); // Store current time before calculating difference
+    const remainingDiff = timestamp - currentTime;
+    if (remainingDiff > 0) {
+      await ethers.provider.send("evm_increaseTime", [remainingDiff]);
+      await ethers.provider.send("evm_mine");
+    }
+  }
+};
 describe("BukPOSNFTs Updations", function () {
   let stableTokenContract;
   let bukProtocolContract;
@@ -249,7 +249,7 @@ describe("BukPOSNFTs Updations", function () {
 
       //Toggle tradeability
       const toggle = await bukProtocolContract.toggleTradeability(1);
-      
+
     });
     afterEach(async function () {
       await restoreInitialSnapshot();
@@ -299,27 +299,27 @@ describe("BukPOSNFTs Updations", function () {
   });
 
   describe("Safe batch transfer of Buk PoS NFTs", function () {
-    
-        /* The above code is using the Chai testing framework to define a "before" and "after" hook. */
-        beforeEach(async function () {
-          await saveInitialSnapshot();
-    
-          await fastForwardTo(1701590949);
-    
-          //Check-out NFT
-          await expect(
-            bukProtocolContract.connect(adminWallet).checkout(
-              [1]
-            ),
-          ).not.be.reverted;
-    
-          //Toggle tradeability
-          const toggle = await bukProtocolContract.toggleTradeability(1);
-          
-        });
-        afterEach(async function () {
-          await restoreInitialSnapshot();
-        });
+
+    /* The above code is using the Chai testing framework to define a "before" and "after" hook. */
+    beforeEach(async function () {
+      await saveInitialSnapshot();
+
+      await fastForwardTo(1701590949);
+
+      //Check-out NFT
+      await expect(
+        bukProtocolContract.connect(adminWallet).checkout(
+          [1]
+        ),
+      ).not.be.reverted;
+
+      //Toggle tradeability
+      const toggle = await bukProtocolContract.toggleTradeability(1);
+
+    });
+    afterEach(async function () {
+      await restoreInitialSnapshot();
+    });
 
     it("Should safe batch transfer Buk PoS NFTs", async function () {
       expect(
