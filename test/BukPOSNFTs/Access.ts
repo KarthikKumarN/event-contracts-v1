@@ -151,11 +151,11 @@ describe("BukPoSNFTs Access Control", function () {
       // Get the keccak256 hash of the DEFAULT_ADMIN_ROLE
       const DEFAULT_ADMIN_ROLE = keccak256(toUtf8Bytes("DEFAULT_ADMIN_ROLE"));
 
-      // Add new address to Admin role
+      // Add new address to default admin role
       await expect(
         nftPosContract.connect(adminWallet).grantRole(
           DEFAULT_ADMIN_ROLE,
-          account1
+          await account1.getAddress()
         )
       ).to.not.be.reverted;
 
@@ -163,7 +163,7 @@ describe("BukPoSNFTs Access Control", function () {
       expect(
         await nftPosContract.connect(account1).hasRole(
           DEFAULT_ADMIN_ROLE,
-          account1
+          await account1.getAddress()
         )
       ).to.equal(true);
 
@@ -171,11 +171,11 @@ describe("BukPoSNFTs Access Control", function () {
       expect(
         await nftPosContract.connect(adminWallet).revokeRole(
           DEFAULT_ADMIN_ROLE,
-          adminWallet
+          await adminWallet.getAddress()
         ),
       ).not.be.reverted;
 
-      expect(await nftPosContract.connect(account1).setBukProtocol(await bukProtocolContract.getAddress()))
+      await expect(nftPosContract.connect(account1).setBukProtocol(await bukProtocolContract.getAddress()))
         .not.be.reverted;
     })
     
