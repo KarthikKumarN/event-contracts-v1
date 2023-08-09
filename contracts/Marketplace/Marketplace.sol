@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
-import "contracts/Marketplace/Interface/IMarketplace.sol";
+import "contracts/Marketplace/IMarketplace.sol";
 import "contracts/BukProtocol/IBukProtocol.sol";
 import "contracts/BukNFTs/IBukNFTs.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
