@@ -2,6 +2,7 @@
 pragma solidity =0.8.19;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "../BukPOSNFTs/IBukPOSNFTs.sol";
@@ -15,6 +16,8 @@ import "./IBukProtocol.sol";
  * @dev Contract to manage operations of the BUK protocol to manage BukNFTs tokens and underlying sub-contracts.
  */
 contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
+    using SafeERC20 for IERC20;
+    
     /**
      * @dev address _bukWallet        Address of the Buk wallet.
      * @dev address _stableToken          Address of the stable token.

@@ -3,7 +3,6 @@ pragma solidity =0.8.19;
 
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../BukNFTs/IBukNFTs.sol";
 import "../BukProtocol/IBukProtocol.sol";
 import "../BukTreasury/IBukTreasury.sol";
