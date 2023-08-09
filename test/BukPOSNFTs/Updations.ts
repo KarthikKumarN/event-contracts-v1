@@ -211,28 +211,6 @@ describe("BukPOSNFTs Updations", function () {
     })
   });
 
-  describe("Set Marketplace Role in BukPOSNFTs", function () {
-    //Get the keccak256 hash of the MARKETPLACE_ROLE
-    const MARKETPLACE_ROLE = keccak256(toUtf8Bytes("MARKETPLACE_ROLE"));
-
-    it("Should set Marketplace in BukPOSNFTs", async function () {
-      expect(await nftPosContract.setMarketplaceRole(marketplaceContract.getAddress()))
-        .not.be.reverted;
-      //Check if Marketplace is set
-      expect(await nftPosContract.hasRole(MARKETPLACE_ROLE, await marketplaceContract.getAddress()))
-        .not.be.reverted;
-    });
-    it("Should set Marketplace and emit event", async function () {
-      expect(await nftPosContract.setMarketplaceRole(marketplaceContract.getAddress()))
-        .to.emit(nftPosContract, "SetMarketplace")
-        .withArgs(marketplaceContract.getAddress());
-    });
-    it("Should revert if not called by owner", async function () {
-      await expect(nftPosContract.connect(account1)
-        .setMarketplaceRole(marketplaceContract.getAddress())).to.be.reverted;
-    })
-  });
-
   describe("Grant BukNFTs Role in BukPOSNFTs", function () {
     it("Should grant BukPOSNFTs role in BukNFTs", async function () {
       expect(await nftPosContract.grantBukNFTRole(await nftContract.getAddress()))
@@ -278,18 +256,8 @@ describe("BukPOSNFTs Updations", function () {
     });
 
     it("Should safe transfer Buk PoS NFTs", async function () {
-      //Approve marketplace
-      await expect(nftPosContract.connect(owner)
-        .setApprovalForAll(await testMarketplace1.getAddress(), 1)
-      ).not.be.reverted;
-
-      //Check the allowance
-      const allowance = await nftPosContract.connect(owner).isApprovedForAll(owner.address, await testMarketplace1.getAddress())
-
-      expect(await nftPosContract.setMarketplaceRole(testMarketplace1.getAddress()))
-        .not.be.reverted;
       expect(
-        await nftPosContract.connect(testMarketplace1).safeTransferFrom(
+        await nftPosContract.connect(adminWallet).safeTransferFrom(
           await owner.getAddress(),
           await account1.getAddress(),
           1,
@@ -301,18 +269,8 @@ describe("BukPOSNFTs Updations", function () {
     })
 
     it("Should safe transfer Buk PoS NFTs and emit event", async function () {
-      //Approve marketplace
-      await expect(nftPosContract.connect(owner)
-        .setApprovalForAll(await testMarketplace1.getAddress(), 1)
-      ).not.be.reverted;
-
-      //Check the allowance
-      const allowance = await nftPosContract.connect(owner).isApprovedForAll(owner.address, await testMarketplace1.getAddress())
-
-      expect(await nftPosContract.setMarketplaceRole(testMarketplace1.getAddress()))
-        .not.be.reverted;
       expect(
-        await nftPosContract.connect(testMarketplace1).safeTransferFrom(
+        await nftPosContract.connect(adminWallet).safeTransferFrom(
           await owner.getAddress(),
           await account1.getAddress(),
           1,
@@ -321,21 +279,13 @@ describe("BukPOSNFTs Updations", function () {
         )
       )
         .to.emit(nftPosContract, "TransferSingle")
-        .withArgs(await testMarketplace1.getAddress(), owner.getAddress(), account1.getAddress(), 1, 1);
+        .withArgs(await adminWallet.getAddress(), owner.getAddress(), account1.getAddress(), 1, 1);
 
     })
 
-    it("Should revert if not called by marketplace", async function () {
-      //Approve marketplace
-      await expect(nftPosContract.connect(owner)
-        .setApprovalForAll(await testMarketplace1.getAddress(), 1)
-      ).not.be.reverted;
+    it("Should revert if not called by admin", async function () {
 
       //Check the allowance
-      const allowance = await nftPosContract.connect(owner).isApprovedForAll(owner.address, await testMarketplace1.getAddress())
-
-      expect(await nftPosContract.setMarketplaceRole(testMarketplace1.getAddress()))
-        .not.be.reverted;
       await expect(
         nftPosContract.connect(account1).safeTransferFrom(
           await owner.getAddress(),
@@ -372,19 +322,8 @@ describe("BukPOSNFTs Updations", function () {
         });
 
     it("Should safe batch transfer Buk PoS NFTs", async function () {
-
-      //Approve marketplace
-      await expect(nftPosContract.connect(owner)
-        .setApprovalForAll(await testMarketplace1.getAddress(), 1)
-      ).not.be.reverted;
-
-      //Check the allowance
-      const allowance = await nftPosContract.connect(owner).isApprovedForAll(owner.address, await testMarketplace1.getAddress())
-
-      expect(await nftPosContract.setMarketplaceRole(testMarketplace1.getAddress()))
-        .not.be.reverted;
       expect(
-        await nftPosContract.connect(testMarketplace1).safeBatchTransferFrom(
+        await nftPosContract.connect(adminWallet).safeBatchTransferFrom(
           await owner.getAddress(),
           await account1.getAddress(),
           [1],
@@ -396,21 +335,10 @@ describe("BukPOSNFTs Updations", function () {
     })
 
     it("Should safe batch transfer Buk PoS NFTs and emit event", async function () {
-      //Approve marketplace
-      await expect(nftPosContract.connect(owner)
-        .setApprovalForAll(await testMarketplace1.getAddress(), 1)
-      ).not.be.reverted;
-
-      //Check the allowance
-      const allowance = await nftPosContract.connect(owner).isApprovedForAll(owner.address, await testMarketplace1.getAddress())
-
-      //Set Marketplace
-      expect(await nftPosContract.setMarketplaceRole(testMarketplace1.getAddress()))
-        .not.be.reverted;
 
       //Safe batch transfer
       expect(
-        await nftPosContract.connect(testMarketplace1).safeBatchTransferFrom(
+        await nftPosContract.connect(adminWallet).safeBatchTransferFrom(
           await owner.getAddress(),
           await account1.getAddress(),
           [1],
@@ -424,17 +352,6 @@ describe("BukPOSNFTs Updations", function () {
     })
 
     it("Should revert if not called by marketplace", async function () {
-      //Approve marketplace
-      await expect(nftPosContract.connect(owner)
-        .setApprovalForAll(await testMarketplace1.getAddress(), 1)
-      ).not.be.reverted;
-
-      //Check the allowance
-      const allowance = await nftPosContract.connect(owner).isApprovedForAll(owner.address, await testMarketplace1.getAddress())
-
-      //Set Marketplace role in BukPOSNFTs
-      expect(await nftPosContract.setMarketplaceRole(testMarketplace1.getAddress()))
-        .not.be.reverted;
 
       await expect(
         nftPosContract.connect(account1).safeBatchTransferFrom(

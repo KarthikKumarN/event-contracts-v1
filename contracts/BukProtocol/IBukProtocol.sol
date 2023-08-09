@@ -237,7 +237,8 @@ interface IBukProtocol {
 
     /**
      * @dev Function to toggle the tradeability of an asset.
-    * @param _tokenId Token Id whose tradeability is being toggled.
+     * @param _tokenId Token Id whose tradeability is being toggled.
+     * @notice This function can only be called by `ADMIN_ROLE`
      */
     function toggleTradeability(uint256 _tokenId) external;
 

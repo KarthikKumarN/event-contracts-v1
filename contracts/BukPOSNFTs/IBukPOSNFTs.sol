@@ -21,13 +21,6 @@ interface IBukPOSNFTs is IERC1155, IAccessControl {
     function setBukTreasury(address _bukTreasuryContract) external;
 
     /**
-     * @dev Function to update the marketplace address.
-     * @param _marketplaceContract Address of the marketplace.
-     * @notice This function can only be called by addresses with `DEFAULT_ADMIN_ROLE`
-     */
-    function setMarketplaceRole(address _marketplaceContract) external;
-
-    /**
      * @dev Function to grant the BukNFT role to a given contract
      * @param _nftContract address: The address of the NFT contract
      * @notice This function can only be called by a contract with `ADMIN_ROLE`
@@ -73,7 +66,7 @@ interface IBukPOSNFTs is IERC1155, IAccessControl {
      * @param _amount - The amount of NFTs to mint.
      * @param _data - Additional data to include in the transfer.
      * @notice This function checks if the NFT is tranferable or not.
-     * @notice This function can only be called by a contract with `MARKETPLACE_CONTRACT_ROLE`
+     * @notice This function can only be called by a contract with `ADMIN_ROLE`
      */
     function safeTransferFrom(
         address _from,
@@ -91,7 +84,7 @@ interface IBukPOSNFTs is IERC1155, IAccessControl {
      * @param _amounts - Count of ERC1155 tokens of the respective token IDs.
      * @param _data - Additional data to include in the transfer.
      * @notice This function checks if the NFTs are tranferable or not.
-     * @notice This function can only be called by a contract with `MARKETPLACE_CONTRACT_ROLE`
+     * @notice This function can only be called by a contract with `ADMIN_ROLE`
      */
     function safeBatchTransferFrom(
         address _from,
@@ -121,16 +114,6 @@ interface IBukPOSNFTs is IERC1155, IAccessControl {
      * @param _id uint256: The ID of the token
      */
     function bookingTickets(uint256 _id) external view returns (string memory);
-
-    /**
-     * @dev To retrieve information about the royalties associated with a specific token.
-     * @param _tokenId - The token ID of the NFT.
-     * @param _salePrice - The price at which the token is being sold.
-     */
-    function royaltyInfo(
-        uint256 _tokenId,
-        uint256 _salePrice
-    ) external view returns (address receiver, uint256 royaltyAmount);
 
     /**
      * @dev Function to get the URI for a given ID

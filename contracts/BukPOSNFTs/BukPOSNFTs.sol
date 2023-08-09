@@ -50,12 +50,7 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
     bytes32 public constant BUK_PROTOCOL_CONTRACT_ROLE =
         keccak256("BUK_PROTOCOL_CONTRACT_ROLE");
     /**
-     * @dev Constant for the role of the marketplace contract
-     */
-    bytes32 public constant MARKETPLACE_CONTRACT_ROLE =
-        keccak256("MARKETPLACE_CONTRACT_ROLE");
-    /**
-     * @dev Constant for the role of the marketplace contract
+     * @dev Constant for the role of the admin
      */
     bytes32 public constant ADMIN_ROLE =
         keccak256("ADMIN_ROLE");
@@ -82,11 +77,6 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
      * @dev Emitted when treasury is updated.
      */
     event SetBukTreasury(address indexed treasuryContract);
-
-    /**
-     * @dev Emitted when marketplace role is granted.
-     */
-    event SetMarketplace(address indexed marketplaceContract);
 
     /**
      * @dev Event to update the contract name
@@ -142,16 +132,6 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
     */
     function setBukTreasury(address _bukTreasuryContract) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _setBukTreasury(_bukTreasuryContract);
-    }
-
-    /**
-    * @dev Function to update the marketplace address.
-    * @param _marketplaceContract Address of the marketplace.
-     * @notice This function can only be called by addresses with `DEFAULT_ADMIN_ROLE`
-    */
-    function setMarketplaceRole(address _marketplaceContract) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        _grantRole(MARKETPLACE_CONTRACT_ROLE, _marketplaceContract);
-        emit SetMarketplace(_marketplaceContract);
     }
 
     /**
@@ -224,7 +204,7 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
      * @param _amount - The amount of NFTs to mint.
      * @param _data - Additional data to include in the transfer.
      * @notice This function checks if the NFT is tranferable or not.
-     * @notice This function can only be called by a contract with `MARKETPLACE_CONTRACT_ROLE`
+     * @notice This function can only be called by a contract with `ADMIN_ROLE`
      */
     function safeTransferFrom(
         address _from,
@@ -232,7 +212,7 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
         uint256 _id,
         uint256 _amount,
         bytes memory _data
-    ) public virtual override onlyRole(MARKETPLACE_CONTRACT_ROLE) {
+    ) public virtual override onlyRole(ADMIN_ROLE) {
         require(bukProtocolContract.getBookingDetails(_id).tradeable, "This NFT is non transferable");
         require(balanceOf(_from, _id)>0, "From address does not own NFT");
         super._safeTransferFrom(_from, _to, _id, _amount, _data);
@@ -246,7 +226,7 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
      * @param _amounts - Count of ERC1155 tokens of the respective token IDs.
      * @param _data - Additional data to include in the transfer.
      * @notice This function checks if the NFTs are tranferable or not.
-     * @notice This function can only be called by a contract with `MARKETPLACE_CONTRACT_ROLE`
+     * @notice This function can only be called by a contract with `ADMIN_ROLE`
      */
     function safeBatchTransferFrom(
         address _from,
@@ -254,36 +234,13 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
         uint256[] memory _ids,
         uint256[] memory _amounts,
         bytes memory _data
-    ) public virtual override onlyRole(MARKETPLACE_CONTRACT_ROLE) {
+    ) public virtual override onlyRole(ADMIN_ROLE) {
         uint256 len = _ids.length;
         for(uint i=0; i<len; ++i) {
             require(bukProtocolContract.getBookingDetails(_ids[i]).tradeable, "One of these NFT is non-transferable");
             require(balanceOf(_from, _ids[i])>0, "From address does not own NFT");
         }
         super._safeBatchTransferFrom(_from, _to, _ids, _amounts, _data);
-    }
-
-    /**
-     * @dev To retrieve information about the royalties associated with a specific token.
-     * @param _tokenId - The token ID of the NFT.
-     * @param _salePrice - The price at which the token is being sold.
-     * @return receiver - The address of the royalty receiver.
-     * @return royaltyAmount - The amount of royalty to be paid.
-     */
-    function royaltyInfo(
-        uint256 _tokenId,
-        uint256 _salePrice
-    )
-        external
-        view
-        returns (address receiver, uint256 royaltyAmount)
-    {
-        IBukProtocol.Royalty[] memory royaltyArray = bukProtocolContract.getRoyaltyInfo(_tokenId);
-        uint256 royaltyAmount_ = 0;
-        for (uint i = 0; i < royaltyArray.length; i++) {
-            royaltyAmount_ += ((_salePrice * royaltyArray[i].royaltyFraction)/_feeDenominator());
-        }
-        return (address(_bukTreasury), royaltyAmount_);
     }
 
     /**
@@ -339,14 +296,5 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
      */
     function _setURI(uint256 _id, string memory _newuri) internal {
         bookingTickets[_id] = _newuri;
-    }
-
-    /**
-     * @dev The denominator with which to interpret the fee set in {_setTokenRoyalty} and {_setDefaultRoyalty} as a
-     * fraction of the sale price. Defaults to 10000 so fees are expressed in basis points, but may be customized by an
-     * override.
-     */
-    function _feeDenominator() internal pure virtual returns (uint96) {
-        return 10000;
     }
 }
