@@ -9,6 +9,7 @@ import { ContractTransactionResponse } from "ethers";
 import { Marketplace } from "../typechain-types";
 import { BukProtocol } from "../typechain-types";
 import { bukNfTs } from "../typechain-types/contracts";
+import { keccak256, toUtf8Bytes } from "ethers";
 
 describe("Marketplace", function () {
   let stableTokenContract;
@@ -865,7 +866,7 @@ describe("Marketplace", function () {
       let listingDetails = await marketplaceContract.getListingDetails(tokenId);
       await expect(listingDetails[0]).to.equal(salePrice);
       await expect(listingDetails[1]).to.equal(await owner.getAddress());
-      await expect(listingDetails[2]).to.equal(0);
+      await expect(listingDetails[2]).to.equal(1);
     });
   });
 
@@ -913,7 +914,7 @@ describe("Marketplace", function () {
         .reverted;
       let listingDetails = await marketplaceContract.getListingDetails(tokenId);
       await expect(listingDetails[0]).to.equal(salePrice);
-      await expect(listingDetails[2]).to.equal(1);
+      await expect(listingDetails[2]).to.equal(0);
     });
     it("Should emit event delisted token ID", async function () {
       let tokenId = 1;
@@ -1186,8 +1187,80 @@ describe("Marketplace", function () {
         marketplaceContract.connect(account1).deleteListing(tokenId),
       ).to.be.revertedWith("Only owner or Buk protocol can delete");
     });
-    //TODO owner check and contract
   });
+
+  //Admin role
+  describe("Manage Admin Role", function () {
+    it("Should add new admin", async function () {
+      const DEFAULT_ADMIN_ROLE = keccak256(toUtf8Bytes("DEFAULT_ADMIN_ROLE"));
+      //Add new address to Admin role
+      expect(
+        await marketplaceContract
+          .connect(owner)
+          .grantRole(DEFAULT_ADMIN_ROLE, account1),
+      ).not.be.reverted;
+
+      //Check if the new admin has ADMIN_ROLE
+      expect(
+        await marketplaceContract.hasRole(DEFAULT_ADMIN_ROLE, account1),
+      ).to.equal(true);
+    });
+    it("Should set new admin and revoke old admin", async function () {
+      const DEFAULT_ADMIN_ROLE = keccak256(toUtf8Bytes("DEFAULT_ADMIN_ROLE"));
+
+      //Add new address to Admin role
+      expect(
+        await marketplaceContract
+          .connect(owner)
+          .grantRole(DEFAULT_ADMIN_ROLE, account1),
+      ).not.be.reverted;
+
+      //Check if the new admin has ADMIN_ROLE
+      expect(
+        await marketplaceContract
+          .connect(owner)
+          .hasRole(DEFAULT_ADMIN_ROLE, account1),
+      ).to.equal(true);
+
+      //Revoke the new admin's access
+      expect(
+        await marketplaceContract
+          .connect(owner)
+          .revokeRole(DEFAULT_ADMIN_ROLE, account1),
+      ).not.be.reverted;
+
+      //Check if the new admin still has ADMIN_ROLE
+      expect(
+        await marketplaceContract
+          .connect(owner)
+          .hasRole(DEFAULT_ADMIN_ROLE, account1),
+      ).to.equal(false);
+    });
+    it("Should execute function with new admin", async function () {
+      const DEFAULT_ADMIN_ROLE = keccak256(toUtf8Bytes("ADMIN_ROLE"));
+
+      //Add new address to Admin role
+      expect(
+        await marketplaceContract
+          .connect(owner)
+          .grantRole(DEFAULT_ADMIN_ROLE, account1.address),
+      ).not.be.reverted;
+
+      //Check if the new admin has ADMIN_ROLE
+      expect(
+        await marketplaceContract
+          .connect(owner)
+          .hasRole(DEFAULT_ADMIN_ROLE, account1.address),
+      ).to.equal(true);
+
+      expect(
+        await marketplaceContract
+          .connect(account1)
+          .setBukProtocol(await bukProtocolContract.getAddress()),
+      ).not.be.reverted;
+    });
+  });
+  // Admin role end
 
   // Test cases for relist
   describe("Relist listing function marketplace", function () {
@@ -1283,7 +1356,7 @@ describe("Marketplace", function () {
         .be.reverted;
       let listingDetails = await marketplaceContract.getListingDetails(tokenId);
       await expect(listingDetails[0]).to.equal(newPrice);
-      await expect(listingDetails[2]).to.equal(0);
+      await expect(listingDetails[2]).to.equal(1);
     });
     it("Should owner only can relist listing", async function () {
       let tokenId = 1;
