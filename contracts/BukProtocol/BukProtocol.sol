@@ -245,14 +245,14 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     }
 
     /**
-     * @dev See {IBukProtocol-setNFTName}.
+     * @dev See {IBukProtocol-setNFTContractName}.
      */
     function setNFTContractName(
         string memory _contractName
     ) external onlyRole(ADMIN_ROLE) {
         string memory oldContractName_ = IBukNFTs(nftContract).name();
-        IBukNFTs(nftContract).setNFTName(_contractName);
-        emit UpdateContractName(oldContractName_, _contractName);
+        IBukNFTs(nftContract).setNFTContractName(_contractName);
+        emit SetNFTContractName(oldContractName_, _contractName);
     }
 
     /**
@@ -522,7 +522,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
      * Internal function to set the BukTreasury contract address
      * @param _bukTreasuryContract The address of the BukTreasury contract
      */
-    function _setBukTreasury(address _bukTreasuryContract) internal {
+    function _setBukTreasury(address _bukTreasuryContract) private {
         _bukTreasury = IBukTreasury(_bukTreasuryContract);
         emit SetBukTreasury(_bukTreasuryContract);
     }
@@ -531,7 +531,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
      * Internal function to set the BukWallet contract address
      * @param _bukWalletAddress The address of the BukWallet contract
      */
-    function _setBukWallet(address _bukWalletAddress) internal {
+    function _setBukWallet(address _bukWalletAddress) private {
         _bukWallet = _bukWalletAddress;
         emit SetBukWallet(_bukWalletAddress);
     }
@@ -540,7 +540,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
      * Internal function to set the stable token contract address
      * @param _stableTokenAddress The address of the stable token contract
      */
-    function _setStableToken(address _stableTokenAddress) internal {
+    function _setStableToken(address _stableTokenAddress) private {
         _stableToken = IERC20(_stableTokenAddress);
         emit SetStableToken(_stableTokenAddress);
     }
@@ -554,7 +554,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     function _bookingPayment(
         uint256 _commission,
         uint256 _total
-    ) internal returns (bool) {
+    ) private returns (bool) {
         require(
             _stableToken.balanceOf(_msgSender()) >= _total + _commission,
             "Insufficient balance for booking"

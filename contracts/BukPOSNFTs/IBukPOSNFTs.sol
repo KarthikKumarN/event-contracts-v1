@@ -21,11 +21,11 @@ interface IBukPOSNFTs is IERC1155, IAccessControl {
     function setBukTreasury(address _bukTreasuryContract) external;
 
     /**
-     * @dev Function to grant the BukNFT role to a given contract
+     * @dev Function to set the BukNFT role to a given contract
      * @param _nftContract address: The address of the NFT contract
      * @notice This function can only be called by a contract with `ADMIN_ROLE`
      */
-    function grantBukNFTRole(address _nftContract) external;
+    function setBukNFTRole(address _nftContract) external;
 
     /**
      * @dev Function to set the contract name
@@ -113,7 +113,7 @@ interface IBukPOSNFTs is IERC1155, IAccessControl {
      * @dev Mapping for token URI's for Buk PoS NFTs
      * @param _id uint256: The ID of the token
      */
-    function bookingTickets(uint256 _id) external view returns (string memory);
+    function uriByTokenId(uint256 _id) external view returns (string memory);
 
     /**
      * @dev Function to get the URI for a given ID

@@ -146,7 +146,7 @@ interface IBukProtocol {
     /**
      * @dev Event to update the contract name
      */
-    event UpdateContractName(string indexed oldContractName, string indexed newContractName);
+    event SetNFTContractName(string indexed oldContractName, string indexed newContractName);
 
     /**
     * @dev Function to update the treasury address.

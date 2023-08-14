@@ -27,17 +27,17 @@ interface IBukNFTs is IERC1155 {
     function setMarketplaceRole(address _marketplaceContract) external;
 
     /**
-     * @dev Function to update the BukPOSNFT to the contract
+     * @dev Function to set the BukPOSNFT to the contract
      * @param _nftPoSContract address: The address of the NFT contract
      * @notice This function can only be called by a contract with `ADMIN_ROLE`
      */
-    function grantBukPOSNFTRole(address _nftPoSContract) external;
+    function setBukPOSNFTRole(address _nftPoSContract) external;
 
     /**
      * @dev Set the name of the contract.
      * @notice This function can only be called by addresses with `BUK_PROTOCOL_CONTRACT_ROLE`
      */
-    function setNFTName(string memory _contractName) external;
+    function setNFTContractName(string memory _contractName) external;
 
     /**
      * @dev Sets the URI for a specific token ID.
@@ -135,7 +135,7 @@ interface IBukNFTs is IERC1155 {
      * @dev Mapping for token URI's for Buk PoS NFTs
      * @param _id uint256: The ID of the token
      */
-    function bookingTickets(uint256 _id) external view returns (string memory);
+    function uriByTokenId(uint256 _id) external view returns (string memory);
 
     /**
      * @dev To retrieve information about the royalties associated with a specific token.

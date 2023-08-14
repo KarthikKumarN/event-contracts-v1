@@ -135,7 +135,7 @@ describe("BukPOSNFTs Updations", function () {
     const setBukProtocol = await bukTreasuryContract.setBukProtocol(bukProtocolContract.getAddress())
 
     //Set BukNFTS in BukPOSNFTs
-    const setBukNFTsInBukPOSNFTs = await nftPosContract.connect(adminWallet).grantBukNFTRole(await nftContract.getAddress())
+    const setBukNFTsInBukPOSNFTs = await nftPosContract.connect(adminWallet).setBukNFTRole(await nftContract.getAddress())
 
     //Grant allowance permission
     const res = await stableTokenContract.connect(owner).approve(
@@ -213,20 +213,20 @@ describe("BukPOSNFTs Updations", function () {
 
   describe("Grant BukNFTs Role in BukPOSNFTs", function () {
     it("Should grant BukPOSNFTs role in BukNFTs", async function () {
-      expect(await nftPosContract.grantBukNFTRole(await nftContract.getAddress()))
+      expect(await nftPosContract.setBukNFTRole(await nftContract.getAddress()))
         .not.be.reverted;
       //Check if BukPOSNFTs is set
       expect(await nftPosContract.nftContract())
         .to.equal(await nftContract.getAddress());
     })
     it("Should grant BukPOSNFTs role and emit event", async function () {
-      expect(await nftPosContract.grantBukNFTRole(await nftContract.getAddress()))
+      expect(await nftPosContract.setBukNFTRole(await nftContract.getAddress()))
         .to.emit(nftPosContract, "GrantNftContractRole")
         .withArgs(await nftContract.getAddress());
     })
     it("Should revert if not called by owner", async function () {
       await expect(nftPosContract.connect(account1)
-        .grantBukNFTRole(await nftContract.getAddress()))
+        .setBukNFTRole(await nftContract.getAddress()))
         .to.be.reverted;
     })
 

@@ -36,7 +36,7 @@ contract BukNFTs is AccessControl, ERC1155 {
     /**
      * @dev Mapping for token URI's for booked tickets
      */
-    mapping(uint256 => string) public bookingTickets; //tokenID -> uri
+    mapping(uint256 => string) public uriByTokenId; //tokenID -> uri
 
     /**
      * @dev Constant for the role of the Buk Protocol contract
@@ -74,20 +74,12 @@ contract BukNFTs is AccessControl, ERC1155 {
     /**
      * @dev Event to update the contract name
      */
-    event UpdateContractName(string indexed contractName);
+    event SetNFTContractName(string indexed contractName);
 
     /**
-     * @dev Emitted when Buk Protocol role access is granted for NFT and PoS contracts
+     * @dev Event to set NFT contract role
      */
-    event GrantBukProtocolRole(
-        address indexed oldAddress,
-        address indexed newAddress
-    );
-
-    /**
-     * @dev Event to grant NFT contract role
-     */
-    event GrantNftPoSContractRole(address indexed nftPoSContractAddr);
+    event SeNftPoSContractRole(address indexed nftPoSContractAddr);
 
     /**
      * @dev Event to set token URI
@@ -109,7 +101,7 @@ contract BukNFTs is AccessControl, ERC1155 {
     ) ERC1155("") {
         _setNFTContractName(_contractName);
         _setBukTreasury(_bukTreasuryContract);
-        _grantBukPOSNFTRole(_bukPoSContract);
+        _setBukPOSNFTRole(_bukPoSContract);
         _setBukProtocol(_bukProtocolContract);
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(ADMIN_ROLE, _msgSender());
@@ -155,10 +147,10 @@ contract BukNFTs is AccessControl, ERC1155 {
      * @param _nftPoSContract address: The address of the NFT contract
      * @notice This function can only be called by a contract with `ADMIN_ROLE`
      */
-    function grantBukPOSNFTRole(
+    function setBukPOSNFTRole(
         address _nftPoSContract
     ) external onlyRole(ADMIN_ROLE) {
-        _grantBukPOSNFTRole(_nftPoSContract);
+        _setBukPOSNFTRole(_nftPoSContract);
     }
 
     /**
@@ -183,7 +175,7 @@ contract BukNFTs is AccessControl, ERC1155 {
         uint256 _id,
         string memory _newuri
     ) external onlyRole(BUK_PROTOCOL_CONTRACT_ROLE) {
-        if (bytes(bookingTickets[_id]).length != 0) {
+        if (bytes(uriByTokenId[_id]).length != 0) {
             _setURI(_id, _newuri);
         } else {
             nftPoSContract.setURI(_id, _newuri);
@@ -227,8 +219,8 @@ contract BukNFTs is AccessControl, ERC1155 {
         uint256 _amount,
         bool _isPoSNFT
     ) external onlyRole(BUK_PROTOCOL_CONTRACT_ROLE) {
-        string memory uri_ = bookingTickets[_id];
-        bookingTickets[_id] = "";
+        string memory uri_ = uriByTokenId[_id];
+        delete uriByTokenId[_id];
         if (_isPoSNFT) {
             nftPoSContract.mint(_account, _id, _amount, uri_, "");
         }
@@ -275,6 +267,10 @@ contract BukNFTs is AccessControl, ERC1155 {
     ) public virtual override onlyRole(MARKETPLACE_CONTRACT_ROLE) {
         require(isApprovedForAll(_from, _msgSender()),
             "ERC1155: caller is not token owner or approved"
+        );
+        require(
+            bukProtocolContract.getBookingDetails(_id).checkin > block.timestamp,
+            "Checkin time has passed"
         );
         require(bukProtocolContract.getBookingDetails(_id).tradeable, "This NFT is non transferable");
         require(balanceOf(_from, _id)>0, "From address does not own NFT");
@@ -323,7 +319,7 @@ contract BukNFTs is AccessControl, ERC1155 {
     function uri(
         uint256 _id
     ) public view virtual override returns (string memory) {
-        return bookingTickets[_id];
+        return uriByTokenId[_id];
     }
 
     /**
@@ -336,20 +332,31 @@ contract BukNFTs is AccessControl, ERC1155 {
     }
 
     /**
+     * @dev The denominator with which to interpret the fee set in {_setTokenRoyalty} and {_setDefaultRoyalty} as a
+     * fraction of the sale price. Defaults to 10000 so fees are expressed in basis points, but may be customized by an
+     * override.
+     */
+    function _feeDenominator() internal pure virtual returns (uint96) {
+        return 10000;
+    }
+
+    /**
      * Internal function to update the contract name
      * @param _contractName The new name for the contract
      */
-    function _setNFTContractName(string memory _contractName) internal {
+    function _setNFTContractName(string memory _contractName) private {
         name = _contractName;
-        emit UpdateContractName(_contractName);
+        emit SetNFTContractName(_contractName);
     }
 
     /**
      * Internal function to set the Buk Protocol Contract address.
      * @param _bukProtocolContract The address of the Buk Protocol contract
      */
-    function _setBukProtocol(address _bukProtocolContract) internal {
+    function _setBukProtocol(address _bukProtocolContract) private {
         bukProtocolContract = IBukProtocol(_bukProtocolContract);
+        _grantRole(BUK_PROTOCOL_CONTRACT_ROLE, _bukProtocolContract);
+        _revokeRole(BUK_PROTOCOL_CONTRACT_ROLE, _msgSender());
         emit SetBukProtocol(_bukProtocolContract);
     }
 
@@ -357,19 +364,19 @@ contract BukNFTs is AccessControl, ERC1155 {
      * Internal function to set the BukTreasury contract address
      * @param _bukTreasuryContract The address of the BukTreasury contract
      */
-    function _setBukTreasury(address _bukTreasuryContract) internal {
+    function _setBukTreasury(address _bukTreasuryContract) private {
         _bukTreasury = IBukTreasury(_bukTreasuryContract);
         emit SetBukTreasury(_bukTreasuryContract);
     }
     /**
-     * Internal function to grant the role to a BukPOSNFT contract
+     * Internal function to set the role to a BukPOSNFT contract
      * @param _nftPoSContract The address of the BukPOSNFT contract to grant the role to
      */
-    function _grantBukPOSNFTRole(
+    function _setBukPOSNFTRole(
         address _nftPoSContract
-    ) internal {
+    ) private {
         nftPoSContract = IBukPOSNFTs(_nftPoSContract);
-        emit GrantNftPoSContractRole(_nftPoSContract);
+        emit SeNftPoSContractRole(_nftPoSContract);
     }
 
     /**
@@ -377,16 +384,7 @@ contract BukNFTs is AccessControl, ERC1155 {
      * @param _id - The token ID to retrieve the URI for.
      * @param _newuri - The URI associated with the token ID.
      */
-    function _setURI(uint256 _id, string memory _newuri) internal {
-        bookingTickets[_id] = _newuri;
-    }
-
-    /**
-     * @dev The denominator with which to interpret the fee set in {_setTokenRoyalty} and {_setDefaultRoyalty} as a
-     * fraction of the sale price. Defaults to 10000 so fees are expressed in basis points, but may be customized by an
-     * override.
-     */
-    function _feeDenominator() internal pure virtual returns (uint96) {
-        return 10000;
+    function _setURI(uint256 _id, string memory _newuri) private {
+        uriByTokenId[_id] = _newuri;
     }
 }

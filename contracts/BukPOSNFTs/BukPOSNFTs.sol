@@ -36,7 +36,7 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
     /**
      * @dev Mapping for token URI's for Buk PoS NFTs
      */
-    mapping(uint256 => string) public bookingTickets; //tokenID -> uri
+    mapping(uint256 => string) public uriByTokenId; //tokenID -> uri
 
     /**
      * @dev Constant for the role of the Buk NFT contract
@@ -57,17 +57,9 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
         keccak256("ADMIN_ROLE");
 
     /**
-     * @dev Event to grant NFT contract role
+     * @dev Event to set NFT contract role
      */
-    event GrantNftContractRole(address indexed nftContractAddr);
-
-    /**
-     * @dev Emitted when Buk Protocol role access is granted for NFT and PoS contracts
-     */
-    event GrantBukProtocolRole(
-        address indexed oldAddress,
-        address indexed newAddress
-    );
+    event SetNftContractRole(address indexed nftContractAddr);
 
     /**
      * @dev Emitted when Buk Protocol Address is updated.
@@ -82,7 +74,7 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
     /**
      * @dev Event to update the contract name
      */
-    event UpdateContractName(string indexed name);
+    event SetNFTContractName(string indexed name);
 
     /**
      * @dev Event to set token URI
@@ -136,16 +128,16 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
     }
 
     /**
-     * @dev Function to grant the BukNFT role to a given contract
+     * @dev Function to set the BukNFT role to a given contract
      * @param _nftContract address: The address of the NFT contract
      * @notice This function can only be called by a contract with `ADMIN_ROLE`
      */
-    function grantBukNFTRole(
+    function setBukNFTRole(
         address _nftContract
     ) external onlyRole(ADMIN_ROLE) {
         _grantRole(BUK_NFT_CONTRACT_ROLE, _nftContract);
         nftContract = IBukNFTs(_nftContract);
-        emit GrantNftContractRole(_nftContract);
+        emit SetNftContractRole(_nftContract);
     }
 
     /**
@@ -178,7 +170,7 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
         uint256 _id,
         string memory _newuri
     ) external onlyRole(BUK_NFT_CONTRACT_ROLE) {
-        if (bytes(bookingTickets[_id]).length != 0) {
+        if (bytes( uriByTokenId[_id]).length != 0) {
             _setURI(_id, _newuri);
         } else {
             revert NotYetMinted("Token is not yet minted.");
@@ -251,7 +243,7 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
     function uri(
         uint256 _id
     ) public view virtual override returns (string memory) {
-        return bookingTickets[_id];
+        return uriByTokenId[_id];
     }
 
     /**
@@ -267,16 +259,16 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
      * Internal function to update the contract name
      * @param _contractName The new name for the contract
      */
-    function _setNFTContractName(string memory _contractName) internal {
+    function _setNFTContractName(string memory _contractName) private {
         name = _contractName;
-        emit UpdateContractName(name);
+        emit SetNFTContractName(name);
     }
 
     /**
      * Internal function to set the Buk Protocol Contract address.
      * @param _bukProtocolContract The address of the Buk Protocol contract
      */
-    function _setBukProtocol(address _bukProtocolContract) internal {
+    function _setBukProtocol(address _bukProtocolContract) private {
         bukProtocolContract = IBukProtocol(_bukProtocolContract);
         emit SetBukProtocol(_bukProtocolContract);
     }
@@ -285,7 +277,7 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
      * Internal function to set the BukTreasury contract address
      * @param _bukTreasuryContract The address of the BukTreasury contract
      */
-    function _setBukTreasury(address _bukTreasuryContract) internal {
+    function _setBukTreasury(address _bukTreasuryContract) private {
         _bukTreasury = IBukTreasury(_bukTreasuryContract);
         emit SetBukTreasury(_bukTreasuryContract);
     }
@@ -295,7 +287,7 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
      * @param _id - The token ID to retrieve the URI for.
      * @param _newuri - The URI associated with the token ID.
      */
-    function _setURI(uint256 _id, string memory _newuri) internal {
-        bookingTickets[_id] = _newuri;
+    function _setURI(uint256 _id, string memory _newuri) private {
+        uriByTokenId[_id] = _newuri;
     }
 }

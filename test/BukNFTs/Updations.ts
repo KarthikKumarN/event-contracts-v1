@@ -178,20 +178,20 @@ describe("BukNFTs Updations", function () {
 
   describe("Grant BukPOSNFTs Role in BukNFTs", function () {
     it("Should grant BukPOSNFTs role in BukNFTs", async function () {
-      expect(await nftContract.grantBukPOSNFTRole(await nftPosContract.getAddress()))
+      expect(await nftContract.setBukPOSNFTRole(await nftPosContract.getAddress()))
         .not.be.reverted;
       //Check if BukPOSNFTs is set
       expect(await nftContract.nftPoSContract())
         .to.equal(await nftPosContract.getAddress());
     })
     it("Should grant BukPOSNFTs role and emit event", async function () {
-      expect(await nftContract.grantBukPOSNFTRole(await nftPosContract.getAddress()))
+      expect(await nftContract.setBukPOSNFTRole(await nftPosContract.getAddress()))
         .to.emit(nftContract, "GrantNftPoSContractRole")
         .withArgs(await nftPosContract.getAddress());
     })
     it("Should revert if not called by admin", async function () {
       await expect(nftContract.connect(account1)
-        .grantBukPOSNFTRole(await nftPosContract.getAddress()))
+        .setBukPOSNFTRole(await nftPosContract.getAddress()))
         .to.be.reverted;
     })
 

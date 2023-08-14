@@ -113,7 +113,7 @@ describe("BukProtocol Updations", function () {
     );
 
     //Set BukNFTs address in BukPoSNFTs
-    await nftPosContract.grantBukNFTRole(nftContract.getAddress())
+    await nftPosContract.setBukNFTRole(nftContract.getAddress())
 
     //Marketplace
     const Marketplace = await ethers.getContractFactory("Marketplace");
@@ -435,7 +435,7 @@ describe("BukProtocol Updations", function () {
           1,
           newUri,
         )).to.be.reverted;
-      const uri = await nftContract.bookingTickets(1);
+      const uri = await nftContract. uriByTokenId(1);
       expect(uri).not.equal(newUri);
     });
   });
@@ -642,21 +642,21 @@ describe("BukProtocol Updations", function () {
     it("Should set NFT contract name by admin", async function () {
       //Set Name for NFTs
       const NAME = "BukTrips New"
-      expect(await bukProtocolContract.connect(adminWallet).setNFTName(NAME)).not.be.reverted;
+      expect(await bukProtocolContract.connect(adminWallet).setNFTContractName(NAME)).not.be.reverted;
       const newName = await nftContract.connect(adminWallet).name()
       expect(newName).to.equal(NAME);
     });
     it("Should set NFT contract name and emit events", async function () {
       //Set Name for NFTs
       const NAME = "BukTrips New"
-      expect(await bukProtocolContract.connect(adminWallet).setNFTName(NAME))
+      expect(await bukProtocolContract.connect(adminWallet).setNFTContractName(NAME))
         .to.emit(bukProtocolContract, "UpdateContractName")
         .withArgs(NAME);
     });
     it("Should not set NFT contract name if not admin", async function () {
       //Set Name for NFTs
       const NAME = "BukTrips New"
-      await expect(bukProtocolContract.connect(account1).setNFTName(NAME))
+      await expect(bukProtocolContract.connect(account1).setNFTContractName(NAME))
         .to.be.reverted;
     });
   });
@@ -674,7 +674,7 @@ describe("BukProtocol Updations", function () {
       const COMMISSION: number = 10
       await expect(bukProtocolContract.connect(adminWallet).setCommission(COMMISSION))
         .to.emit(bukProtocolContract, "SetCommission")
-        .withArgs(COMMISSION);
+        .withArgs(5,COMMISSION);
     });
     it("Should not set Buk commission if not admin", async function () {
       //Set Commission

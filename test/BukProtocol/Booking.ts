@@ -68,7 +68,7 @@ describe("BukProtocol Bookings", function () {
     );
 
     //Set BukNFTs address in BukPoSNFTs
-    await nftPosContract.grantBukNFTRole(nftContract.getAddress())
+    await nftPosContract.setBukNFTRole(nftContract.getAddress())
 
     //Marketplace
     const Marketplace = await ethers.getContractFactory("Marketplace");
