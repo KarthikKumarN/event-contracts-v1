@@ -3,6 +3,7 @@ pragma solidity =0.8.19;
 
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "../BukNFTs/IBukNFTs.sol";
 import "../BukPOSNFTs/IBukPOSNFTs.sol";
 import "../BukProtocol/IBukProtocol.sol";
 import "../BukTreasury/IBukTreasury.sol";
@@ -12,7 +13,7 @@ import "../BukTreasury/IBukTreasury.sol";
  * @author BUK Technology Inc
  * @dev Contract for managing hotel room-night inventory and ERC1155 token management for room-night NFTs
  */
-contract BukNFTs is AccessControl, ERC1155 {
+contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
     /**
      * @dev Address of the Buk treasury contract.
      */
@@ -55,36 +56,6 @@ contract BukNFTs is AccessControl, ERC1155 {
      */
     bytes32 public constant ADMIN_ROLE =
         keccak256("ADMIN_ROLE");
-
-    /**
-     * @dev Emitted when Buk Protocol Address is updated.
-     */
-    event SetBukProtocol(address indexed bukProtocolContract);
-
-    /**
-     * @dev Emitted when treasury is updated.
-     */
-    event SetBukTreasury(address indexed treasuryContract);
-
-    /**
-     * @dev Emitted when marketplace role is granted.
-     */
-    event SetMarketplace(address indexed marketplaceContract);
-
-    /**
-     * @dev Event to update the contract name
-     */
-    event SetNFTContractName(string indexed contractName);
-
-    /**
-     * @dev Event to set NFT contract role
-     */
-    event SeNftPoSContractRole(address indexed nftPoSContractAddr);
-
-    /**
-     * @dev Event to set token URI
-     */
-    event SetURI(uint256 indexed id, string indexed uri);
 
     /**
      * @dev Constructor to initialize the contract
@@ -264,7 +235,7 @@ contract BukNFTs is AccessControl, ERC1155 {
         uint256 _id,
         uint256 _amount,
         bytes memory _data
-    ) public virtual override onlyRole(MARKETPLACE_CONTRACT_ROLE) {
+    ) public virtual override(ERC1155, IBukNFTs) onlyRole(MARKETPLACE_CONTRACT_ROLE) {
         require(isApprovedForAll(_from, _msgSender()),
             "ERC1155: caller is not token owner or approved"
         );
@@ -293,7 +264,7 @@ contract BukNFTs is AccessControl, ERC1155 {
         uint256[] memory _ids,
         uint256[] memory _amounts,
         bytes memory _data
-    ) public virtual override onlyRole(MARKETPLACE_CONTRACT_ROLE) {
+    ) public virtual override(ERC1155, IBukNFTs) onlyRole(MARKETPLACE_CONTRACT_ROLE) {
         require(isApprovedForAll(_from, _msgSender()),
             "ERC1155: caller is not token owner or approved"
         );
@@ -318,7 +289,7 @@ contract BukNFTs is AccessControl, ERC1155 {
      */
     function uri(
         uint256 _id
-    ) public view virtual override returns (string memory) {
+    ) public view virtual override(ERC1155, IBukNFTs) returns (string memory) {
         return uriByTokenId[_id];
     }
 
@@ -327,7 +298,7 @@ contract BukNFTs is AccessControl, ERC1155 {
      */
     function supportsInterface(
         bytes4 interfaceId
-    ) public view override(AccessControl, ERC1155) returns (bool) {
+    ) public view override(AccessControl, IERC165, ERC1155) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 

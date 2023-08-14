@@ -5,6 +5,37 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 
 interface IBukNFTs is IERC1155 {
 
+
+    /**
+     * @dev Emitted when Buk Protocol Address is updated.
+     */
+    event SetBukProtocol(address indexed bukProtocolContract);
+
+    /**
+     * @dev Emitted when treasury is updated.
+     */
+    event SetBukTreasury(address indexed treasuryContract);
+
+    /**
+     * @dev Emitted when marketplace role is granted.
+     */
+    event SetMarketplace(address indexed marketplaceContract);
+
+    /**
+     * @dev Event to update the contract name
+     */
+    event SetNFTContractName(string indexed contractName);
+
+    /**
+     * @dev Event to set NFT contract role
+     */
+    event SeNftPoSContractRole(address indexed nftPoSContractAddr);
+
+    /**
+     * @dev Event to set token URI
+     */
+    event SetURI(uint256 indexed id, string indexed uri);
+
     /**
      * @dev Function to update the Buk Protocol Contract address.
      * @param _bukProtocolContract Address of the Buk Protocol Contract.
@@ -115,27 +146,6 @@ interface IBukNFTs is IERC1155 {
         uint256[] memory _amounts,
         bytes memory _data
     ) external;
-
-    /**
-     * @dev name of the Buk PoS NFT contract
-     */
-    function name() external view returns (string memory);
-
-    /**
-     * @dev address of the Buk PoS NFT contract
-     */
-    function nftPoSContract() external view returns (address);
-
-    /**
-     * @dev address of the Buk Protocol contract
-     */
-    function bukProtocolContract() external view returns (address);
-
-    /**
-     * @dev Mapping for token URI's for Buk PoS NFTs
-     * @param _id uint256: The ID of the token
-     */
-    function uriByTokenId(uint256 _id) external view returns (string memory);
 
     /**
      * @dev To retrieve information about the royalties associated with a specific token.

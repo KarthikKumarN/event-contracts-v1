@@ -4,6 +4,7 @@ pragma solidity =0.8.19;
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "../BukNFTs/IBukNFTs.sol";
+import "../BukPOSNFTs/IBukPOSNFTs.sol";
 import "../BukProtocol/IBukProtocol.sol";
 import "../BukTreasury/IBukTreasury.sol";
 
@@ -12,7 +13,7 @@ import "../BukTreasury/IBukTreasury.sol";
  * @author BUK Technology Inc
  * @dev Contract for managing Proof-of-Stay utility NFT ERC1155 token
  */
-contract BukPOSNFTs is AccessControl, ERC1155 {
+contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
     /**
      * @dev Address of the Buk treasury contract.
      */
@@ -55,37 +56,6 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
      */
     bytes32 public constant ADMIN_ROLE =
         keccak256("ADMIN_ROLE");
-
-    /**
-     * @dev Event to set NFT contract role
-     */
-    event SetNftContractRole(address indexed nftContractAddr);
-
-    /**
-     * @dev Emitted when Buk Protocol Address is updated.
-     */
-    event SetBukProtocol(address indexed bukProtocolContract);
-
-    /**
-     * @dev Emitted when treasury is updated.
-     */
-    event SetBukTreasury(address indexed treasuryContract);
-
-    /**
-     * @dev Event to update the contract name
-     */
-    event SetNFTContractName(string indexed name);
-
-    /**
-     * @dev Event to set token URI
-     */
-    event SetURI(uint indexed id, string indexed uri);
-
-    /**
-     * @dev Custom error in the function to show that the NFT is not minted.
-     */
-
-    error NotYetMinted(string message);
 
     /**
      * @dev Constructor to initialize the contract
@@ -205,7 +175,7 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
         uint256 _id,
         uint256 _amount,
         bytes memory _data
-    ) public virtual override onlyRole(ADMIN_ROLE) {
+    ) public virtual override(ERC1155, IBukPOSNFTs) onlyRole(ADMIN_ROLE) {
         require(bukProtocolContract.getBookingDetails(_id).tradeable, "This NFT is non transferable");
         require(balanceOf(_from, _id)>0, "From address does not own NFT");
         super._safeTransferFrom(_from, _to, _id, _amount, _data);
@@ -227,7 +197,7 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
         uint256[] memory _ids,
         uint256[] memory _amounts,
         bytes memory _data
-    ) public virtual override onlyRole(ADMIN_ROLE) {
+    ) public virtual override(ERC1155, IBukPOSNFTs) onlyRole(ADMIN_ROLE) {
         uint256 len = _ids.length;
         for(uint i=0; i<len; ++i) {
             require(bukProtocolContract.getBookingDetails(_ids[i]).tradeable, "One of these NFT is non-transferable");
@@ -242,7 +212,7 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
      */
     function uri(
         uint256 _id
-    ) public view virtual override returns (string memory) {
+    ) public view virtual override(ERC1155, IBukPOSNFTs) returns (string memory) {
         return uriByTokenId[_id];
     }
 
@@ -251,7 +221,7 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
      */
     function supportsInterface(
         bytes4 interfaceId
-    ) public view override(AccessControl, ERC1155) returns (bool) {
+    ) public view override(AccessControl, IERC165, ERC1155) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 

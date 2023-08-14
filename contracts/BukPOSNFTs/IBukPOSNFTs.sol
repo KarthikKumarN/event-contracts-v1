@@ -2,9 +2,38 @@
 pragma solidity =0.8.19;
 
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
-import "@openzeppelin/contracts/access/IAccessControl.sol";
 
-interface IBukPOSNFTs is IERC1155, IAccessControl {
+interface IBukPOSNFTs is IERC1155 {
+
+    /**
+     * @dev Event to set NFT contract role
+     */
+    event SetNftContractRole(address indexed nftContractAddr);
+
+    /**
+     * @dev Emitted when Buk Protocol Address is updated.
+     */
+    event SetBukProtocol(address indexed bukProtocolContract);
+
+    /**
+     * @dev Emitted when treasury is updated.
+     */
+    event SetBukTreasury(address indexed treasuryContract);
+
+    /**
+     * @dev Event to update the contract name
+     */
+    event SetNFTContractName(string indexed name);
+
+    /**
+     * @dev Event to set token URI
+     */
+    event SetURI(uint indexed id, string indexed uri);
+
+    /**
+     * @dev Custom error in the function to show that the NFT is not minted.
+     */
+    error NotYetMinted(string message);
 
     /**
      * @dev Function to update the Buk Protocol Contract address.
@@ -93,27 +122,6 @@ interface IBukPOSNFTs is IERC1155, IAccessControl {
         uint256[] memory _amounts,
         bytes memory _data
     ) external;
-
-    /**
-     * @dev name of the contract
-     */
-    function name() external view returns (string memory);
-
-    /**
-     * @dev address of the BukNFTs contract
-     */
-    function nftContract() external view returns (address);
-
-    /**
-     * @dev address of the Buk Protocol contract
-     */
-    function bukProtocolContract() external view returns (address);
-
-    /**
-     * @dev Mapping for token URI's for Buk PoS NFTs
-     * @param _id uint256: The ID of the token
-     */
-    function uriByTokenId(uint256 _id) external view returns (string memory);
 
     /**
      * @dev Function to get the URI for a given ID
