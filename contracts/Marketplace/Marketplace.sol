@@ -68,6 +68,10 @@ contract Marketplace is Context, IMarketplace, AccessControl {
             "Only owner can list"
         );
         require(
+            _bukNFTContract.isApprovedForAll(_msgSender(), address(this)),
+            "Please approve for execute trade"
+        );
+        require(
             block.timestamp <
                 (bookingDetails.checkin -
                     (_bukProtocalContract

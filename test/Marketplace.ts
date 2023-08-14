@@ -340,11 +340,58 @@ describe("Marketplace", function () {
           ],
         ),
       ).not.be.reverted;
+      // Approve allowance
+      await nftContract.setApprovalForAll(
+        await marketplaceContract.getAddress(),
+        true,
+      );
       await expect(marketplaceContract.createListing(tokenId, salePrice)).not.be
         .reverted;
       await expect(await marketplaceContract.isBookingListed(tokenId)).to.equal(
         true,
       );
+    });
+    it("Should create list allowance check", async function () {
+      let tokenId = 1;
+      let price = 100000000;
+      let minSalePrice = 70000000;
+      let salePrice = 120000000;
+      let date = new Date();
+      let checkin = date.setDate(date.getDate() + 2);
+      let checkout = date.setDate(date.getDate() + 3);
+
+      //Grant allowance permission
+      const res = await stableTokenContract.approve(
+        await bukProtocolContract.getAddress(),
+        200000000000,
+      );
+
+      // Book room and mint NFT
+      expect(
+        await bukProtocolContract.bookRoom(
+          1,
+          [price],
+          [price],
+          [70000000],
+          checkin,
+          checkout,
+          12,
+          true,
+        ),
+      ).not.be.reverted;
+      //Mint
+      await expect(
+        bukProtocolContract.mintBukNFT(
+          [tokenId],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
+      ).not.be.reverted;
+      // Approve allowance
+      await expect(
+        marketplaceContract.createListing(tokenId, salePrice),
+      ).to.be.revertedWith("Please approve for execute trade");
     });
     it("Should create list minSale check", async function () {
       let tokenId = 1;
@@ -383,6 +430,11 @@ describe("Marketplace", function () {
           ],
         ),
       ).not.be.reverted;
+      // Approve allowance
+      await nftContract.setApprovalForAll(
+        await marketplaceContract.getAddress(),
+        true,
+      );
       await expect(
         marketplaceContract.createListing(tokenId, salePrice),
       ).to.be.revertedWith("Sale price cann't be lessthan minimum sale price");
@@ -414,6 +466,11 @@ describe("Marketplace", function () {
           true,
         ),
       ).not.be.reverted;
+      // Approve allowance
+      await nftContract.setApprovalForAll(
+        await marketplaceContract.getAddress(),
+        true,
+      );
       await expect(
         marketplaceContract.createListing(tokenId, salePrice),
       ).to.be.revertedWith("Only available booking can be tradable");
@@ -495,6 +552,11 @@ describe("Marketplace", function () {
           ],
         ),
       ).not.be.reverted;
+      // Approve allowance
+      await nftContract.setApprovalForAll(
+        await marketplaceContract.getAddress(),
+        true,
+      );
       await expect(
         marketplaceContract.createListing(tokenId, salePrice),
       ).to.be.revertedWith("Trade limit time crossed");
@@ -536,6 +598,11 @@ describe("Marketplace", function () {
           ],
         ),
       ).not.be.reverted;
+      // Approve allowance
+      await nftContract.setApprovalForAll(
+        await marketplaceContract.getAddress(),
+        true,
+      );
       await expect(marketplaceContract.createListing(tokenId, salePrice)).not.to
         .be.reverted;
       await expect(
@@ -579,6 +646,11 @@ describe("Marketplace", function () {
           ],
         ),
       ).not.be.reverted;
+      // Approve allowance
+      await nftContract.setApprovalForAll(
+        await marketplaceContract.getAddress(),
+        true,
+      );
       await expect(marketplaceContract.createListing(tokenId, salePrice))
         .to.emit(marketplaceContract, "ListingCreated")
         .withArgs(owner.address, tokenId, salePrice);
@@ -625,7 +697,11 @@ describe("Marketplace", function () {
           ],
         ),
       ).not.be.reverted;
-
+      // Approve allowance
+      await nftContract.setApprovalForAll(
+        await marketplaceContract.getAddress(),
+        true,
+      );
       await expect(marketplaceContract.createListing(tokenId, salePrice)).not.to
         .be.reverted;
       //Grant permission to the marketplace
@@ -687,6 +763,11 @@ describe("Marketplace", function () {
           ],
         ),
       ).not.be.reverted;
+      // Approve allowance
+      await nftContract.setApprovalForAll(
+        await marketplaceContract.getAddress(),
+        true,
+      );
 
       await expect(marketplaceContract.createListing(tokenId, salePrice)).not.to
         .be.reverted;
@@ -734,7 +815,11 @@ describe("Marketplace", function () {
           ],
         ),
       ).not.be.reverted;
-
+      // Approve allowance
+      await nftContract.setApprovalForAll(
+        await marketplaceContract.getAddress(),
+        true,
+      );
       await expect(marketplaceContract.createListing(tokenId, salePrice)).not.to
         .be.reverted;
       //Grant permission to the marketplace
@@ -791,7 +876,11 @@ describe("Marketplace", function () {
           ],
         ),
       ).not.be.reverted;
-
+      // Approve allowance
+      await nftContract.setApprovalForAll(
+        await marketplaceContract.getAddress(),
+        true,
+      );
       await expect(marketplaceContract.createListing(tokenId, salePrice)).not.to
         .be.reverted;
       //Grant permission to the marketplace
@@ -859,6 +948,11 @@ describe("Marketplace", function () {
           ],
         ),
       ).not.be.reverted;
+      // Approve allowance
+      await nftContract.setApprovalForAll(
+        await marketplaceContract.getAddress(),
+        true,
+      );
       await marketplaceContract.createListing(tokenId, salePrice);
       let listingDetails = await marketplaceContract.getListingDetails(tokenId);
       await expect(listingDetails[0]).to.equal(salePrice);
@@ -906,6 +1000,11 @@ describe("Marketplace", function () {
           ],
         ),
       ).not.be.reverted;
+      // Approve allowance
+      await nftContract.setApprovalForAll(
+        await marketplaceContract.getAddress(),
+        true,
+      );
       await marketplaceContract.createListing(tokenId, salePrice);
       await expect(await marketplaceContract.delist(tokenId)).to.not.be
         .reverted;
@@ -950,6 +1049,11 @@ describe("Marketplace", function () {
           ],
         ),
       ).not.be.reverted;
+      // Approve allowance
+      await nftContract.setApprovalForAll(
+        await marketplaceContract.getAddress(),
+        true,
+      );
       await marketplaceContract.createListing(tokenId, salePrice);
       await expect(await marketplaceContract.delist(tokenId))
         .to.emit(marketplaceContract, "Delisted")
@@ -998,6 +1102,11 @@ describe("Marketplace", function () {
           ],
         ),
       ).not.be.reverted;
+      // Approve allowance
+      await nftContract.setApprovalForAll(
+        await marketplaceContract.getAddress(),
+        true,
+      );
       await marketplaceContract.createListing(tokenId, salePrice);
       await expect(
         marketplaceContract.connect(account1).delist(tokenId),
@@ -1045,6 +1154,11 @@ describe("Marketplace", function () {
           ],
         ),
       ).not.be.reverted;
+      // Approve allowance
+      await nftContract.setApprovalForAll(
+        await marketplaceContract.getAddress(),
+        true,
+      );
       await marketplaceContract.createListing(tokenId, salePrice);
       await expect(await marketplaceContract.deleteListing(tokenId)).to.not.be
         .reverted;
@@ -1086,6 +1200,11 @@ describe("Marketplace", function () {
           ],
         ),
       ).not.be.reverted;
+      // Approve allowance
+      await nftContract.setApprovalForAll(
+        await marketplaceContract.getAddress(),
+        true,
+      );
       await marketplaceContract.createListing(tokenId, salePrice);
       await expect(await marketplaceContract.deleteListing(tokenId)).to.not.be
         .reverted;
@@ -1131,6 +1250,11 @@ describe("Marketplace", function () {
           ],
         ),
       ).not.be.reverted;
+      // Approve allowance
+      await nftContract.setApprovalForAll(
+        await marketplaceContract.getAddress(),
+        true,
+      );
       await marketplaceContract.createListing(tokenId, salePrice);
       await expect(await marketplaceContract.deleteListing(tokenId))
         .to.emit(marketplaceContract, "DeletedListing")
@@ -1179,6 +1303,11 @@ describe("Marketplace", function () {
           ],
         ),
       ).not.be.reverted;
+      // Approve allowance
+      await nftContract.setApprovalForAll(
+        await marketplaceContract.getAddress(),
+        true,
+      );
       await marketplaceContract.createListing(tokenId, salePrice);
       await expect(
         marketplaceContract.connect(account1).deleteListing(tokenId),
@@ -1299,6 +1428,11 @@ describe("Marketplace", function () {
           ],
         ),
       ).not.be.reverted;
+      // Approve allowance
+      await nftContract.setApprovalForAll(
+        await marketplaceContract.getAddress(),
+        true,
+      );
       await marketplaceContract.createListing(tokenId, salePrice);
       await expect(await marketplaceContract.relist(tokenId, newPrice)).to.not
         .be.reverted;
@@ -1348,6 +1482,11 @@ describe("Marketplace", function () {
           ],
         ),
       ).not.be.reverted;
+      // Approve allowance
+      await nftContract.setApprovalForAll(
+        await marketplaceContract.getAddress(),
+        true,
+      );
       await marketplaceContract.createListing(tokenId, salePrice);
       await expect(await marketplaceContract.relist(tokenId, newPrice)).to.not
         .be.reverted;
@@ -1393,6 +1532,11 @@ describe("Marketplace", function () {
           ],
         ),
       ).not.be.reverted;
+      // Approve allowance
+      await nftContract.setApprovalForAll(
+        await marketplaceContract.getAddress(),
+        true,
+      );
       await marketplaceContract.createListing(tokenId, salePrice);
       await expect(
         marketplaceContract.connect(account1).relist(tokenId, newPrice),
@@ -1436,6 +1580,11 @@ describe("Marketplace", function () {
           ],
         ),
       ).not.be.reverted;
+      // Approve allowance
+      await nftContract.setApprovalForAll(
+        await marketplaceContract.getAddress(),
+        true,
+      );
       await marketplaceContract.createListing(tokenId, salePrice);
       await expect(await marketplaceContract.relist(tokenId, newPrice))
         .to.emit(marketplaceContract, "Relisted")
