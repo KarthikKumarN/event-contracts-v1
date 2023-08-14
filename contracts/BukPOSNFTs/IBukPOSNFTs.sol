@@ -31,7 +31,7 @@ interface IBukPOSNFTs is IERC1155, IAccessControl {
      * @dev Function to set the contract name
      * @notice This function can only be called by a contract with `BUK_NFT_CONTRACT_ROLE`
      */
-    function setNFTName(string memory _contractName) external;
+    function setNFTContractName(string memory _contractName) external;
 
     /**
      * @dev Function to set the URI for a given ID

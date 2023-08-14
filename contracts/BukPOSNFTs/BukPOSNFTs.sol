@@ -107,7 +107,7 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
         address _bukProtocolContract,
         address _bukTreasuryContract
     ) ERC1155("") {
-        _setNFTName(_contractName);
+        _setNFTContractName(_contractName);
         _setBukTreasury(_bukTreasuryContract);
         _setBukProtocol(_bukProtocolContract);
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
@@ -152,10 +152,10 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
      * @dev Function to set the contract name
      * @notice This function can only be called by a contract with `BUK_NFT_CONTRACT_ROLE`
      */
-    function setNFTName(
+    function setNFTContractName(
         string memory _contractName
     ) external onlyRole(BUK_NFT_CONTRACT_ROLE) {
-        _setNFTName(_contractName);
+        _setNFTContractName(_contractName);
     }
 
     /**
@@ -267,7 +267,7 @@ contract BukPOSNFTs is AccessControl, ERC1155 {
      * Internal function to update the contract name
      * @param _contractName The new name for the contract
      */
-    function _setNFTName(string memory _contractName) internal {
+    function _setNFTContractName(string memory _contractName) internal {
         name = _contractName;
         emit UpdateContractName(name);
     }

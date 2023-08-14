@@ -107,7 +107,7 @@ contract BukNFTs is AccessControl, ERC1155 {
         address _bukProtocolContract,
         address _bukTreasuryContract
     ) ERC1155("") {
-        _setNFTName(_contractName);
+        _setNFTContractName(_contractName);
         _setBukTreasury(_bukTreasuryContract);
         _grantBukPOSNFTRole(_bukPoSContract);
         _setBukProtocol(_bukProtocolContract);
@@ -165,11 +165,11 @@ contract BukNFTs is AccessControl, ERC1155 {
      * @dev Set the name of the contract.
      * @notice This function can only be called by addresses with `BUK_PROTOCOL_CONTRACT_ROLE`
      */
-    function setNFTName(
+    function setNFTContractName(
         string memory _contractName
     ) external onlyRole(BUK_PROTOCOL_CONTRACT_ROLE) {
-        nftPoSContract.setNFTName(_contractName);
-        _setNFTName(_contractName);
+        nftPoSContract.setNFTContractName(_contractName);
+        _setNFTContractName(_contractName);
     }
 
 
@@ -273,8 +273,7 @@ contract BukNFTs is AccessControl, ERC1155 {
         uint256 _amount,
         bytes memory _data
     ) public virtual override onlyRole(MARKETPLACE_CONTRACT_ROLE) {
-        require(
-            _from == _msgSender() || isApprovedForAll(_from, _msgSender()),
+        require(isApprovedForAll(_from, _msgSender()),
             "ERC1155: caller is not token owner or approved"
         );
         require(bukProtocolContract.getBookingDetails(_id).tradeable, "This NFT is non transferable");
@@ -299,8 +298,7 @@ contract BukNFTs is AccessControl, ERC1155 {
         uint256[] memory _amounts,
         bytes memory _data
     ) public virtual override onlyRole(MARKETPLACE_CONTRACT_ROLE) {
-        require(
-            _from == _msgSender() || isApprovedForAll(_from, _msgSender()),
+        require(isApprovedForAll(_from, _msgSender()),
             "ERC1155: caller is not token owner or approved"
         );
         uint256 len = _ids.length;
@@ -341,7 +339,7 @@ contract BukNFTs is AccessControl, ERC1155 {
      * Internal function to update the contract name
      * @param _contractName The new name for the contract
      */
-    function _setNFTName(string memory _contractName) internal {
+    function _setNFTContractName(string memory _contractName) internal {
         name = _contractName;
         emit UpdateContractName(_contractName);
     }

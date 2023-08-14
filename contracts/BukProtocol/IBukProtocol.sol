@@ -61,7 +61,7 @@ interface IBukProtocol {
     /**
      * @dev Emitted when the commission is set.
      */
-    event SetCommission(uint256 indexed commission);
+    event SetCommission(uint256 indexed oldCommission, uint256 indexed newCommission);
 
     /**
      * @dev Emitted when token uri is set.
@@ -71,12 +71,12 @@ interface IBukProtocol {
     /**
      * @dev Emitted when BukNFTs contract address is updated.
      */
-    event SetBukNFTs(address indexed nftContractAddress);
+    event SetBukNFTs(address indexed oldNftContract, address indexed newNftContract);
 
     /**
      * @dev Emitted when BukPOSNFTs contract address is updated.
      */
-    event SetBukPoSNFTs(address indexed nftPoSContractAddress);
+    event SetBukPoSNFTs(address indexed oldNftPoSContract, address indexed newNftPoSContract);
 
     /**
      * @dev Emitted when Buk treasury is updated.
@@ -127,7 +127,7 @@ interface IBukProtocol {
     /**
      * @dev Emitted when room bookings are confirmed.
      */
-    event MintBookingNFT(uint256[] indexed bookings, bool indexed status);
+    event MintedBookingNFT(uint256[] indexed bookings, bool indexed status);
 
     /**
      * @dev Emitted when room bookings are checked in.
@@ -146,7 +146,7 @@ interface IBukProtocol {
     /**
      * @dev Event to update the contract name
      */
-    event UpdateContractName(string indexed contractName);
+    event UpdateContractName(string indexed oldContractName, string indexed newContractName);
 
     /**
     * @dev Function to update the treasury address.
@@ -226,7 +226,7 @@ interface IBukProtocol {
      * @dev Set the name of the contract.
      * @notice This function can only be called by addresses with `ADMIN_ROLE`
      */
-    function setNFTName(string memory _contractName) external;
+    function setNFTContractName(string memory _contractName) external;
 
     /**
      * @dev Function to set the Buk commission percentage.
