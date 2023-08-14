@@ -5,6 +5,7 @@ describe("BukProtocol Bookings", function () {
   let stableTokenContract;
   let bukProtocolContract;
   let marketplaceContract;
+  let signatureVerifierContract;
   let owner;
   let account1;
   let account2;
@@ -42,12 +43,17 @@ describe("BukProtocol Bookings", function () {
       stableTokenContract.getAddress(),
     );
 
+    //Deploy SignatureVerifier contract
+    const SignatureVerifier = await ethers.getContractFactory("SignatureVerifier");
+    signatureVerifierContract = await SignatureVerifier.deploy();
+
     //BukProtocol
     const BukProtocol = await ethers.getContractFactory("BukProtocol");
     bukProtocolContract = await BukProtocol.deploy(
       bukTreasuryContract.getAddress(),
       stableTokenContract.getAddress(),
-      bukWallet.address,
+      bukWallet.getAddress(),
+      signatureVerifierContract.getAddress(),
     );
 
     // BukPOSNFT
@@ -1298,6 +1304,29 @@ describe("BukProtocol Bookings", function () {
           ],
         ),
       ).not.be.reverted;
+
+
+      //Get the private key of the owner from hardhat
+      
+
+
+
+
+  // Create message to sign
+  const message = ethers.utils.solidityKeccak256(
+    ["uint256", "uint256", "uint256", "uint256"], 
+    [1, 50000000, 30000000, 20000000]
+  );
+
+  // Sign message
+  const signer = new ethers.Wallet(privateKey);
+  const signature = await signer.signMessage(ethers.utils.arrayify(message));
+
+  // Call contract
+  const contract = new ethers.Contract(contractAddress, abi, provider);
+  const tx = await contract.cancelRoom(bookingId, penalty, refund, charges, signature);
+  await tx.wait();
+
 
       //Cancel Room
       await expect(

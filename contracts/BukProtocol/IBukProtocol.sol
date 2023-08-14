@@ -79,6 +79,11 @@ interface IBukProtocol {
     event SetBukPoSNFTs(address indexed oldNftPoSContract, address indexed newNftPoSContract);
 
     /**
+     * @dev Emitted when signer verifier is updated.
+     */
+    event SetSignerVerifier(address indexed signerVerifier);
+
+    /**
      * @dev Emitted when Buk treasury is updated.
      */
     event SetBukTreasury(address indexed treasuryContract);
@@ -149,74 +154,81 @@ interface IBukProtocol {
     event SetNFTContractName(string indexed oldContractName, string indexed newContractName);
 
     /**
-    * @dev Function to update the treasury address.
-    * @param _bukTreasuryContract Address of the treasury.
-    * @notice This function can only be called by `ADMIN_ROLE`
-    */
+     * @dev This function is used to set the address of the signature verifier contract.
+     * @param _signatureVerifier The address of the signature verifier contract.
+     * @notice This function can only be called by `ADMIN_ROLE`
+     */
+    function setSignatureVerifier(address _signatureVerifier) external;
+
+    /**
+     * @dev Function to update the treasury address.
+     * @param _bukTreasuryContract Address of the treasury.
+     * @notice This function can only be called by `ADMIN_ROLE`
+     */
     function setBukTreasury(address _bukTreasuryContract) external;
 
     /**
-    * @dev Function to update the Buk Wallet address to collect commission.
-    * @param _bukWalletContract Address of the Buk Wallet.
-    * @notice This function can only be called by `ADMIN_ROLE`
-    */
+     * @dev Function to update the Buk Wallet address to collect commission.
+     * @param _bukWalletContract Address of the Buk Wallet.
+     * @notice This function can only be called by `ADMIN_ROLE`
+     */
     function setBukWallet(address _bukWalletContract) external;
 
     /**
-    * @dev Function to update the stable token address.
-    * @param _stableToken Address of the stable token contract.
-    * @notice This function can only be called by `ADMIN_ROLE`
-    */
+     * @dev Function to update the stable token address.
+     * @param _stableToken Address of the stable token contract.
+     * @notice This function can only be called by `ADMIN_ROLE`
+     */
     function setStableToken(address _stableToken) external;
 
     /**
-    * @dev Function to update the BukNFTs contract address.
-    * @param _nftContractAddr Address of the BukNFTs contract.
-    * @notice This function can only be called by `ADMIN_ROLE`
-    */
+     * @dev Function to update the BukNFTs contract address.
+     * @param _nftContractAddr Address of the BukNFTs contract.
+     * @notice This function can only be called by `ADMIN_ROLE`
+     */
     function setBukNFTs(address _nftContractAddr) external;
 
     /**
-    * @dev Function to update the BukPOSNFTs contract address.
-    * @param _nftPoSContractAddr Address of the BukPOSNFTs contract.
-    * @notice This function can only be called by `ADMIN_ROLE`
-    */
+     * @dev Function to update the BukPOSNFTs contract address.
+     * @param _nftPoSContractAddr Address of the BukPOSNFTs contract.
+     * @notice This function can only be called by `ADMIN_ROLE`
+     */
     function setBukPoSNFTs(address _nftPoSContractAddr) external;
 
     /**
-    * @dev Function to update the token uri.
-    * @param _tokenId Token Id.
-    * @notice This function can only be called by `ADMIN_ROLE`
-    */
+     * @dev Function to update the token uri.
+     * @param _tokenId Token Id.
+     * @notice This function can only be called by `ADMIN_ROLE`
+     */
     function setTokenUri(uint _tokenId, string memory _newUri) external;
 
     /**
-    * @dev Function to define the royalty Fraction for Buk.
-    * @param _royaltyFraction Royalty Fraction.
-    * @notice This function can only be called by `ADMIN_ROLE`
-    */
+     * @dev Function to define the royalty Fraction for Buk.
+     * @param _royaltyFraction Royalty Fraction.
+     * @notice This function can only be called by `ADMIN_ROLE`
+     */
     function setBukRoyaltyInfo(uint96 _royaltyFraction) external;
 
     /**
-    * @dev Function to define the royalty Fraction for Hotel.
-    * @param _royaltyFraction Royalty Fraction.
-    * @notice This function can only be called by `ADMIN_ROLE`
-    */
+     * @dev Function to define the royalty Fraction for Hotel.
+     * @param _royaltyFraction Royalty Fraction.
+     * @notice This function can only be called by `ADMIN_ROLE`
+     */
     function setHotelRoyaltyInfo(uint96 _royaltyFraction) external;
 
     /**
-    * @dev Function to define the royalty Fraction for the First Owners.
-    * @param _royaltyFraction Royalty Fraction.
-    * @notice This function can only be called by `ADMIN_ROLE`
-    */
+     * @dev Function to define the royalty Fraction for the First Owners.
+     * @param _royaltyFraction Royalty Fraction.
+     * @notice This function can only be called by `ADMIN_ROLE`
+     */
     function setFirstOwnerRoyaltyInfo(uint96 _royaltyFraction) external;
 
     /**
-    * @dev Function to define the royalties.
-    * @param _recipients Array of recipients of royalties
-    * @param _royaltyFractions Array of percentages for each recipients in the _recipients[] order.
-    * @notice This function can only be called by `ADMIN_ROLE`
-    */
+     * @dev Function to define the royalties.
+     * @param _recipients Array of recipients of royalties
+     * @param _royaltyFractions Array of percentages for each recipients in the _recipients[] order.
+     * @notice This function can only be called by `ADMIN_ROLE`
+     */
     function setOtherRoyaltyInfo(
         address[] memory _recipients,
         uint96[] memory _royaltyFractions
@@ -274,7 +286,7 @@ interface IBukProtocol {
      */
     function bookingRefund(uint256[] memory _ids, address _owner) external;
 
-     /**
+    /**
      * @dev Function to mint new BukNFT tokens based on the provided booking IDs and URIs.
      * @param _ids An array of booking IDs representing the unique identifier for each BukNFT token.
      * @param _uri An array of URIs corresponding to each booking ID, which will be associated with the Buk NFTs.
@@ -283,10 +295,7 @@ interface IBukProtocol {
      * @notice The booking status should be booked to confirm it.
      * @notice The NFTs are minted to the owner of the booking.
      */
-    function mintBukNFT(
-        uint256[] memory _ids,
-        string[] memory _uri
-    ) external;
+    function mintBukNFT(uint256[] memory _ids, string[] memory _uri) external;
 
     /**
      * @dev Function to checkin the rooms.
@@ -314,6 +323,7 @@ interface IBukProtocol {
      * @param _penalty Penalty amount to be refunded.
      * @param _refund Refund amount to be refunded.
      * @param _charges Charges amount to be refunded.
+     * @param _bookingOwner Owner of the booking.
      * @notice Only the admin can cancel the rooms.
      * @notice The booking status should be confirmed to cancel it.
      * @notice The Active Booking NFTs are burnt from the owner's account.
@@ -323,7 +333,24 @@ interface IBukProtocol {
         uint256 _id,
         uint256 _penalty,
         uint256 _refund,
-        uint256 _charges
+        uint256 _charges,
+        address _bookingOwner,
+        bytes memory _signature
+    ) external;
+
+    /**
+     * @dev Function to perform an emergency cancellation of a booking.
+     * @param _id The ID of the booking to be cancelled.
+     * @param _refund The amount to be refunded to the booking owner.
+     * @param _charges The charges associated with the cancellation(if any).
+     * @param _bookingOwner The address of the booking owner.
+     * @notice This function can only be called by `ADMIN_ROLE`
+     */
+    function emergencyCancellation(
+        uint256 _id,
+        uint256 _refund,
+        uint256 _charges,
+        address _bookingOwner
     ) external;
 
     /**
@@ -332,18 +359,25 @@ interface IBukProtocol {
      * @return bukWallet The address of the bukWallet contract
      * @return stableToken The address of the stable token contract
      */
-    function getWallets() external view returns (address bukTreasury, address bukWallet, address stableToken);
+    function getWallets()
+        external
+        view
+        returns (address bukTreasury, address bukWallet, address stableToken);
 
     /**
      * @dev To get the booking details
      * @param _tokenId ID of the booking.
      */
-    function getBookingDetails(uint256 _tokenId) external view returns (Booking memory);
+    function getBookingDetails(
+        uint256 _tokenId
+    ) external view returns (Booking memory);
 
     /**
      * @dev Function to retrieve royalty information.
      * @param _tokenId ID of the token
      * @notice Token ID and Booking ID are same.
      */
-    function getRoyaltyInfo(uint256 _tokenId) external view returns (Royalty[] memory);
+    function getRoyaltyInfo(
+        uint256 _tokenId
+    ) external view returns (Royalty[] memory);
 }

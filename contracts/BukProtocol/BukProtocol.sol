@@ -5,9 +5,11 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "../BukPOSNFTs/IBukPOSNFTs.sol";
 import "../BukNFTs/IBukNFTs.sol";
 import "../BukTreasury/IBukTreasury.sol";
+import "../SignatureVerifier/ISignatureVerifier.sol";
 import "./IBukProtocol.sol";
 
 /**
@@ -17,7 +19,7 @@ import "./IBukProtocol.sol";
  */
 contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     using SafeERC20 for IERC20;
-    
+
     /**
      * @dev address _bukWallet        Address of the Buk wallet.
      * @dev address _stableToken          Address of the stable token.
@@ -28,6 +30,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     address private _bukWallet;
     IERC20 private _stableToken;
     IBukTreasury private _bukTreasury;
+    ISignatureVerifier private _signatureVerifier;
     IBukNFTs public nftContract;
     IBukPOSNFTs public nftPoSContract;
 
@@ -55,9 +58,9 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
     /**
-     * @dev mapping(uint256 => Booking) bookingDetails   Mapping of booking IDs to booking details.
+     * @dev mapping(uint256 => Booking) _bookingDetails   Mapping of booking IDs to booking details.
      */
-    mapping(uint256 => Booking) public bookingDetails; //bookingID -> Booking Details
+    mapping(uint256 => Booking) private _bookingDetails; //bookingID -> Booking Details
 
     //Modifier to check if the sender is either admin or an owner of the booking
     modifier onlyAdminOwner(uint256[] memory _ids) {
@@ -65,7 +68,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         for (uint8 i = 0; i < len; ++i) {
             require(
                 hasRole(ADMIN_ROLE, _msgSender()) ||
-                (nftContract.balanceOf(_msgSender(), _ids[i]) > 0),
+                    (nftContract.balanceOf(_msgSender(), _ids[i]) > 0),
                 "Only admin or owner of the NFT can access the booking"
             );
         }
@@ -81,14 +84,25 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     constructor(
         address _bukTreasuryContract,
         address _stableTokenAddress,
-        address _bukWalletAddress
+        address _bukWalletAddress,
+        address _sigVerifier
     ) {
+        _signatureVerifier = ISignatureVerifier(_sigVerifier);
         _setBukTreasury(_bukTreasuryContract);
         _setStableToken(_stableTokenAddress);
         _setBukWallet(_bukWalletAddress);
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setupRole(ADMIN_ROLE, _msgSender());
         _grantRole(ADMIN_ROLE, _msgSender());
+    }
+
+    /**
+     * @dev See {IBukProtocol-setSignatureVerifier}.
+     */
+    function setSignatureVerifier(
+        address __signatureVerifier
+    ) external onlyRole(ADMIN_ROLE) {
+        _setSignatureVerifier(__signatureVerifier);
     }
 
     /**
@@ -271,13 +285,16 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     /**
      * @dev See {IBukProtocol-toggleTradeability}.
      */
-    function toggleTradeability(uint256 _tokenId) external onlyRole(ADMIN_ROLE) {
+    function toggleTradeability(
+        uint256 _tokenId
+    ) external onlyRole(ADMIN_ROLE) {
         require(
-            bookingDetails[_tokenId].status != BookingStatus.nil,
+            _bookingDetails[_tokenId].status != BookingStatus.nil,
             "Check the Booking status"
         );
-        bookingDetails[_tokenId].tradeable = !bookingDetails[_tokenId].tradeable;
-        emit ToggleTradeability(_tokenId, bookingDetails[_tokenId].tradeable);
+        _bookingDetails[_tokenId].tradeable = !_bookingDetails[_tokenId]
+            .tradeable;
+        emit ToggleTradeability(_tokenId, _bookingDetails[_tokenId].tradeable);
     }
 
     /**
@@ -294,10 +311,12 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         bool _tradeable
     ) external nonReentrant returns (bool) {
         require(
-            (_checkin > block.timestamp), "Checkin date should be greater than current date"
+            (_checkin > block.timestamp),
+            "Checkin date should be greater than current date"
         );
         require(
-            (_checkout > _checkin), "Checkout date should be greater than checkin date"
+            (_checkout > _checkin),
+            "Checkout date should be greater than checkin date"
         );
         uint256 total = 0;
         for (uint8 i = 0; i < _count; ++i) {
@@ -318,7 +337,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         uint commissionTotal = 0;
         for (uint8 i = 0; i < _count; ++i) {
             ++_bookingIds;
-            bookingDetails[_bookingIds] = Booking(
+            _bookingDetails[_bookingIds] = Booking(
                 _bookingIds,
                 BookingStatus.booked,
                 0,
@@ -349,20 +368,20 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         require((len > 0), "Array is empty");
         for (uint8 i = 0; i < len; ++i) {
             require(
-                bookingDetails[_ids[i]].firstOwner == _owner,
+                _bookingDetails[_ids[i]].firstOwner == _owner,
                 "Check the booking owner"
             );
             require(
-                bookingDetails[_ids[i]].status == BookingStatus.booked,
+                _bookingDetails[_ids[i]].status == BookingStatus.booked,
                 "Check the Booking status"
             );
         }
         uint total = 0;
         for (uint8 i = 0; i < len; ++i) {
-            bookingDetails[_ids[i]].status = BookingStatus.cancelled;
+            _bookingDetails[_ids[i]].status = BookingStatus.cancelled;
             total +=
-                bookingDetails[_ids[i]].total +
-                (bookingDetails[_ids[i]].baseRate * commission) /
+                _bookingDetails[_ids[i]].total +
+                (_bookingDetails[_ids[i]].baseRate * commission) /
                 100;
         }
         _bukTreasury.cancelUSDCRefund(total, _owner);
@@ -381,24 +400,24 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         require(((len > 0) && (len < 11)), "Not in max - min booking limit");
         for (uint8 i = 0; i < len; ++i) {
             require(
-                bookingDetails[_ids[i]].status == BookingStatus.booked,
+                _bookingDetails[_ids[i]].status == BookingStatus.booked,
                 "Check the Booking status"
             );
             require(
-                bookingDetails[_ids[i]].firstOwner == _msgSender(),
+                _bookingDetails[_ids[i]].firstOwner == _msgSender(),
                 "Only booking owner has access"
             );
         }
         for (uint8 i = 0; i < len; ++i) {
-            bookingDetails[_ids[i]].status = BookingStatus.confirmed;
+            _bookingDetails[_ids[i]].status = BookingStatus.confirmed;
             nftContract.mint(
                 _ids[i],
-                bookingDetails[_ids[i]].firstOwner,
+                _bookingDetails[_ids[i]].firstOwner,
                 1,
                 "",
                 _uri[i]
             );
-            bookingDetails[_ids[i]].tokenID = _ids[i];
+            _bookingDetails[_ids[i]].tokenID = _ids[i];
         }
         emit MintedBookingNFT(_ids, true);
     }
@@ -411,13 +430,13 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         require(((len > 0) && (len < 11)), "Not in max-min booking limit");
         for (uint8 i = 0; i < len; ++i) {
             require(
-                bookingDetails[_ids[i]].status == BookingStatus.confirmed,
+                _bookingDetails[_ids[i]].status == BookingStatus.confirmed,
                 "Check the Booking status"
             );
         }
         for (uint8 i = 0; i < len; ++i) {
-            bookingDetails[_ids[i]].status = BookingStatus.checkedin;
-            bookingDetails[_ids[i]].tradeable = false;
+            _bookingDetails[_ids[i]].status = BookingStatus.checkedin;
+            _bookingDetails[_ids[i]].tradeable = false;
         }
         emit CheckinRooms(_ids, true);
     }
@@ -430,19 +449,19 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         require(((len > 0) && (len < 11)), "Not in max-min booking limit");
         for (uint8 i = 0; i < len; ++i) {
             require(
-                bookingDetails[_ids[i]].status == BookingStatus.checkedin,
+                _bookingDetails[_ids[i]].status == BookingStatus.checkedin,
                 "Check the Booking status"
             );
             require(
-                (bookingDetails[_ids[i]].checkout < block.timestamp),
+                (_bookingDetails[_ids[i]].checkout < block.timestamp),
                 "Checkout date should be less than current date"
             );
         }
         for (uint8 i = 0; i < len; ++i) {
-            bookingDetails[_ids[i]].status = BookingStatus.checkedout;
-            bookingDetails[_ids[i]].tradeable = false;
-            nftContract.burn(
-                bookingDetails[_ids[i]].firstOwner,
+            _bookingDetails[_ids[i]].status = BookingStatus.checkedout;
+            _bookingDetails[_ids[i]].tradeable = false;
+            IBukNFTs(nftContract).burn(
+                _bookingDetails[_ids[i]].firstOwner,
                 _ids[i],
                 1,
                 true
@@ -458,23 +477,71 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         uint256 _id,
         uint256 _penalty,
         uint256 _refund,
-        uint256 _charges
+        uint256 _charges,
+        address _bookingOwner,
+        bytes memory _signature
     ) external onlyRole(ADMIN_ROLE) {
+        //Check if _bookingOwner is the current owner of the booking
         require(
-            ((bookingDetails[_id].status == BookingStatus.confirmed) ||
-                (bookingDetails[_id].status == BookingStatus.checkedin)),
+            nftContract.balanceOf(_bookingOwner, _id) > 0,
+            "Check the booking owner"
+        );
+
+        // hash message
+        bytes32 hash = keccak256(
+            abi.encodePacked(_id, _penalty, _refund, _charges)
+        );
+
+        address signer = _signatureVerifier.verify(hash, _signature);
+
+        // Verify recovered address matches booking owner
+        require(signer == _bookingOwner, "Invalid owner signature");
+
+        require(
+            ((_bookingDetails[_id].status == BookingStatus.confirmed) ||
+                (_bookingDetails[_id].status == BookingStatus.checkedin)),
             "Not a confirmed or checkedin Booking"
         );
         require(
-            ((_penalty + _refund + _charges) < (bookingDetails[_id].total + 1)),
+            ((_penalty + _refund + _charges) < (_bookingDetails[_id].total + 1)),
             "Transfer amount exceeds total"
         );
-        IBukNFTs bukNftsContract = IBukNFTs(nftContract);
-        bookingDetails[_id].status = BookingStatus.cancelled;
+        _bookingDetails[_id].status = BookingStatus.cancelled;
         _bukTreasury.cancelUSDCRefund(_penalty, _bukWallet);
-        _bukTreasury.cancelUSDCRefund(_refund, bookingDetails[_id].firstOwner);
+        _bukTreasury.cancelUSDCRefund(_refund, _bookingOwner);
         _bukTreasury.cancelUSDCRefund(_charges, _bukWallet);
-        bukNftsContract.burn(bookingDetails[_id].firstOwner, _id, 1, false);
+        //TODO Change the condition to check if the NFT is burned from the current owner
+        nftContract.burn(_bookingOwner, _id, 1, false);
+        emit CancelRoom(_id, true);
+    }
+
+    /**
+     * @dev See {IBukProtocol-emergencyCancellation}.
+     */
+    function emergencyCancellation(
+        uint256 _id,
+        uint256 _refund,
+        uint256 _charges,
+        address _bookingOwner
+    ) external onlyRole(ADMIN_ROLE) {
+        require(
+            nftContract.balanceOf(_bookingOwner, _id) > 0,
+            "Check the booking owner"
+        );
+
+        require(
+            ((_bookingDetails[_id].status == BookingStatus.confirmed) ||
+                (_bookingDetails[_id].status == BookingStatus.checkedin)),
+            "Not a confirmed or checkedin Booking"
+        );
+        require(
+            ((_refund + _charges) < (_bookingDetails[_id].total + 1)),
+            "Transfer amount exceeds total"
+        );
+        _bookingDetails[_id].status = BookingStatus.cancelled;
+        _bukTreasury.cancelUSDCRefund(_refund, _bookingOwner);
+        _bukTreasury.cancelUSDCRefund(_charges, address(_bukTreasury));
+        nftContract.burn(_bookingOwner, _id, 1, false);
         emit CancelRoom(_id, true);
     }
 
@@ -487,7 +554,11 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         onlyRole(ADMIN_ROLE)
         returns (address bukTreasury, address bukWallet, address stableToken)
     {
-        return (address(_bukTreasury), address(_bukWallet), address(_stableToken));
+        return (
+            address(_bukTreasury),
+            address(_bukWallet),
+            address(_stableToken)
+        );
     }
 
     /**
@@ -496,7 +567,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     function getBookingDetails(
         uint256 _tokenId
     ) external view returns (Booking memory) {
-        return bookingDetails[_tokenId];
+        return _bookingDetails[_tokenId];
     }
 
     /**
@@ -509,13 +580,24 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         royalties[0] = Royalty(address(_bukTreasury), bukRoyalty);
         royalties[1] = Royalty(address(_bukTreasury), hotelRoyalty);
         royalties[2] = Royalty(
-            bookingDetails[_tokenId].firstOwner,
+            _bookingDetails[_tokenId].firstOwner,
             firstOwnerRoyalty
         );
         for (uint i = 0; i < otherRoyalties.length; i++) {
             royalties[i + 3] = otherRoyalties[i];
         }
         return royalties;
+    }
+
+    /**
+     * Internal function to set the Signature Verifier contract address
+     * @param _signatureVerifierContract The address of the Signature Verifier contract
+     */
+    function _setSignatureVerifier(
+        address _signatureVerifierContract
+    ) internal {
+        _signatureVerifier = ISignatureVerifier(_signatureVerifierContract);
+        emit SetSignerVerifier(address(_signatureVerifierContract));
     }
 
     /**
