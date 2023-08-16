@@ -119,7 +119,7 @@ interface IBukProtocol {
     /**
      * @dev Emitted when single room is booked.
      */
-    event BookRoom(uint256 indexed booking);
+    event BookRoom(uint256 indexed booking, uint256 checkin, uint256 checkout, uint256 total);
 
     /**
      * @dev Emitted when booking refund is done.
@@ -147,11 +147,11 @@ interface IBukProtocol {
 
     /**
      * @dev Sets the admin wallet address.
-     * @param _adminWallet The new admin wallet address to be set.
+     * @param _adminAddr The new admin wallet address to be set.
      * @notice This function can only be called by admin
      */
-    function setAdminWallet(
-        address _adminWallet
+    function setAdmin(
+        address _adminAddr
     ) external;
 
     /**
@@ -235,7 +235,6 @@ interface IBukProtocol {
 
     /**
      * @dev Function to book rooms.
-     * @param _count Number of rooms to be booked.
      * @param _total Total amount to be paid.
      * @param _baseRate Base rate of the room.
      * @param _minSalePrice Minimum sale price for the booking.
@@ -246,7 +245,6 @@ interface IBukProtocol {
      * @return ids IDs of the bookings.
      */
     function bookRoom(
-        uint256 _count,
         uint256[] memory _total,
         uint256[] memory _baseRate,
         uint256[] memory _minSalePrice,

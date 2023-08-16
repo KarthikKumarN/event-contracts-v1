@@ -216,24 +216,16 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
         onlyRole(MARKETPLACE_CONTRACT_ROLE)
     {
         require(
-            block.timestamp <
+            (block.timestamp <
                 (bukProtocolContract.getBookingDetails(_id).checkin -
                     (bukProtocolContract.getBookingDetails(_id).tradeTimeLimit *
-                        3600)),
+                        3600)) &&
+                bukProtocolContract.getBookingDetails(_id).tradeable),
             "Trade limit time crossed"
         );
         require(
             isApprovedForAll(_from, _msgSender()),
             "ERC1155: caller is not token owner or approved"
-        );
-        require(
-            bukProtocolContract.getBookingDetails(_id).checkin >
-                block.timestamp,
-            "Checkin time has passed"
-        );
-        require(
-            bukProtocolContract.getBookingDetails(_id).tradeable,
-            "This NFT is non transferable"
         );
         require(balanceOf(_from, _id) > 0, "From address does not own NFT");
         super._safeTransferFrom(_from, _to, _id, _amount, _data);
@@ -260,16 +252,14 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
         );
         uint256 len = _ids.length;
         for (uint i = 0; i < len; ++i) {
-        		require(
-								block.timestamp <
-										(bukProtocolContract.getBookingDetails(_ids[i]).checkin -
-												(bukProtocolContract.getBookingDetails(_ids[i]).tradeTimeLimit *
-														3600)),
-								"Trade limit time crossed"
-						);
             require(
-                bukProtocolContract.getBookingDetails(_ids[i]).tradeable,
-                "One of these NFT is non-transferable"
+                (block.timestamp <
+                    (bukProtocolContract.getBookingDetails(_ids[i]).checkin -
+                        (bukProtocolContract
+                            .getBookingDetails(_ids[i])
+                            .tradeTimeLimit * 3600)) &&
+                    bukProtocolContract.getBookingDetails(_ids[i]).tradeable),
+                "Trade limit time crossed"
             );
             require(
                 balanceOf(_from, _ids[i]) > 0,
@@ -321,7 +311,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
      * @param _bukProtocolContract The address of the Buk Protocol contract
      */
     function _setBukProtocol(address _bukProtocolContract) private {
-		address oldBukProtocolContract_ = address(bukProtocolContract);
+        address oldBukProtocolContract_ = address(bukProtocolContract);
         bukProtocolContract = IBukProtocol(_bukProtocolContract);
         _grantRole(BUK_PROTOCOL_CONTRACT_ROLE, _bukProtocolContract);
         _revokeRole(BUK_PROTOCOL_CONTRACT_ROLE, oldBukProtocolContract_);
