@@ -78,9 +78,7 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
     }
 
     /**
-     * @dev Function to update the Buk Protocol Contract address.
-     * @param _bukProtocolContract Address of the Buk Protocol Contract.
-     * @notice This function can only be called by addresses with `ADMIN_ROLE`
+     * @dev See {IBukPOSNFTs-setBukProtocol}.
      */
     function setBukProtocol(
         address _bukProtocolContract
@@ -89,18 +87,14 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
     }
 
     /**
-    * @dev Function to update the treasury address.
-    * @param _bukTreasuryContract Address of the treasury.
-     * @notice This function can only be called by addresses with `ADMIN_ROLE`
-    */
+     * @dev See {IBukPOSNFTs-setBukTreasury}.
+     */
     function setBukTreasury(address _bukTreasuryContract) external onlyRole(ADMIN_ROLE) {
         _setBukTreasury(_bukTreasuryContract);
     }
 
     /**
-     * @dev Function to set the BukNFT role to a given contract
-     * @param _nftContract address: The address of the NFT contract
-     * @notice This function can only be called by a contract with `ADMIN_ROLE`
+     * @dev See {IBukPOSNFTs-setBukNFTRole}.
      */
     function setBukNFTRole(
         address _nftContract
@@ -111,8 +105,7 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
     }
 
     /**
-     * @dev Function to set the contract name
-     * @notice This function can only be called by a contract with `BUK_NFT_CONTRACT_ROLE`
+     * @dev See {IBukPOSNFTs-setNFTContractName}.
      */
     function setNFTContractName(
         string memory _contractName
@@ -121,20 +114,7 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
     }
 
     /**
-     * @dev Function to mint tokens
-     * @param _account address: The address to which the tokens will be minted
-     * @param _id uint256: The ID of the token
-     * @param _amount uint256: The amount of tokens to be minted
-     * @param _newuri string: The URI of the token
-     * @param _data bytes: Additional data associated with the token
-     * @notice This function can only be called by a contract with `BUK_NFT_CONTRACT_ROLE`
-     */
-
-    /**
-     * @dev Function to set the URI for a given ID
-     * @param _id uint256: The ID of the token
-     * @param _newuri string: The new URI of the token
-     * @notice This function can only be called by a contract with `BUK_NFT_CONTRACT_ROLE`
+     * @dev See {IBukPOSNFTs-setURI}.
      */
     function setURI(
         uint256 _id,
@@ -148,6 +128,9 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
         emit SetURI(_id, _newuri);
     }
 
+    /**
+     * @dev See {IBukPOSNFTs-mint}.
+     */
     function mint(
         address _account,
         uint256 _id,
@@ -160,14 +143,14 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
     }
 
     /**
-     * @dev Transfers ownership of an NFT token from one address to another.
-     * @param _from - The current owner of the NFT.
-     * @param _to - The address to transfer the ownership to.
-     * @param _id - The ID of the NFT token.
-     * @param _amount - The amount of NFTs to mint.
-     * @param _data - Additional data to include in the transfer.
-     * @notice This function checks if the NFT is tranferable or not.
-     * @notice This function can only be called by a contract with `ADMIN_ROLE`
+     * @dev See {IBukPOSNFTs-getName}.
+     */
+    function getName() external view returns (string memory) {
+        return name;
+    }
+
+    /**
+     * @dev See {IBukPOSNFTs-safeTransferFrom}.
      */
     function safeTransferFrom(
         address _from,
@@ -182,14 +165,7 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
     }
 
     /**
-     * @dev Transfers ownership of multiple NFT tokens from one address to another.
-     * @param _from - The current owner of the NFTs.
-     * @param _to - The address to transfer the ownership to.
-     * @param _ids - The IDs of the NFT tokens.
-     * @param _amounts - Count of ERC1155 tokens of the respective token IDs.
-     * @param _data - Additional data to include in the transfer.
-     * @notice This function checks if the NFTs are tranferable or not.
-     * @notice This function can only be called by a contract with `ADMIN_ROLE`
+     * @dev See {IBukPOSNFTs-safeBatchTransferFrom}.
      */
     function safeBatchTransferFrom(
         address _from,
@@ -207,8 +183,7 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
     }
 
     /**
-     * @dev Function to get the URI for a given ID
-     * @param _id uint256: The ID of the token
+     * @dev See {IBukPOSNFTs-uri}.
      */
     function uri(
         uint256 _id
@@ -226,7 +201,7 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
     }
 
     /**
-     * Internal function to update the contract name
+     * Private function to update the contract name
      * @param _contractName The new name for the contract
      */
     function _setNFTContractName(string memory _contractName) private {
@@ -235,7 +210,7 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
     }
 
     /**
-     * Internal function to set the Buk Protocol Contract address.
+     * Private function to set the Buk Protocol Contract address.
      * @param _bukProtocolContract The address of the Buk Protocol contract
      */
     function _setBukProtocol(address _bukProtocolContract) private {
@@ -244,7 +219,7 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
     }
 
     /**
-     * Internal function to set the BukTreasury contract address
+     * Private function to set the BukTreasury contract address
      * @param _bukTreasuryContract The address of the BukTreasury contract
      */
     function _setBukTreasury(address _bukTreasuryContract) private {

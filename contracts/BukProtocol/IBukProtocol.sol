@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.19;
+import "../BukRoyalties/IBukRoyalties.sol";
 
 interface IBukProtocol {
     /**
@@ -49,16 +50,6 @@ interface IBukProtocol {
     }
 
     /**
-     * @dev Struct named Royalty to store royalty information.
-     * @param address receiver           The address of the receiver who will receive the royalty
-     * @param uint96 royaltyFraction     The fraction of the royalty to be paid, expressed as an unsigned 96-bit integer
-     */
-    struct Royalty {
-        address receiver;
-        uint96 royaltyFraction;
-    }
-
-    /**
      * @dev Emitted when the commission is set.
      */
     event SetCommission(uint256 indexed oldCommission, uint256 indexed newCommission);
@@ -78,6 +69,11 @@ interface IBukProtocol {
      */
     event SetBukPoSNFTs(address indexed oldNftPoSContract, address indexed newNftPoSContract);
 
+    /**
+     * @dev Emitted when BukRoyalties contract address is updated.
+     */
+    event SetRoyaltiesContract(address indexed oldRoyaltiesContract, address indexed newRoyaltiesContract);
+    
     /**
      * @dev Emitted when signer verifier is updated.
      */
@@ -99,19 +95,9 @@ interface IBukProtocol {
     event SetStableToken(address indexed _stableToken);
 
     /**
-     * @dev Emitted when new royalty has been updated
-     * @param oldRoyalty, old buk royalty
-     * @param newRoyalty, new buk royalty
-     * @notice This event is used when Buk, Hotel and First Owner royalties are updated
+     * @dev Event to update the contract name
      */
-    event SetRoyalty(uint96 oldRoyalty, uint96 newRoyalty);
-
-    /**
-     * @dev Emitted when other royalties are updated
-     * @param oldRoyalty, array of old royalties
-     * @param newRoyalty, array od new royalties
-     */
-    event SetOtherRoyalties(uint96[] oldRoyalty, uint96[] newRoyalty);
+    event SetNFTContractName(string indexed oldContractName, string indexed newContractName);
 
     /**
      * @dev Emitted when the tradeability of a Buk NFT is toggled.
@@ -147,11 +133,6 @@ interface IBukProtocol {
      * @dev Emitted when room bookings are cancelled.
      */
     event CancelRoom(uint256 indexed booking, bool indexed status);
-
-    /**
-     * @dev Event to update the contract name
-     */
-    event SetNFTContractName(string indexed oldContractName, string indexed newContractName);
 
     /**
      * @dev This function is used to set the address of the signature verifier contract.
@@ -196,43 +177,21 @@ interface IBukProtocol {
     function setBukPoSNFTs(address _nftPoSContractAddr) external;
 
     /**
+     * @dev Sets the Buk royalties contract address.
+     * Can only be called by accounts with the ADMIN_ROLE.
+     * @param _royaltiesContract The new royaltiesContract address to set.
+     * @notice This function updates the royaltiesContract address and emits an event.
+     * @dev If {_royaltiesContract} is the zero address, the function will revert.
+     * @dev Emits a {SetRoyaltiesContract} event with the previous royaltiesContract address and the new address.
+     */
+    function setRoyaltiesContract(address _royaltiesContract) external;
+
+    /**
      * @dev Function to update the token uri.
      * @param _tokenId Token Id.
      * @notice This function can only be called by `ADMIN_ROLE`
      */
     function setTokenUri(uint _tokenId, string memory _newUri) external;
-
-    /**
-     * @dev Function to define the royalty Fraction for Buk.
-     * @param _royaltyFraction Royalty Fraction.
-     * @notice This function can only be called by `ADMIN_ROLE`
-     */
-    function setBukRoyaltyInfo(uint96 _royaltyFraction) external;
-
-    /**
-     * @dev Function to define the royalty Fraction for Hotel.
-     * @param _royaltyFraction Royalty Fraction.
-     * @notice This function can only be called by `ADMIN_ROLE`
-     */
-    function setHotelRoyaltyInfo(uint96 _royaltyFraction) external;
-
-    /**
-     * @dev Function to define the royalty Fraction for the First Owners.
-     * @param _royaltyFraction Royalty Fraction.
-     * @notice This function can only be called by `ADMIN_ROLE`
-     */
-    function setFirstOwnerRoyaltyInfo(uint96 _royaltyFraction) external;
-
-    /**
-     * @dev Function to define the royalties.
-     * @param _recipients Array of recipients of royalties
-     * @param _royaltyFractions Array of percentages for each recipients in the _recipients[] order.
-     * @notice This function can only be called by `ADMIN_ROLE`
-     */
-    function setOtherRoyaltyInfo(
-        address[] memory _recipients,
-        uint96[] memory _royaltyFractions
-    ) external;
 
     /**
      * @dev Set the name of the contract.
@@ -379,5 +338,5 @@ interface IBukProtocol {
      */
     function getRoyaltyInfo(
         uint256 _tokenId
-    ) external view returns (Royalty[] memory);
+    ) external view returns (IBukRoyalties.Royalty[] memory);
 }

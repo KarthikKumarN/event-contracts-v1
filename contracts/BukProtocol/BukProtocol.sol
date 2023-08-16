@@ -10,7 +10,8 @@ import "../BukPOSNFTs/IBukPOSNFTs.sol";
 import "../BukNFTs/IBukNFTs.sol";
 import "../BukTreasury/IBukTreasury.sol";
 import "../SignatureVerifier/ISignatureVerifier.sol";
-import "./IBukProtocol.sol";
+import "../BukRoyalties/IBukRoyalties.sol";
+import "../BukProtocol/IBukProtocol.sol";
 
 /**
  * @title BUK Protocol Contract
@@ -26,6 +27,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
      * @dev address _bukTreasury          Address of the Buk treasury contract.
      * @dev address nftContract Address of the Buk NFT contract.
      * @dev address nftPoSContract  Address of the Buk NFT PoS Contract.
+     * @dev address royaltiesContract  Address of the Buk Royalties Contract.
      */
     address private _bukWallet;
     IERC20 private _stableToken;
@@ -33,12 +35,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     ISignatureVerifier private _signatureVerifier;
     IBukNFTs public nftContract;
     IBukPOSNFTs public nftPoSContract;
-
-    //Buk, Hotel, First Owner and other Royalties
-    uint96 public bukRoyalty;
-    uint96 public hotelRoyalty;
-    uint96 public firstOwnerRoyalty;
-    Royalty[] public otherRoyalties;
+    IBukRoyalties public royaltiesContract;
 
     /**
      * @dev Commission charged on bookings.
@@ -80,14 +77,18 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
      * @param _bukTreasuryContract Address of the treasury.
      * @param _stableTokenAddress Address of the stable token.
      * @param _bukWalletAddress Address of the Buk wallet.
+     * @param _signVerifier Address of the signature verifier contract.
+     * @param _royaltiesContract Address of the Buk royalties contract.
      */
     constructor(
         address _bukTreasuryContract,
         address _stableTokenAddress,
         address _bukWalletAddress,
-        address _sigVerifier
+        address _signVerifier,
+        address _royaltiesContract
     ) {
-        _signatureVerifier = ISignatureVerifier(_sigVerifier);
+        _signatureVerifier = ISignatureVerifier(_signVerifier);
+        royaltiesContract = IBukRoyalties(_royaltiesContract);
         _setBukTreasury(_bukTreasuryContract);
         _setStableToken(_stableTokenAddress);
         _setBukWallet(_bukWalletAddress);
@@ -164,6 +165,21 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     }
 
     /**
+     * @dev See {IBukProtocol-setRoyalties}.
+     */
+    function setRoyaltiesContract(address _royaltiesContract) external onlyRole(ADMIN_ROLE) {
+        require(
+            _royaltiesContract != address(0),
+            "Address cannot be zero"
+        );
+        address oldRoyaltiesContract_ = address(royaltiesContract);
+        royaltiesContract = IBukRoyalties(_royaltiesContract);
+        emit SetRoyaltiesContract(oldRoyaltiesContract_, _royaltiesContract);
+    }
+
+
+
+    /**
      * @dev See {IBukProtocol-setTokenUri}.
      */
     function setTokenUri(
@@ -175,96 +191,12 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     }
 
     /**
-     * @dev See {IBukProtocol-setBukRoyaltyInfo}.
-     */
-    function setBukRoyaltyInfo(
-        uint96 _royaltyFraction
-    ) external onlyRole(ADMIN_ROLE) {
-        //SUM of all the royalties should be less than 10000
-        require(
-            _royaltyFraction <= 10000,
-            "Royalty fraction is more than 10000"
-        );
-        uint96 bukRoyalty_ = bukRoyalty;
-        bukRoyalty = _royaltyFraction;
-        emit SetRoyalty(bukRoyalty_, _royaltyFraction);
-    }
-
-    /**
-     * @dev See {IBukProtocol-setHotelRoyaltyInfo}.
-     */
-    function setHotelRoyaltyInfo(
-        uint96 _royaltyFraction
-    ) external onlyRole(ADMIN_ROLE) {
-        require(
-            _royaltyFraction <= 10000,
-            "Royalty fraction is more than 10000"
-        );
-        uint96 hotelRoyalty_ = hotelRoyalty;
-        hotelRoyalty = _royaltyFraction;
-        emit SetRoyalty(hotelRoyalty_, _royaltyFraction);
-    }
-
-    /**
-     * @dev See {IBukProtocol-setFirstOwnerRoyaltyInfo}.
-     */
-    function setFirstOwnerRoyaltyInfo(
-        uint96 _royaltyFraction
-    ) external onlyRole(ADMIN_ROLE) {
-        require(
-            _royaltyFraction <= 10000,
-            "Royalty fraction is more than 10000"
-        );
-        uint96 firstOwnerRoyalty_ = firstOwnerRoyalty;
-        firstOwnerRoyalty = _royaltyFraction;
-        emit SetRoyalty(firstOwnerRoyalty_, _royaltyFraction);
-    }
-
-    /**
-     * @dev See {IBukProtocol-setRoyaltyInfo}.
-     */
-    function setOtherRoyaltyInfo(
-        address[] memory _recipients,
-        uint96[] memory _royaltyFractions
-    ) external onlyRole(ADMIN_ROLE) {
-        require(
-            _recipients.length == _royaltyFractions.length,
-            "Input arrays must have the same length"
-        );
-        uint96[] memory oldRoyalties_ = new uint96[](otherRoyalties.length);
-        for (uint i = 0; i < otherRoyalties.length; i++) {
-            oldRoyalties_[i] = otherRoyalties[i].royaltyFraction;
-        }
-        uint256 totalRoyalties_ = bukRoyalty + hotelRoyalty + firstOwnerRoyalty;
-        for (uint i = 0; i < _recipients.length; i++) {
-            require(
-                _royaltyFractions[i] <= 10000,
-                "Royalty fraction is more than 10000"
-            );
-            totalRoyalties_ += _royaltyFractions[i];
-        }
-        require(
-            totalRoyalties_ < 10000,
-            "Total Royalties cannot be more than 10000"
-        );
-        delete otherRoyalties;
-        for (uint i = 0; i < _recipients.length; i++) {
-            Royalty memory newRoyalty = Royalty(
-                _recipients[i],
-                _royaltyFractions[i]
-            );
-            otherRoyalties.push(newRoyalty);
-        }
-        emit SetOtherRoyalties(oldRoyalties_, _royaltyFractions);
-    }
-
-    /**
      * @dev See {IBukProtocol-setNFTContractName}.
      */
     function setNFTContractName(
         string memory _contractName
     ) external onlyRole(ADMIN_ROLE) {
-        string memory oldContractName_ = IBukNFTs(nftContract).name();
+        string memory oldContractName_ = IBukNFTs(nftContract).getName();
         IBukNFTs(nftContract).setNFTContractName(_contractName);
         emit SetNFTContractName(oldContractName_, _contractName);
     }
@@ -481,6 +413,11 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         address _bookingOwner,
         bytes memory _signature
     ) external onlyRole(ADMIN_ROLE) {
+        require(
+            ((_bookingDetails[_id].status == BookingStatus.confirmed) ||
+                (_bookingDetails[_id].status == BookingStatus.checkedin)),
+            "Not a confirmed or checkedin Booking"
+        );
         //Check if _bookingOwner is the current owner of the booking
         require(
             nftContract.balanceOf(_bookingOwner, _id) > 0,
@@ -497,11 +434,6 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         // Verify recovered address matches booking owner
         require(signer == _bookingOwner, "Invalid owner signature");
 
-        require(
-            ((_bookingDetails[_id].status == BookingStatus.confirmed) ||
-                (_bookingDetails[_id].status == BookingStatus.checkedin)),
-            "Not a confirmed or checkedin Booking"
-        );
         require(
             ((_penalty + _refund + _charges) < (_bookingDetails[_id].total + 1)),
             "Transfer amount exceeds total"
@@ -575,17 +507,9 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
      */
     function getRoyaltyInfo(
         uint256 _tokenId
-    ) external view returns (Royalty[] memory) {
-        Royalty[] memory royalties = new Royalty[](otherRoyalties.length + 3);
-        royalties[0] = Royalty(address(_bukTreasury), bukRoyalty);
-        royalties[1] = Royalty(address(_bukTreasury), hotelRoyalty);
-        royalties[2] = Royalty(
-            _bookingDetails[_tokenId].firstOwner,
-            firstOwnerRoyalty
-        );
-        for (uint i = 0; i < otherRoyalties.length; i++) {
-            royalties[i + 3] = otherRoyalties[i];
-        }
+    ) external view returns (IBukRoyalties.Royalty[] memory) {
+        //Get the royalty details from Buk Royalties
+        IBukRoyalties.Royalty[] memory royalties = royaltiesContract.getRoyaltyInfo(_tokenId);
         return royalties;
     }
 

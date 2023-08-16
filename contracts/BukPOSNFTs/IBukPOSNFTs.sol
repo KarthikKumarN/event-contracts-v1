@@ -128,4 +128,10 @@ interface IBukPOSNFTs is IERC1155 {
      * @param _id uint256: The ID of the token
      */
     function uri(uint256 _id) external view returns (string memory);
+
+    /**
+     * @dev Returns the contract name of BukPOSNFTs.
+     * @return string - The Buk PoS NFT contract name.
+     */
+    function getName() external view returns (string memory);
 }

@@ -6,6 +6,8 @@ describe("BukNFTs Access Control", function () {
   let stableTokenContract;
   let bukProtocolContract;
   let marketplaceContract;
+  let signatureVerifierContract;
+  let royaltiesContract;
   let owner;
   let account1;
   let account2;
@@ -43,12 +45,22 @@ describe("BukNFTs Access Control", function () {
       stableTokenContract.getAddress(),
     );
 
+    //Deploy SignatureVerifier contract
+    const SignatureVerifier = await ethers.getContractFactory("SignatureVerifier");
+    signatureVerifierContract = await SignatureVerifier.deploy();
+
+    //Deploy BukRoyalties contract
+    const BukRoyalties = await ethers.getContractFactory("BukRoyalties");
+    royaltiesContract = await BukRoyalties.deploy();
+
     //BukProtocol
     const BukProtocol = await ethers.getContractFactory("BukProtocol");
     bukProtocolContract = await BukProtocol.deploy(
       bukTreasuryContract.getAddress(),
       stableTokenContract.getAddress(),
-      bukWallet.address,
+      bukWallet.getAddress(),
+      signatureVerifierContract.getAddress(),
+      royaltiesContract.getAddress(),
     );
 
     // BukPOSNFT

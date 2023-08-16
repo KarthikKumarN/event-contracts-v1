@@ -50,6 +50,8 @@ describe("BukProtocol Updations", function () {
   let stableTokenContract;
   let bukProtocolContract;
   let marketplaceContract;
+  let signatureVerifierContract;
+  let royaltiesContract;
   let owner;
   let account1;
   let account2;
@@ -87,12 +89,22 @@ describe("BukProtocol Updations", function () {
       stableTokenContract.getAddress(),
     );
 
+    //Deploy SignatureVerifier contract
+    const SignatureVerifier = await ethers.getContractFactory("SignatureVerifier");
+    signatureVerifierContract = await SignatureVerifier.deploy();
+
+    //Deploy BukRoyalties contract
+    const BukRoyalties = await ethers.getContractFactory("BukRoyalties");
+    royaltiesContract = await BukRoyalties.deploy();
+
     //BukProtocol
     const BukProtocol = await ethers.getContractFactory("BukProtocol");
     bukProtocolContract = await BukProtocol.deploy(
       bukTreasuryContract.getAddress(),
       stableTokenContract.getAddress(),
-      bukWallet.address,
+      bukWallet.getAddress(),
+      signatureVerifierContract.getAddress(),
+      royaltiesContract.getAddress(),
     );
 
     // BukPOSNFT
@@ -254,6 +266,29 @@ describe("BukProtocol Updations", function () {
       // Set BukPoSNFTs
       await expect(bukProtocolContract.connect(account1)
         .setBukPoSNFTs(await nftPosContract.getAddress())).to.be.reverted;
+    });
+  });
+
+  describe("Set Buk Royalties Contract in BukProtocol", function () {
+    it("Should set royaltiesContract by admin", async function () {
+      //Set royaltiesContract
+      expect(await bukProtocolContract.connect(adminWallet).setRoyaltiesContract(account1)).not.be.reverted;
+      const addr1: string = await bukProtocolContract.royaltiesContract();
+      const addr2: string = await account1.getAddress();
+      expect(addr1).to.be.equal(addr2);
+    });
+    it("Should set royaltiesContract and emit events", async function () {
+      //Set royaltiesContract
+      expect(
+        await bukProtocolContract
+          .connect(adminWallet)
+          .setRoyaltiesContract(account1))
+        .to.emit(bukProtocolContract, "SetBukRoyalties")
+        .withArgs(await account1.getAddress());
+    });
+    it("Should not set royaltiesContract if not admin", async function () {
+      //Set royaltiesContract
+      await expect(bukProtocolContract.connect(account2).setRoyaltiesContract(account1)).to.be.reverted;
     });
   });
 
@@ -437,204 +472,6 @@ describe("BukProtocol Updations", function () {
         )).to.be.reverted;
       const uri = await nftContract. uriByTokenId(1);
       expect(uri).not.equal(newUri);
-    });
-  });
-
-  describe("Set Buk Royalty in BukProtocol", function () {
-    it("Should set Buk Royalty by admin", async function () {
-      //Set Buk Royalty
-      expect(await bukProtocolContract.connect(adminWallet).setBukRoyaltyInfo(200)).not.be.reverted;
-      expect(200).to.equal(await bukProtocolContract.bukRoyalty());
-    });
-    it("Should set Buk Royalty and emit events", async function () {
-      //Set Buk Royalty
-      expect(await bukProtocolContract.connect(adminWallet).setBukRoyaltyInfo(200))
-        .to.emit(bukProtocolContract, "SetStableToken")
-        .withArgs(await account1.getAddress());
-    });
-    it("Should not set Buk Royalty if not admin", async function () {
-      //Set Buk Royalty
-      await expect(bukProtocolContract.connect(account1).setBukRoyaltyInfo(200)).to.be.reverted;
-    });
-    it("Should not set Buk Royalty if royalty fee is more than 10000", async function () {
-      //Set Buk Royalty
-      await expect(bukProtocolContract.connect(adminWallet).setBukRoyaltyInfo(20000)).to.be.revertedWith("Royalty fraction is more than 10000");
-    });
-  });
-
-  describe("Set Hotel Royalty in BukProtocol", function () {
-    it("Should set Hotel Royalty by admin", async function () {
-      //Set Hotel Royalty
-      expect(await bukProtocolContract.connect(adminWallet).setHotelRoyaltyInfo(200)).not.be.reverted;
-      expect(200).to.equal(await bukProtocolContract.hotelRoyalty());
-    });
-    it("Should set Hotel Royalty and emit events", async function () {
-      //Set Hotel Royalty
-      expect(await bukProtocolContract.connect(adminWallet).setHotelRoyaltyInfo(200))
-        .to.emit(bukProtocolContract, "SetStableToken")
-        .withArgs(await account1.getAddress());
-    });
-    it("Should not set Hotel Royalty if not admin", async function () {
-      //Set Hotel Royalty
-      await expect(bukProtocolContract.connect(account1).setHotelRoyaltyInfo(200)).to.be.reverted;
-    });
-    it("Should not set Hotel Royalty if royalty fee is more than 10000", async function () {
-      //Set Hotel Royalty
-      await expect(bukProtocolContract.connect(adminWallet).setHotelRoyaltyInfo(20000)).to.be.revertedWith("Royalty fraction is more than 10000");
-    });
-  });
-
-  describe("Set First Owner Royalty in BukProtocol", function () {
-    it("Should set First Owner Royalty by admin", async function () {
-      //Set First Owner Royalty
-      expect(await bukProtocolContract.connect(adminWallet).setFirstOwnerRoyaltyInfo(200)).not.be.reverted;
-      expect(200).to.equal(await bukProtocolContract.firstOwnerRoyalty());
-    });
-    it("Should set First Owner Royalty and emit events", async function () {
-      //Set First Owner Royalty
-      expect(await bukProtocolContract.connect(adminWallet).setFirstOwnerRoyaltyInfo(200))
-        .to.emit(bukProtocolContract, "SetStableToken")
-        .withArgs(await account1.getAddress());
-    });
-    it("Should not set First Owner Royalty if not admin", async function () {
-      //Set First Owner Royalty
-      await expect(bukProtocolContract.connect(account1).setFirstOwnerRoyaltyInfo(200)).to.be.reverted;
-    });
-    it("Should not set First Owner Royalty if royalty fee is more than 10000", async function () {
-      //Set First Owner Royalty
-      await expect(bukProtocolContract.connect(adminWallet).setFirstOwnerRoyaltyInfo(20000)).to.be.revertedWith("Royalty fraction is more than 10000");
-    });
-  });
-
-  describe("Set other Royalties in BukProtocol", function () {
-    it("Should set other Royalty by admin", async function () {
-      //Grant allowance permission
-      const res = await stableTokenContract.connect(owner).approve(
-        await bukProtocolContract.getAddress(),
-        150000000,
-      );
-
-      //Book room
-      expect(
-        await bukProtocolContract.connect(owner).bookRoom(
-          1,
-          [100000000],
-          [80000000],
-          [70000000],
-          1701504548,
-          1701590948,
-          12,
-          true,
-        ),
-      ).not.be.reverted;
-
-      //Mint NFT
-      await expect(
-        bukProtocolContract.connect(owner).mintBukNFT(
-          [1],
-          [
-            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-          ],
-        ),
-      ).not.be.reverted;
-
-      //Set Other Royalty
-      const recipients = [await account1.getAddress(), await account2.getAddress()]
-      const royaltyFractions = [2000, 3000]
-      expect(await bukProtocolContract.connect(adminWallet).setOtherRoyaltyInfo(recipients, royaltyFractions)).not.be.reverted;
-      const royaltyInfo = await bukProtocolContract.getRoyaltyInfo(1);
-      const royalties: number[] = []
-      for (let i = 3; i < royaltyInfo.length; i++) {
-        expect(royaltyFractions[i - 3]).to.equal(royaltyInfo[i][1]);
-      }
-    });
-    it("Should set other Royalty and emit events", async function () {
-      //Set Other Royalty
-      const recipients = [await account1.getAddress(), await account2.getAddress()]
-      const royaltyFractions = [2000, 3000]
-      expect(await bukProtocolContract.connect(adminWallet).setOtherRoyaltyInfo(recipients, royaltyFractions))
-        .to.emit(bukProtocolContract, "SetOtherRoyalties")
-        .withArgs([], [2000, 3000]);
-    });
-    it("Should set and replace the existing other royalties by admin", async function () {
-      //Grant allowance permission
-      const res = await stableTokenContract.connect(owner).approve(
-        await bukProtocolContract.getAddress(),
-        150000000,
-      );
-
-      //Book room
-      expect(
-        await bukProtocolContract.connect(owner).bookRoom(
-          1,
-          [100000000],
-          [80000000],
-          [70000000],
-          1701504548,
-          1701590948,
-          12,
-          true,
-        ),
-      ).not.be.reverted;
-
-      //Mint NFT
-      await expect(
-        bukProtocolContract.connect(owner).mintBukNFT(
-          [1],
-          [
-            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-          ],
-        ),
-      ).not.be.reverted;
-
-      //Set Other Royalty
-      const recipients = [await account1.getAddress(), await account2.getAddress()]
-      const royaltyFractions = [2000, 3000]
-      expect(await bukProtocolContract.connect(adminWallet).setOtherRoyaltyInfo(recipients, royaltyFractions)).not.be.reverted;
-      const royaltyInfo = await bukProtocolContract.getRoyaltyInfo(1);
-      for (let i = 3; i < royaltyInfo.length; i++) {
-        expect(royaltyFractions[i - 3]).to.equal(royaltyInfo[i][1]);
-      }
-
-      //Setting new royalties and check the update
-      const newRoyaltyFractions = [4000, 1000]
-      expect(await bukProtocolContract.connect(adminWallet).setOtherRoyaltyInfo(recipients, newRoyaltyFractions)).not.be.reverted;
-      const newRoyaltyInfo = await bukProtocolContract.getRoyaltyInfo(1);
-      for (let i = 3; i < newRoyaltyInfo.length; i++) {
-        expect(newRoyaltyFractions[i - 3]).to.equal(newRoyaltyInfo[i][1]);
-      }
-    });
-    it("Should not set other Royalty if not admin", async function () {
-      //Set Other Royalty
-      const recipients = [await account1.getAddress(), await account2.getAddress()]
-      const royaltyFractions = [2000, 3000]
-      await expect(bukProtocolContract.connect(account1)
-        .setOtherRoyaltyInfo(recipients, royaltyFractions))
-        .to.be.reverted;
-    });
-    it("Should not set other Royalty if array size mismatch is there", async function () {
-      //Set Other Royalty
-      const recipients = [await account1.getAddress(), await account2.getAddress()]
-      const royaltyFractions = [2000]
-      await expect(bukProtocolContract.connect(adminWallet)
-        .setOtherRoyaltyInfo(recipients, royaltyFractions))
-        .to.be.revertedWith("Input arrays must have the same length");
-    });
-    it("Should not set other Royalty if total royalty fee is more than 10000", async function () {
-      //Set Other Royalty
-      const recipients = [await account1.getAddress(), await account2.getAddress()]
-      const royaltyFractions = [20000, 1000]
-      await expect(bukProtocolContract.connect(adminWallet)
-        .setOtherRoyaltyInfo(recipients, royaltyFractions))
-        .to.be.revertedWith("Royalty fraction is more than 10000");
-    });
-    it("Should not set other Royalty if royalty fee is more than 10000", async function () {
-      //Set Other Royalty
-      const recipients = [await account1.getAddress(), await account2.getAddress()]
-      const royaltyFractions = [8000, 8000]
-      await expect(bukProtocolContract.connect(adminWallet)
-        .setOtherRoyaltyInfo(recipients, royaltyFractions))
-        .to.be.revertedWith("Total Royalties cannot be more than 10000");
     });
   });
 

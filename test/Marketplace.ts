@@ -15,6 +15,8 @@ describe("Marketplace", function () {
   let stableTokenContract;
   let marketplaceContract;
   let bukProtocolContract;
+  let signatureVerifierContract;
+  let royaltiesContract;
   let owner;
   let account1;
   let account2;
@@ -54,12 +56,22 @@ describe("Marketplace", function () {
     );
     // console.log(await bukTreasuryContract.getAddress(), " bukTreasuryContract");
 
+    //Deploy SignatureVerifier contract
+    const SignatureVerifier = await ethers.getContractFactory("SignatureVerifier");
+    signatureVerifierContract = await SignatureVerifier.deploy();
+
+    //Deploy BukRoyalties contract
+    const BukRoyalties = await ethers.getContractFactory("BukRoyalties");
+    royaltiesContract = await BukRoyalties.deploy();
+
     //BukProtocol
     const BukProtocol = await ethers.getContractFactory("BukProtocol");
     bukProtocolContract = await BukProtocol.deploy(
       bukTreasuryContract.getAddress(),
       stableTokenContract.getAddress(),
-      bukWallet.address,
+      bukWallet.getAddress(),
+      signatureVerifierContract.getAddress(),
+      royaltiesContract.getAddress(),
     );
     // console.log(await bukProtocolContract.getAddress(), " bukProtocolContract");
 
@@ -107,13 +119,20 @@ describe("Marketplace", function () {
       nftPosContract.getAddress(),
     );
 
+    //Set Buk Protocol in Treasury
+    const setBukProtocol = await bukTreasuryContract.setBukProtocol(bukProtocolContract.getAddress())
+
+    //Set Buk Protocol in BukRoyalties
+    const setBukProtocolRoyalties = await royaltiesContract.setBukProtocolContract(bukProtocolContract.getAddress())
+
+
     // console.log("🚀 ~ file: Marketplace.ts:98 ~ setBukPoSNFTs:");
+
     // Set all required
-    await bukProtocolContract.setBukRoyaltyInfo(300);
-    await bukProtocolContract.setHotelRoyaltyInfo(200);
-    await bukProtocolContract.setFirstOwnerRoyaltyInfo(200);
+    await royaltiesContract.setBukRoyaltyInfo(bukTreasuryContract, 200);
+    await royaltiesContract.setHotelRoyaltyInfo(bukTreasuryContract, 200);
+    await royaltiesContract.setFirstOwnerRoyaltyInfo(200);
     await nftContract.setBukTreasury(await bukTreasuryContract.getAddress());
-    //Set BukProtocol in BukNFTs and BukPOSNFTs
   });
 
   describe("Deployment marketplace", function () {

@@ -37,21 +37,21 @@ interface IBukNFTs is IERC1155 {
     event SetURI(uint256 indexed id, string indexed uri);
 
     /**
-     * @dev Function to update the Buk Protocol Contract address.
+     * @dev Function to set the Buk Protocol Contract address.
      * @param _bukProtocolContract Address of the Buk Protocol Contract.
      * @notice This function can only be called by addresses with `ADMIN_ROLE`
      */
     function setBukProtocol(address _bukProtocolContract) external;
 
     /**
-     * @dev Function to update the treasury address.
+     * @dev Function to set the treasury address.
      * @param _bukTreasuryContract Address of the treasury.
      * @notice This function can only be called by addresses with `ADMIN_ROLE`
      */
     function setBukTreasury(address _bukTreasuryContract) external;
 
     /**
-     * @dev Function to update the marketplace address.
+     * @dev Function to set the marketplace address.
      * @param _marketplaceContract Address of the marketplace.
      * @notice This function can only be called by addresses with `ADMIN_ROLE`
      */
@@ -151,6 +151,8 @@ interface IBukNFTs is IERC1155 {
      * @dev To retrieve information about the royalties associated with a specific token.
      * @param _tokenId - The token ID of the NFT.
      * @param _salePrice - The price at which the token is being sold.
+     * @return receiver - The address of the royalty receiver.
+     * @return royaltyAmount - The amount of royalty to be paid.
      */
     function royaltyInfo(
         uint256 _tokenId,
@@ -163,4 +165,10 @@ interface IBukNFTs is IERC1155 {
      * @return string - The URI associated with the token ID.
      */
     function uri(uint256 _id) external view returns (string memory);
+    
+    /**
+     * @dev Returns the contract name of BukNFTs.
+     * @return string - The Buk NFT contract name.
+     */
+    function getName() external view returns (string memory);
 }
