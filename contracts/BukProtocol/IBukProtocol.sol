@@ -25,7 +25,7 @@ interface IBukProtocol {
      * @dev Struct for booking details.
      * @param uint256 id                Booking ID.
      * @param BookingStatus status      Booking status.
-     * @param uint256 tokenID           Token ID.
+     * @param uint256 tokenId           Token ID.
      * @param address owner             Address of the booking owner.
      * @param uint256 checkin           Check-in date.
      * @param uint256 checkout          Check-out date.
@@ -38,7 +38,7 @@ interface IBukProtocol {
     struct Booking {
         uint256 id;
         BookingStatus status;
-        uint256 tokenID;
+        uint256 tokenId;
         address firstOwner;
         uint256 checkin;
         uint256 checkout;

@@ -333,7 +333,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
                 "",
                 _uri[i]
             );
-            _bookingDetails[_ids[i]].tokenID = _ids[i];
+            _bookingDetails[_ids[i]].tokenId = _ids[i];
         }
         emit MintedBookingNFT(_ids, true);
     }

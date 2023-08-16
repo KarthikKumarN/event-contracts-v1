@@ -37,7 +37,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
     /**
      * @dev Mapping for token URI's for booked tickets
      */
-    mapping(uint256 => string) public uriByTokenId; //tokenID -> uri
+    mapping(uint256 => string) public uriByTokenId; //tokenId -> uri
 
     /**
      * @dev Constant for the role of the Buk Protocol contract
