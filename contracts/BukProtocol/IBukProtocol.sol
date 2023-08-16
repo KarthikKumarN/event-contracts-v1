@@ -2,6 +2,12 @@
 pragma solidity =0.8.19;
 import "../BukRoyalties/IBukRoyalties.sol";
 
+/**
+ * @title Interface to define the BUK protocol
+ * @author BUK Technology Inc
+ * @dev Collection of all procedures related to the BUK protocol
+ * @dev This interface is used by the other child contract to interact with the BukProtocol contract.
+ */
 interface IBukProtocol {
     /**
      * @dev Enum for booking statuses.

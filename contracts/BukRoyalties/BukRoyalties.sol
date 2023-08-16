@@ -5,6 +5,11 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "../BukRoyalties/IBukRoyalties.sol";
 import "../BukProtocol/IBukProtocol.sol";
 
+/**
+ * @title BukRoyalties contract
+ * @author BUK Technology Inc
+ * @dev Contract to manage the royalties of the Buk NFTs.
+ */
 contract BukRoyalties is AccessControl, IBukRoyalties {
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 

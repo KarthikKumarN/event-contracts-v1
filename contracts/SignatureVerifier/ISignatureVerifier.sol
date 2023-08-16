@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+/**
+ * @title Interface to define the signature verifier contract
+ * @author BUK Technology Inc
+ * @notice Collection of all functions related to the signature verifier.
+ */
 interface ISignatureVerifier {
 
   /**

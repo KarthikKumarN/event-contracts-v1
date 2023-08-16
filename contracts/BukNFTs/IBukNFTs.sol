@@ -3,8 +3,12 @@ pragma solidity =0.8.19;
 
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 
+/**
+ * @title Interface to define the BUK NFTs 
+ * @author BUK Technology Inc
+ * @dev Collection of all procedures related to the BUK NFTs.
+ */
 interface IBukNFTs is IERC1155 {
-
 
     /**
      * @dev Emitted when Buk Protocol Address is updated.

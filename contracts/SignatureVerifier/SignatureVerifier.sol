@@ -3,6 +3,11 @@ pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
+/**
+ * @title SignatureVerifier contract
+ * @author BUK Technology Inc
+ * @dev Contract to verify the signature
+ */
 contract SignatureVerifier {
 
   /**

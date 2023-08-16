@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.19;
 
+/**
+ * @title Interface to define the BUK royalties. 
+ * @author BUK Technology Inc
+ * @dev Collection of all functions related to the BUK Royalties.
+ */
 interface IBukRoyalties {
 
     /**
