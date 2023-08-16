@@ -760,6 +760,12 @@ describe("BukProtocol Bookings", function () {
       let salePrice = 110000000;
       let transferMoney = 210000000;
 
+      // Approve allowance
+      await nftContract.connect(owner).setApprovalForAll(
+        await marketplaceContract.getAddress(),
+        true,
+      );
+
       await expect(marketplaceContract.connect(owner).createListing(tokenId, salePrice)).not.to
         .be.reverted;
 
