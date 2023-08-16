@@ -5,13 +5,14 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 contract SignatureVerifier {
 
+  /**
+   * @dev See {ISignatureVerifier-verify}.
+   */
   function verify(
-    bytes32 hash,
-    bytes memory signature
+      bytes32 _hash,
+      bytes memory _signature
   ) external pure returns (address) {
-
-    bytes32 ethSignedHash = ECDSA.toEthSignedMessageHash(hash); 
-    return ECDSA.recover(ethSignedHash, signature);
+      bytes32 ethSignedHash = ECDSA.toEthSignedMessageHash(_hash); 
+      return ECDSA.recover(ethSignedHash, _signature);
   }
-
 }
