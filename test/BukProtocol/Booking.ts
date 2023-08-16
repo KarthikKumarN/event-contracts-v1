@@ -1,18 +1,13 @@
-import {
-  time,
-  loadFixture,
-} from "@nomicfoundation/hardhat-toolbox/network-helpers";
-import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { ContractTransactionResponse } from "ethers";
-import { BukProtocol } from "../../typechain-types";
-import { bukNfTs } from "../../typechain-types/contracts";
+import { keccak256, AbiCoder, toBeArray, ethers as eth } from 'ethers'
 
 describe("BukProtocol Bookings", function () {
   let stableTokenContract;
   let bukProtocolContract;
   let marketplaceContract;
+  let signatureVerifierContract;
+  let royaltiesContract;
   let owner;
   let account1;
   let account2;
@@ -23,7 +18,7 @@ describe("BukProtocol Bookings", function () {
   let nftPosContract;
   let sellerWallet;
   let buyerWallet;
-
+  let initialTime;
   beforeEach("deploy the contract instance first", async function () {
     [
       adminWallet,
@@ -41,7 +36,7 @@ describe("BukProtocol Bookings", function () {
       "USDC",
       18,
       owner.address,
-      10000000000,
+      100000000000,
     );
 
     //BukTreasury
@@ -50,12 +45,22 @@ describe("BukProtocol Bookings", function () {
       stableTokenContract.getAddress(),
     );
 
+    //Deploy SignatureVerifier contract
+    const SignatureVerifier = await ethers.getContractFactory("SignatureVerifier");
+    signatureVerifierContract = await SignatureVerifier.deploy();
+
+    //Deploy BukRoyalties contract
+    const BukRoyalties = await ethers.getContractFactory("BukRoyalties");
+    royaltiesContract = await BukRoyalties.deploy();
+
     //BukProtocol
     const BukProtocol = await ethers.getContractFactory("BukProtocol");
     bukProtocolContract = await BukProtocol.deploy(
       bukTreasuryContract.getAddress(),
       stableTokenContract.getAddress(),
-      bukWallet.address,
+      bukWallet.getAddress(),
+      signatureVerifierContract.getAddress(),
+      royaltiesContract.getAddress(),
     );
 
     // BukPOSNFT
@@ -63,6 +68,7 @@ describe("BukProtocol Bookings", function () {
     nftPosContract = await BukPOSNFT.deploy(
       "BUK_POS",
       bukProtocolContract.getAddress(),
+      bukTreasuryContract.getAddress(),
     );
 
     // BukNFT
@@ -71,7 +77,11 @@ describe("BukProtocol Bookings", function () {
       "BUK_NFT",
       nftPosContract.getAddress(),
       bukProtocolContract.getAddress(),
+      bukTreasuryContract.getAddress(),
     );
+
+    //Set BukNFTs address in BukPoSNFTs
+    await nftPosContract.setBukNFTRole(nftContract.getAddress())
 
     //Marketplace
     const Marketplace = await ethers.getContractFactory("Marketplace");
@@ -93,6 +103,16 @@ describe("BukProtocol Bookings", function () {
 
     //Set Buk Protocol in Treasury
     const setBukProtocol = await bukTreasuryContract.setBukProtocol(bukProtocolContract.getAddress())
+
+    //Set Buk Protocol in BukRoyalties
+    const setBukProtocolRoyalties = await royaltiesContract.setBukProtocolContract(bukProtocolContract.getAddress())
+
+    // Set all required
+    await royaltiesContract.setBukRoyaltyInfo(bukTreasuryContract, 200);
+    await royaltiesContract.setHotelRoyaltyInfo(bukTreasuryContract, 200);
+    await royaltiesContract.setFirstOwnerRoyaltyInfo(200);
+    await nftContract.setBukTreasury(await bukTreasuryContract.getAddress());
+
   });
 
   /**
@@ -122,6 +142,7 @@ describe("BukProtocol Bookings", function () {
       ).not.be.reverted;
       const bookingDetails = await bukProtocolContract.getBookingDetails(1);
     });
+    
     it("Should succeed booking and emit events", async function () {
       //Grant allowance permission
       const res = await stableTokenContract.connect(owner).approve(
@@ -275,7 +296,7 @@ describe("BukProtocol Bookings", function () {
           2,
           [100000000, 100000000],
           [80000000, 80000000],
-          [70000000,70000000],
+          [70000000, 70000000],
           1701504548,
           1701590948,
           12,
@@ -304,7 +325,7 @@ describe("BukProtocol Bookings", function () {
           2,
           [100000000, 100000000],
           [80000000, 80000000],
-          [70000000,70000000],
+          [70000000, 70000000],
           1701504548,
           1701590948,
           12,
@@ -334,7 +355,7 @@ describe("BukProtocol Bookings", function () {
           2,
           [100000000, 100000000],
           [80000000, 80000000],
-          [70000000,70000000],
+          [70000000, 70000000],
           1701504548,
           1701590948,
           12,
@@ -363,7 +384,7 @@ describe("BukProtocol Bookings", function () {
           2,
           [100000000, 100000000],
           [80000000, 80000000],
-          [70000000,70000000],
+          [70000000, 70000000],
           1701504548,
           1701590948,
           12,
@@ -392,7 +413,7 @@ describe("BukProtocol Bookings", function () {
           2,
           [100000000, 100000000],
           [80000000, 80000000],
-          [70000000,70000000],
+          [70000000, 70000000],
           1701504548,
           1701590948,
           12,
@@ -463,8 +484,7 @@ describe("BukProtocol Bookings", function () {
         ),
       ).not.be.reverted;
 
-      //TODO Mint NFT
-      expect(( await 
+      expect((await
         bukProtocolContract.connect(owner).mintBukNFT(
           [1],
           [
@@ -597,7 +617,45 @@ describe("BukProtocol Bookings", function () {
   });
 
   describe("Check-in for a booking in Buk Protocol", function () {
-    it("Should check-in successfully", async function () {
+    it("Should check-in successfully by admin", async function () {
+      //Grant allowance permission
+      const res = await stableTokenContract.connect(owner).approve(
+        await bukProtocolContract.getAddress(),
+        150000000,
+      );
+
+      //Book room
+      expect(
+        await bukProtocolContract.connect(owner).bookRoom(
+          1,
+          [100000000],
+          [80000000],
+          [70000000],
+          1701504548,
+          1701590948,
+          12,
+          true,
+        ),
+      ).not.be.reverted;
+
+      //Mint NFT
+      await expect(
+        bukProtocolContract.connect(owner).mintBukNFT(
+          [1],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
+      ).not.be.reverted;
+
+      //Check-in NFT
+      await expect(
+        bukProtocolContract.connect(adminWallet).checkin(
+          [1]
+        ),
+      ).not.be.reverted;
+    });
+    it("Should check-in successfully by owner", async function () {
       //Grant allowance permission
       const res = await stableTokenContract.connect(owner).approve(
         await bukProtocolContract.getAddress(),
@@ -679,7 +737,7 @@ describe("BukProtocol Bookings", function () {
           2,
           [100000000, 100000000],
           [80000000, 80000000],
-          [70000000,70000000],
+          [70000000, 70000000],
           1701504548,
           1701590948,
           12,
@@ -690,7 +748,7 @@ describe("BukProtocol Bookings", function () {
       //Mint NFT
       await expect(
         bukProtocolContract.connect(owner).mintBukNFT(
-          [1,2],
+          [1, 2],
           [
             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
@@ -698,26 +756,52 @@ describe("BukProtocol Bookings", function () {
         ),
       ).not.be.reverted;
 
-      //TODO Needs tradeability here.
-      //Check if NFT is transferable or not
-      //Transfer NFT to another account
-      // await expect(marketplaceContract.createListing(1, 110000000)).not.be
-      // .reverted;
-      // await expect(
-      //   nftContract.connect(owner).transferFrom(
-      //     owner.getAddress(),
-      //     account1.getAddress(),
-      //     1,
-      //   ),
-      // ).not.be.reverted
-      
+      let tokenId = 1;
+      let salePrice = 110000000;
+      let transferMoney = 210000000;
 
-      //Check-in NFT
-      // await expect(
-      //   bukProtocolContract.connect(owner).checkin(
-      //     [1]
-      //   ),
-      // ).not.be.reverted;
+      await expect(marketplaceContract.connect(owner).createListing(tokenId, salePrice)).not.to
+        .be.reverted;
+
+      //Grant permission to the marketplace
+      await expect(
+        nftContract.connect(owner).setApprovalForAll(
+          await marketplaceContract.getAddress(),
+          true,
+        ),
+      ).not.to.be.reverted;
+
+      //Set Marketplace role in BukNFTs
+      expect(await nftContract.connect(adminWallet).setMarketplaceRole(marketplaceContract.getAddress()))
+        .not.be.reverted;
+
+      //Transfer tokens to buyer
+      await stableTokenContract.connect(owner).transfer(
+        await account1.getAddress(),
+        transferMoney,
+      );
+
+      //Approve tokens to marketplace by buyer
+      await stableTokenContract
+        .connect(account1)
+        .approve(await marketplaceContract.getAddress(), transferMoney);
+
+      //Buy NFT
+      await expect(marketplaceContract.connect(account1).buyRoom(tokenId)).not
+        .to.be.reverted;
+
+      //Check NFT balance
+      await expect(
+        await nftContract.balanceOf(await account1.getAddress(), tokenId),
+      ).to.equal(1);
+
+
+      //Check-in NFT by new owner
+      await expect(
+        bukProtocolContract.connect(account1).checkin(
+          [1]
+        ),
+      ).not.be.reverted;
     });
     it("Should not check-in with empty array", async function () {
       //Grant allowance permission
@@ -790,13 +874,13 @@ describe("BukProtocol Bookings", function () {
       //Mint NFT
       await expect(
         bukProtocolContract.connect(owner).mintBukNFT(
-          [1,2,3,4,5,6],
+          [1, 2, 3, 4, 5, 6],
           uris,
         ),
       ).not.be.reverted;
       await expect(
         bukProtocolContract.connect(owner).mintBukNFT(
-          [7,8,9,10,11,12],
+          [7, 8, 9, 10, 11, 12],
           uris,
         ),
       ).not.be.reverted;
@@ -804,7 +888,7 @@ describe("BukProtocol Bookings", function () {
       //Check-in NFT
       await expect(
         bukProtocolContract.connect(owner).checkin(
-          [1,2,3,4,5,6,7,8,9,10,11,12]
+          [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
         ),
       ).to.be.revertedWith("Not in max-min booking limit");
     });
@@ -838,7 +922,61 @@ describe("BukProtocol Bookings", function () {
   });
 
   describe("Check-out for a booking in Buk Protocol", function () {
-    it("Should check-out successfully", async function () {      //Grant allowance permission
+    /**
+     * The above function is a TypeScript function that retrieves the current timestamp of the latest
+     * block in the Ethereum blockchain and saves an initial snapshot of the blockchain state.
+     * @returns The function `getCurrentTime` returns a Promise that resolves to a number, which is the
+     * current timestamp of the latest block.
+     */
+    const getCurrentTime = async (): Promise<number> => {
+      const block: any = await ethers.provider.getBlock("latest");
+      return block.timestamp;
+    };
+    let initialSnapshotId: number;
+    const saveInitialSnapshot = async () => {
+      const response = await ethers.provider.send("evm_snapshot");
+      initialSnapshotId = response;
+    };
+    /**
+     * The function `restoreInitialSnapshot` reverts the Ethereum Virtual Machine (EVM) state to the
+     * initial snapshot identified by `initialSnapshotId`.
+     */
+    const restoreInitialSnapshot = async () => {
+      await ethers.provider.send("evm_revert", [initialSnapshotId]);
+    };
+    /**
+     * The function `fastForwardTo` allows you to fast forward the Ethereum Virtual Machine (EVM) to
+     * a specific timestamp.
+     * @param {number} timestamp - The `timestamp` parameter is a number representing the desired
+     * timestamp to fast forward to. It is the target time that you want to set for the Ethereum
+     * Virtual Machine (EVM) during testing or development.
+     */
+    const fastForwardTo = async (timestamp: number): Promise<void> => {
+      const currentTime = await getCurrentTime();
+      const diff = timestamp - currentTime;
+
+      if (diff > 0) {
+        await ethers.provider.send("evm_increaseTime", [diff]);
+        await ethers.provider.send("evm_mine");
+      } else {
+        await restoreInitialSnapshot();
+        const currentTime = await getCurrentTime(); // Store current time before calculating difference
+        const remainingDiff = timestamp - currentTime;
+        if (remainingDiff > 0) {
+          await ethers.provider.send("evm_increaseTime", [remainingDiff]);
+          await ethers.provider.send("evm_mine");
+        }
+      }
+    };
+    /* The above code is using the Chai testing framework to define a "before" and "after" hook. */
+    beforeEach(async function () {
+      await saveInitialSnapshot();
+    });
+    afterEach(async function () {
+      await restoreInitialSnapshot();
+    });
+    it("Should check-out successfully", async function () {
+      //Grant allowance permission
       const res = await stableTokenContract.connect(owner).approve(
         await bukProtocolContract.getAddress(),
         150000000,
@@ -875,197 +1013,290 @@ describe("BukProtocol Bookings", function () {
         ),
       ).not.be.reverted;
 
-      //Check-in NFT
+      await fastForwardTo(1701590949);
+
+      //Check-out NFT
       await expect(
         bukProtocolContract.connect(adminWallet).checkout(
           [1]
         ),
       ).not.be.reverted;
-      
-
-//Check-in NFT
-await expect(
-  bukProtocolContract.connect(owner).checkin([1]),
-).not.be.reverted;
-
-// Get current EVM time
-// const currentEvmTime = (await ethers.provider.getBlock('latest')).timestamp;
-
-// Calculate the amount of time to advance: checkout date - current time + some extra time
-// The "+ 60" at the end represents advancing an additional 60 seconds beyond the checkout time
-// const timeToAdvance = 1701590948 - currentEvmTime + 60;
-
-// Increase the EVM time
-// await network.provider.send("evm_increaseTime", [timeToAdvance]);
-// await network.provider.send("evm_mine");
-
-//Check-out NFT
-await expect(
-  bukProtocolContract.connect(adminWallet).checkout([1]),
-).not.be.reverted;
 
     });
-    // it("Should check-out successfully and emit events", async function () {
-    //       //Grant allowance permission
-    //       const res = await stableTokenContract.connect(owner).approve(
-    //         await bukProtocolContract.getAddress(),
-    //         150000000,
-    //       );
-    
-    //       //Book room
-    //       expect(
-    //         await bukProtocolContract.connect(owner).bookRoom(
-    //           1,
-    //           [100000000],
-    //           [80000000],
-                //[70000000],
-    //           1701504548,
-    //           1701590948,
-    //           12,
-    //           true,
-    //         ),
-    //       ).not.be.reverted;
-    
-    //       //Mint NFT
-    //       await expect(
-    //         bukProtocolContract.connect(owner).mintBukNFT(
-    //           [1],
-    //           [
-    //             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-    //           ],
-    //         ),
-    //       ).not.be.reverted;
-    
-    //       //Check-in NFT
-    //       await expect(
-    //         bukProtocolContract.connect(owner).checkin(
-    //           [1]
-    //         ),
-    //       ).not.be.reverted;
-    // });
-    // it("Should not check-out with empty array", async function () {
-    //   //Grant allowance permission
-    //   const res = await stableTokenContract.connect(owner).approve(
-    //     await bukProtocolContract.getAddress(),
-    //     150000000,
-    //   );
+    it("Should check-out successfully and emit events", async function () {
+      //Grant allowance permission
+      const res = await stableTokenContract.connect(owner).approve(
+        await bukProtocolContract.getAddress(),
+        150000000,
+      );
 
-    //   //Book room
-    //   expect(
-    //     await bukProtocolContract.connect(owner).bookRoom(
-    //       1,
-    //       [100000000],
-    //       [80000000],
-    //       [70000000],
-    //       1701504548,
-    //       1701590948,
-    //       12,
-    //       true,
-    //     ),
-    //   ).not.be.reverted;
+      //Book room
+      expect(
+        await bukProtocolContract.connect(owner).bookRoom(
+          1,
+          [100000000],
+          [80000000],
+          [70000000],
+          1701504548,
+          1701590948,
+          12,
+          true,
+        ),
+      ).not.be.reverted;
 
-    //   //Mint NFT
-    //   await expect(
-    //     bukProtocolContract.connect(owner).mintBukNFT(
-    //       [1],
-    //       [
-    //         "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-    //       ],
-    //     ),
-    //   ).not.be.reverted;
+      //Mint NFT
+      await expect(
+        bukProtocolContract.connect(owner).mintBukNFT(
+          [1],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
+      ).not.be.reverted;
 
-    //   //Check-in NFT
-    //   await expect(
-    //     bukProtocolContract.connect(owner).checkin(
-    //       [1]
-    //     ),
-    //   ).not.be.reverted;
-    // });
-    // it("Should not check-out with array limit error", async function () {
-    //   //Grant allowance permission
-    //   const res = await stableTokenContract.connect(owner).approve(
-    //     await bukProtocolContract.getAddress(),
-    //     150000000,
-    //   );
+      //Check-in NFT
+      await expect(
+        bukProtocolContract.connect(owner).checkin(
+          [1]
+        ),
+      ).not.be.reverted;
 
-    //   //Book room
-    //   expect(
-    //     await bukProtocolContract.connect(owner).bookRoom(
-    //       1,
-    //       [100000000],
-    //       [80000000],
-    //       [70000000],
-    //       1701504548,
-    //       1701590948,
-    //       12,
-    //       true,
-    //     ),
-    //   ).not.be.reverted;
+      await fastForwardTo(1701590949);
 
-    //   //Mint NFT
-    //   await expect(
-    //     bukProtocolContract.connect(owner).mintBukNFT(
-    //       [1],
-    //       [
-    //         "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-    //       ],
-    //     ),
-    //   ).not.be.reverted;
+      //Check-out NFT
+      expect(await
+        bukProtocolContract.connect(adminWallet).checkout(
+          [1]
+        )
+      ).to.emit(bukProtocolContract, "CheckoutRooms")
+        .withArgs([1], true);
+    });
+    it("Should not check-out with empty array", async function () {
+      //Grant allowance permission
+      const res = await stableTokenContract.connect(owner).approve(
+        await bukProtocolContract.getAddress(),
+        150000000,
+      );
 
-    //   //Check-in NFT
-    //   await expect(
-    //     bukProtocolContract.connect(owner).checkin(
-    //       [1]
-    //     ),
-    //   ).not.be.reverted;
-    // });
-    // it("Should not check-out when the booking status is not checkedin", async function () {
-    //   //Grant allowance permission
-    //   const res = await stableTokenContract.connect(owner).approve(
-    //     await bukProtocolContract.getAddress(),
-    //     150000000,
-    //   );
+      //Book room
+      expect(
+        await bukProtocolContract.connect(owner).bookRoom(
+          1,
+          [100000000],
+          [80000000],
+          [70000000],
+          1701504548,
+          1701590948,
+          12,
+          true,
+        ),
+      ).not.be.reverted;
 
-    //   //Book room
-    //   expect(
-    //     await bukProtocolContract.connect(owner).bookRoom(
-    //       1,
-    //       [100000000],
-    //       [80000000],
-    //       [70000000],
-    //       1701504548,
-    //       1701590948,
-    //       12,
-    //       true,
-    //     ),
-    //   ).not.be.reverted;
+      //Mint NFT
+      await expect(
+        bukProtocolContract.connect(owner).mintBukNFT(
+          [1],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
+      ).not.be.reverted;
 
-    //   //Mint NFT
-    //   await expect(
-    //     bukProtocolContract.connect(owner).mintBukNFT(
-    //       [1],
-    //       [
-    //         "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-    //       ],
-    //     ),
-    //   ).not.be.reverted;
+      //Check-in NFT
+      await expect(
+        bukProtocolContract.connect(owner).checkin(
+          [1]
+        ),
+      ).not.be.reverted;
 
-    //   //Check-in NFT
-    //   await expect(
-    //     bukProtocolContract.connect(owner).checkin(
-    //       [1]
-    //     ),
-    //   ).not.be.reverted;
-    // });
+      await fastForwardTo(1701590949);
+
+      //Check-out NFT
+      await expect(
+        bukProtocolContract.connect(adminWallet).checkout(
+          []
+        ),
+      ).to.be.revertedWith("Not in max-min booking limit");
+    });
+    it("Should not check-out with array size limit", async function () {
+      //Grant allowance permission
+      const res = await stableTokenContract.connect(owner).approve(
+        await bukProtocolContract.getAddress(),
+        150000000000,
+      );
+
+      //Book room
+      expect(
+        await bukProtocolContract.connect(owner).bookRoom(
+          12,
+          [100000000, 100000000, 100000000, 100000000, 100000000, 100000000, 100000000, 100000000, 100000000, 100000000, 100000000, 100000000],
+          [80000000, 80000000, 80000000, 80000000, 80000000, 80000000, 80000000, 80000000, 80000000, 80000000, 80000000, 80000000],
+          [70000000, 70000000, 70000000, 70000000, 70000000, 70000000, 70000000, 70000000, 70000000, 70000000, 70000000, 70000000],
+          1701504548,
+          1701590948,
+          12,
+          true,
+        ),
+      ).not.be.reverted;
+
+      //Mint NFT
+      await expect(
+        bukProtocolContract.connect(owner).mintBukNFT(
+          [1],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
+      ).not.be.reverted;
+
+      //Check-in NFT
+      await expect(
+        bukProtocolContract.connect(owner).checkin(
+          [1]
+        ),
+      ).not.be.reverted;
+
+      await fastForwardTo(1701590949);
+
+      //Check-out NFT
+      await expect(
+        bukProtocolContract.connect(adminWallet).checkout(
+          []
+        ),
+      ).to.be.revertedWith("Not in max-min booking limit");
+    });
+    it("Should not check-out if checkout date is less than current date", async function () {
+      //Grant allowance permission
+      const res = await stableTokenContract.connect(owner).approve(
+        await bukProtocolContract.getAddress(),
+        150000000,
+      );
+
+      //Book room
+      expect(
+        await bukProtocolContract.connect(owner).bookRoom(
+          1,
+          [100000000],
+          [80000000],
+          [70000000],
+          1701504548,
+          1701590948,
+          12,
+          true,
+        ),
+      ).not.be.reverted;
+
+      //Mint NFT
+      await expect(
+        bukProtocolContract.connect(owner).mintBukNFT(
+          [1],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
+      ).not.be.reverted;
+
+      //Check-in NFT
+      await expect(
+        bukProtocolContract.connect(owner).checkin(
+          [1]
+        ),
+      ).not.be.reverted;
+
+      //Check-out NFT
+      await expect(
+        bukProtocolContract.connect(adminWallet).checkout(
+          [1]
+        ),
+      ).to.be.revertedWith("Checkout date should be less than current date");
+
+    });
+    it("Should not check-out when the booking status is not checkedin", async function () {
+      //Grant allowance permission
+      const res = await stableTokenContract.connect(owner).approve(
+        await bukProtocolContract.getAddress(),
+        150000000,
+      );
+
+      //Book room
+      expect(
+        await bukProtocolContract.connect(owner).bookRoom(
+          1,
+          [100000000],
+          [80000000],
+          [70000000],
+          1701504548,
+          1701590948,
+          12,
+          true,
+        ),
+      ).not.be.reverted;
+
+      //Mint NFT
+      await expect(
+        bukProtocolContract.connect(owner).mintBukNFT(
+          [1],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
+      ).not.be.reverted;
+
+      //Check-out NFT
+      await expect(
+        bukProtocolContract.connect(adminWallet).checkout(
+          [1]
+        ),
+      ).to.be.revertedWith("Check the Booking status");
+    });
+    it("Should not check-out when the booking status if not admin", async function () {
+      //Grant allowance permission
+      const res = await stableTokenContract.connect(owner).approve(
+        await bukProtocolContract.getAddress(),
+        150000000,
+      );
+
+      //Book room
+      expect(
+        await bukProtocolContract.connect(owner).bookRoom(
+          1,
+          [100000000],
+          [80000000],
+          [70000000],
+          1701504548,
+          1701590948,
+          12,
+          true,
+        ),
+      ).not.be.reverted;
+
+      //Mint NFT
+      await expect(
+        bukProtocolContract.connect(owner).mintBukNFT(
+          [1],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
+      ).not.be.reverted;
+
+      //Check-out NFT
+      await expect(
+        bukProtocolContract.connect(account1).checkout(
+          [1]
+        ),
+      ).to.be.reverted;
+    });
   });
 
   describe("Cancel a booking in Buk Protocol", function () {
-    it("Cancellation is successful before checkin", async function () {
+    it("Should cancel successfully before checkin", async function () {
       //Grant allowance permission
       const res = await stableTokenContract.connect(owner).approve(
         await bukProtocolContract.getAddress(),
         150000000,
       );
+
 
       //Book room
       expect(
@@ -1091,17 +1322,32 @@ await expect(
         ),
       ).not.be.reverted;
 
+      const _id = 1;
+      const _penalty = 50000000; // Example values, use your actual logic
+      const _refund = 30000000;
+      const _charges = 20000000;
+      const _bookingOwner = await owner.getAddress();
+
+      // Formulate the signature
+      const types = ["uint256", "uint256", "uint256", "uint256"];
+      const values = [_id, _penalty, _refund, _charges];
+      const encoded = AbiCoder.defaultAbiCoder().encode(types, values);
+      const hash = keccak256(encoded);
+      const signature = await owner.signMessage(toBeArray(hash));
+
       //Cancel Room
       await expect(
         bukProtocolContract.connect(adminWallet).cancelRoom(
-          1,
-          50000000,
-          30000000,
-          20000000
+          _id,
+          _penalty,
+          _refund,
+          _charges,
+          _bookingOwner,
+          signature
         ),
       ).not.be.reverted;
     });
-    it("Cancellation is successful after checkin", async function () {
+    it("Should cancel successfully after checkin", async function () {
       //Grant allowance permission
       const res = await stableTokenContract.connect(owner).approve(
         await bukProtocolContract.getAddress(),
@@ -1139,17 +1385,32 @@ await expect(
         ),
       ).not.be.reverted;
 
+      const _id = 1;
+      const _penalty = 50000000; // Example values, use your actual logic
+      const _refund = 30000000;
+      const _charges = 20000000;
+      const _bookingOwner = await owner.getAddress();
+
+      // Formulate the signature
+      const types = ["uint256", "uint256", "uint256", "uint256"];
+      const values = [_id, _penalty, _refund, _charges];
+      const encoded = AbiCoder.defaultAbiCoder().encode(types, values);
+      const hash = keccak256(encoded);
+      const signature = await owner.signMessage(toBeArray(hash));
+
       //Cancel Room
       await expect(
         bukProtocolContract.connect(adminWallet).cancelRoom(
-          1,
-          50000000,
-          30000000,
-          20000000
+          _id,
+          _penalty,
+          _refund,
+          _charges,
+          _bookingOwner,
+          signature
         ),
       ).not.be.reverted;
     });
-    it("Cancellation is successful and emit events", async function () {
+    it("Should cancel successfully and emit events", async function () {
       //Grant allowance permission
       const res = await stableTokenContract.connect(owner).approve(
         await bukProtocolContract.getAddress(),
@@ -1187,19 +1448,34 @@ await expect(
         ),
       ).not.be.reverted;
 
-      //Cancel Booking
+      const _id = 1;
+      const _penalty = 50000000; // Example values, use your actual logic
+      const _refund = 30000000;
+      const _charges = 20000000;
+      const _bookingOwner = await owner.getAddress();
+
+      // Formulate the signature
+      const types = ["uint256", "uint256", "uint256", "uint256"];
+      const values = [_id, _penalty, _refund, _charges];
+      const encoded = AbiCoder.defaultAbiCoder().encode(types, values);
+      const hash = keccak256(encoded);
+      const signature = await owner.signMessage(toBeArray(hash));
+
+      //Cancel Room
       await expect(
         bukProtocolContract.connect(adminWallet).cancelRoom(
-          1,
-          50000000,
-          30000000,
-          20000000
+          _id,
+          _penalty,
+          _refund,
+          _charges,
+          _bookingOwner,
+          signature
         ),
       )
-      .to.emit(bukProtocolContract, "CancelRoom")
-      .withArgs(1, true);
+        .to.emit(bukProtocolContract, "CancelRoom")
+        .withArgs(1, true);
     });
-    it("Cancellation is successful and check the BukNFTs and Buk PoS status", async function (){
+    it("Should cancel successfully and check the BukNFTs and BukPOSNFTs status", async function () {
       //Grant allowance permission
       const res = await stableTokenContract.connect(owner).approve(
         await bukProtocolContract.getAddress(),
@@ -1235,13 +1511,29 @@ await expect(
       //Check the balance of PoS NFT
       expect(await nftPosContract.balanceOf(owner.getAddress(), 1)).to.equal(0);
 
-      //Cancel Room 
+
+      const _id = 1;
+      const _penalty = 50000000; // Example values, use your actual logic
+      const _refund = 30000000;
+      const _charges = 20000000;
+      const _bookingOwner = await owner.getAddress();
+
+      // Formulate the signature
+      const types = ["uint256", "uint256", "uint256", "uint256"];
+      const values = [_id, _penalty, _refund, _charges];
+      const encoded = AbiCoder.defaultAbiCoder().encode(types, values);
+      const hash = keccak256(encoded);
+      const signature = await owner.signMessage(toBeArray(hash));
+
+      //Cancel Room
       await expect(
         bukProtocolContract.connect(adminWallet).cancelRoom(
-          1,
-          50000000,
-          30000000,
-          20000000
+          _id,
+          _penalty,
+          _refund,
+          _charges,
+          _bookingOwner,
+          signature
         ),
       ).not.be.reverted;
 
@@ -1249,9 +1541,9 @@ await expect(
       expect(await nftContract.balanceOf(owner.getAddress(), 1)).to.equal(0);
       //Check the balance of PoS NFT
       expect(await nftPosContract.balanceOf(owner.getAddress(), 1)).to.equal(0);
-      
+
     });
-    it("Cancellation failed when the booking status is not confirmed or checkedin", async function (){
+    it("Should not cancel when the booking status is not confirmed or checkedin", async function () {
       //Grant allowance permission
       const res = await stableTokenContract.connect(owner).approve(
         await bukProtocolContract.getAddress(),
@@ -1272,17 +1564,33 @@ await expect(
         ),
       ).not.be.reverted;
 
-      //Cancel Room 
+      const _id = 1;
+      const _penalty = 50000000; // Example values, use your actual logic
+      const _refund = 30000000;
+      const _charges = 20000000;
+      const _bookingOwner = await owner.getAddress();
+
+      // Formulate the signature
+      const types = ["uint256", "uint256", "uint256", "uint256"];
+      const values = [_id, _penalty, _refund, _charges];
+      const encoded = AbiCoder.defaultAbiCoder().encode(types, values);
+      const hash = keccak256(encoded);
+      const signature = await owner.signMessage(toBeArray(hash));
+
+      //Cancel Room
       await expect(
         bukProtocolContract.connect(adminWallet).cancelRoom(
-          1,
-          50000000,
-          30000000,
-          20000000
+          _id,
+          _penalty,
+          _refund,
+          _charges,
+          _bookingOwner,
+          signature
         ),
-      ).to.be.revertedWith("Not a confirmed or checkedin Booking");
+        ).to.be.revertedWith("Not a confirmed or checkedin Booking");
+
     });
-    it("Cancellation failed when transfer amount exceeds total", async function () {
+    it("Should not cancel when transfer amount exceeds total", async function () {
       //Grant allowance permission
       const res = await stableTokenContract.connect(owner).approve(
         await bukProtocolContract.getAddress(),
@@ -1313,15 +1621,330 @@ await expect(
         ),
       ).not.be.reverted;
 
-      //Cancel Room 
+      const _id = 1;
+      const _penalty = 50000000; // Example values, use your actual logic
+      const _refund = 50000000;
+      const _charges = 20000000;
+      const _bookingOwner = await owner.getAddress();
+
+      // Formulate the signature
+      const types = ["uint256", "uint256", "uint256", "uint256"];
+      const values = [_id, _penalty, _refund, _charges];
+      const encoded = AbiCoder.defaultAbiCoder().encode(types, values);
+      const hash = keccak256(encoded);
+      const signature = await owner.signMessage(toBeArray(hash));
+
+      //Cancel Room
       await expect(
         bukProtocolContract.connect(adminWallet).cancelRoom(
-          1,
-          50000000,
-          50000000,
-          20000000
+          _id,
+          _penalty,
+          _refund,
+          _charges,
+          _bookingOwner,
+          signature
         ),
         ).to.be.revertedWith("Transfer amount exceeds total");
+    });
+  });
+
+  describe("Emergency Cancellations in Buk Protocol", function () {
+    it("Should cancel successfully before checkin", async function () {
+      //Grant allowance permission
+      const res = await stableTokenContract.connect(owner).approve(
+        await bukProtocolContract.getAddress(),
+        150000000,
+      );
+
+
+      //Book room
+      expect(
+        await bukProtocolContract.connect(owner).bookRoom(
+          1,
+          [100000000],
+          [80000000],
+          [70000000],
+          1701504548,
+          1701590948,
+          12,
+          true,
+        ),
+      ).not.be.reverted;
+
+      //Mint NFT
+      await expect(
+        bukProtocolContract.connect(owner).mintBukNFT(
+          [1],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
+      ).not.be.reverted;
+
+      const _id = 1;
+      const _refund = 30000000;
+      const _charges = 20000000;
+      const _bookingOwner = await owner.getAddress();
+
+      //Emergency Cancellation
+      await expect(
+        bukProtocolContract.connect(adminWallet).emergencyCancellation(
+          _id,
+          _refund,
+          _charges,
+          _bookingOwner
+        ),
+      ).not.be.reverted;
+    });
+    it("Should cancel successfully after checkin", async function () {
+      //Grant allowance permission
+      const res = await stableTokenContract.connect(owner).approve(
+        await bukProtocolContract.getAddress(),
+        150000000,
+      );
+
+      //Book room
+      expect(
+        await bukProtocolContract.connect(owner).bookRoom(
+          1,
+          [100000000],
+          [80000000],
+          [70000000],
+          1701504548,
+          1701590948,
+          12,
+          true,
+        ),
+      ).not.be.reverted;
+
+      //Mint NFT
+      await expect(
+        bukProtocolContract.connect(owner).mintBukNFT(
+          [1],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
+      ).not.be.reverted;
+
+      //Check-in NFT
+      await expect(
+        bukProtocolContract.connect(owner).checkin(
+          [1]
+        ),
+      ).not.be.reverted;
+
+
+      const _id = 1;
+      const _refund = 30000000;
+      const _charges = 20000000;
+      const _bookingOwner = await owner.getAddress();
+
+      //Emergency Cancellation
+      await expect(
+        bukProtocolContract.connect(adminWallet).emergencyCancellation(
+          _id,
+          _refund,
+          _charges,
+          _bookingOwner
+        ),
+      ).not.be.reverted;
+    });
+    it("Should cancel successfully and emit events", async function () {
+      //Grant allowance permission
+      const res = await stableTokenContract.connect(owner).approve(
+        await bukProtocolContract.getAddress(),
+        150000000,
+      );
+
+      //Book room
+      expect(
+        await bukProtocolContract.connect(owner).bookRoom(
+          1,
+          [100000000],
+          [80000000],
+          [70000000],
+          1701504548,
+          1701590948,
+          12,
+          true,
+        ),
+      ).not.be.reverted;
+
+      //Mint NFT
+      await expect(
+        bukProtocolContract.connect(owner).mintBukNFT(
+          [1],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
+      ).not.be.reverted;
+
+      //Check-in NFT
+      await expect(
+        bukProtocolContract.connect(owner).checkin(
+          [1]
+        ),
+      ).not.be.reverted;
+
+
+      const _id = 1;
+      const _refund = 30000000;
+      const _charges = 20000000;
+      const _bookingOwner = await owner.getAddress();
+
+      //Emergency Cancellation
+      await expect(
+        bukProtocolContract.connect(adminWallet).emergencyCancellation(
+          _id,
+          _refund,
+          _charges,
+          _bookingOwner
+        ),
+      )
+      .to.emit(bukProtocolContract, "CancelRoom")
+      .withArgs(1, true);
+    });
+    it("Should cancel successfully and check the BukNFTs and BukPOSNFTs status", async function () {
+      //Grant allowance permission
+      const res = await stableTokenContract.connect(owner).approve(
+        await bukProtocolContract.getAddress(),
+        150000000,
+      );
+
+      //Book room
+      expect(
+        await bukProtocolContract.connect(owner).bookRoom(
+          1,
+          [100000000],
+          [80000000],
+          [70000000],
+          1701504548,
+          1701590948,
+          12,
+          true,
+        ),
+      ).not.be.reverted;
+
+      //Mint NFT
+      await expect(
+        bukProtocolContract.connect(owner).mintBukNFT(
+          [1],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
+      ).not.be.reverted;
+
+      //Check the balance of NFT
+      expect(await nftContract.balanceOf(owner.getAddress(), 1)).to.equal(1);
+      //Check the balance of PoS NFT
+      expect(await nftPosContract.balanceOf(owner.getAddress(), 1)).to.equal(0);
+
+      const _id = 1;
+      const _refund = 30000000;
+      const _charges = 20000000;
+      const _bookingOwner = await owner.getAddress();
+
+      //Emergency Cancellation
+      await expect(
+        bukProtocolContract.connect(adminWallet).emergencyCancellation(
+          _id,
+          _refund,
+          _charges,
+          _bookingOwner
+        ),
+      ).not.be.reverted;
+
+      //Check the balance of NFT
+      expect(await nftContract.balanceOf(owner.getAddress(), 1)).to.equal(0);
+      //Check the balance of PoS NFT
+      expect(await nftPosContract.balanceOf(owner.getAddress(), 1)).to.equal(0);
+
+    });
+    it("Should not cancel when the booking status is not confirmed or checkedin", async function () {
+      //Grant allowance permission
+      const res = await stableTokenContract.connect(owner).approve(
+        await bukProtocolContract.getAddress(),
+        150000000,
+      );
+
+      //Book room
+      expect(
+        await bukProtocolContract.connect(owner).bookRoom(
+          1,
+          [100000000],
+          [80000000],
+          [70000000],
+          1701504548,
+          1701590948,
+          12,
+          true,
+        ),
+      ).not.be.reverted;
+
+      const _id = 1;
+      const _refund = 30000000;
+      const _charges = 20000000;
+      const _bookingOwner = await owner.getAddress();
+
+      //Emergency Cancellation
+      await expect(
+        bukProtocolContract.connect(adminWallet).emergencyCancellation(
+          _id,
+          _refund,
+          _charges,
+          _bookingOwner
+        ),
+      ).to.be.revertedWith("Not a confirmed or checkedin Booking");
+
+    });
+    it("Should not cancel when transfer amount exceeds total", async function () {
+      //Grant allowance permission
+      const res = await stableTokenContract.connect(owner).approve(
+        await bukProtocolContract.getAddress(),
+        150000000,
+      );
+
+      //Book room
+      expect(
+        await bukProtocolContract.connect(owner).bookRoom(
+          1,
+          [100000000],
+          [80000000],
+          [70000000],
+          1701504548,
+          1701590948,
+          12,
+          true,
+        ),
+      ).not.be.reverted;
+
+      //Mint NFT
+      await expect(
+        bukProtocolContract.connect(owner).mintBukNFT(
+          [1],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
+      ).not.be.reverted;
+
+      const _id = 1;
+      const _refund = 80000000;
+      const _charges = 30000000;
+      const _bookingOwner = await owner.getAddress();
+
+      //Emergency Cancellation
+      await expect(
+        bukProtocolContract.connect(adminWallet).emergencyCancellation(
+          _id,
+          _refund,
+          _charges,
+          _bookingOwner
+        ),
+      ).to.be.revertedWith("Transfer amount exceeds total");
     });
   });
 });

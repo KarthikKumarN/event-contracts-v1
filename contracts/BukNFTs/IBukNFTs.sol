@@ -4,25 +4,71 @@ pragma solidity =0.8.19;
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 
 interface IBukNFTs is IERC1155 {
-    /**
-     * @dev Update the name of the contract.
-     * @notice This function can only be called by addresses with `BUK_PROTOCOL_CONTRACT_ROLE`
-     */
-    function updateName(string memory _contractName) external;
+
 
     /**
-     * @dev Function to update the treasury address.
+     * @dev Emitted when Buk Protocol Address is updated.
+     */
+    event SetBukProtocol(address indexed oldBukProtocolContract, address indexed newBukProtocolContract);
+
+    /**
+     * @dev Emitted when treasury is updated.
+     */
+    event SetBukTreasury(address indexed oldTreasuryContract, address indexed newTreasuryContract);
+
+    /**
+     * @dev Emitted when marketplace role is granted.
+     */
+    event SetMarketplace(address indexed marketplaceContract);
+
+    /**
+     * @dev Event to update the contract name
+     */
+    event SetNFTContractName(string indexed oldContractName, string indexed newContractName);
+
+    /**
+     * @dev Event to set NFT contract role
+     */
+    event SetNftPoSContractRole(address indexed oldNftPoSContractAddr, address indexed newNftPoSContractAddr);
+
+    /**
+     * @dev Event to set token URI
+     */
+    event SetURI(uint256 indexed id, string indexed uri);
+
+    /**
+     * @dev Function to set the Buk Protocol Contract address.
+     * @param _bukProtocolContract Address of the Buk Protocol Contract.
+     * @notice This function can only be called by addresses with `ADMIN_ROLE`
+     */
+    function setBukProtocol(address _bukProtocolContract) external;
+
+    /**
+     * @dev Function to set the treasury address.
      * @param _bukTreasuryContract Address of the treasury.
-     * @notice This function can only be called by addresses with `BUK_PROTOCOL_CONTRACT_ROLE`
+     * @notice This function can only be called by addresses with `ADMIN_ROLE`
      */
     function setBukTreasury(address _bukTreasuryContract) external;
 
     /**
-     * @dev Function to update the marketplace address.
+     * @dev Function to set the marketplace address.
      * @param _marketplaceContract Address of the marketplace.
-     * @notice This function can only be called by addresses with `DEFAULT_ADMIN_ROLE`
+     * @notice This function can only be called by addresses with `ADMIN_ROLE`
      */
     function setMarketplaceRole(address _marketplaceContract) external;
+
+    /**
+     * @dev Function to set the BukPOSNFT to the contract
+     * @param _nftPoSContract address: The address of the NFT contract
+     * @notice This function can only be called by a contract with `ADMIN_ROLE`
+     */
+    function setBukPOSNFTRole(address _nftPoSContract) external;
+
+    /**
+     * @dev Set the name of the contract.
+     * @notice This function can only be called by addresses with `BUK_PROTOCOL_CONTRACT_ROLE`
+     */
+    function setNFTContractName(string memory _contractName) external;
 
     /**
      * @dev Sets the URI for a specific token ID.
@@ -55,14 +101,14 @@ interface IBukNFTs is IERC1155 {
      * @param _account - The account to burn the NFT from.
      * @param _id - The token ID of the NFT to burn.
      * @param _amount - The amount of NFTs to burn.
-     * @param _isPoSNFT - Whether or not to call the Buk PoS NFTs contract to burn the NFT.
+     * @param _mintPoS - Whether or not to call the Buk PoS NFTs contract to burn the NFT.
      * @notice This function can only be called by a contract with `BUK_PROTOCOL_CONTRACT_ROLE`
      */
     function burn(
         address _account,
         uint256 _id,
         uint256 _amount,
-        bool _isPoSNFT
+        bool _mintPoS
     ) external;
 
     /**
@@ -102,30 +148,11 @@ interface IBukNFTs is IERC1155 {
     ) external;
 
     /**
-     * @dev name of the Buk PoS NFT contract
-     */
-    function name() external view returns (string memory);
-
-    /**
-     * @dev address of the Buk PoS NFT contract
-     */
-    function nftPoSContract() external view returns (address);
-
-    /**
-     * @dev address of the Buk Protocol contract
-     */
-    function bukProtocolContract() external view returns (address);
-
-    /**
-     * @dev Mapping for token URI's for Buk PoS NFTs
-     * @param _id uint256: The ID of the token
-     */
-    function bookingTickets(uint256 _id) external view returns (string memory);
-
-    /**
      * @dev To retrieve information about the royalties associated with a specific token.
      * @param _tokenId - The token ID of the NFT.
      * @param _salePrice - The price at which the token is being sold.
+     * @return receiver - The address of the royalty receiver.
+     * @return royaltyAmount - The amount of royalty to be paid.
      */
     function royaltyInfo(
         uint256 _tokenId,
@@ -138,4 +165,10 @@ interface IBukNFTs is IERC1155 {
      * @return string - The URI associated with the token ID.
      */
     function uri(uint256 _id) external view returns (string memory);
+    
+    /**
+     * @dev Returns the contract name of BukNFTs.
+     * @return string - The Buk NFT contract name.
+     */
+    function getName() external view returns (string memory);
 }

@@ -2,16 +2,65 @@
 pragma solidity =0.8.19;
 
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
-import "@openzeppelin/contracts/access/IAccessControl.sol";
 
-interface IBukPOSNFTs is IERC1155, IAccessControl {
+interface IBukPOSNFTs is IERC1155 {
 
     /**
-     * @dev Function to grant the BukNFT role to a given contract
-     * @param _nftContract address: The address of the NFT contract
-     * @notice This function can only be called by a contract with `BUK_PROTOCOL_CONTRACT_ROLE`
+     * @dev Emitted when Buk Protocol Address is updated.
      */
-    function grantBukNFTRole(address _nftContract) external;
+    event SetBukProtocol(address indexed oldBukProtocolContract, address indexed newBukProtocolContract);
+
+    /**
+     * @dev Emitted when treasury is updated.
+     */
+    event SetBukTreasury(address indexed oldTreasuryContract, address indexed newTreasuryContract);
+
+    /**
+     * @dev Event to update the contract name
+     */
+    event SetNFTContractName(string indexed oldContractName, string indexed newContractName);
+
+    /**
+     * @dev Event to set NFT contract role
+     */
+    event SetNftContractRole(address indexed oldNftContractAddr, address indexed newNftContractAddr);
+
+    /**
+     * @dev Event to set token URI
+     */
+    event SetURI(uint indexed id, string indexed uri);
+
+    /**
+     * @dev Custom error in the function to show that the NFT is not minted.
+     */
+    error NotYetMinted(string message);
+
+    /**
+     * @dev Function to update the Buk Protocol Contract address.
+     * @param _bukProtocolContract Address of the Buk Protocol Contract.
+     * @notice This function can only be called by addresses with `ADMIN_ROLE`
+     */
+    function setBukProtocol(address _bukProtocolContract) external;
+    
+    /**
+     * @dev Function to update the treasury address.
+     * @param _bukTreasuryContract Address of the treasury.
+     * @notice This function can only be called by addresses with `ADMIN_ROLE`
+     */
+    function setBukTreasury(address _bukTreasuryContract) external;
+
+    /**
+     * @dev Function to set the BukNFT role to a given contract
+     * @param _nftContract address: The address of the NFT contract
+     * @notice This function can only be called by a contract with `ADMIN_ROLE`
+     */
+    function setBukNFTRole(address _nftContract) external;
+
+    /**
+     * @dev Function to set the contract name
+     * @notice This function can only be called by a contract with `BUK_NFT_CONTRACT_ROLE`
+     */
+    function setNFTContractName(string memory _contractName) external;
 
     /**
      * @dev Function to set the URI for a given ID
@@ -20,12 +69,6 @@ interface IBukPOSNFTs is IERC1155, IAccessControl {
      * @notice This function can only be called by a contract with `BUK_NFT_CONTRACT_ROLE`
      */
     function setURI(uint256 _id, string memory _newuri) external;
-
-    /**
-     * @dev Function to update the contract name
-     * @notice This function can only be called by a contract with `BUK_NFT_CONTRACT_ROLE`
-     */
-    function updateName(string memory _contractName) external;
 
     /**
      * @dev Function to mint tokens
@@ -52,7 +95,7 @@ interface IBukPOSNFTs is IERC1155, IAccessControl {
      * @param _amount - The amount of NFTs to mint.
      * @param _data - Additional data to include in the transfer.
      * @notice This function checks if the NFT is tranferable or not.
-     * @notice This function can only be called by a contract with `MARKETPLACE_CONTRACT_ROLE`
+     * @notice This function can only be called by a contract with `ADMIN_ROLE`
      */
     function safeTransferFrom(
         address _from,
@@ -70,7 +113,7 @@ interface IBukPOSNFTs is IERC1155, IAccessControl {
      * @param _amounts - Count of ERC1155 tokens of the respective token IDs.
      * @param _data - Additional data to include in the transfer.
      * @notice This function checks if the NFTs are tranferable or not.
-     * @notice This function can only be called by a contract with `MARKETPLACE_CONTRACT_ROLE`
+     * @notice This function can only be called by a contract with `ADMIN_ROLE`
      */
     function safeBatchTransferFrom(
         address _from,
@@ -81,43 +124,14 @@ interface IBukPOSNFTs is IERC1155, IAccessControl {
     ) external;
 
     /**
-     * @dev name of the contract
-     */
-    function name() external view returns (string memory);
-
-    /**
-     * @dev address of the BukNFTs contract
-     */
-    function nftContract() external view returns (address);
-
-    /**
-     * @dev address of the Buk Protocol contract
-     */
-    function bukProtocolContract() external view returns (address);
-
-    /**
-     * @dev Mapping for token URI's for Buk PoS NFTs
-     * @param _id uint256: The ID of the token
-     */
-    function bookingTickets(uint256 _id) external view returns (string memory);
-
-    /**
-     * @dev To retrieve information about the royalties associated with a specific token.
-     * @param _tokenId - The token ID of the NFT.
-     * @param _salePrice - The price at which the token is being sold.
-     */
-    function royaltyInfo(
-        uint256 _tokenId,
-        uint256 _salePrice
-    )
-        external
-        view
-        returns (address receiver, uint256 royaltyAmount);
-
-
-    /**
      * @dev Function to get the URI for a given ID
      * @param _id uint256: The ID of the token
      */
     function uri(uint256 _id) external view returns (string memory);
+
+    /**
+     * @dev Returns the contract name of BukPOSNFTs.
+     * @return string - The Buk PoS NFT contract name.
+     */
+    function getName() external view returns (string memory);
 }

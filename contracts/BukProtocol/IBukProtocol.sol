@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.19;
+import "../BukRoyalties/IBukRoyalties.sol";
 
 interface IBukProtocol {
     /**
@@ -8,7 +9,8 @@ interface IBukProtocol {
      * @var BookingStatus.booked      Booking has been initiated but not yet confirmed.
      * @var BookingStatus.confirmed   Booking has been confirmed.
      * @var BookingStatus.cancelled   Booking has been cancelled.
-     * @var BookingStatus.expired     Booking has expired.
+     * @var BookingStatus.checkedin   Booking has been checked-in.
+     * @var BookingStatus.checkedout  Booking has been checked-out.
      */
     enum BookingStatus {
         nil,
@@ -21,22 +23,22 @@ interface IBukProtocol {
 
     /**
      * @dev Struct for booking details.
-     * @var uint256 id                Booking ID.
-     * @var BookingStatus status      Booking status.
-     * @var uint256 tokenID           Token ID.
-     * @var address owner             Address of the booking owner.
-     * @var uint256 checkin           Check-in date.
-     * @var uint256 checkout          Check-out date.
-     * @var uint256 total             Total price.
-     * @var uint256 baseRate          Base rate.
-     * @var uint256 minSalePrice      Min Sale Price.
-     * @var uint256 tradeTimeLimit    Buy will excecute if tradeLimitTime is not crossed (in hours)
-     * @var uint256 tradeable         Is the NFT .
+     * @param uint256 id                Booking ID.
+     * @param BookingStatus status      Booking status.
+     * @param uint256 tokenId           Token ID.
+     * @param address owner             Address of the booking owner.
+     * @param uint256 checkin           Check-in date.
+     * @param uint256 checkout          Check-out date.
+     * @param uint256 total             Total price.
+     * @param uint256 baseRate          Base rate.
+     * @param uint256 minSalePrice      Min Sale Price.
+     * @param uint256 tradeTimeLimit    Buy will excecute if tradeLimitTime is not crossed (in hours)
+     * @param bool tradeable            Is the NFT Tradeable.
      */
     struct Booking {
         uint256 id;
         BookingStatus status;
-        uint256 tokenID;
+        uint256 tokenId;
         address firstOwner;
         uint256 checkin;
         uint256 checkout;
@@ -48,28 +50,14 @@ interface IBukProtocol {
     }
 
     /**
-     * @dev Struct named Royalty to store royalty information.
-     * @var address receiver           The address of the receiver who will receive the royalty
-     * @var uint96 royaltyFraction     The fraction of the royalty to be paid, expressed as an unsigned 96-bit integer
+     * @dev Emitted when the admin wallet is set.
      */
-    struct Royalty {
-        address receiver;
-        uint96 royaltyFraction;
-    }
+    event SetAdminWallet(address indexed oldCAdminWallet, address indexed newAdminWallet);
 
     /**
      * @dev Emitted when the commission is set.
      */
-
-    event SetCommission(uint256 indexed commission);
-    /**
-     * @dev Emitted when Buk Protocol role access is granted for NFT and PoS contracts
-     */
-
-    event GrantBukProtocolRole(
-        address indexed oldAddress,
-        address indexed newAddress
-    );
+    event SetCommission(uint256 indexed oldCommission, uint256 indexed newCommission);
 
     /**
      * @dev Emitted when token uri is set.
@@ -79,12 +67,22 @@ interface IBukProtocol {
     /**
      * @dev Emitted when BukNFTs contract address is updated.
      */
-    event SetBukNFTs(address indexed _nftContractAddr);
+    event SetBukNFTs(address indexed oldNftContract, address indexed newNftContract);
 
     /**
      * @dev Emitted when BukPOSNFTs contract address is updated.
      */
-    event SetBukPoSNFTs(address indexed _nftPoSContractAddr);
+    event SetBukPoSNFTs(address indexed oldNftPoSContract, address indexed newNftPoSContract);
+
+    /**
+     * @dev Emitted when BukRoyalties contract address is updated.
+     */
+    event SetRoyaltiesContract(address indexed oldRoyaltiesContract, address indexed newRoyaltiesContract);
+    
+    /**
+     * @dev Emitted when signer verifier is updated.
+     */
+    event SetSignerVerifier(address indexed signerVerifier);
 
     /**
      * @dev Emitted when Buk treasury is updated.
@@ -97,37 +95,25 @@ interface IBukProtocol {
     event SetBukWallet(address indexed bukWalletContract);
 
     /**
-     * @dev Emitted when currency is updated.
+     * @dev Emitted when stable token is updated.
      */
-    event SetCurrency(address indexed _currencyContract);
+    event SetStableToken(address indexed _stableToken);
 
     /**
-     * @dev Emitted when new Buk royalty has been updated
-     * @param oldRoyalty, old buk royalty
-     * @param newRoyalty, new buk royalty
+     * @dev Event to update the contract name
      */
-    event SetBukRoyalty(uint8 oldRoyalty, uint8 newRoyalty);
+    event SetNFTContractName(string indexed oldContractName, string indexed newContractName);
 
     /**
-     * @dev Emitted when new hotel royalty has been updated
-     * @param oldRoyalty, old hotel royalty
-     * @param newRoyalty, new hotel royalty
+     * @dev Emitted when the tradeability of a Buk NFT is toggled.
+     * @param _tokenId Token Id whose tradeability is being toggled.
      */
-    event SetHotelRoyalty(uint8 oldRoyalty, uint8 newRoyalty);
+    event ToggleTradeability(uint256 indexed _tokenId, bool _tradeable);
 
     /**
      * @dev Emitted when single room is booked.
      */
     event BookRoom(uint256 indexed booking);
-
-    /**
-     * @dev Emitted when multiple rooms are booked together.
-     */
-    event BookRooms(
-        uint256[] indexed bookings,
-        uint256 indexed total,
-        uint256 indexed commission
-    );
 
     /**
      * @dev Emitted when booking refund is done.
@@ -137,7 +123,7 @@ interface IBukProtocol {
     /**
      * @dev Emitted when room bookings are confirmed.
      */
-    event MintBookingNFT(uint256[] indexed bookings, bool indexed status);
+    event MintedBookingNFT(uint256[] indexed bookings, bool indexed status);
 
     /**
      * @dev Emitted when room bookings are checked in.
@@ -154,96 +140,92 @@ interface IBukProtocol {
     event CancelRoom(uint256 indexed booking, bool indexed status);
 
     /**
-     * @dev Event to update the contract name
+     * @dev Sets the admin wallet address.
+     * @param _adminWallet The new admin wallet address to be set.
+     * @notice This function can only be called by admin
      */
-    event UpdateContractName(string indexed contractName);
-
-    /**
-    * @dev Function to update the treasury address.
-    * @param _bukTreasuryContract Address of the treasury.
-    * @notice This function can only be called by `ADMIN_ROLE`
-    */
-    function setBukTreasury(address _bukTreasuryContract) external;
-
-    /**
-    * @dev Function to update the Buk Wallet address to collect commission.
-    * @param _bukWalletContract Address of the Buk Wallet.
-    * @notice This function can only be called by `ADMIN_ROLE`
-    */
-    function setBukWallet(address _bukWalletContract) external;
-
-    /**
-    * @dev Function to update the currency address.
-    * @param _currencyContract Address of the currency contract.
-    * @notice This function can only be called by `ADMIN_ROLE`
-    */
-    function setCurrency(address _currencyContract) external;
-
-    /**
-    * @dev Function to update the BukNFTs contract address.
-    * @param _nftContractAddr Address of the BukNFTs contract.
-    * @notice This function can only be called by `ADMIN_ROLE`
-    */
-    function setBukNFTs(address _nftContractAddr) external;
-
-    /**
-    * @dev Function to update the BukPOSNFTs contract address.
-    * @param _nftPoSContractAddr Address of the BukPOSNFTs contract.
-    * @notice This function can only be called by `ADMIN_ROLE`
-    */
-    function setBukPoSNFTs(address _nftPoSContractAddr) external;
-
-    /**
-    * @dev Function to update the token uri.
-    * @param _tokenId Token Id.
-    * @notice This function can only be called by `ADMIN_ROLE`
-    */
-    function setTokenUri(uint _tokenId, string memory _newUri) external;
-
-    /**
-    * @dev Function to define the royalties.
-    * @param _recipients Array of recipients of royalties
-    * @param _royaltyFractions Array of percentages for each recipients in the _recipients[] order.
-    * @notice This function can only be called by `ADMIN_ROLE`
-    */
-    function setOtherRoyaltyInfo(
-        address[] memory _recipients,
-        uint96[] memory _royaltyFractions
+    function setAdminWallet(
+        address _adminWallet
     ) external;
 
     /**
-    * @dev Function to define the royalty Fraction for Buk.
-    * @param _royaltyFraction Royalty Fraction.
-    * @notice This function can only be called by `ADMIN_ROLE`
-    */
-    function setBukRoyaltyInfo(uint96 _royaltyFraction) external;
+     * @dev This function is used to set the address of the signature verifier contract.
+     * @param _signatureVerifier The address of the signature verifier contract.
+     * @notice This function can only be called by admin
+     */
+    function setSignatureVerifier(address _signatureVerifier) external;
 
     /**
-    * @dev Function to define the royalty Fraction for Hotel.
-    * @param _royaltyFraction Royalty Fraction.
-    * @notice This function can only be called by `ADMIN_ROLE`
-    */
-    function setHotelRoyaltyInfo(uint96 _royaltyFraction) external;
+     * @dev Function to update the treasury address.
+     * @param _bukTreasuryContract Address of the treasury.
+     * @notice This function can only be called by admin
+     */
+    function setBukTreasury(address _bukTreasuryContract) external;
 
     /**
-    * @dev Function to define the royalty Fraction for the First Owners.
-    * @param _royaltyFraction Royalty Fraction.
-    * @notice This function can only be called by `ADMIN_ROLE`
-    */
-    function setFirstOwnerRoyaltyInfo(uint96 _royaltyFraction) external;
+     * @dev Function to update the Buk Wallet address to collect commission.
+     * @param _bukWalletContract Address of the Buk Wallet.
+     * @notice This function can only be called by admin
+     */
+    function setBukWallet(address _bukWalletContract) external;
 
     /**
-     * @dev Update the name of the contract.
+     * @dev Function to update the stable token address.
+     * @param _stableToken Address of the stable token contract.
+     * @notice This function can only be called by admin
+     */
+    function setStableToken(address _stableToken) external;
+
+    /**
+     * @dev Function to update the BukNFTs contract address.
+     * @param _nftContractAddr Address of the BukNFTs contract.
+     * @notice This function can only be called by admin
+     */
+    function setBukNFTs(address _nftContractAddr) external;
+
+    /**
+     * @dev Function to update the BukPOSNFTs contract address.
+     * @param _nftPoSContractAddr Address of the BukPOSNFTs contract.
+     * @notice This function can only be called by admin
+     */
+    function setBukPoSNFTs(address _nftPoSContractAddr) external;
+
+    /**
+     * @dev Sets the Buk royalties contract address.
+     * Can only be called by accounts with the ADMIN_ROLE.
+     * @param _royaltiesContract The new royaltiesContract address to set.
+     * @notice This function updates the royaltiesContract address and emits an event.
+     * @dev If {_royaltiesContract} is the zero address, the function will revert.
+     * @dev Emits a {SetRoyaltiesContract} event with the previous royaltiesContract address and the new address.
+     */
+    function setRoyaltiesContract(address _royaltiesContract) external;
+
+    /**
+     * @dev Function to update the token uri.
+     * @param _tokenId Token Id.
+     * @notice This function can only be called by admin
+     */
+    function setTokenUri(uint _tokenId, string memory _newUri) external;
+
+    /**
+     * @dev Set the name of the contract.
      * @notice This function can only be called by addresses with `ADMIN_ROLE`
      */
-    function updateNFTName(string memory _contractName) external;
+    function setNFTContractName(string memory _contractName) external;
 
     /**
      * @dev Function to set the Buk commission percentage.
      * @param _commission Commission percentage.
-     * @notice This function can only be called by `ADMIN_ROLE`
+     * @notice This function can only be called by admin
      */
     function setCommission(uint8 _commission) external;
+
+    /**
+     * @dev Function to toggle the tradeability of an asset.
+     * @param _tokenId Token Id whose tradeability is being toggled.
+     * @notice This function can only be called by admin
+     */
+    function toggleTradeability(uint256 _tokenId) external;
 
     /**
      * @dev Function to book rooms.
@@ -269,32 +251,31 @@ interface IBukProtocol {
     ) external returns (bool);
 
     /**
-     * @dev Function to refund the amount for the failure scenarios.
-     * @param _ids IDs of the bookings.
-     * @notice This function can only be called by `ADMIN_ROLE`
+     * @dev Allows the admin to refund a booking by canceling it and transferring the amount to the owner.
+     * @param _ids An array of booking IDs that need to be refunded.
+     * @param _owner The address of the owner of the bookings.
+     * @notice This function is usually executed when the booking is unsuccessful from the hotel's end.
+     * @notice This function can only be called by admin
      */
     function bookingRefund(uint256[] memory _ids, address _owner) external;
 
     /**
-     * @dev Function to confirm the room bookings and mint NFT.
-     * @param _ids IDs of the bookings.
-     * @param _uri URIs of the NFTs.
-     * @notice Only the owner of the booking can confirm the rooms.
+     * @dev Function to mint new BukNFT tokens based on the provided booking IDs and URIs.
+     * @param _ids An array of booking IDs representing the unique identifier for each BukNFT token.
+     * @param _uri An array of URIs corresponding to each booking ID, which will be associated with the Buk NFTs.
+     * @notice Only the owner of the booking can book the NFTs and confirm the rooms.
      * @notice The number of bookings and URIs should be same.
      * @notice The booking status should be booked to confirm it.
      * @notice The NFTs are minted to the owner of the booking.
      */
-    function mintBukNFT(
-        uint256[] memory _ids,
-        string[] memory _uri
-    ) external;
+    function mintBukNFT(uint256[] memory _ids, string[] memory _uri) external;
 
     /**
      * @dev Function to checkin the rooms.
-     * @param _ids IDs of the bookings.
+     * @param _ids An array of booking IDs representing the unique identifier for each BukNFT token.
      * @notice The booking status should be confirmed to checkin it.
      * @notice Once checkedin the NFT becomes non-tradeable.
-     * @notice This function can only be called by `ADMIN_ROLE` or the owner of the booking NFT
+     * @notice This function can only be called by admin or the owner of the booking NFT
      */
     function checkin(uint256[] memory _ids) external;
 
@@ -305,7 +286,7 @@ interface IBukProtocol {
      * @notice The booking status should be checkedin to checkout it.
      * @notice The Active Booking NFTs are burnt from the owner's account.
      * @notice The Utility NFTs are minted to the owner of the booking.
-     * @notice This function can only be called by `ADMIN_ROLE`
+     * @notice This function can only be called by admin
      */
     function checkout(uint256[] memory _ids) external;
 
@@ -315,36 +296,61 @@ interface IBukProtocol {
      * @param _penalty Penalty amount to be refunded.
      * @param _refund Refund amount to be refunded.
      * @param _charges Charges amount to be refunded.
+     * @param _bookingOwner Owner of the booking.
      * @notice Only the admin can cancel the rooms.
      * @notice The booking status should be confirmed to cancel it.
      * @notice The Active Booking NFTs are burnt from the owner's account.
-     * @notice This function can only be called by `ADMIN_ROLE`
+     * @notice This function can only be called by admin
      */
     function cancelRoom(
         uint256 _id,
         uint256 _penalty,
         uint256 _refund,
-        uint256 _charges
+        uint256 _charges,
+        address _bookingOwner,
+        bytes memory _signature
+    ) external;
+
+    /**
+     * @dev Function to perform an emergency cancellation of a booking.
+     * @param _id The ID of the booking to be cancelled.
+     * @param _refund The amount to be refunded to the booking owner.
+     * @param _charges The charges associated with the cancellation(if any).
+     * @param _bookingOwner The address of the booking owner.
+     * @notice This function can only be called by admin
+     */
+    function emergencyCancellation(
+        uint256 _id,
+        uint256 _refund,
+        uint256 _charges,
+        address _bookingOwner
     ) external;
 
     /**
      * Function to get wallet addresses
      * @return bukTreasury The address of the bukTreasury contract
      * @return bukWallet The address of the bukWallet contract
-     * @return currency The address of the currency contract
+     * @return stableToken The address of the stable token contract
      */
-    function getWallets() external view returns (address bukTreasury, address bukWallet, address currency);
+    function getWallets()
+        external
+        view
+        returns (address bukTreasury, address bukWallet, address stableToken);
 
     /**
      * @dev To get the booking details
      * @param _tokenId ID of the booking.
      */
-    function getBookingDetails(uint256 _tokenId) external view returns (Booking memory);
+    function getBookingDetails(
+        uint256 _tokenId
+    ) external view returns (Booking memory);
 
     /**
      * @dev Function to retrieve royalty information.
      * @param _tokenId ID of the token
      * @notice Token ID and Booking ID are same.
      */
-    function getRoyaltyInfo(uint256 _tokenId) external view returns (Royalty[] memory);
+    function getRoyaltyInfo(
+        uint256 _tokenId
+    ) external view returns (IBukRoyalties.Royalty[] memory);
 }
