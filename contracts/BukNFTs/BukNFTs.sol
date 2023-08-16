@@ -54,8 +54,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
     /**
      * @dev Constant for the role of the admin
      */
-    bytes32 public constant ADMIN_ROLE =
-        keccak256("ADMIN_ROLE");
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
     /**
      * @dev Constructor to initialize the contract
@@ -163,16 +162,16 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
         address _account,
         uint256 _id,
         uint256 _amount,
-        bool _isPoSNFT
+        bool _mintPoS
     ) external onlyRole(BUK_PROTOCOL_CONTRACT_ROLE) {
         string memory uri_ = uriByTokenId[_id];
         delete uriByTokenId[_id];
-        if (_isPoSNFT) {
+        if (_mintPoS) {
             nftPoSContract.mint(_account, _id, _amount, uri_, "");
         }
         _burn(_account, _id, _amount);
     }
-    
+
     /**
      * @dev See {IBukNFTs-royaltyInfo}.
      */
@@ -210,16 +209,33 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
         uint256 _id,
         uint256 _amount,
         bytes memory _data
-    ) public virtual override(ERC1155, IBukNFTs) onlyRole(MARKETPLACE_CONTRACT_ROLE) {
-        require(isApprovedForAll(_from, _msgSender()),
+    )
+        public
+        virtual
+        override(ERC1155, IBukNFTs)
+        onlyRole(MARKETPLACE_CONTRACT_ROLE)
+    {
+        require(
+            block.timestamp <
+                (bukProtocolContract.getBookingDetails(_id).checkin -
+                    (bukProtocolContract.getBookingDetails(_id).tradeTimeLimit *
+                        3600)),
+            "Trade limit time crossed"
+        );
+        require(
+            isApprovedForAll(_from, _msgSender()),
             "ERC1155: caller is not token owner or approved"
         );
         require(
-            bukProtocolContract.getBookingDetails(_id).checkin > block.timestamp,
+            bukProtocolContract.getBookingDetails(_id).checkin >
+                block.timestamp,
             "Checkin time has passed"
         );
-        require(bukProtocolContract.getBookingDetails(_id).tradeable, "This NFT is non transferable");
-        require(balanceOf(_from, _id)>0, "From address does not own NFT");
+        require(
+            bukProtocolContract.getBookingDetails(_id).tradeable,
+            "This NFT is non transferable"
+        );
+        require(balanceOf(_from, _id) > 0, "From address does not own NFT");
         super._safeTransferFrom(_from, _to, _id, _amount, _data);
     }
 
@@ -232,12 +248,25 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
         uint256[] memory _ids,
         uint256[] memory _amounts,
         bytes memory _data
-    ) public virtual override(ERC1155, IBukNFTs) onlyRole(MARKETPLACE_CONTRACT_ROLE) {
-        require(isApprovedForAll(_from, _msgSender()),
+    )
+        public
+        virtual
+        override(ERC1155, IBukNFTs)
+        onlyRole(MARKETPLACE_CONTRACT_ROLE)
+    {
+        require(
+            isApprovedForAll(_from, _msgSender()),
             "ERC1155: caller is not token owner or approved"
         );
         uint256 len = _ids.length;
         for (uint i = 0; i < len; ++i) {
+        		require(
+								block.timestamp <
+										(bukProtocolContract.getBookingDetails(_ids[i]).checkin -
+												(bukProtocolContract.getBookingDetails(_ids[i]).tradeTimeLimit *
+														3600)),
+								"Trade limit time crossed"
+						);
             require(
                 bukProtocolContract.getBookingDetails(_ids[i]).tradeable,
                 "One of these NFT is non-transferable"
@@ -282,8 +311,9 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
      * @param _contractName The new name for the contract
      */
     function _setNFTContractName(string memory _contractName) private {
+        string memory oldName_ = name;
         name = _contractName;
-        emit SetNFTContractName(_contractName);
+        emit SetNFTContractName(oldName_, _contractName);
     }
 
     /**
@@ -291,10 +321,11 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
      * @param _bukProtocolContract The address of the Buk Protocol contract
      */
     function _setBukProtocol(address _bukProtocolContract) private {
+		address oldBukProtocolContract_ = address(bukProtocolContract);
         bukProtocolContract = IBukProtocol(_bukProtocolContract);
         _grantRole(BUK_PROTOCOL_CONTRACT_ROLE, _bukProtocolContract);
-        _revokeRole(BUK_PROTOCOL_CONTRACT_ROLE, _msgSender());
-        emit SetBukProtocol(_bukProtocolContract);
+        _revokeRole(BUK_PROTOCOL_CONTRACT_ROLE, oldBukProtocolContract_);
+        emit SetBukProtocol(oldBukProtocolContract_, _bukProtocolContract);
     }
 
     /**
@@ -302,18 +333,19 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
      * @param _bukTreasuryContract The address of the BukTreasury contract
      */
     function _setBukTreasury(address _bukTreasuryContract) private {
+        address oldBukTreasuryContract_ = address(_bukTreasury);
         _bukTreasury = IBukTreasury(_bukTreasuryContract);
-        emit SetBukTreasury(_bukTreasuryContract);
+        emit SetBukTreasury(oldBukTreasuryContract_, _bukTreasuryContract);
     }
+
     /**
      * Private function to set the role to a BukPOSNFT contract
      * @param _nftPoSContract The address of the BukPOSNFT contract to grant the role to
      */
-    function _setBukPOSNFTRole(
-        address _nftPoSContract
-    ) private {
+    function _setBukPOSNFTRole(address _nftPoSContract) private {
+        address oldNftPoSContract_ = address(nftPoSContract);
         nftPoSContract = IBukPOSNFTs(_nftPoSContract);
-        emit SeNftPoSContractRole(_nftPoSContract);
+        emit SetNftPoSContractRole(oldNftPoSContract_, _nftPoSContract);
     }
 
     /**

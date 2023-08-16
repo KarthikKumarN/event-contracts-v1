@@ -142,7 +142,7 @@ describe("BukNFTs Updations", function () {
     it("Should set Buk Protocol and emit event", async function () {
       expect(await nftContract.setBukProtocol(bukProtocolContract.getAddress()))
         .to.emit(nftContract, "SetBukProtocol")
-        .withArgs(bukProtocolContract.getAddress());
+        .withArgs(bukProtocolContract.getAddress(), bukProtocolContract.getAddress());
     });
     it("Should revert if not called by admin", async function () {
       await expect(nftContract.connect(account1)
@@ -158,7 +158,7 @@ describe("BukNFTs Updations", function () {
     it("Should set Buk Treasury and emit event", async function () {
       expect(await nftContract.setBukTreasury(bukTreasuryContract.getAddress()))
         .to.emit(nftContract, "SetBukTreasury")
-        .withArgs(bukTreasuryContract.getAddress());
+        .withArgs(bukTreasuryContract.getAddress(), bukTreasuryContract.getAddress());
     });
     it("Should revert if not called by admin", async function () {
       await expect(nftContract.connect(account1)
@@ -180,7 +180,7 @@ describe("BukNFTs Updations", function () {
     it("Should set Marketplace and emit event", async function () {
       expect(await nftContract.setMarketplaceRole(marketplaceContract.getAddress()))
         .to.emit(nftContract, "SetMarketplace")
-        .withArgs(marketplaceContract.getAddress());
+        .withArgs(marketplaceContract.getAddress(), marketplaceContract.getAddress());
     });
     it("Should revert if not called by admin", async function () {
       await expect(nftContract.connect(account1)
@@ -188,18 +188,18 @@ describe("BukNFTs Updations", function () {
     })
   });
 
-  describe("Grant BukPOSNFTs Role in BukNFTs", function () {
-    it("Should grant BukPOSNFTs role in BukNFTs", async function () {
+  describe("Set BukPOSNFTs Role in BukNFTs", function () {
+    it("Should set BukPOSNFTs role in BukNFTs", async function () {
       expect(await nftContract.setBukPOSNFTRole(await nftPosContract.getAddress()))
         .not.be.reverted;
       //Check if BukPOSNFTs is set
       expect(await nftContract.nftPoSContract())
         .to.equal(await nftPosContract.getAddress());
     })
-    it("Should grant BukPOSNFTs role and emit event", async function () {
+    it("Should set BukPOSNFTs role and emit event", async function () {
       expect(await nftContract.setBukPOSNFTRole(await nftPosContract.getAddress()))
-        .to.emit(nftContract, "GrantNftPoSContractRole")
-        .withArgs(await nftPosContract.getAddress());
+        .to.emit(nftContract, "SetNftPoSContractRole")
+        .withArgs(await nftPosContract.getAddress(), await nftPosContract.getAddress());
     })
     it("Should revert if not called by admin", async function () {
       await expect(nftContract.connect(account1)

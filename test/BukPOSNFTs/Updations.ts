@@ -199,7 +199,7 @@ describe("BukPOSNFTs Updations", function () {
     it("Should set Buk Protocol and emit event", async function () {
       expect(await nftPosContract.setBukProtocol(bukProtocolContract.getAddress()))
         .to.emit(nftPosContract, "SetBukProtocol")
-        .withArgs(bukProtocolContract.getAddress());
+        .withArgs(bukProtocolContract.getAddress(), bukProtocolContract.getAddress());
     });
     it("Should revert if not called by owner", async function () {
       await expect(nftPosContract.connect(account1)
@@ -215,7 +215,7 @@ describe("BukPOSNFTs Updations", function () {
     it("Should set Buk Treasury and emit event", async function () {
       expect(await nftPosContract.setBukTreasury(bukTreasuryContract.getAddress()))
         .to.emit(nftPosContract, "SetBukTreasury")
-        .withArgs(bukTreasuryContract.getAddress());
+        .withArgs(bukTreasuryContract.getAddress(), bukTreasuryContract.getAddress());
     });
     it("Should revert if not called by admin", async function () {
       await expect(nftPosContract.connect(account1)
@@ -223,18 +223,18 @@ describe("BukPOSNFTs Updations", function () {
     })
   });
 
-  describe("Grant BukNFTs Role in BukPOSNFTs", function () {
-    it("Should grant BukPOSNFTs role in BukNFTs", async function () {
+  describe("Set BukNFTs Role in BukPOSNFTs", function () {
+    it("Should set BukPOSNFTs role in BukNFTs", async function () {
       expect(await nftPosContract.setBukNFTRole(await nftContract.getAddress()))
         .not.be.reverted;
       //Check if BukPOSNFTs is set
       expect(await nftPosContract.nftContract())
         .to.equal(await nftContract.getAddress());
     })
-    it("Should grant BukPOSNFTs role and emit event", async function () {
+    it("Should set BukPOSNFTs role and emit event", async function () {
       expect(await nftPosContract.setBukNFTRole(await nftContract.getAddress()))
-        .to.emit(nftPosContract, "GrantNftContractRole")
-        .withArgs(await nftContract.getAddress());
+        .to.emit(nftPosContract, "SetNftContractRole")
+        .withArgs(await nftContract.getAddress(), await nftContract.getAddress());
     })
     it("Should revert if not called by owner", async function () {
       await expect(nftPosContract.connect(account1)

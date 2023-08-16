@@ -6,24 +6,24 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 interface IBukPOSNFTs is IERC1155 {
 
     /**
-     * @dev Event to set NFT contract role
-     */
-    event SetNftContractRole(address indexed nftContractAddr);
-
-    /**
      * @dev Emitted when Buk Protocol Address is updated.
      */
-    event SetBukProtocol(address indexed bukProtocolContract);
+    event SetBukProtocol(address indexed oldBukProtocolContract, address indexed newBukProtocolContract);
 
     /**
      * @dev Emitted when treasury is updated.
      */
-    event SetBukTreasury(address indexed treasuryContract);
+    event SetBukTreasury(address indexed oldTreasuryContract, address indexed newTreasuryContract);
 
     /**
      * @dev Event to update the contract name
      */
-    event SetNFTContractName(string indexed name);
+    event SetNFTContractName(string indexed oldContractName, string indexed newContractName);
+
+    /**
+     * @dev Event to set NFT contract role
+     */
+    event SetNftContractRole(address indexed oldNftContractAddr, address indexed newNftContractAddr);
 
     /**
      * @dev Event to set token URI

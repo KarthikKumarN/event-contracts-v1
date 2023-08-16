@@ -100,8 +100,10 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
         address _nftContract
     ) external onlyRole(ADMIN_ROLE) {
         _grantRole(BUK_NFT_CONTRACT_ROLE, _nftContract);
+        _revokeRole(BUK_NFT_CONTRACT_ROLE, address(nftContract));
+        address oldNftContract_ = address(nftContract);
         nftContract = IBukNFTs(_nftContract);
-        emit SetNftContractRole(_nftContract);
+        emit SetNftContractRole(oldNftContract_, _nftContract);
     }
 
     /**
@@ -205,8 +207,9 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
      * @param _contractName The new name for the contract
      */
     function _setNFTContractName(string memory _contractName) private {
+        string memory oldName_ = name;
         name = _contractName;
-        emit SetNFTContractName(name);
+        emit SetNFTContractName(oldName_, _contractName);
     }
 
     /**
@@ -214,8 +217,11 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
      * @param _bukProtocolContract The address of the Buk Protocol contract
      */
     function _setBukProtocol(address _bukProtocolContract) private {
+		address oldBukProtocolContract_ = address(bukProtocolContract);
         bukProtocolContract = IBukProtocol(_bukProtocolContract);
-        emit SetBukProtocol(_bukProtocolContract);
+        _grantRole(BUK_PROTOCOL_CONTRACT_ROLE, _bukProtocolContract);
+        _revokeRole(BUK_PROTOCOL_CONTRACT_ROLE, oldBukProtocolContract_);
+        emit SetBukProtocol(oldBukProtocolContract_, _bukProtocolContract);
     }
 
     /**
@@ -223,8 +229,9 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
      * @param _bukTreasuryContract The address of the BukTreasury contract
      */
     function _setBukTreasury(address _bukTreasuryContract) private {
+        address oldBukTreasuryContract_ = address(_bukTreasury);
         _bukTreasury = IBukTreasury(_bukTreasuryContract);
-        emit SetBukTreasury(_bukTreasuryContract);
+        emit SetBukTreasury(oldBukTreasuryContract_, _bukTreasuryContract);
     }
 
     /**
