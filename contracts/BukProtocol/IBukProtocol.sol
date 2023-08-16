@@ -50,6 +50,11 @@ interface IBukProtocol {
     }
 
     /**
+     * @dev Emitted when the admin wallet is set.
+     */
+    event SetAdminWallet(address indexed oldCAdminWallet, address indexed newAdminWallet);
+
+    /**
      * @dev Emitted when the commission is set.
      */
     event SetCommission(uint256 indexed oldCommission, uint256 indexed newCommission);
@@ -135,44 +140,53 @@ interface IBukProtocol {
     event CancelRoom(uint256 indexed booking, bool indexed status);
 
     /**
+     * @dev Sets the admin wallet address.
+     * @param _adminWallet The new admin wallet address to be set.
+     * @notice This function can only be called by admin
+     */
+    function setAdminWallet(
+        address _adminWallet
+    ) external;
+
+    /**
      * @dev This function is used to set the address of the signature verifier contract.
      * @param _signatureVerifier The address of the signature verifier contract.
-     * @notice This function can only be called by `ADMIN_ROLE`
+     * @notice This function can only be called by admin
      */
     function setSignatureVerifier(address _signatureVerifier) external;
 
     /**
      * @dev Function to update the treasury address.
      * @param _bukTreasuryContract Address of the treasury.
-     * @notice This function can only be called by `ADMIN_ROLE`
+     * @notice This function can only be called by admin
      */
     function setBukTreasury(address _bukTreasuryContract) external;
 
     /**
      * @dev Function to update the Buk Wallet address to collect commission.
      * @param _bukWalletContract Address of the Buk Wallet.
-     * @notice This function can only be called by `ADMIN_ROLE`
+     * @notice This function can only be called by admin
      */
     function setBukWallet(address _bukWalletContract) external;
 
     /**
      * @dev Function to update the stable token address.
      * @param _stableToken Address of the stable token contract.
-     * @notice This function can only be called by `ADMIN_ROLE`
+     * @notice This function can only be called by admin
      */
     function setStableToken(address _stableToken) external;
 
     /**
      * @dev Function to update the BukNFTs contract address.
      * @param _nftContractAddr Address of the BukNFTs contract.
-     * @notice This function can only be called by `ADMIN_ROLE`
+     * @notice This function can only be called by admin
      */
     function setBukNFTs(address _nftContractAddr) external;
 
     /**
      * @dev Function to update the BukPOSNFTs contract address.
      * @param _nftPoSContractAddr Address of the BukPOSNFTs contract.
-     * @notice This function can only be called by `ADMIN_ROLE`
+     * @notice This function can only be called by admin
      */
     function setBukPoSNFTs(address _nftPoSContractAddr) external;
 
@@ -189,7 +203,7 @@ interface IBukProtocol {
     /**
      * @dev Function to update the token uri.
      * @param _tokenId Token Id.
-     * @notice This function can only be called by `ADMIN_ROLE`
+     * @notice This function can only be called by admin
      */
     function setTokenUri(uint _tokenId, string memory _newUri) external;
 
@@ -202,14 +216,14 @@ interface IBukProtocol {
     /**
      * @dev Function to set the Buk commission percentage.
      * @param _commission Commission percentage.
-     * @notice This function can only be called by `ADMIN_ROLE`
+     * @notice This function can only be called by admin
      */
     function setCommission(uint8 _commission) external;
 
     /**
      * @dev Function to toggle the tradeability of an asset.
      * @param _tokenId Token Id whose tradeability is being toggled.
-     * @notice This function can only be called by `ADMIN_ROLE`
+     * @notice This function can only be called by admin
      */
     function toggleTradeability(uint256 _tokenId) external;
 
@@ -241,7 +255,7 @@ interface IBukProtocol {
      * @param _ids An array of booking IDs that need to be refunded.
      * @param _owner The address of the owner of the bookings.
      * @notice This function is usually executed when the booking is unsuccessful from the hotel's end.
-     * @notice This function can only be called by `ADMIN_ROLE`
+     * @notice This function can only be called by admin
      */
     function bookingRefund(uint256[] memory _ids, address _owner) external;
 
@@ -261,7 +275,7 @@ interface IBukProtocol {
      * @param _ids An array of booking IDs representing the unique identifier for each BukNFT token.
      * @notice The booking status should be confirmed to checkin it.
      * @notice Once checkedin the NFT becomes non-tradeable.
-     * @notice This function can only be called by `ADMIN_ROLE` or the owner of the booking NFT
+     * @notice This function can only be called by admin or the owner of the booking NFT
      */
     function checkin(uint256[] memory _ids) external;
 
@@ -272,7 +286,7 @@ interface IBukProtocol {
      * @notice The booking status should be checkedin to checkout it.
      * @notice The Active Booking NFTs are burnt from the owner's account.
      * @notice The Utility NFTs are minted to the owner of the booking.
-     * @notice This function can only be called by `ADMIN_ROLE`
+     * @notice This function can only be called by admin
      */
     function checkout(uint256[] memory _ids) external;
 
@@ -286,7 +300,7 @@ interface IBukProtocol {
      * @notice Only the admin can cancel the rooms.
      * @notice The booking status should be confirmed to cancel it.
      * @notice The Active Booking NFTs are burnt from the owner's account.
-     * @notice This function can only be called by `ADMIN_ROLE`
+     * @notice This function can only be called by admin
      */
     function cancelRoom(
         uint256 _id,
@@ -303,7 +317,7 @@ interface IBukProtocol {
      * @param _refund The amount to be refunded to the booking owner.
      * @param _charges The charges associated with the cancellation(if any).
      * @param _bookingOwner The address of the booking owner.
-     * @notice This function can only be called by `ADMIN_ROLE`
+     * @notice This function can only be called by admin
      */
     function emergencyCancellation(
         uint256 _id,

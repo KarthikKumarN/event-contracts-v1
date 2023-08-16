@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.19;
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
@@ -18,9 +16,7 @@ import "../BukProtocol/IBukProtocol.sol";
  * @author BUK Technology Inc
  * @dev Contract to manage operations of the BUK protocol to manage BukNFTs tokens and underlying sub-contracts.
  */
-contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
-    using SafeERC20 for IERC20;
-
+contract BukProtocol is ReentrancyGuard, IBukProtocol {
     /**
      * @dev address _bukWallet        Address of the Buk wallet.
      * @dev address _stableToken          Address of the stable token.
@@ -29,6 +25,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
      * @dev address nftPoSContract  Address of the Buk NFT PoS Contract.
      * @dev address royaltiesContract  Address of the Buk Royalties Contract.
      */
+    address private _admin;
     address private _bukWallet;
     IERC20 private _stableToken;
     IBukTreasury private _bukTreasury;
@@ -47,30 +44,24 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
      */
     uint256 private _bookingIds;
 
-    //COMMENT Need to add comment to this
-
-    /**
-     * @dev Constant for the role of admin
-     */
-    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
-
     /**
      * @dev mapping(uint256 => Booking) _bookingDetails   Mapping of booking IDs to booking details.
      */
     mapping(uint256 => Booking) private _bookingDetails; //bookingID -> Booking Details
 
-    //Modifier to check if the sender is either admin or an owner of the booking
-    modifier onlyAdminOwner(uint256[] memory _ids) {
-        uint256 len = _ids.length;
-        for (uint8 i = 0; i < len; ++i) {
-            require(
-                hasRole(ADMIN_ROLE, _msgSender()) ||
-                    (nftContract.balanceOf(_msgSender(), _ids[i]) > 0),
-                "Only admin or owner of the NFT can access the booking"
-            );
-        }
+    /**
+     * @dev Modifier onlyAdmin
+     * Ensures that the function can only be accessed by the admin.
+     * Throws an exception with a custom error message if the calling address is not the admin.
+     */
+    modifier onlyAdmin() {
+        require(
+            (msg.sender == _admin),
+            "Only admin can access the booking"
+        );
         _;
     }
+
 
     /**
      * @dev Constructor to initialize the contract
@@ -89,12 +80,20 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     ) {
         _signatureVerifier = ISignatureVerifier(_signVerifier);
         royaltiesContract = IBukRoyalties(_royaltiesContract);
+        _setAdminWallet(msg.sender);
         _setBukTreasury(_bukTreasuryContract);
         _setStableToken(_stableTokenAddress);
         _setBukWallet(_bukWalletAddress);
-        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
-        _setupRole(ADMIN_ROLE, _msgSender());
-        _grantRole(ADMIN_ROLE, _msgSender());
+    }
+
+    /**
+     * @dev See {IBukProtocol-setAdminWallet}.
+     */
+    function setAdminWallet(address _adminWallet) external onlyAdmin {
+        require(_adminWallet != address(0), "Address cannot be zero");
+        address oldAdminWallet_ = _admin;
+        _setAdminWallet(_adminWallet);
+        emit SetAdminWallet(oldAdminWallet_, _adminWallet);
     }
 
     /**
@@ -102,48 +101,36 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
      */
     function setSignatureVerifier(
         address __signatureVerifier
-    ) external onlyRole(ADMIN_ROLE) {
+    ) external onlyAdmin {
         _setSignatureVerifier(__signatureVerifier);
     }
 
     /**
      * @dev See {IBukProtocol-setBukTreasury}.
      */
-    function setBukTreasury(
-        address _bukTreasuryContract
-    ) external onlyRole(ADMIN_ROLE) {
+    function setBukTreasury(address _bukTreasuryContract) external onlyAdmin {
         _setBukTreasury(_bukTreasuryContract);
     }
 
     /**
      * @dev See {IBukProtocol-setStableToken}.
      */
-    function setStableToken(
-        address _stableTokenAddress
-    ) external onlyRole(ADMIN_ROLE) {
+    function setStableToken(address _stableTokenAddress) external onlyAdmin {
         _setStableToken(_stableTokenAddress);
     }
 
     /**
      * @dev See {IBukProtocol-setBukWallet}.
      */
-    function setBukWallet(
-        address _bukWalletAddress
-    ) external onlyRole(ADMIN_ROLE) {
+    function setBukWallet(address _bukWalletAddress) external onlyAdmin {
         _setBukWallet(_bukWalletAddress);
     }
 
     /**
      * @dev See {IBukProtocol-setBukNFTs}.
      */
-    function setBukNFTs(
-        address _nftContractAddr
-    ) external onlyRole(ADMIN_ROLE) {
-        //Check address is not zero
-        require(
-            _nftContractAddr != address(0),
-            "Address cannot be zero"
-        );
+    function setBukNFTs(address _nftContractAddr) external onlyAdmin {
+        require(_nftContractAddr != address(0), "Address cannot be zero");
         address oldNftContractAddr_ = address(nftContract);
         nftContract = IBukNFTs(_nftContractAddr);
         emit SetBukNFTs(oldNftContractAddr_, _nftContractAddr);
@@ -152,13 +139,8 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     /**
      * @dev See {IBukProtocol-setBukPosNFTs}.
      */
-    function setBukPoSNFTs(
-        address _nftPoSContractAddr
-    ) external onlyRole(ADMIN_ROLE) {
-        require(
-            _nftPoSContractAddr != address(0),
-            "Address cannot be zero"
-        );
+    function setBukPoSNFTs(address _nftPoSContractAddr) external onlyAdmin {
+        require(_nftPoSContractAddr != address(0), "Address cannot be zero");
         address oldNftPoSContractAddr_ = address(nftPoSContract);
         nftPoSContract = IBukPOSNFTs(_nftPoSContractAddr);
         emit SetBukPoSNFTs(oldNftPoSContractAddr_, _nftPoSContractAddr);
@@ -167,17 +149,14 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     /**
      * @dev See {IBukProtocol-setRoyalties}.
      */
-    function setRoyaltiesContract(address _royaltiesContract) external onlyRole(ADMIN_ROLE) {
-        require(
-            _royaltiesContract != address(0),
-            "Address cannot be zero"
-        );
+    function setRoyaltiesContract(
+        address _royaltiesContract
+    ) external onlyAdmin {
+        require(_royaltiesContract != address(0), "Address cannot be zero");
         address oldRoyaltiesContract_ = address(royaltiesContract);
         royaltiesContract = IBukRoyalties(_royaltiesContract);
         emit SetRoyaltiesContract(oldRoyaltiesContract_, _royaltiesContract);
     }
-
-
 
     /**
      * @dev See {IBukProtocol-setTokenUri}.
@@ -185,7 +164,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     function setTokenUri(
         uint _tokenId,
         string memory _newUri
-    ) external onlyRole(ADMIN_ROLE) {
+    ) external onlyAdmin {
         IBukNFTs(nftContract).setURI(_tokenId, _newUri);
         emit SetTokenURI(_tokenId, _newUri);
     }
@@ -195,7 +174,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
      */
     function setNFTContractName(
         string memory _contractName
-    ) external onlyRole(ADMIN_ROLE) {
+    ) external onlyAdmin {
         string memory oldContractName_ = IBukNFTs(nftContract).getName();
         IBukNFTs(nftContract).setNFTContractName(_contractName);
         emit SetNFTContractName(oldContractName_, _contractName);
@@ -204,11 +183,8 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     /**
      * @dev See {IBukProtocol-setCommission}.
      */
-    function setCommission(uint8 _newCommission) external onlyRole(ADMIN_ROLE) {
-        require(
-            _newCommission <= 100,
-            "Commission is more than 100"
-        );
+    function setCommission(uint8 _newCommission) external onlyAdmin {
+        require(_newCommission <= 100, "Commission is more than 100");
         uint oldCommission_ = commission;
         commission = _newCommission;
         emit SetCommission(oldCommission_, _newCommission);
@@ -217,9 +193,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     /**
      * @dev See {IBukProtocol-toggleTradeability}.
      */
-    function toggleTradeability(
-        uint256 _tokenId
-    ) external onlyRole(ADMIN_ROLE) {
+    function toggleTradeability(uint256 _tokenId) external onlyAdmin {
         require(
             _bookingDetails[_tokenId].status != BookingStatus.nil,
             "Check the Booking status"
@@ -255,13 +229,14 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
             total += _total[i];
         }
         require(
-            (_stableToken.allowance(_msgSender(), address(this)) >= total),
+            (_stableToken.allowance(msg.sender, address(this)) >= total),
             "Check the allowance of the sender"
         );
         require(
-            ((_total.length == _baseRate.length) && 
-            (_total.length == _minSalePrice.length) && 
-            (_total.length == _count) &&  (_count > 0)),
+            ((_total.length == _baseRate.length) &&
+                (_total.length == _minSalePrice.length) &&
+                (_total.length == _count) &&
+                (_count > 0)),
             "Array sizes mismatch"
         );
 
@@ -273,7 +248,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
                 _bookingIds,
                 BookingStatus.booked,
                 0,
-                _msgSender(),
+                msg.sender,
                 _checkin,
                 _checkout,
                 _total[i],
@@ -295,7 +270,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     function bookingRefund(
         uint256[] memory _ids,
         address _owner
-    ) external onlyRole(ADMIN_ROLE) {
+    ) external onlyAdmin {
         uint256 len = _ids.length;
         require((len > 0), "Array is empty");
         for (uint8 i = 0; i < len; ++i) {
@@ -336,7 +311,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
                 "Check the Booking status"
             );
             require(
-                _bookingDetails[_ids[i]].firstOwner == _msgSender(),
+                _bookingDetails[_ids[i]].firstOwner == msg.sender,
                 "Only booking owner has access"
             );
         }
@@ -357,8 +332,15 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     /**
      * @dev See {IBukProtocol-checkin}.
      */
-    function checkin(uint256[] memory _ids) external onlyAdminOwner(_ids) {
+    function checkin(uint256[] memory _ids) external {
         uint256 len = _ids.length;
+        for (uint8 i = 0; i < len; ++i) {
+            require(
+                (_admin == msg.sender) ||
+                    (nftContract.balanceOf(msg.sender, _ids[i]) > 0),
+                "Only admin or owner of the NFT can access the booking"
+            );
+        }
         require(((len > 0) && (len < 11)), "Not in max-min booking limit");
         for (uint8 i = 0; i < len; ++i) {
             require(
@@ -376,7 +358,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     /**
      * @dev See {IBukProtocol-checkout}.
      */
-    function checkout(uint256[] memory _ids) external onlyRole(ADMIN_ROLE) {
+    function checkout(uint256[] memory _ids) external onlyAdmin {
         uint256 len = _ids.length;
         require(((len > 0) && (len < 11)), "Not in max-min booking limit");
         for (uint8 i = 0; i < len; ++i) {
@@ -412,37 +394,30 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         uint256 _charges,
         address _bookingOwner,
         bytes memory _signature
-    ) external onlyRole(ADMIN_ROLE) {
+    ) external onlyAdmin {
         require(
             ((_bookingDetails[_id].status == BookingStatus.confirmed) ||
                 (_bookingDetails[_id].status == BookingStatus.checkedin)),
             "Not a confirmed or checkedin Booking"
         );
-        //Check if _bookingOwner is the current owner of the booking
         require(
             nftContract.balanceOf(_bookingOwner, _id) > 0,
             "Check the booking owner"
         );
-
-        // hash message
         bytes32 hash = keccak256(
             abi.encodePacked(_id, _penalty, _refund, _charges)
         );
-
         address signer = _signatureVerifier.verify(hash, _signature);
-
-        // Verify recovered address matches booking owner
         require(signer == _bookingOwner, "Invalid owner signature");
-
         require(
-            ((_penalty + _refund + _charges) < (_bookingDetails[_id].total + 1)),
+            ((_penalty + _refund + _charges) <
+                (_bookingDetails[_id].total + 1)),
             "Transfer amount exceeds total"
         );
         _bookingDetails[_id].status = BookingStatus.cancelled;
         _bukTreasury.cancelUSDCRefund(_penalty, _bukWallet);
         _bukTreasury.cancelUSDCRefund(_refund, _bookingOwner);
         _bukTreasury.cancelUSDCRefund(_charges, _bukWallet);
-        //TODO Change the condition to check if the NFT is burned from the current owner
         nftContract.burn(_bookingOwner, _id, 1, false);
         emit CancelRoom(_id, true);
     }
@@ -455,16 +430,15 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         uint256 _refund,
         uint256 _charges,
         address _bookingOwner
-    ) external onlyRole(ADMIN_ROLE) {
-        require(
-            nftContract.balanceOf(_bookingOwner, _id) > 0,
-            "Check the booking owner"
-        );
-
+    ) external onlyAdmin {
         require(
             ((_bookingDetails[_id].status == BookingStatus.confirmed) ||
                 (_bookingDetails[_id].status == BookingStatus.checkedin)),
             "Not a confirmed or checkedin Booking"
+        );
+        require(
+            nftContract.balanceOf(_bookingOwner, _id) > 0,
+            "Check the booking owner"
         );
         require(
             ((_refund + _charges) < (_bookingDetails[_id].total + 1)),
@@ -483,7 +457,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     function getWallets()
         external
         view
-        onlyRole(ADMIN_ROLE)
+        onlyAdmin
         returns (address bukTreasury, address bukWallet, address stableToken)
     {
         return (
@@ -508,24 +482,31 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     function getRoyaltyInfo(
         uint256 _tokenId
     ) external view returns (IBukRoyalties.Royalty[] memory) {
-        //Get the royalty details from Buk Royalties
-        IBukRoyalties.Royalty[] memory royalties = royaltiesContract.getRoyaltyInfo(_tokenId);
+        IBukRoyalties.Royalty[] memory royalties = royaltiesContract
+            .getRoyaltyInfo(_tokenId);
         return royalties;
     }
 
     /**
-     * Internal function to set the Signature Verifier contract address
+     * Private function to set the Admin Wallet address
+     * @param _adminWallet The address of the Admin Wallet
+     */
+    function _setAdminWallet(address _adminWallet) private {
+        _admin = _adminWallet;
+        emit SetBukWallet(_adminWallet);
+    }
+
+    /**
+     * Private function to set the Signature Verifier contract address
      * @param _signatureVerifierContract The address of the Signature Verifier contract
      */
-    function _setSignatureVerifier(
-        address _signatureVerifierContract
-    ) internal {
+    function _setSignatureVerifier(address _signatureVerifierContract) private {
         _signatureVerifier = ISignatureVerifier(_signatureVerifierContract);
         emit SetSignerVerifier(address(_signatureVerifierContract));
     }
 
     /**
-     * Internal function to set the BukTreasury contract address
+     * Private function to set the BukTreasury contract address
      * @param _bukTreasuryContract The address of the BukTreasury contract
      */
     function _setBukTreasury(address _bukTreasuryContract) private {
@@ -534,7 +515,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     }
 
     /**
-     * Internal function to set the BukWallet contract address
+     * Private function to set the BukWallet contract address
      * @param _bukWalletAddress The address of the BukWallet contract
      */
     function _setBukWallet(address _bukWalletAddress) private {
@@ -543,7 +524,7 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
     }
 
     /**
-     * Internal function to set the stable token contract address
+     * Private function to set the stable token contract address
      * @param _stableTokenAddress The address of the stable token contract
      */
     function _setStableToken(address _stableTokenAddress) private {
@@ -562,18 +543,20 @@ contract BukProtocol is AccessControl, ReentrancyGuard, IBukProtocol {
         uint256 _total
     ) private returns (bool) {
         require(
-            _stableToken.balanceOf(_msgSender()) >= _total + _commission,
+            _stableToken.balanceOf(msg.sender) >= _total + _commission,
             "Insufficient balance for booking"
         );
-        _stableToken.safeTransferFrom(
-            _msgSender(),
-            _bukWallet,
-            _commission
+        require(
+            _stableToken.transferFrom(msg.sender, _bukWallet, _commission),
+            "Commission transfer failed"
         );
-        _stableToken.safeTransferFrom(
-            _msgSender(), 
-            address(_bukTreasury), 
-            _total
+        require(
+            _stableToken.transferFrom(
+                msg.sender,
+                address(_bukTreasury),
+                _total
+            ),
+            "Booking payment failed"
         );
         return true;
     }
