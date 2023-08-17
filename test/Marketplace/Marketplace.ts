@@ -6,9 +6,9 @@ import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { ContractTransactionResponse } from "ethers";
-import { Marketplace } from "../typechain-types";
-import { BukProtocol } from "../typechain-types";
-import { bukNfTs } from "../typechain-types/contracts";
+import { Marketplace } from "../../typechain-types";
+import { BukProtocol } from "../../typechain-types";
+import { bukNfTs } from "../../typechain-types/contracts";
 import { keccak256, toUtf8Bytes } from "ethers";
 
 describe("Marketplace", function () {
@@ -57,7 +57,9 @@ describe("Marketplace", function () {
     // console.log(await bukTreasuryContract.getAddress(), " bukTreasuryContract");
 
     //Deploy SignatureVerifier contract
-    const SignatureVerifier = await ethers.getContractFactory("SignatureVerifier");
+    const SignatureVerifier = await ethers.getContractFactory(
+      "SignatureVerifier",
+    );
     signatureVerifierContract = await SignatureVerifier.deploy();
 
     //Deploy BukRoyalties contract
@@ -120,11 +122,15 @@ describe("Marketplace", function () {
     );
 
     //Set Buk Protocol in Treasury
-    const setBukProtocol = await bukTreasuryContract.setBukProtocol(bukProtocolContract.getAddress())
+    const setBukProtocol = await bukTreasuryContract.setBukProtocol(
+      bukProtocolContract.getAddress(),
+    );
 
     //Set Buk Protocol in BukRoyalties
-    const setBukProtocolRoyalties = await royaltiesContract.setBukProtocolContract(bukProtocolContract.getAddress())
-
+    const setBukProtocolRoyalties =
+      await royaltiesContract.setBukProtocolContract(
+        bukProtocolContract.getAddress(),
+      );
 
     // console.log("🚀 ~ file: Marketplace.ts:98 ~ setBukPoSNFTs:");
 
@@ -722,7 +728,7 @@ describe("Marketplace", function () {
           true,
         ),
       ).not.to.be.reverted;
-      
+
       //Approve and transfer amount for transaction for buyer
       await stableTokenContract.transfer(
         await account1.getAddress(),
@@ -1539,6 +1545,53 @@ describe("Marketplace", function () {
       await expect(
         marketplaceContract.connect(account1).relist(tokenId, newPrice),
       ).to.be.revertedWith("Only owner can relist");
+    });
+    it("Should be greater than minSale relist listing", async function () {
+      let tokenId = 1;
+      let price = 100000000;
+      let newPrice = 90000000;
+      let salePrice = 100000000;
+      let date = new Date();
+      let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
+      let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
+
+      //Grant allowance permission
+      const res = await stableTokenContract.approve(
+        await bukProtocolContract.getAddress(),
+        200000000000,
+      );
+
+      // Book room and mint NFT
+      expect(
+        await bukProtocolContract.bookRoom(
+          [price],
+          [price],
+          [price],
+          checkin,
+          checkout,
+          24,
+          true,
+        ),
+      ).not.be.reverted;
+
+      //Mint
+      await expect(
+        bukProtocolContract.mintBukNFT(
+          [tokenId],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
+      ).not.be.reverted;
+      // Approve allowance
+      await nftContract.setApprovalForAll(
+        await marketplaceContract.getAddress(),
+        true,
+      );
+      await marketplaceContract.createListing(tokenId, salePrice);
+      await expect(
+        marketplaceContract.relist(tokenId, newPrice),
+      ).to.be.revertedWith("Sale price cann't be lessthan minimum sale price");
     });
     it("Should emit event on relist token ID", async function () {
       let tokenId = 1;

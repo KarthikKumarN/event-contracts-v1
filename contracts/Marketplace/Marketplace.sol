@@ -74,9 +74,7 @@ contract Marketplace is Context, IMarketplace, AccessControl {
         require(
             block.timestamp <
                 (bookingDetails.checkin -
-                    (_bukProtocalContract
-                        .getBookingDetails(_tokenId)
-                        .tradeTimeLimit * 3600)),
+                    (bookingDetails.tradeTimeLimit * 3600)),
             "Trade limit time crossed"
         );
         _listedNFT[_tokenId] = ListingDetails(
@@ -126,14 +124,19 @@ contract Marketplace is Context, IMarketplace, AccessControl {
      */
     function relist(uint256 _tokenId, uint256 _newPrice) external {
         require(isBookingListed(_tokenId), "NFT not listed");
+        IBukProtocol.Booking memory bookingDetails = _bukProtocalContract
+            .getBookingDetails(_tokenId);
         require(
             _bukNFTContract.balanceOf(_msgSender(), _tokenId) == 1,
             "Only owner can relist"
         );
         require(
-            _bukProtocalContract.getBookingDetails(_tokenId).status ==
-                IBukProtocol.BookingStatus.confirmed,
+            bookingDetails.status == IBukProtocol.BookingStatus.confirmed,
             "Only available booking can be tradable"
+        );
+        require(
+            _newPrice >= bookingDetails.minSalePrice,
+            "Sale price cann't be lessthan minimum sale price"
         );
         uint256 oldPrice = _listedNFT[_tokenId].price;
         _listedNFT[_tokenId].status = ListingStatus.active;
@@ -151,6 +154,24 @@ contract Marketplace is Context, IMarketplace, AccessControl {
             "NFT not listed"
         );
         _buy(_tokenId);
+    }
+
+    /**
+     * @dev Refer {IMarketplace-buyRoomBatch}.
+     * @param _tokenIds Array room/booking NFT id
+     */
+    function buyRoomBatch(uint256[] calldata _tokenIds) external {
+        uint256 len = _tokenIds.length;
+        for (uint256 i = 0; i < len; ) {
+            require(
+                _listedNFT[_tokenIds[i]].status == ListingStatus.active,
+                "NFT not listed"
+            );
+            _buy(_tokenIds[i]);
+            unchecked {
+                i += 1;
+            }
+        }
     }
 
     /**

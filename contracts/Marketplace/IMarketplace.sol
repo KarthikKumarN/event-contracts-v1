@@ -3,7 +3,7 @@ pragma solidity =0.8.19;
 
 /**
  * @title Interface to define the BUK marketplace
- * @author Buk.technology
+ * @author BUK Technology Inc
  * @dev Collection of all procedures related to the marketplace
  */
 interface IMarketplace {
@@ -141,9 +141,21 @@ interface IMarketplace {
      * @dev Buyer should have approve marketplace to transfer its ERC20 tokens to pay price and royalties
      * @dev Only Marketplace contract can excecute transfer
      * @notice Buy will excecute only if, tradeLimitTime is not crossed and in active status and not checkedin bookings
-     * @dev Will delete a entry once bought
+     * @notice Will delete a entry once bought
      */
     function buyRoom(uint256 _tokenId) external;
+
+    /**
+     * @dev Function will enable user to buy multiple room/booking NFT
+     * @param _tokenId Array of room/booking NFT id's
+     * @dev Gets royalty details from BUK NFT and transfer the royalties
+     * @dev NFT Owner should give approve marketplace to transfer booking
+     * @dev Buyer should have approve marketplace to transfer its ERC20 tokens to pay price and royalties
+     * @dev Only Marketplace contract can excecute transfer
+     * @notice Buy will excecute only if, tradeLimitTime is not crossed and in active status and not checkedin bookings
+     * @notice Will delete a entry once bought
+     */
+    function buyRoomBatch(uint256[] calldata _tokenId) external;
 
     /**
      * @dev Function will set new BUK protocol address
