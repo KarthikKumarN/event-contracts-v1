@@ -108,6 +108,7 @@ interface IMarketplace {
 
     /**
      * @dev Function will create a listing of Booking/Room NFT
+     * @dev Seller has to approve marketplace to execute transfer before listing
      * @notice Only NFT owner can list
      * @param _tokenId room/booking NFT id
      * @param _price  Sale price of room/booking
