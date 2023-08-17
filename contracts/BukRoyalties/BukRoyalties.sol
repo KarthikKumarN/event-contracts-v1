@@ -1,9 +1,9 @@
 //SPDX-License-Identifier: MIT
 pragma solidity =0.8.19;
 
-import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
-import {IBukRoyalties} from "../BukRoyalties/IBukRoyalties.sol";
-import {IBukProtocol} from "../BukProtocol/IBukProtocol.sol";
+import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
+import { IBukRoyalties } from "../BukRoyalties/IBukRoyalties.sol";
+import { IBukProtocol } from "../BukProtocol/IBukProtocol.sol";
 
 /**
  * @title BukRoyalties contract
@@ -11,7 +11,6 @@ import {IBukProtocol} from "../BukProtocol/IBukProtocol.sol";
  * @dev Contract to manage the royalties of the Buk NFTs.
  */
 contract BukRoyalties is AccessControl, IBukRoyalties {
-
     /**
      * @dev Constant for the role of the admin
      */
@@ -41,7 +40,7 @@ contract BukRoyalties is AccessControl, IBukRoyalties {
     uint96 public firstOwnerFraction;
 
     /**
-     * @dev Dynamic array of the Royalty type representing other royalty contracts associated 
+     * @dev Dynamic array of the Royalty type representing other royalty contracts associated
      * with the Buk PoS NFT collection contract.
      */
     Royalty[] public otherRoyalties;
@@ -163,9 +162,8 @@ contract BukRoyalties is AccessControl, IBukRoyalties {
     function getRoyaltyInfo(
         uint256 _tokenId
     ) external view returns (Royalty[] memory) {
-        IBukProtocol.Booking memory bookingDetails_ = bukProtocolContract.getBookingDetails(
-            _tokenId
-        );
+        IBukProtocol.Booking memory bookingDetails_ = bukProtocolContract
+            .getBookingDetails(_tokenId);
         Royalty[] memory royalties = new Royalty[](otherRoyalties.length + 3);
         royalties[0] = bukRoyalty;
         royalties[1] = hotelRoyalty;

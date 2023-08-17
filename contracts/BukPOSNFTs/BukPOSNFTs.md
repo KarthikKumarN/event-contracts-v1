@@ -38,7 +38,6 @@ The contract is designed with the following key components:
 - **setNFTContractName**: Set the name of the contract.
 - **setURI**: Sets the URI for a specific token ID.
 - **mint**: Mint a new NFT with a specific token ID, account, amount, and data.
-- **getName**: Returns the contract name of BukPOSNFTs.
 - **safeTransferFrom**: Transfers ownership of an NFT token from one address to another.
 - **safeBatchTransferFrom**: Transfers ownership of multiple NFT tokens from one address to another.
 - **uri**: Returns the URI associated with the token ID.

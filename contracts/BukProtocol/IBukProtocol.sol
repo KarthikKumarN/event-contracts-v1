@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.19;
-import {IBukRoyalties} from "../BukRoyalties/IBukRoyalties.sol";
+import { IBukRoyalties } from "../BukRoyalties/IBukRoyalties.sol";
 
 /**
  * @title Interface to define the BUK protocol
@@ -58,47 +58,74 @@ interface IBukProtocol {
     /**
      * @dev Emitted when the admin wallet is set.
      */
-    event SetAdminWallet(address indexed oldCAdminWallet, address indexed newAdminWallet);
+    event SetAdminWallet(
+        address indexed oldCAdminWallet,
+        address indexed newAdminWallet
+    );
 
     /**
      * @dev Emitted when the commission is set.
      */
-    event SetCommission(uint256 indexed oldCommission, uint256 indexed newCommission);
+    event SetCommission(
+        uint256 indexed oldCommission,
+        uint256 indexed newCommission
+    );
 
     /**
      * @dev Emitted when BukNFTs contract address is updated.
      */
-    event SetBukNFTs(address indexed oldNftContract, address indexed newNftContract);
+    event SetBukNFTs(
+        address indexed oldNftContract,
+        address indexed newNftContract
+    );
 
     /**
      * @dev Emitted when BukPOSNFTs contract address is updated.
      */
-    event SetBukPoSNFTs(address indexed oldNftPoSContract, address indexed newNftPoSContract);
+    event SetBukPoSNFTs(
+        address indexed oldNftPoSContract,
+        address indexed newNftPoSContract
+    );
 
     /**
      * @dev Emitted when BukRoyalties contract address is updated.
      */
-    event SetRoyaltiesContract(address indexed oldRoyaltiesContract, address indexed newRoyaltiesContract);
-    
+    event SetRoyaltiesContract(
+        address indexed oldRoyaltiesContract,
+        address indexed newRoyaltiesContract
+    );
+
     /**
      * @dev Emitted when signer verifier is updated.
      */
-    event SetSignerVerifier(address indexed oldSignerVerifier, address indexed newSignerVerifier);
+    event SetSignerVerifier(
+        address indexed oldSignerVerifier,
+        address indexed newSignerVerifier
+    );
 
     /**
      * @dev Emitted when Buk treasury is updated.
      */
-    event SetBukTreasury(address indexed oldTreasuryContract, address indexed newTreasuryContract);
+    event SetBukTreasury(
+        address indexed oldTreasuryContract,
+        address indexed newTreasuryContract
+    );
 
     /**
      * @dev Emitted when Buk Wallet is updated.
      */
-    event SetBukWallet(address indexed oldBukWalletContract, address indexed newBukWalletContract);
+    event SetBukWallet(
+        address indexed oldBukWalletContract,
+        address indexed newBukWalletContract
+    );
 
     /**
      * @dev Emitted when stable token is updated.
      */
-    event SetStableToken(address indexed oldStableToken, address indexed newStableToken);
+    event SetStableToken(
+        address indexed oldStableToken,
+        address indexed newStableToken
+    );
 
     /**
      * @dev Emitted when the tradeability of a Buk NFT is toggled.
@@ -110,7 +137,12 @@ interface IBukProtocol {
     /**
      * @dev Emitted when single room is booked.
      */
-    event BookRoom(uint256 indexed booking, uint256 checkin, uint256 checkout, uint256 total);
+    event BookRoom(
+        uint256 indexed booking,
+        uint256 checkin,
+        uint256 checkout,
+        uint256 total
+    );
 
     /**
      * @dev Emitted when booking refund is done.
@@ -131,7 +163,7 @@ interface IBukProtocol {
      * @dev Emitted when room bookings are checked out.
      */
     event CheckoutRooms(uint256[] indexed bookings, bool indexed status);
-    
+
     /**
      * @dev Emitted when room bookings are cancelled.
      */
@@ -147,9 +179,7 @@ interface IBukProtocol {
      * @param _adminAddr The new admin wallet address to be set.
      * @notice This function can only be called by admin
      */
-    function setAdmin(
-        address _adminAddr
-    ) external;
+    function setAdmin(address _adminAddr) external;
 
     /**
      * @dev This function is used to set the address of the signature verifier contract.
@@ -319,11 +349,19 @@ interface IBukProtocol {
      * @return bukTreasury The address of the bukTreasury contract
      * @return bukWallet The address of the bukWallet contract
      * @return stableToken The address of the stable token contract
+     * @return admin The address of the stable token contract
+     * @return signatureVerifier The address of the signature verifier contract
      */
     function getWallets()
         external
         view
-        returns (address bukTreasury, address bukWallet, address stableToken);
+        returns (
+            address bukTreasury,
+            address bukWallet,
+            address stableToken,
+            address admin,
+            address signatureVerifier
+        );
 
     /**
      * @dev To get the booking details

@@ -1,24 +1,29 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.19;
 
-import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+import { IERC1155 } from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 
 /**
- * @title Interface to define the BUK NFTs 
+ * @title Interface to define the BUK NFTs
  * @author BUK Technology Inc
  * @dev Collection of all procedures related to the BUK NFTs.
  */
 interface IBukNFTs is IERC1155 {
-
     /**
      * @dev Emitted when Buk Protocol Address is updated.
      */
-    event SetBukProtocol(address indexed oldBukProtocolContract, address indexed newBukProtocolContract);
+    event SetBukProtocol(
+        address indexed oldBukProtocolContract,
+        address indexed newBukProtocolContract
+    );
 
     /**
      * @dev Emitted when treasury is updated.
      */
-    event SetBukTreasury(address indexed oldTreasuryContract, address indexed newTreasuryContract);
+    event SetBukTreasury(
+        address indexed oldTreasuryContract,
+        address indexed newTreasuryContract
+    );
 
     /**
      * @dev Emitted when marketplace role is granted.
@@ -28,17 +33,27 @@ interface IBukNFTs is IERC1155 {
     /**
      * @dev Event to update the contract name
      */
-    event SetNFTContractName(string indexed oldContractName, string indexed newContractName);
+    event SetNFTContractName(
+        string indexed oldContractName,
+        string indexed newContractName
+    );
 
     /**
      * @dev Event to set NFT contract role
      */
-    event SetNftPoSContractRole(address indexed oldNftPoSContractAddr, address indexed newNftPoSContractAddr);
+    event SetNftPoSContractRole(
+        address indexed oldNftPoSContractAddr,
+        address indexed newNftPoSContractAddr
+    );
 
     /**
      * @dev Event to set token URI
      */
-    event SetURI(uint256 indexed id, string indexed oldUri, string indexed newUri);
+    event SetURI(
+        uint256 indexed id,
+        string indexed oldUri,
+        string indexed newUri
+    );
 
     /**
      * @dev Function to set the Buk Protocol Contract address.
@@ -169,10 +184,4 @@ interface IBukNFTs is IERC1155 {
      * @return string - The URI associated with the token ID.
      */
     function uri(uint256 _id) external view returns (string memory);
-    
-    /**
-     * @dev Returns the contract name of BukNFTs.
-     * @return string - The Buk NFT contract name.
-     */
-    function getName() external view returns (string memory);
 }

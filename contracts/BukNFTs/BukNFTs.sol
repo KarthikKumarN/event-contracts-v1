@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.19;
 
-import {ERC1155, IERC165} from "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
-import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
-import {IBukNFTs} from "../BukNFTs/IBukNFTs.sol";
-import {IBukPOSNFTs} from "../BukPOSNFTs/IBukPOSNFTs.sol";
-import {IBukProtocol, IBukRoyalties} from "../BukProtocol/IBukProtocol.sol";
-import {IBukTreasury} from "../BukTreasury/IBukTreasury.sol";
+import { ERC1155, IERC165 } from "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
+import { IBukNFTs } from "../BukNFTs/IBukNFTs.sol";
+import { IBukPOSNFTs } from "../BukPOSNFTs/IBukPOSNFTs.sol";
+import { IBukProtocol, IBukRoyalties } from "../BukProtocol/IBukProtocol.sol";
+import { IBukTreasury } from "../BukTreasury/IBukTreasury.sol";
 
 /**
  * @title BUK Protocol NFT Contract
@@ -14,7 +14,6 @@ import {IBukTreasury} from "../BukTreasury/IBukTreasury.sol";
  * @dev Contract for managing hotel room-night inventory and ERC1155 token management for room-night NFTs
  */
 contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
-
     /**
      * @dev Name of the Buk PoS NFT collection contract
      */
@@ -29,7 +28,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
      * @dev Address of the Buk Protocol contract
      */
     IBukProtocol public bukProtocolContract;
-    
+
     /**
      * @dev Address of the Buk treasury contract.
      */
@@ -132,7 +131,10 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
         uint256 _id,
         string memory _newuri
     ) external onlyRole(ADMIN_ROLE) {
-        require(bytes(uriByTokenId[_id]).length != 0, "Token does not exist on BukNFTs");
+        require(
+            bytes(uriByTokenId[_id]).length != 0,
+            "Token does not exist on BukNFTs"
+        );
         _setURI(_id, _newuri);
     }
 
@@ -183,17 +185,6 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
                 _feeDenominator());
         }
         return (address(_bukTreasury), royaltyAmount_);
-    }
-
-    /**
-     * @dev Returns the contract name of BukNFTs.
-     * @return string - The Buk NFT contract name.
-     */
-    /**
-     * @dev See {IBukNFTs-getName}.
-     */
-    function getName() external view returns (string memory) {
-        return name;
     }
 
     /**

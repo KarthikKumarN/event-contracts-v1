@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.19;
 
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import {IBukPOSNFTs} from "../BukPOSNFTs/IBukPOSNFTs.sol";
-import {IBukNFTs} from "../BukNFTs/IBukNFTs.sol";
-import {IBukTreasury} from "../BukTreasury/IBukTreasury.sol";
-import {ISignatureVerifier} from "../SignatureVerifier/ISignatureVerifier.sol";
-import {IBukRoyalties} from "../BukRoyalties/IBukRoyalties.sol";
-import {IBukProtocol} from "../BukProtocol/IBukProtocol.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import { IBukPOSNFTs } from "../BukPOSNFTs/IBukPOSNFTs.sol";
+import { IBukNFTs } from "../BukNFTs/IBukNFTs.sol";
+import { IBukTreasury } from "../BukTreasury/IBukTreasury.sol";
+import { ISignatureVerifier } from "../SignatureVerifier/ISignatureVerifier.sol";
+import { IBukRoyalties } from "../BukRoyalties/IBukRoyalties.sol";
+import { IBukProtocol } from "../BukProtocol/IBukProtocol.sol";
 
 /**
  * @title BUK Protocol Contract
@@ -16,7 +16,6 @@ import {IBukProtocol} from "../BukProtocol/IBukProtocol.sol";
  * @dev Contract to manage operations of the BUK protocol to manage BukNFTs tokens and underlying sub-contracts.
  */
 contract BukProtocol is ReentrancyGuard, IBukProtocol {
-
     /**
      * @dev address _bukWallet        Address of the Buk wallet.
      * @dev address _stableToken          Address of the stable token.
@@ -55,9 +54,10 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
      * Throws an exception with a custom error message if the calling address is not the admin.
      */
     modifier onlyAdmin() {
-            require((msg.sender == _admin),
-                "Only admin or owner of the NFT can access the booking"
-            );
+        require(
+            (msg.sender == _admin),
+            "Only admin has access to this function"
+        );
         _;
     }
 
@@ -87,9 +87,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
     /**
      * @dev See {IBukProtocol-setAdmin}.
      */
-    function setAdmin(
-        address _adminAddr
-    ) external onlyAdmin {
+    function setAdmin(address _adminAddr) external onlyAdmin {
         _setAdmin(_adminAddr);
     }
 
@@ -105,36 +103,28 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
     /**
      * @dev See {IBukProtocol-setBukTreasury}.
      */
-    function setBukTreasury(
-        address _bukTreasuryContract
-    ) external onlyAdmin {
+    function setBukTreasury(address _bukTreasuryContract) external onlyAdmin {
         _setBukTreasury(_bukTreasuryContract);
     }
 
     /**
      * @dev See {IBukProtocol-setBukWallet}.
      */
-    function setBukWallet(
-        address _bukWalletAddr
-    ) external onlyAdmin {
+    function setBukWallet(address _bukWalletAddr) external onlyAdmin {
         _setBukWallet(_bukWalletAddr);
     }
 
     /**
      * @dev See {IBukProtocol-setStableToken}.
      */
-    function setStableToken(
-        address _stableTokenAddress
-    ) external onlyAdmin {
+    function setStableToken(address _stableTokenAddress) external onlyAdmin {
         _setStableToken(_stableTokenAddress);
     }
 
     /**
      * @dev See {IBukProtocol-setBukNFTs}.
      */
-    function setBukNFTs(
-        address _nftContractAddr
-    ) external onlyAdmin {
+    function setBukNFTs(address _nftContractAddr) external onlyAdmin {
         address oldNftContractAddr_ = address(nftContract);
         nftContract = IBukNFTs(_nftContractAddr);
         emit SetBukNFTs(oldNftContractAddr_, _nftContractAddr);
@@ -143,9 +133,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
     /**
      * @dev See {IBukProtocol-setBukPosNFTs}.
      */
-    function setBukPoSNFTs(
-        address _nftPoSContractAddr
-    ) external onlyAdmin {
+    function setBukPoSNFTs(address _nftPoSContractAddr) external onlyAdmin {
         address oldNftPoSContractAddr_ = address(nftPoSContract);
         nftPoSContract = IBukPOSNFTs(_nftPoSContractAddr);
         emit SetBukPoSNFTs(oldNftPoSContractAddr_, _nftPoSContractAddr);
@@ -154,7 +142,9 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
     /**
      * @dev See {IBukProtocol-setRoyalties}.
      */
-    function setRoyaltiesContract(address _royaltiesContract) external onlyAdmin {
+    function setRoyaltiesContract(
+        address _royaltiesContract
+    ) external onlyAdmin {
         _setRoyaltiesContract(_royaltiesContract);
     }
 
@@ -162,10 +152,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
      * @dev See {IBukProtocol-setCommission}.
      */
     function setCommission(uint8 _newCommission) external onlyAdmin {
-        require(
-            _newCommission <= 100,
-            "Commission is more than 100"
-        );
+        require(_newCommission <= 100, "Commission is more than 100");
         uint oldCommission_ = commission;
         commission = _newCommission;
         emit SetCommission(oldCommission_, _newCommission);
@@ -174,9 +161,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
     /**
      * @dev See {IBukProtocol-toggleTradeability}.
      */
-    function toggleTradeability(
-        uint256 _tokenId
-    ) external onlyAdmin {
+    function toggleTradeability(uint256 _tokenId) external onlyAdmin {
         require(
             _bookingDetails[_tokenId].status != BookingStatus.nil,
             "Check the Booking status"
@@ -199,9 +184,9 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
         bool _tradeable
     ) external nonReentrant returns (bool) {
         require(
-            ((_total.length == _baseRate.length) && 
-            (_total.length == _minSalePrice.length) && 
-            (_total.length > 0)),
+            ((_total.length == _baseRate.length) &&
+                (_total.length == _minSalePrice.length) &&
+                (_total.length > 0)),
             "Array sizes mismatch"
         );
         require(
@@ -390,7 +375,8 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
         address signer = _signatureVerifier.verify(hash, _signature);
         require(signer == _bookingOwner, "Invalid owner signature");
         require(
-            ((_penalty + _refund + _charges) < (_bookingDetails[_id].total + 1)),
+            ((_penalty + _refund + _charges) <
+                (_bookingDetails[_id].total + 1)),
             "Transfer amount exceeds total"
         );
         _bookingDetails[_id].status = BookingStatus.cancelled;
@@ -441,12 +427,20 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
         external
         view
         onlyAdmin
-        returns (address bukTreasury, address bukWallet, address stableToken)
+        returns (
+            address bukTreasury,
+            address bukWallet,
+            address stableToken,
+            address admin,
+            address signatureVerifier
+        )
     {
         return (
             address(_bukTreasury),
             address(_bukWallet),
-            address(_stableToken)
+            address(_stableToken),
+            address(_admin),
+            address(_signatureVerifier)
         );
     }
 
@@ -465,7 +459,8 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
     function getRoyaltyInfo(
         uint256 _tokenId
     ) external view returns (IBukRoyalties.Royalty[] memory) {
-        IBukRoyalties.Royalty[] memory royalties = royaltiesContract.getRoyaltyInfo(_tokenId);
+        IBukRoyalties.Royalty[] memory royalties = royaltiesContract
+            .getRoyaltyInfo(_tokenId);
         return royalties;
     }
 
@@ -483,12 +478,13 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
      * Private function to set the Signature Verifier contract address
      * @param _signatureVerifierContract The address of the Signature Verifier contract
      */
-    function _setSignatureVerifier(
-        address _signatureVerifierContract
-    ) private {
+    function _setSignatureVerifier(address _signatureVerifierContract) private {
         address oldSignatureVerifierContract_ = address(_signatureVerifier);
         _signatureVerifier = ISignatureVerifier(_signatureVerifierContract);
-        emit SetSignerVerifier(oldSignatureVerifierContract_, _signatureVerifierContract);
+        emit SetSignerVerifier(
+            oldSignatureVerifierContract_,
+            _signatureVerifierContract
+        );
     }
 
     /**

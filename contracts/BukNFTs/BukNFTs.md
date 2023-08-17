@@ -42,7 +42,6 @@ The contract is designed with the following key components:
 - **mint**: Mint a new NFT with a specific token ID, account, amount, and data.
 - **burn**: Burn a specific NFT.
 - **royaltyInfo**: To retrieve information about the royalties associated with a specific token.
-- **getName**: Returns the contract name of BukNFTs.
 - **safeTransferFrom**: Transfers ownership of an NFT token from one address to another.
 - **safeBatchTransferFrom**: Transfers ownership of multiple NFT tokens from one address to another.
 - **uri**: Returns the URI associated with the token ID.

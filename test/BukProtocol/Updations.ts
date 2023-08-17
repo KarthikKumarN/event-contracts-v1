@@ -154,6 +154,7 @@ describe("BukProtocol Updations", function () {
 
     await saveInitialSnapshot();
   });
+
   afterEach(async function () {
     await restoreInitialSnapshot();
   });
@@ -177,6 +178,75 @@ describe("BukProtocol Updations", function () {
     it("Should not set treasury if not admin", async function () {
       //Set treasury
       await expect(bukProtocolContract.connect(account2).setBukTreasury(account1)).to.be.reverted;
+    });
+  });
+
+  describe("Set Admin in BukProtocol", function () {
+    it("Should set admin by admin", async function () {
+      //Set admin
+      expect(await bukProtocolContract.connect(adminWallet).setAdmin(account1)).not.be.reverted;
+      const addresses = await bukProtocolContract.connect(account1).getWallets()
+      expect(addresses[3]).to.equal(await account1.getAddress());
+    });
+    it("Should set admin and emit events", async function () {
+      const addresses = await bukProtocolContract.connect(adminWallet).getWallets()
+      //Get the old admin
+      const oldAdmin = addresses[3];
+      //Set admin
+      expect(
+        await bukProtocolContract
+          .connect(adminWallet)
+          .setAdmin(account1))
+        .to.emit(bukProtocolContract, "SetAdminWallet")
+        .withArgs(oldAdmin, await account1.getAddress());
+    });
+    it("Should not set admin if not admin", async function () {
+      //Set admin
+      await expect(bukProtocolContract.connect(account2).setAdmin(account1)).to.be.reverted;
+    });
+  });
+
+  describe("Set Signature Verifier in BukProtocol", function () {
+    it("Should set signature verifier by admin", async function () {
+      //Set signature verifier
+      expect(await bukProtocolContract.connect(adminWallet).setSignatureVerifier(account1)).not.be.reverted;
+      const addresses = await bukProtocolContract.connect(adminWallet).getWallets()
+      expect(addresses[4]).to.equal(await account1.getAddress());
+    });
+    it("Should set signature verifier and emit events", async function () {
+      //Set signature verifier
+      expect(
+        await bukProtocolContract
+          .connect(adminWallet)
+          .setSignatureVerifier(account1))
+        .to.emit(bukProtocolContract, "SetSignerVerifier")
+        .withArgs(await account1.getAddress());
+    });
+    it("Should not set signature verifier if not admin", async function () {
+      //Set signature verifier
+      await expect(bukProtocolContract.connect(account2).setSignatureVerifier(account1)).to.be.reverted;
+    });
+  });
+
+  describe("Set Royalties Contract in BukProtocol", function () {
+    it("Should set royalties contract by admin", async function () {
+      //Set royalties
+      expect(await bukProtocolContract.connect(adminWallet).setRoyaltiesContract(account1)).not.be.reverted;
+      const addr = await bukProtocolContract.connect(adminWallet).royaltiesContract()
+      expect(addr).to.equal(await account1.getAddress());
+    });
+    it("Should set royalties contract and emit events", async function () {
+      //Set royalties
+      expect(
+        await bukProtocolContract
+          .connect(adminWallet)
+          .setRoyaltiesContract(account1))
+        .to.emit(bukProtocolContract, "SetRoyaltiesContract")
+        .withArgs(await account1.getAddress());
+    });
+    it("Should not set royalties contract if not admin", async function () {
+      //Set royalties
+      await expect(bukProtocolContract.connect(account2).setRoyaltiesContract(account1)).to.be.reverted;
     });
   });
 

@@ -595,7 +595,7 @@ describe("BukProtocol Bookings", function () {
             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
           ],
         ),
-      ).to.be.revertedWith("Only booking owner has access");
+      ).to.be.revertedWith("Only booking owner can mint");
     });
   });
 
@@ -1769,7 +1769,7 @@ describe("BukProtocol Bookings", function () {
           _bookingOwner
         ),
       )
-      .to.emit(bukProtocolContract, "CancelRoom")
+      .to.emit(bukProtocolContract, "EmergencyCancellation")
       .withArgs(1, true);
     });
     it("Should cancel successfully and check the BukNFTs and BukPOSNFTs status", async function () {

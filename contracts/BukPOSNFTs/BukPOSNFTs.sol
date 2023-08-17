@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.19;
 
-import {ERC1155, IERC165} from "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
-import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
-import {IBukNFTs} from "../BukNFTs/IBukNFTs.sol";
-import {IBukPOSNFTs} from "../BukPOSNFTs/IBukPOSNFTs.sol";
-import {IBukProtocol, IBukRoyalties} from "../BukProtocol/IBukProtocol.sol";
-import {IBukTreasury} from "../BukTreasury/IBukTreasury.sol";
+import { ERC1155, IERC165 } from "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
+import { IBukNFTs } from "../BukNFTs/IBukNFTs.sol";
+import { IBukPOSNFTs } from "../BukPOSNFTs/IBukPOSNFTs.sol";
+import { IBukProtocol, IBukRoyalties } from "../BukProtocol/IBukProtocol.sol";
+import { IBukTreasury } from "../BukTreasury/IBukTreasury.sol";
 
 /**
  * @title BUK Protocol Proof of Stay NFTs Contract
@@ -14,7 +14,6 @@ import {IBukTreasury} from "../BukTreasury/IBukTreasury.sol";
  * @dev Contract for managing Proof-of-Stay utility NFT ERC1155 token
  */
 contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
-
     /**
      * @dev Name of the contract
      */
@@ -49,8 +48,7 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
     /**
      * @dev Constant for the role of the admin
      */
-    bytes32 public constant ADMIN_ROLE =
-        keccak256("ADMIN_ROLE");
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
     /**
      * @dev Constructor to initialize the contract
@@ -83,16 +81,16 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
     /**
      * @dev See {IBukPOSNFTs-setBukTreasury}.
      */
-    function setBukTreasury(address _bukTreasuryContract) external onlyRole(ADMIN_ROLE) {
+    function setBukTreasury(
+        address _bukTreasuryContract
+    ) external onlyRole(ADMIN_ROLE) {
         _setBukTreasury(_bukTreasuryContract);
     }
 
     /**
      * @dev See {IBukPOSNFTs-setBukNFTRole}.
      */
-    function setBukNFTRole(
-        address _nftContract
-    ) external onlyRole(ADMIN_ROLE) {
+    function setBukNFTRole(address _nftContract) external onlyRole(ADMIN_ROLE) {
         _grantRole(BUK_NFT_CONTRACT_ROLE, _nftContract);
         _revokeRole(BUK_NFT_CONTRACT_ROLE, address(nftContract));
         address oldNftContract_ = address(nftContract);
@@ -116,7 +114,10 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
         uint256 _id,
         string memory _newuri
     ) external onlyRole(ADMIN_ROLE) {
-        require(bytes(uriByTokenId[_id]).length != 0, "Token does not exist on BukPOSNFTs");
+        require(
+            bytes(uriByTokenId[_id]).length != 0,
+            "Token does not exist on BukPOSNFTs"
+        );
         _setURI(_id, _newuri);
     }
 
@@ -135,13 +136,6 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
     }
 
     /**
-     * @dev See {IBukPOSNFTs-getName}.
-     */
-    function getName() external view returns (string memory) {
-        return name;
-    }
-
-    /**
      * @dev See {IBukPOSNFTs-safeTransferFrom}.
      */
     function safeTransferFrom(
@@ -151,7 +145,7 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
         uint256 _amount,
         bytes memory _data
     ) public virtual override(ERC1155, IBukPOSNFTs) onlyRole(ADMIN_ROLE) {
-        require(balanceOf(_from, _id)>0, "From address does not own NFT");
+        require(balanceOf(_from, _id) > 0, "From address does not own NFT");
         super._safeTransferFrom(_from, _to, _id, _amount, _data);
     }
 
@@ -166,8 +160,11 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
         bytes memory _data
     ) public virtual override(ERC1155, IBukPOSNFTs) onlyRole(ADMIN_ROLE) {
         uint256 len = _ids.length;
-        for(uint i=0; i<len; ++i) {
-            require(balanceOf(_from, _ids[i])>0, "From address does not own NFT");
+        for (uint i = 0; i < len; ++i) {
+            require(
+                balanceOf(_from, _ids[i]) > 0,
+                "From address does not own NFT"
+            );
         }
         super._safeBatchTransferFrom(_from, _to, _ids, _amounts, _data);
     }
@@ -177,7 +174,13 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
      */
     function uri(
         uint256 _id
-    ) public view virtual override(ERC1155, IBukPOSNFTs) returns (string memory) {
+    )
+        public
+        view
+        virtual
+        override(ERC1155, IBukPOSNFTs)
+        returns (string memory)
+    {
         return uriByTokenId[_id];
     }
 
@@ -205,7 +208,7 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
      * @param _bukProtocolContract The address of the Buk Protocol contract
      */
     function _setBukProtocol(address _bukProtocolContract) private {
-		address oldBukProtocolContract_ = address(bukProtocolContract);
+        address oldBukProtocolContract_ = address(bukProtocolContract);
         bukProtocolContract = IBukProtocol(_bukProtocolContract);
         emit SetBukProtocol(oldBukProtocolContract_, _bukProtocolContract);
     }
