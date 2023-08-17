@@ -26,26 +26,26 @@ interface IBukRoyalties {
     event SetBukProtocol(address indexed oldBukProtocol, address indexed newBukProtocol);
 
     /**
-     * @dev Emitted when new royalty has been updated
+     * @dev Emitted when new Buk royalty has been updated
      * @param oldRoyalty, old buk royalty
      * @param newRoyalty, new buk royalty
-     * @notice This event is used when Buk, Hotel and First Owner royalties are updated
+     * @notice This event is used when Buk royalty is updated
      */
     event SetBukRoyalty(uint96 oldRoyalty, uint96 newRoyalty);
 
     /**
-     * @dev Emitted when new royalty has been updated
+     * @dev Emitted when Hotel royalty has been updated
      * @param oldRoyalty, old buk royalty
      * @param newRoyalty, new buk royalty
-     * @notice This event is used when Buk, Hotel and First Owner royalties are updated
+     * @notice This event is used when Hotel royalty is updated
      */
     event SetHotelRoyalty(uint96 oldRoyalty, uint96 newRoyalty);
 
     /**
-     * @dev Emitted when new royalty has been updated
+     * @dev Emitted when First Owner royalty has been updated
      * @param oldRoyalty, old buk royalty
      * @param newRoyalty, new buk royalty
-     * @notice This event is used when Buk, Hotel and First Owner royalties are updated
+     * @notice This event is used when First Owner royalty is updated
      */
     event SetFirstOwnerRoyalty(uint96 oldRoyalty, uint96 newRoyalty);
 

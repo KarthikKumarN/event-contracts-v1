@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.19;
-import "../BukRoyalties/IBukRoyalties.sol";
+import {IBukRoyalties} from "../BukRoyalties/IBukRoyalties.sol";
 
 /**
  * @title Interface to define the BUK protocol
@@ -83,28 +83,29 @@ interface IBukProtocol {
     /**
      * @dev Emitted when signer verifier is updated.
      */
-    event SetSignerVerifier(address indexed signerVerifier);
+    event SetSignerVerifier(address indexed oldSignerVerifier, address indexed newSignerVerifier);
 
     /**
      * @dev Emitted when Buk treasury is updated.
      */
-    event SetBukTreasury(address indexed treasuryContract);
+    event SetBukTreasury(address indexed oldTreasuryContract, address indexed newTreasuryContract);
 
     /**
      * @dev Emitted when Buk Wallet is updated.
      */
-    event SetBukWallet(address indexed bukWalletContract);
+    event SetBukWallet(address indexed oldBukWalletContract, address indexed newBukWalletContract);
 
     /**
      * @dev Emitted when stable token is updated.
      */
-    event SetStableToken(address indexed _stableToken);
+    event SetStableToken(address indexed oldStableToken, address indexed newStableToken);
 
     /**
      * @dev Emitted when the tradeability of a Buk NFT is toggled.
-     * @param _tokenId Token Id whose tradeability is being toggled.
+     * @param tokenId Token Id whose tradeability is being toggled.
+     * @param tradeable Is the NFT tradeable.
      */
-    event ToggleTradeability(uint256 indexed _tokenId, bool _tradeable);
+    event ToggleTradeability(uint256 indexed tokenId, bool tradeable);
 
     /**
      * @dev Emitted when single room is booked.
@@ -130,10 +131,16 @@ interface IBukProtocol {
      * @dev Emitted when room bookings are checked out.
      */
     event CheckoutRooms(uint256[] indexed bookings, bool indexed status);
+    
     /**
      * @dev Emitted when room bookings are cancelled.
      */
-    event CancelRoom(uint256 indexed booking, bool indexed status);
+    event CancelRoom(uint256 indexed bookingId, bool indexed status);
+
+    /**
+     * @dev Emitted when room bookings are cancelled.
+     */
+    event EmergencyCancellation(uint256 indexed bookingId, bool indexed status);
 
     /**
      * @dev Sets the admin wallet address.

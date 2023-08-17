@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.19;
 
-import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 
 /**
  * @title Interface to define the BUK NFTs 
@@ -38,7 +38,7 @@ interface IBukNFTs is IERC1155 {
     /**
      * @dev Event to set token URI
      */
-    event SetURI(uint256 indexed id, string indexed uri);
+    event SetURI(uint256 indexed id, string indexed oldUri, string indexed newUri);
 
     /**
      * @dev Function to set the Buk Protocol Contract address.

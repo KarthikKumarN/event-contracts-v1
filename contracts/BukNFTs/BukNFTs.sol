@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.19;
 
-import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "../BukNFTs/IBukNFTs.sol";
-import "../BukPOSNFTs/IBukPOSNFTs.sol";
-import "../BukProtocol/IBukProtocol.sol";
-import "../BukTreasury/IBukTreasury.sol";
+import {ERC1155, IERC165} from "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {IBukNFTs} from "../BukNFTs/IBukNFTs.sol";
+import {IBukPOSNFTs} from "../BukPOSNFTs/IBukPOSNFTs.sol";
+import {IBukProtocol, IBukRoyalties} from "../BukProtocol/IBukProtocol.sol";
+import {IBukTreasury} from "../BukTreasury/IBukTreasury.sol";
 
 /**
  * @title BUK Protocol NFT Contract
@@ -14,10 +14,6 @@ import "../BukTreasury/IBukTreasury.sol";
  * @dev Contract for managing hotel room-night inventory and ERC1155 token management for room-night NFTs
  */
 contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
-    /**
-     * @dev Address of the Buk treasury contract.
-     */
-    IBukTreasury private _bukTreasury;
 
     /**
      * @dev Name of the Buk PoS NFT collection contract
@@ -33,6 +29,11 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
      * @dev Address of the Buk Protocol contract
      */
     IBukProtocol public bukProtocolContract;
+    
+    /**
+     * @dev Address of the Buk treasury contract.
+     */
+    IBukTreasury private _bukTreasury;
 
     /**
      * @dev Mapping for token URI's for booked tickets
@@ -339,7 +340,8 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
      * @param _newuri - The URI associated with the token ID.
      */
     function _setURI(uint256 _id, string memory _newuri) private {
+        string memory olduri_ = uriByTokenId[_id];
         uriByTokenId[_id] = _newuri;
-        emit SetURI(_id, _newuri);
+        emit SetURI(_id, olduri_, _newuri);
     }
 }

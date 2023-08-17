@@ -1,15 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.19;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import "../BukPOSNFTs/IBukPOSNFTs.sol";
-import "../BukNFTs/IBukNFTs.sol";
-import "../BukTreasury/IBukTreasury.sol";
-import "../SignatureVerifier/ISignatureVerifier.sol";
-import "../BukRoyalties/IBukRoyalties.sol";
-import "../BukProtocol/IBukProtocol.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import {IBukPOSNFTs} from "../BukPOSNFTs/IBukPOSNFTs.sol";
+import {IBukNFTs} from "../BukNFTs/IBukNFTs.sol";
+import {IBukTreasury} from "../BukTreasury/IBukTreasury.sol";
+import {ISignatureVerifier} from "../SignatureVerifier/ISignatureVerifier.sol";
+import {IBukRoyalties} from "../BukRoyalties/IBukRoyalties.sol";
+import {IBukProtocol} from "../BukProtocol/IBukProtocol.sol";
 
 /**
  * @title BUK Protocol Contract
@@ -77,7 +76,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
         address _signVerifierContract,
         address _royaltiesContract
     ) {
-        royaltiesContract = IBukRoyalties(_royaltiesContract);
+        _setRoyaltiesContract(_royaltiesContract);
         _setAdmin(msg.sender);
         _setBukTreasury(_bukTreasuryContract);
         _setStableToken(_stableTokenAddr);
@@ -156,9 +155,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
      * @dev See {IBukProtocol-setRoyalties}.
      */
     function setRoyaltiesContract(address _royaltiesContract) external onlyAdmin {
-        address oldRoyaltiesContract_ = address(royaltiesContract);
-        royaltiesContract = IBukRoyalties(_royaltiesContract);
-        emit SetRoyaltiesContract(oldRoyaltiesContract_, _royaltiesContract);
+        _setRoyaltiesContract(_royaltiesContract);
     }
 
     /**
@@ -293,7 +290,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
             );
             require(
                 _bookingDetails[_ids[i]].firstOwner == msg.sender,
-                "Only booking owner has access"
+                "Only booking owner can mint"
             );
         }
         for (uint8 i = 0; i < len; ++i) {
@@ -434,7 +431,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
         _bukTreasury.cancelUSDCRefund(_refund, _bookingOwner);
         _bukTreasury.cancelUSDCRefund(_charges, address(_bukTreasury));
         nftContract.burn(_bookingOwner, _id, 1, false);
-        emit CancelRoom(_id, true);
+        emit EmergencyCancellation(_id, true);
     }
 
     /**
@@ -489,8 +486,19 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
     function _setSignatureVerifier(
         address _signatureVerifierContract
     ) private {
+        address oldSignatureVerifierContract_ = address(_signatureVerifier);
         _signatureVerifier = ISignatureVerifier(_signatureVerifierContract);
-        emit SetSignerVerifier(address(_signatureVerifierContract));
+        emit SetSignerVerifier(oldSignatureVerifierContract_, _signatureVerifierContract);
+    }
+
+    /**
+     * Private function to set the Royalty contract address
+     * @param _royaltiesContract The address of the Royalties contract
+     */
+    function _setRoyaltiesContract(address _royaltiesContract) private {
+        address oldRoyaltiesContract_ = address(royaltiesContract);
+        royaltiesContract = IBukRoyalties(_royaltiesContract);
+        emit SetRoyaltiesContract(oldRoyaltiesContract_, _royaltiesContract);
     }
 
     /**
@@ -498,8 +506,9 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
      * @param _bukTreasuryContract The address of the BukTreasury contract
      */
     function _setBukTreasury(address _bukTreasuryContract) private {
+        address oldBukTreasuryContract_ = address(_bukTreasury);
         _bukTreasury = IBukTreasury(_bukTreasuryContract);
-        emit SetBukTreasury(_bukTreasuryContract);
+        emit SetBukTreasury(oldBukTreasuryContract_, _bukTreasuryContract);
     }
 
     /**
@@ -507,8 +516,9 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
      * @param _bukWalletAddr The address of the BukWallet contract
      */
     function _setBukWallet(address _bukWalletAddr) private {
+        address oldBukWallet_ = _bukWallet;
         _bukWallet = _bukWalletAddr;
-        emit SetBukWallet(_bukWalletAddr);
+        emit SetBukWallet(oldBukWallet_, _bukWalletAddr);
     }
 
     /**
@@ -516,8 +526,9 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
      * @param _stableTokenAddress The address of the stable token contract
      */
     function _setStableToken(address _stableTokenAddress) private {
+        address oldStableToken_ = address(_stableToken);
         _stableToken = IERC20(_stableTokenAddress);
-        emit SetStableToken(_stableTokenAddress);
+        emit SetStableToken(oldStableToken_, _stableTokenAddress);
     }
 
     /**

@@ -33,12 +33,7 @@ interface IBukPOSNFTs is IERC1155 {
     /**
      * @dev Event to set token URI
      */
-    event SetURI(uint indexed id, string indexed uri);
-
-    /**
-     * @dev Custom error in the function to show that the NFT is not minted.
-     */
-    error NotYetMinted(string message);
+    event SetURI(uint indexed id, string indexed oldUri, string indexed newUri);
 
     /**
      * @dev Function to update the Buk Protocol Contract address.
