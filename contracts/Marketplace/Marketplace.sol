@@ -1,39 +1,64 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.19;
 
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/utils/Context.sol";
-import "contracts/Marketplace/IMarketplace.sol";
-import "contracts/BukProtocol/IBukProtocol.sol";
-import "contracts/BukNFTs/IBukNFTs.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
+import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
+import { Context } from "@openzeppelin/contracts/utils/Context.sol";
+import { IMarketplace } from "contracts/Marketplace/IMarketplace.sol";
+import { IBukProtocol } from "contracts/BukProtocol/IBukProtocol.sol";
+import { IBukNFTs } from "contracts/BukNFTs/IBukNFTs.sol";
+import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
 contract Marketplace is Context, IMarketplace, AccessControl {
+    // Using safeERC20
     using SafeERC20 for IERC20;
+
+    /**
+     * @dev Constant for the role of the Admin
+     */
+
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+    /**
+     * @dev Constant for the role of the Buk Protocol contract
+     */
     bytes32 public constant BUK_PROTOCOL_ROLE = keccak256("BUK_PROTOCOL_ROLE");
 
-    // Buk protocol address
+    /**
+     * @dev Constant address Buk Protocol contract
+     */
     IBukProtocol private _bukProtocalContract;
+
+    /**
+     * @dev Constant address Buk NFT contract
+     */
     IBukNFTs private _bukNFTContract;
 
     // Address of owner who can perform administrator work
     address private _owner;
 
-    // Currency used for transaction
+    /**
+     * @dev Currency used for transaction
+     */
     IERC20 private _stableToken;
 
-    // Captures listed bookings for sale
+    /**
+     * @dev mapping(uint256 => ListingDetails) _listedNFT  Captures listed bookings for sale
+     */
     mapping(uint256 => ListingDetails) private _listedNFT;
 
+    /**
+     * @dev Constructor to initialize the contract
+     * @param _bukProtocalAddress address of Buk protocol
+     * @param _bukNFTAddress address of Buk NFT
+     * @param _tokenAddress address of the stable token
+     */
     constructor(
         address _bukProtocalAddress,
         address _bukNFTAddress,
         address _tokenAddress
     ) {
-        _owner = _msgSender();
+        _setOwner(_msgSender());
         _setStableToken(_tokenAddress);
         _setBukProtocol(_bukProtocalAddress);
         _setBukNFT(_bukNFTAddress);
@@ -193,6 +218,14 @@ contract Marketplace is Context, IMarketplace, AccessControl {
     }
 
     /**
+     * @dev Refer {IMarketplace-setAdmin}.
+     * @param _ownerAddress address of new owner
+     */
+    function setOwner(address _ownerAddress) external onlyRole(ADMIN_ROLE) {
+        _setOwner(_ownerAddress);
+    }
+
+    /**
      * @dev Refer {IMarketplace-setStableToken}.
      * @param _tokenAddress address of new token
      */
@@ -271,6 +304,20 @@ contract Marketplace is Context, IMarketplace, AccessControl {
         _revokeRole(BUK_PROTOCOL_ROLE, address(oldAddress));
 
         emit BukProtocolSet(oldAddress, _bukProtocol);
+    }
+
+    /**
+     *
+     * @param _ownerAddress New owner address
+     */
+    function _setOwner(address _ownerAddress) private {
+        require(_ownerAddress != address(0), "Invalid address");
+        address oldAddress = address(_owner);
+        _owner = address(_ownerAddress);
+        _setupRole(ADMIN_ROLE, address(_ownerAddress));
+        _revokeRole(ADMIN_ROLE, oldAddress);
+
+        emit OwnerSet(oldAddress, _owner);
     }
 
     /**
