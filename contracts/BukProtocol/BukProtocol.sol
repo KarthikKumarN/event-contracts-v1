@@ -113,21 +113,21 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
     }
 
     /**
-     * @dev See {IBukProtocol-setStableToken}.
-     */
-    function setStableToken(
-        address _stableTokenAddress
-    ) external onlyAdmin {
-        _setStableToken(_stableTokenAddress);
-    }
-
-    /**
      * @dev See {IBukProtocol-setBukWallet}.
      */
     function setBukWallet(
         address _bukWalletAddr
     ) external onlyAdmin {
         _setBukWallet(_bukWalletAddr);
+    }
+
+    /**
+     * @dev See {IBukProtocol-setStableToken}.
+     */
+    function setStableToken(
+        address _stableTokenAddress
+    ) external onlyAdmin {
+        _setStableToken(_stableTokenAddress);
     }
 
     /**
@@ -159,28 +159,6 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
         address oldRoyaltiesContract_ = address(royaltiesContract);
         royaltiesContract = IBukRoyalties(_royaltiesContract);
         emit SetRoyaltiesContract(oldRoyaltiesContract_, _royaltiesContract);
-    }
-
-    /**
-     * @dev See {IBukProtocol-setTokenUri}.
-     */
-    function setTokenUri(
-        uint _tokenId,
-        string memory _newUri
-    ) external onlyAdmin {
-        nftContract.setURI(_tokenId, _newUri);
-        emit SetTokenURI(_tokenId, _newUri);
-    }
-
-    /**
-     * @dev See {IBukProtocol-setNFTContractName}.
-     */
-    function setNFTContractName(
-        string memory _contractName
-    ) external onlyAdmin {
-        string memory oldContractName_ = nftContract.getName();
-        nftContract.setNFTContractName(_contractName);
-        emit SetNFTContractName(oldContractName_, _contractName);
     }
 
     /**

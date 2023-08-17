@@ -260,7 +260,6 @@ describe("BukRoyalties Updations", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],
@@ -310,7 +309,6 @@ describe("BukRoyalties Updations", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],

@@ -292,7 +292,6 @@ describe("Marketplace", function () {
       // Book room and mint NFT
       expect(
         await bukProtocolContract.bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],
@@ -342,7 +341,6 @@ describe("Marketplace", function () {
       // Book room and mint NFT
       expect(
         await bukProtocolContract.bookRoom(
-          1,
           [price],
           [price],
           [minSalePrice],
@@ -390,7 +388,6 @@ describe("Marketplace", function () {
       // Book room and mint NFT
       expect(
         await bukProtocolContract.bookRoom(
-          1,
           [price],
           [price],
           [70000000],
@@ -432,7 +429,6 @@ describe("Marketplace", function () {
       // Book room and mint NFT
       expect(
         await bukProtocolContract.bookRoom(
-          1,
           [price],
           [price],
           [70000000],
@@ -477,7 +473,6 @@ describe("Marketplace", function () {
       // Book room and mint NFT
       expect(
         await bukProtocolContract.bookRoom(
-          1,
           [price],
           [price],
           [price],
@@ -513,7 +508,6 @@ describe("Marketplace", function () {
       // Book room and mint NFT
       expect(
         await bukProtocolContract.bookRoom(
-          1,
           [price],
           [price],
           [price],
@@ -553,7 +547,6 @@ describe("Marketplace", function () {
       // Book room and mint NFT
       expect(
         await bukProtocolContract.bookRoom(
-          1,
           [price],
           [price],
           [price],
@@ -599,7 +592,6 @@ describe("Marketplace", function () {
       // Book room and mint NFT
       expect(
         await bukProtocolContract.bookRoom(
-          1,
           [price],
           [price],
           [price],
@@ -647,7 +639,6 @@ describe("Marketplace", function () {
       // Book room and mint NFT
       expect(
         await bukProtocolContract.bookRoom(
-          1,
           [price],
           [price],
           [price],
@@ -698,7 +689,6 @@ describe("Marketplace", function () {
       // Book room and mint NFT
       expect(
         await bukProtocolContract.bookRoom(
-          1,
           [price],
           [price],
           [price],
@@ -765,7 +755,6 @@ describe("Marketplace", function () {
       // Book room and mint NFT
       expect(
         await bukProtocolContract.bookRoom(
-          1,
           [price],
           [price],
           [price],
@@ -817,7 +806,6 @@ describe("Marketplace", function () {
       // Book room and mint NFT
       expect(
         await bukProtocolContract.bookRoom(
-          1,
           [price],
           [price],
           [price],
@@ -878,7 +866,6 @@ describe("Marketplace", function () {
       // Book room and mint NFT
       expect(
         await bukProtocolContract.bookRoom(
-          1,
           [price],
           [price],
           [price],
@@ -950,7 +937,6 @@ describe("Marketplace", function () {
       // Book room and mint NFT
       expect(
         await bukProtocolContract.bookRoom(
-          1,
           [price],
           [price],
           [price],
@@ -1002,7 +988,6 @@ describe("Marketplace", function () {
       // Book room and mint NFT
       expect(
         await bukProtocolContract.bookRoom(
-          1,
           [price],
           [price],
           [price],
@@ -1051,7 +1036,6 @@ describe("Marketplace", function () {
       // Book room and mint NFT
       expect(
         await bukProtocolContract.bookRoom(
-          1,
           [price],
           [price],
           [price],
@@ -1104,7 +1088,6 @@ describe("Marketplace", function () {
       // Book room and mint NFT
       expect(
         await bukProtocolContract.bookRoom(
-          1,
           [price],
           [price],
           [price],
@@ -1156,7 +1139,6 @@ describe("Marketplace", function () {
       // Book room and mint NFT
       expect(
         await bukProtocolContract.bookRoom(
-          1,
           [price],
           [price],
           [price],
@@ -1202,7 +1184,6 @@ describe("Marketplace", function () {
       // Book room and mint NFT
       expect(
         await bukProtocolContract.bookRoom(
-          1,
           [price],
           [price],
           [price],
@@ -1252,7 +1233,6 @@ describe("Marketplace", function () {
       // Book room and mint NFT
       expect(
         await bukProtocolContract.bookRoom(
-          1,
           [price],
           [price],
           [price],
@@ -1305,7 +1285,6 @@ describe("Marketplace", function () {
       // Book room and mint NFT
       expect(
         await bukProtocolContract.bookRoom(
-          1,
           [price],
           [price],
           [price],
@@ -1430,7 +1409,6 @@ describe("Marketplace", function () {
       // Book room and mint NFT
       expect(
         await bukProtocolContract.bookRoom(
-          1,
           [price],
           [price],
           [price],
@@ -1484,7 +1462,6 @@ describe("Marketplace", function () {
       // Book room and mint NFT
       expect(
         await bukProtocolContract.bookRoom(
-          1,
           [price],
           [price],
           [price],
@@ -1534,7 +1511,6 @@ describe("Marketplace", function () {
       // Book room and mint NFT
       expect(
         await bukProtocolContract.bookRoom(
-          1,
           [price],
           [price],
           [price],
@@ -1582,7 +1558,6 @@ describe("Marketplace", function () {
       // Book room and mint NFT
       expect(
         await bukProtocolContract.bookRoom(
-          1,
           [price],
           [price],
           [price],

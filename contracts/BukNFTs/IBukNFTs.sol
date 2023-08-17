@@ -70,7 +70,7 @@ interface IBukNFTs is IERC1155 {
 
     /**
      * @dev Set the name of the contract.
-     * @notice This function can only be called by addresses with `BUK_PROTOCOL_CONTRACT_ROLE`
+     * @notice This function can only be called by addresses with `ADMIN_ROLE`
      */
     function setNFTContractName(string memory _contractName) external;
 
@@ -78,7 +78,7 @@ interface IBukNFTs is IERC1155 {
      * @dev Sets the URI for a specific token ID.
      * @param _id - The ID of the token.
      * @param _newuri - The new URI for the token.
-     * @notice This function can only be called by a contract with `BUK_PROTOCOL_CONTRACT_ROLE`
+     * @notice This function can only be called by a contract with `ADMIN_ROLE`
      */
     function setURI(uint256 _id, string memory _newuri) external;
 

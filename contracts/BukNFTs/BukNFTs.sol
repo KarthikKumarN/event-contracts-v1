@@ -120,8 +120,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
      */
     function setNFTContractName(
         string memory _contractName
-    ) external onlyRole(BUK_PROTOCOL_CONTRACT_ROLE) {
-        nftPoSContract.setNFTContractName(_contractName);
+    ) external onlyRole(ADMIN_ROLE) {
         _setNFTContractName(_contractName);
     }
 
@@ -131,13 +130,9 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
     function setURI(
         uint256 _id,
         string memory _newuri
-    ) external onlyRole(BUK_PROTOCOL_CONTRACT_ROLE) {
-        if (bytes(uriByTokenId[_id]).length != 0) {
-            _setURI(_id, _newuri);
-        } else {
-            nftPoSContract.setURI(_id, _newuri);
-        }
-        emit SetURI(_id, _newuri);
+    ) external onlyRole(ADMIN_ROLE) {
+        require(bytes(uriByTokenId[_id]).length != 0, "Token does not exist on BukNFTs");
+        _setURI(_id, _newuri);
     }
 
     /**
@@ -345,5 +340,6 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
      */
     function _setURI(uint256 _id, string memory _newuri) private {
         uriByTokenId[_id] = _newuri;
+        emit SetURI(_id, _newuri);
     }
 }

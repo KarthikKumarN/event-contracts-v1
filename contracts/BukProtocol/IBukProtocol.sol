@@ -66,11 +66,6 @@ interface IBukProtocol {
     event SetCommission(uint256 indexed oldCommission, uint256 indexed newCommission);
 
     /**
-     * @dev Emitted when token uri is set.
-     */
-    event SetTokenURI(uint256 indexed nftId, string indexed uri);
-
-    /**
      * @dev Emitted when BukNFTs contract address is updated.
      */
     event SetBukNFTs(address indexed oldNftContract, address indexed newNftContract);
@@ -104,11 +99,6 @@ interface IBukProtocol {
      * @dev Emitted when stable token is updated.
      */
     event SetStableToken(address indexed _stableToken);
-
-    /**
-     * @dev Event to update the contract name
-     */
-    event SetNFTContractName(string indexed oldContractName, string indexed newContractName);
 
     /**
      * @dev Emitted when the tradeability of a Buk NFT is toggled.
@@ -205,19 +195,6 @@ interface IBukProtocol {
      * @dev Emits a {SetRoyaltiesContract} event with the previous royaltiesContract address and the new address.
      */
     function setRoyaltiesContract(address _royaltiesContract) external;
-
-    /**
-     * @dev Function to update the token uri.
-     * @param _tokenId Token Id.
-     * @notice This function can only be called by admin
-     */
-    function setTokenUri(uint _tokenId, string memory _newUri) external;
-
-    /**
-     * @dev Set the name of the contract.
-     * @notice This function can only be called by addresses with `ADMIN_ROLE`
-     */
-    function setNFTContractName(string memory _contractName) external;
 
     /**
      * @dev Function to set the Buk commission percentage.

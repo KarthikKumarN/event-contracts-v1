@@ -111,7 +111,7 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
      */
     function setNFTContractName(
         string memory _contractName
-    ) external onlyRole(BUK_NFT_CONTRACT_ROLE) {
+    ) external onlyRole(ADMIN_ROLE) {
         _setNFTContractName(_contractName);
     }
 
@@ -121,13 +121,9 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
     function setURI(
         uint256 _id,
         string memory _newuri
-    ) external onlyRole(BUK_NFT_CONTRACT_ROLE) {
-        if (bytes( uriByTokenId[_id]).length != 0) {
-            _setURI(_id, _newuri);
-        } else {
-            revert NotYetMinted("Token is not yet minted.");
-        }
-        emit SetURI(_id, _newuri);
+    ) external onlyRole(ADMIN_ROLE) {
+        require(bytes(uriByTokenId[_id]).length != 0, "Token does not exist on BukPOSNFTs");
+        _setURI(_id, _newuri);
     }
 
     /**
@@ -241,5 +237,6 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
      */
     function _setURI(uint256 _id, string memory _newuri) private {
         uriByTokenId[_id] = _newuri;
+        emit SetURI(_id, _newuri);
     }
 }
