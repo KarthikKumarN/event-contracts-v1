@@ -39,6 +39,7 @@ The contract is designed with the following key components:
 - **relist**: Update the price and status for a listed NFT.
 - **buyRoom**: Buy a listed room/booking NFT.
 - **setBukProtocol**: Set a new BUK Protocol address.
+- **setOwner**: Set a new owner address.
 - **setBukNFT**: Set a new BUK NFT address.
 - **setStableToken**: Set a new stable token address.
 - **getStableToken**: Get the address of the stable token.
@@ -49,10 +50,11 @@ The contract is designed with the following key components:
 
 ### Private Functions:
 
-- **_setBukNFT**: Set a new BUK NFT address.
-- **_setBukProtocol**: Set a new BUK Protocol address.
-- **_setStableToken**: Set a new stable token address.
-- **_buy**: Safe transfer NFT to buyer and transfer the price to the owner.
+- **\_setBukNFT**: Set a new BUK NFT address.
+- **\_setOwner**: Set a new Owner address.
+- **\_setBukProtocol**: Set a new BUK Protocol address.
+- **\_setStableToken**: Set a new stable token address.
+- **\_buy**: Safe transfer NFT to buyer and transfer the price to the owner.
 
 ## Events
 
@@ -62,6 +64,7 @@ The contract is designed with the following key components:
 - **Delisted**: Emitted when a booking/room NFT is delisted.
 - **DeletedListing**: Emitted when a booking/room listing is deleted.
 - **BukProtocolSet**: Emitted when a new BUK Protocol address is set.
+- **OwnerSet**: Emitted when a new owner address is set.
 - **BukNFTSet**: Emitted when a new BUK NFT address is set.
 - **StableTokenSet**: Emitted when a new stable token address is set.
 
