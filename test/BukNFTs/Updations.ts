@@ -271,15 +271,6 @@ describe("BukNFTs Updations", function () {
         ),
       ).not.be.reverted;
 
-      await fastForwardTo(1701590949);
-
-      //Check-out NFT
-      await expect(
-        bukProtocolContract.connect(adminWallet).checkout(
-          [1]
-        ),
-      ).not.be.reverted;
-
       //Set Token URI
       const newUri = "http://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json"
       expect(await nftContract.connect(adminWallet)
@@ -295,15 +286,6 @@ describe("BukNFTs Updations", function () {
       //Check-in NFT
       await expect(
         bukProtocolContract.connect(owner).checkin(
-          [1]
-        ),
-      ).not.be.reverted;
-
-      await fastForwardTo(1701590949);
-
-      //Check-out NFT
-      await expect(
-        bukProtocolContract.connect(adminWallet).checkout(
           [1]
         ),
       ).not.be.reverted;

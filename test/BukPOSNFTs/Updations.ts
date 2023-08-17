@@ -149,6 +149,16 @@ describe("BukPOSNFTs Updations", function () {
     //Set BukNFTS in BukPOSNFTs
     const setBukNFTsInBukPOSNFTs = await nftPosContract.connect(adminWallet).setBukNFTRole(await nftContract.getAddress())
 
+    //Set Buk Protocol in BukRoyalties
+    const setBukProtocolRoyalties = await royaltiesContract.setBukProtocolContract(bukProtocolContract.getAddress())
+
+    // Set all required
+    await royaltiesContract.setBukRoyaltyInfo(bukTreasuryContract, 200);
+    await royaltiesContract.setHotelRoyaltyInfo(bukTreasuryContract, 200);
+    await royaltiesContract.setFirstOwnerRoyaltyInfo(200);
+    await nftContract.setBukTreasury(await bukTreasuryContract.getAddress());
+
+  
     //Grant allowance permission
     const res = await stableTokenContract.connect(owner).approve(
       await bukProtocolContract.getAddress(),
@@ -185,6 +195,11 @@ describe("BukPOSNFTs Updations", function () {
         [1]
       ),
     ).not.be.reverted;
+    await saveInitialSnapshot();
+
+  });
+  afterEach(async function () {
+    await restoreInitialSnapshot();
   });
 
   describe("Set Buk Protocol in BukPOSNFTs", function () {
@@ -244,8 +259,16 @@ describe("BukPOSNFTs Updations", function () {
   });
   describe("Set Token URIs for NFTS in BukPOSNFTs", function () {
     it("Should set Token URIs for BukPOSNFTs by admin", async function () {
-      const booking = await bukProtocolContract.getBookingDetails(1);
-      console.log("🚀 ~ file: Updations.ts:248 ~ booking:", booking)
+
+      await fastForwardTo(1701590949);
+  
+      //Check-out NFT
+      await expect(
+        bukProtocolContract.connect(adminWallet).checkout(
+          [1]
+        ),
+      ).not.be.reverted;
+      
       //Set Token URI
       const newUri = "http://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json"
       expect(await nftPosContract.connect(adminWallet)
@@ -257,6 +280,15 @@ describe("BukPOSNFTs Updations", function () {
       expect(uri).to.equal(newUri);
     });
     it("Should set Token URIs and emit events", async function () {
+
+      await fastForwardTo(1701590949);
+  
+      //Check-out NFT
+      await expect(
+        bukProtocolContract.connect(adminWallet).checkout(
+          [1]
+        ),
+      ).not.be.reverted;
 
       //Set Token URI
       const newUri = "http://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json"
