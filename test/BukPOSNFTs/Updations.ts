@@ -149,6 +149,16 @@ describe("BukPOSNFTs Updations", function () {
     //Set BukNFTS in BukPOSNFTs
     const setBukNFTsInBukPOSNFTs = await nftPosContract.connect(adminWallet).setBukNFTRole(await nftContract.getAddress())
 
+    //Set Buk Protocol in BukRoyalties
+    const setBukProtocolRoyalties = await royaltiesContract.setBukProtocolContract(bukProtocolContract.getAddress())
+
+    // Set all required
+    await royaltiesContract.setBukRoyaltyInfo(bukTreasuryContract, 200);
+    await royaltiesContract.setHotelRoyaltyInfo(bukTreasuryContract, 200);
+    await royaltiesContract.setFirstOwnerRoyaltyInfo(200);
+    await nftContract.setBukTreasury(await bukTreasuryContract.getAddress());
+
+  
     //Grant allowance permission
     const res = await stableTokenContract.connect(owner).approve(
       await bukProtocolContract.getAddress(),
@@ -158,7 +168,6 @@ describe("BukPOSNFTs Updations", function () {
     //Book room
     expect(
       await bukProtocolContract.connect(owner).bookRoom(
-        1,
         [100000000],
         [80000000],
         [70000000],
@@ -186,6 +195,11 @@ describe("BukPOSNFTs Updations", function () {
         [1]
       ),
     ).not.be.reverted;
+    await saveInitialSnapshot();
+
+  });
+  afterEach(async function () {
+    await restoreInitialSnapshot();
   });
 
   describe("Set Buk Protocol in BukPOSNFTs", function () {
@@ -224,14 +238,14 @@ describe("BukPOSNFTs Updations", function () {
   });
 
   describe("Set BukNFTs Role in BukPOSNFTs", function () {
-    it("Should set BukPOSNFTs role in BukNFTs", async function () {
+    it("Should set BukNFTs role in BukPOSNFTs", async function () {
       expect(await nftPosContract.setBukNFTRole(await nftContract.getAddress()))
         .not.be.reverted;
       //Check if BukPOSNFTs is set
       expect(await nftPosContract.nftContract())
         .to.equal(await nftContract.getAddress());
     })
-    it("Should set BukPOSNFTs role and emit event", async function () {
+    it("Should set BukNFTs role and emit event", async function () {
       expect(await nftPosContract.setBukNFTRole(await nftContract.getAddress()))
         .to.emit(nftPosContract, "SetNftContractRole")
         .withArgs(await nftContract.getAddress(), await nftContract.getAddress());
@@ -242,6 +256,95 @@ describe("BukPOSNFTs Updations", function () {
         .to.be.reverted;
     })
 
+  });
+  describe("Set Token URIs for NFTS in BukPOSNFTs", function () {
+    it("Should set Token URIs for BukPOSNFTs by admin", async function () {
+
+      await fastForwardTo(1701590949);
+  
+      //Check-out NFT
+      await expect(
+        bukProtocolContract.connect(adminWallet).checkout(
+          [1]
+        ),
+      ).not.be.reverted;
+      
+      //Set Token URI
+      const newUri = "http://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json"
+      expect(await nftPosContract.connect(adminWallet)
+        .setURI(
+          1,
+          newUri,
+        )).not.be.reverted;
+      const uri = await nftPosContract.uri(1);
+      expect(uri).to.equal(newUri);
+    });
+    it("Should set Token URIs and emit events", async function () {
+
+      await fastForwardTo(1701590949);
+  
+      //Check-out NFT
+      await expect(
+        bukProtocolContract.connect(adminWallet).checkout(
+          [1]
+        ),
+      ).not.be.reverted;
+
+      //Set Token URI
+      const newUri = "http://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json"
+      expect(await nftPosContract.connect(adminWallet)
+        .setURI(
+          1,
+          newUri,
+        ))
+        .to.emit(nftPosContract, "SetURI")
+        .withArgs(1, newUri);
+    });
+    it("Should not set if token is not minted", async function () {
+
+      //Set Token URI
+      const newUri = "http://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json"
+      await expect(nftPosContract.connect(adminWallet)
+        .setURI(
+          3,
+          newUri,
+        )).to.be.revertedWith("Token does not exist on BukPOSNFTs");
+    });
+    it("Should not set Token URIs if not admin", async function () {
+
+      //Set Token URI
+      const newUri = "http://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json"
+      await expect(nftPosContract.connect(account1)
+        .setURI(
+          1,
+          newUri,
+        )).to.be.reverted;
+      const uri = await nftPosContract.uri(1);
+      expect(uri).not.equal(newUri);
+    });
+  });
+
+  describe("Set NFT contract name in BukPOSNFTs", function () {
+    it("Should set NFT contract name by admin", async function () {
+      //Set Name for NFTs
+      const NAME = "BukTrips New"
+      expect(await nftPosContract.connect(adminWallet).setNFTContractName(NAME)).not.be.reverted;
+      const newName = await nftPosContract.connect(adminWallet).name()
+      expect(newName).to.equal(NAME);
+    });
+    it("Should set NFT contract name and emit events", async function () {
+      //Set Name for NFTs
+      const NAME = "BukTrips New"
+      expect(await nftPosContract.connect(adminWallet).setNFTContractName(NAME))
+        .to.emit(nftPosContract, "SetNFTContractName")
+        .withArgs(NAME);
+    });
+    it("Should not set NFT contract name if not admin", async function () {
+      //Set Name for NFTs
+      const NAME = "BukTrips New"
+      await expect(nftPosContract.connect(account1).setNFTContractName(NAME))
+        .to.be.reverted;
+    });
   });
 
   describe("Safe transfer of Buk PoS NFTs", function () {

@@ -1,39 +1,50 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.19;
 
-import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+import { IERC1155 } from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 
+/**
+ * @title Interface to define the BUK PoS NFTs
+ * @author BUK Technology Inc
+ * @dev Collection of all procedures related to the BUK Proof of Stay NFTs.
+ */
 interface IBukPOSNFTs is IERC1155 {
-
     /**
      * @dev Emitted when Buk Protocol Address is updated.
      */
-    event SetBukProtocol(address indexed oldBukProtocolContract, address indexed newBukProtocolContract);
+    event SetBukProtocol(
+        address indexed oldBukProtocolContract,
+        address indexed newBukProtocolContract
+    );
 
     /**
      * @dev Emitted when treasury is updated.
      */
-    event SetBukTreasury(address indexed oldTreasuryContract, address indexed newTreasuryContract);
+    event SetBukTreasury(
+        address indexed oldTreasuryContract,
+        address indexed newTreasuryContract
+    );
 
     /**
      * @dev Event to update the contract name
      */
-    event SetNFTContractName(string indexed oldContractName, string indexed newContractName);
+    event SetNFTContractName(
+        string indexed oldContractName,
+        string indexed newContractName
+    );
 
     /**
      * @dev Event to set NFT contract role
      */
-    event SetNftContractRole(address indexed oldNftContractAddr, address indexed newNftContractAddr);
+    event SetNftContractRole(
+        address indexed oldNftContractAddr,
+        address indexed newNftContractAddr
+    );
 
     /**
      * @dev Event to set token URI
      */
-    event SetURI(uint indexed id, string indexed uri);
-
-    /**
-     * @dev Custom error in the function to show that the NFT is not minted.
-     */
-    error NotYetMinted(string message);
+    event SetURI(uint indexed id, string indexed oldUri, string indexed newUri);
 
     /**
      * @dev Function to update the Buk Protocol Contract address.
@@ -41,7 +52,7 @@ interface IBukPOSNFTs is IERC1155 {
      * @notice This function can only be called by addresses with `ADMIN_ROLE`
      */
     function setBukProtocol(address _bukProtocolContract) external;
-    
+
     /**
      * @dev Function to update the treasury address.
      * @param _bukTreasuryContract Address of the treasury.
@@ -128,10 +139,4 @@ interface IBukPOSNFTs is IERC1155 {
      * @param _id uint256: The ID of the token
      */
     function uri(uint256 _id) external view returns (string memory);
-
-    /**
-     * @dev Returns the contract name of BukPOSNFTs.
-     * @return string - The Buk PoS NFT contract name.
-     */
-    function getName() external view returns (string memory);
 }

@@ -130,7 +130,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],
@@ -157,7 +156,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],
@@ -180,7 +178,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],
@@ -205,7 +202,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       await expect(
         bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],
@@ -227,7 +223,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       await expect(
         bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],
@@ -248,7 +243,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],
@@ -269,7 +263,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       await expect(
         bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000, 80000000],
           [70000000, 70000000],
@@ -293,7 +286,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       await expect(
         bukProtocolContract.connect(owner).bookRoom(
-          2,
           [100000000, 100000000],
           [80000000, 80000000],
           [70000000, 70000000],
@@ -322,7 +314,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       await expect(
         bukProtocolContract.connect(owner).bookRoom(
-          2,
           [100000000, 100000000],
           [80000000, 80000000],
           [70000000, 70000000],
@@ -352,7 +343,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       await expect(
         bukProtocolContract.connect(owner).bookRoom(
-          2,
           [100000000, 100000000],
           [80000000, 80000000],
           [70000000, 70000000],
@@ -381,7 +371,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       await expect(
         bukProtocolContract.connect(owner).bookRoom(
-          2,
           [100000000, 100000000],
           [80000000, 80000000],
           [70000000, 70000000],
@@ -410,7 +399,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       await expect(
         bukProtocolContract.connect(owner).bookRoom(
-          2,
           [100000000, 100000000],
           [80000000, 80000000],
           [70000000, 70000000],
@@ -442,7 +430,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],
@@ -473,7 +460,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],
@@ -493,7 +479,7 @@ describe("BukProtocol Bookings", function () {
         ))
       ).to.emit(bukProtocolContract, "MintBookingNFT").withArgs([1], true);
     });
-    it("Should failed minting with array size mismatch", async function () {
+    it("Should fail minting with array size mismatch", async function () {
       //Grant allowance permission
       const res = await stableTokenContract.connect(owner).approve(
         await bukProtocolContract.getAddress(),
@@ -503,7 +489,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],
@@ -512,19 +497,19 @@ describe("BukProtocol Bookings", function () {
           12,
           true,
         ),
-      ).to.be.revertedWith("Check Ids and URIs size");
+      ).not.be.reverted;
 
       //Mint NFT
       await expect(
         bukProtocolContract.connect(owner).mintBukNFT(
-          [1],
+          [1, 2],
           [
             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
           ],
         ),
-      ).not.be.reverted;
+      ).to.be.revertedWith("Check Ids and URIs size");
     });
-    it("Should failed minting with array size limit", async function () {
+    it("Should fail minting with array size limit", async function () {
       //Grant allowance permission
       const res = await stableTokenContract.connect(owner).approve(
         await bukProtocolContract.getAddress(),
@@ -534,7 +519,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          12,
           [100000000, 100000000, 100000000, 100000000, 100000000, 100000000, 100000000, 100000000, 100000000, 100000000, 100000000, 100000000],
           [80000000, 80000000, 80000000, 80000000, 80000000, 80000000, 80000000, 80000000, 80000000, 80000000, 80000000, 80000000],
           [70000000, 70000000, 70000000, 70000000, 70000000, 70000000, 70000000, 70000000, 70000000, 70000000, 70000000, 70000000],
@@ -566,7 +550,7 @@ describe("BukProtocol Bookings", function () {
         ),
       ).to.be.revertedWith("Not in max - min booking limit");
     });
-    it("Should failed minting with booking status", async function () {
+    it("Should fail minting with booking status", async function () {
       //Grant allowance permission
       const res = await stableTokenContract.connect(owner).approve(
         await bukProtocolContract.getAddress(),
@@ -583,7 +567,7 @@ describe("BukProtocol Bookings", function () {
         ),
       ).to.be.revertedWith("Check the Booking status");
     });
-    it("Should failed minting when the sender is not the owner", async function () {
+    it("Should fail minting when the sender is not the owner", async function () {
       //Grant allowance permission
       const res = await stableTokenContract.connect(owner).approve(
         await bukProtocolContract.getAddress(),
@@ -593,7 +577,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],
@@ -612,7 +595,7 @@ describe("BukProtocol Bookings", function () {
             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
           ],
         ),
-      ).to.be.revertedWith("Only booking owner has access");
+      ).to.be.revertedWith("Only booking owner can mint");
     });
   });
 
@@ -627,7 +610,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],
@@ -665,7 +647,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],
@@ -703,7 +684,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],
@@ -734,7 +714,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          2,
           [100000000, 100000000],
           [80000000, 80000000],
           [70000000, 70000000],
@@ -759,6 +738,12 @@ describe("BukProtocol Bookings", function () {
       let tokenId = 1;
       let salePrice = 110000000;
       let transferMoney = 210000000;
+
+      // Approve allowance
+      await nftContract.connect(owner).setApprovalForAll(
+        await marketplaceContract.getAddress(),
+        true,
+      );
 
       await expect(marketplaceContract.connect(owner).createListing(tokenId, salePrice)).not.to
         .be.reverted;
@@ -813,7 +798,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],
@@ -851,7 +835,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          12,
           [100000000, 100000000, 100000000, 100000000, 100000000, 100000000, 100000000, 100000000, 100000000, 100000000, 100000000, 100000000],
           [80000000, 80000000, 80000000, 80000000, 80000000, 80000000, 80000000, 80000000, 80000000, 80000000, 80000000, 80000000],
           [70000000, 70000000, 70000000, 70000000, 70000000, 70000000, 70000000, 70000000, 70000000, 70000000, 70000000, 70000000],
@@ -902,7 +885,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],
@@ -985,7 +967,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],
@@ -1033,7 +1014,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],
@@ -1081,7 +1061,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],
@@ -1128,7 +1107,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          12,
           [100000000, 100000000, 100000000, 100000000, 100000000, 100000000, 100000000, 100000000, 100000000, 100000000, 100000000, 100000000],
           [80000000, 80000000, 80000000, 80000000, 80000000, 80000000, 80000000, 80000000, 80000000, 80000000, 80000000, 80000000],
           [70000000, 70000000, 70000000, 70000000, 70000000, 70000000, 70000000, 70000000, 70000000, 70000000, 70000000, 70000000],
@@ -1175,7 +1153,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],
@@ -1221,7 +1198,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],
@@ -1259,7 +1235,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],
@@ -1301,7 +1276,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],
@@ -1357,7 +1331,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],
@@ -1420,7 +1393,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],
@@ -1485,7 +1457,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],
@@ -1553,7 +1524,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],
@@ -1600,7 +1570,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],
@@ -1660,7 +1629,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],
@@ -1706,7 +1674,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],
@@ -1760,7 +1727,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],
@@ -1803,7 +1769,7 @@ describe("BukProtocol Bookings", function () {
           _bookingOwner
         ),
       )
-      .to.emit(bukProtocolContract, "CancelRoom")
+      .to.emit(bukProtocolContract, "EmergencyCancellation")
       .withArgs(1, true);
     });
     it("Should cancel successfully and check the BukNFTs and BukPOSNFTs status", async function () {
@@ -1816,7 +1782,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],
@@ -1873,7 +1838,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],
@@ -1910,7 +1874,6 @@ describe("BukProtocol Bookings", function () {
       //Book room
       expect(
         await bukProtocolContract.connect(owner).bookRoom(
-          1,
           [100000000],
           [80000000],
           [70000000],

@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.19;
 
-import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "../BukNFTs/IBukNFTs.sol";
-import "../BukPOSNFTs/IBukPOSNFTs.sol";
-import "../BukProtocol/IBukProtocol.sol";
-import "../BukTreasury/IBukTreasury.sol";
+import { ERC1155, IERC165 } from "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
+import { IBukNFTs } from "../BukNFTs/IBukNFTs.sol";
+import { IBukPOSNFTs } from "../BukPOSNFTs/IBukPOSNFTs.sol";
+import { IBukProtocol, IBukRoyalties } from "../BukProtocol/IBukProtocol.sol";
+import { IBukTreasury } from "../BukTreasury/IBukTreasury.sol";
 
 /**
  * @title BUK Protocol NFT Contract
@@ -14,11 +14,6 @@ import "../BukTreasury/IBukTreasury.sol";
  * @dev Contract for managing hotel room-night inventory and ERC1155 token management for room-night NFTs
  */
 contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
-    /**
-     * @dev Address of the Buk treasury contract.
-     */
-    IBukTreasury private _bukTreasury;
-
     /**
      * @dev Name of the Buk PoS NFT collection contract
      */
@@ -33,6 +28,11 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
      * @dev Address of the Buk Protocol contract
      */
     IBukProtocol public bukProtocolContract;
+
+    /**
+     * @dev Address of the Buk treasury contract.
+     */
+    IBukTreasury private _bukTreasury;
 
     /**
      * @dev Mapping for token URI's for booked tickets
@@ -120,8 +120,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
      */
     function setNFTContractName(
         string memory _contractName
-    ) external onlyRole(BUK_PROTOCOL_CONTRACT_ROLE) {
-        nftPoSContract.setNFTContractName(_contractName);
+    ) external onlyRole(ADMIN_ROLE) {
         _setNFTContractName(_contractName);
     }
 
@@ -131,13 +130,12 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
     function setURI(
         uint256 _id,
         string memory _newuri
-    ) external onlyRole(BUK_PROTOCOL_CONTRACT_ROLE) {
-        if (bytes(uriByTokenId[_id]).length != 0) {
-            _setURI(_id, _newuri);
-        } else {
-            nftPoSContract.setURI(_id, _newuri);
-        }
-        emit SetURI(_id, _newuri);
+    ) external onlyRole(ADMIN_ROLE) {
+        require(
+            bytes(uriByTokenId[_id]).length != 0,
+            "Token does not exist on BukNFTs"
+        );
+        _setURI(_id, _newuri);
     }
 
     /**
@@ -190,17 +188,6 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
     }
 
     /**
-     * @dev Returns the contract name of BukNFTs.
-     * @return string - The Buk NFT contract name.
-     */
-    /**
-     * @dev See {IBukNFTs-getName}.
-     */
-    function getName() external view returns (string memory) {
-        return name;
-    }
-
-    /**
      * @dev See {IBukNFTs-safeTransferFrom}.
      */
     function safeTransferFrom(
@@ -216,24 +203,16 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
         onlyRole(MARKETPLACE_CONTRACT_ROLE)
     {
         require(
-            block.timestamp <
+            (block.timestamp <
                 (bukProtocolContract.getBookingDetails(_id).checkin -
                     (bukProtocolContract.getBookingDetails(_id).tradeTimeLimit *
-                        3600)),
+                        3600)) &&
+                bukProtocolContract.getBookingDetails(_id).tradeable),
             "Trade limit time crossed"
         );
         require(
             isApprovedForAll(_from, _msgSender()),
             "ERC1155: caller is not token owner or approved"
-        );
-        require(
-            bukProtocolContract.getBookingDetails(_id).checkin >
-                block.timestamp,
-            "Checkin time has passed"
-        );
-        require(
-            bukProtocolContract.getBookingDetails(_id).tradeable,
-            "This NFT is non transferable"
         );
         require(balanceOf(_from, _id) > 0, "From address does not own NFT");
         super._safeTransferFrom(_from, _to, _id, _amount, _data);
@@ -260,16 +239,14 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
         );
         uint256 len = _ids.length;
         for (uint i = 0; i < len; ++i) {
-        		require(
-								block.timestamp <
-										(bukProtocolContract.getBookingDetails(_ids[i]).checkin -
-												(bukProtocolContract.getBookingDetails(_ids[i]).tradeTimeLimit *
-														3600)),
-								"Trade limit time crossed"
-						);
             require(
-                bukProtocolContract.getBookingDetails(_ids[i]).tradeable,
-                "One of these NFT is non-transferable"
+                (block.timestamp <
+                    (bukProtocolContract.getBookingDetails(_ids[i]).checkin -
+                        (bukProtocolContract
+                            .getBookingDetails(_ids[i])
+                            .tradeTimeLimit * 3600)) &&
+                    bukProtocolContract.getBookingDetails(_ids[i]).tradeable),
+                "Trade limit time crossed"
             );
             require(
                 balanceOf(_from, _ids[i]) > 0,
@@ -321,7 +298,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
      * @param _bukProtocolContract The address of the Buk Protocol contract
      */
     function _setBukProtocol(address _bukProtocolContract) private {
-		address oldBukProtocolContract_ = address(bukProtocolContract);
+        address oldBukProtocolContract_ = address(bukProtocolContract);
         bukProtocolContract = IBukProtocol(_bukProtocolContract);
         _grantRole(BUK_PROTOCOL_CONTRACT_ROLE, _bukProtocolContract);
         _revokeRole(BUK_PROTOCOL_CONTRACT_ROLE, oldBukProtocolContract_);
@@ -354,6 +331,8 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
      * @param _newuri - The URI associated with the token ID.
      */
     function _setURI(uint256 _id, string memory _newuri) private {
+        string memory olduri_ = uriByTokenId[_id];
         uriByTokenId[_id] = _newuri;
+        emit SetURI(_id, olduri_, _newuri);
     }
 }

@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
+
 /**
  * The above function is a TypeScript function that retrieves the current timestamp of the latest
  * block in the Ethereum blockchain and saves an initial snapshot of the blockchain state.
@@ -15,6 +16,7 @@ const saveInitialSnapshot = async () => {
   const response = await ethers.provider.send("evm_snapshot");
   initialSnapshotId = response;
 };
+
 /**
  * The function `restoreInitialSnapshot` reverts the Ethereum Virtual Machine (EVM) state to the
  * initial snapshot identified by `initialSnapshotId`.
@@ -22,6 +24,7 @@ const saveInitialSnapshot = async () => {
 const restoreInitialSnapshot = async () => {
   await ethers.provider.send("evm_revert", [initialSnapshotId]);
 };
+
 /**
  * The function `fastForwardTo` allows you to fast forward the Ethereum Virtual Machine (EVM) to
  * a specific timestamp.
@@ -46,6 +49,7 @@ const fastForwardTo = async (timestamp: number): Promise<void> => {
     }
   }
 };
+
 describe("BukProtocol Updations", function () {
   let stableTokenContract;
   let bukProtocolContract;
@@ -150,6 +154,7 @@ describe("BukProtocol Updations", function () {
 
     await saveInitialSnapshot();
   });
+
   afterEach(async function () {
     await restoreInitialSnapshot();
   });
@@ -173,6 +178,75 @@ describe("BukProtocol Updations", function () {
     it("Should not set treasury if not admin", async function () {
       //Set treasury
       await expect(bukProtocolContract.connect(account2).setBukTreasury(account1)).to.be.reverted;
+    });
+  });
+
+  describe("Set Admin in BukProtocol", function () {
+    it("Should set admin by admin", async function () {
+      //Set admin
+      expect(await bukProtocolContract.connect(adminWallet).setAdmin(account1)).not.be.reverted;
+      const addresses = await bukProtocolContract.connect(account1).getWallets()
+      expect(addresses[3]).to.equal(await account1.getAddress());
+    });
+    it("Should set admin and emit events", async function () {
+      const addresses = await bukProtocolContract.connect(adminWallet).getWallets()
+      //Get the old admin
+      const oldAdmin = addresses[3];
+      //Set admin
+      expect(
+        await bukProtocolContract
+          .connect(adminWallet)
+          .setAdmin(account1))
+        .to.emit(bukProtocolContract, "SetAdminWallet")
+        .withArgs(oldAdmin, await account1.getAddress());
+    });
+    it("Should not set admin if not admin", async function () {
+      //Set admin
+      await expect(bukProtocolContract.connect(account2).setAdmin(account1)).to.be.reverted;
+    });
+  });
+
+  describe("Set Signature Verifier in BukProtocol", function () {
+    it("Should set signature verifier by admin", async function () {
+      //Set signature verifier
+      expect(await bukProtocolContract.connect(adminWallet).setSignatureVerifier(account1)).not.be.reverted;
+      const addresses = await bukProtocolContract.connect(adminWallet).getWallets()
+      expect(addresses[4]).to.equal(await account1.getAddress());
+    });
+    it("Should set signature verifier and emit events", async function () {
+      //Set signature verifier
+      expect(
+        await bukProtocolContract
+          .connect(adminWallet)
+          .setSignatureVerifier(account1))
+        .to.emit(bukProtocolContract, "SetSignerVerifier")
+        .withArgs(await account1.getAddress());
+    });
+    it("Should not set signature verifier if not admin", async function () {
+      //Set signature verifier
+      await expect(bukProtocolContract.connect(account2).setSignatureVerifier(account1)).to.be.reverted;
+    });
+  });
+
+  describe("Set Royalties Contract in BukProtocol", function () {
+    it("Should set royalties contract by admin", async function () {
+      //Set royalties
+      expect(await bukProtocolContract.connect(adminWallet).setRoyaltiesContract(account1)).not.be.reverted;
+      const addr = await bukProtocolContract.connect(adminWallet).royaltiesContract()
+      expect(addr).to.equal(await account1.getAddress());
+    });
+    it("Should set royalties contract and emit events", async function () {
+      //Set royalties
+      expect(
+        await bukProtocolContract
+          .connect(adminWallet)
+          .setRoyaltiesContract(account1))
+        .to.emit(bukProtocolContract, "SetRoyaltiesContract")
+        .withArgs(await account1.getAddress());
+    });
+    it("Should not set royalties contract if not admin", async function () {
+      //Set royalties
+      await expect(bukProtocolContract.connect(account2).setRoyaltiesContract(account1)).to.be.reverted;
     });
   });
 
@@ -289,212 +363,6 @@ describe("BukProtocol Updations", function () {
     it("Should not set royaltiesContract if not admin", async function () {
       //Set royaltiesContract
       await expect(bukProtocolContract.connect(account2).setRoyaltiesContract(account1)).to.be.reverted;
-    });
-  });
-
-  describe("Set Token URIs for NFTS in BukProtocol", function () {
-    it("Should set Token URIs for BukNFTs by admin", async function () {
-      //Grant allowance permission
-      const res = await stableTokenContract.connect(owner).approve(
-        await bukProtocolContract.getAddress(),
-        150000000,
-      );
-
-      //Book room
-      expect(
-        await bukProtocolContract.connect(owner).bookRoom(
-          1,
-          [100000000],
-          [80000000],
-          [70000000],
-          1701504548,
-          1701590948,
-          12,
-          true,
-        ),
-      ).not.be.reverted;
-
-      //Mint NFT
-      await expect(
-        bukProtocolContract.connect(owner).mintBukNFT(
-          [1],
-          [
-            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-          ],
-        ),
-      ).not.be.reverted;
-
-      //Set Token URI
-      const newUri = "http://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json"
-      expect(await bukProtocolContract.connect(adminWallet)
-        .setTokenUri(
-          1,
-          newUri,
-        )).not.be.reverted;
-      const uri = await nftContract.uri(1);
-      expect(uri).to.equal(newUri);
-    });
-    it("Should set Token URIs for BukPOSNFTs by admin", async function () {
-      //Grant allowance permission
-      const res = await stableTokenContract.connect(owner).approve(
-        await bukProtocolContract.getAddress(),
-        150000000,
-      );
-
-      //Book room
-      expect(
-        await bukProtocolContract.connect(owner).bookRoom(
-          1,
-          [100000000],
-          [80000000],
-          [70000000],
-          1701504548,
-          1701590948,
-          12,
-          true,
-        ),
-      ).not.be.reverted;
-
-      //Mint NFT
-      await expect(
-        bukProtocolContract.connect(owner).mintBukNFT(
-          [1],
-          [
-            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-          ],
-        ),
-      ).not.be.reverted;
-
-      //Check-in NFT
-      await expect(
-        bukProtocolContract.connect(owner).checkin(
-          [1]
-        ),
-      ).not.be.reverted;
-
-      await fastForwardTo(1701590949);
-
-      //Check-out NFT
-      await expect(
-        bukProtocolContract.connect(adminWallet).checkout(
-          [1]
-        ),
-      ).not.be.reverted;
-
-      //Set Token URI
-      const newUri = "http://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json"
-      expect(await bukProtocolContract.connect(adminWallet)
-        .setTokenUri(
-          1,
-          newUri,
-        )).not.be.reverted;
-      const uri = await nftPosContract.uri(1);
-      expect(uri).to.equal(newUri);
-    });
-    it("Should set Token URIs and emit events", async function () {
-      //Grant allowance permission
-      const res = await stableTokenContract.connect(owner).approve(
-        await bukProtocolContract.getAddress(),
-        150000000,
-      );
-
-      //Book room
-      expect(
-        await bukProtocolContract.connect(owner).bookRoom(
-          1,
-          [100000000],
-          [80000000],
-          [70000000],
-          1701504548,
-          1701590948,
-          12,
-          true,
-        ),
-      ).not.be.reverted;
-
-      //Mint NFT
-      await expect(
-        bukProtocolContract.connect(owner).mintBukNFT(
-          [1],
-          [
-            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-          ],
-        ),
-      ).not.be.reverted;
-
-      //Set Token URI
-      const newUri = "http://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json"
-      expect(await bukProtocolContract.connect(adminWallet)
-        .setTokenUri(
-          1,
-          newUri,
-        ))
-        .to.emit(bukProtocolContract, "SetStableToken")
-        .withArgs(1, newUri);
-    });
-    it("Should not set Token URIs if not admin", async function () {
-      //Grant allowance permission
-      const res = await stableTokenContract.connect(owner).approve(
-        await bukProtocolContract.getAddress(),
-        150000000,
-      );
-
-      //Book room
-      expect(
-        await bukProtocolContract.connect(owner).bookRoom(
-          1,
-          [100000000],
-          [80000000],
-          [70000000],
-          1701504548,
-          1701590948,
-          12,
-          true,
-        ),
-      ).not.be.reverted;
-
-      //Mint NFT
-      await expect(
-        bukProtocolContract.connect(owner).mintBukNFT(
-          [1],
-          [
-            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-          ],
-        ),
-      ).not.be.reverted;
-
-      //Set Token URI
-      const newUri = "http://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json"
-      await expect(bukProtocolContract.connect(account1)
-        .setTokenUri(
-          1,
-          newUri,
-        )).to.be.reverted;
-      const uri = await nftContract. uriByTokenId(1);
-      expect(uri).not.equal(newUri);
-    });
-  });
-
-  describe("Set NFT contract name in BukProtocol", function () {
-    it("Should set NFT contract name by admin", async function () {
-      //Set Name for NFTs
-      const NAME = "BukTrips New"
-      expect(await bukProtocolContract.connect(adminWallet).setNFTContractName(NAME)).not.be.reverted;
-      const newName = await nftContract.connect(adminWallet).name()
-      expect(newName).to.equal(NAME);
-    });
-    it("Should set NFT contract name and emit events", async function () {
-      //Set Name for NFTs
-      const NAME = "BukTrips New"
-      expect(await bukProtocolContract.connect(adminWallet).setNFTContractName(NAME))
-        .to.emit(bukProtocolContract, "UpdateContractName")
-        .withArgs(NAME);
-    });
-    it("Should not set NFT contract name if not admin", async function () {
-      //Set Name for NFTs
-      const NAME = "BukTrips New"
-      await expect(bukProtocolContract.connect(account1).setNFTContractName(NAME))
-        .to.be.reverted;
     });
   });
 

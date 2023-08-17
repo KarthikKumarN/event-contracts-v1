@@ -1,8 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.19;
 
+/**
+ * @title Interface to define the BUK royalties.
+ * @author BUK Technology Inc
+ * @dev Collection of all functions related to the BUK Royalties.
+ */
 interface IBukRoyalties {
-
     /**
      * @dev Struct named Royalty to store royalty information.
      * @param address receiver           The address of the receiver who will receive the royalty
@@ -18,29 +22,32 @@ interface IBukRoyalties {
      * @param oldBukProtocol, old buk protocol address
      * @param newBukProtocol, new buk protocol address
      */
-    event SetBukProtocol(address indexed oldBukProtocol, address indexed newBukProtocol);
+    event SetBukProtocol(
+        address indexed oldBukProtocol,
+        address indexed newBukProtocol
+    );
 
     /**
-     * @dev Emitted when new royalty has been updated
+     * @dev Emitted when new Buk royalty has been updated
      * @param oldRoyalty, old buk royalty
      * @param newRoyalty, new buk royalty
-     * @notice This event is used when Buk, Hotel and First Owner royalties are updated
+     * @notice This event is used when Buk royalty is updated
      */
     event SetBukRoyalty(uint96 oldRoyalty, uint96 newRoyalty);
 
     /**
-     * @dev Emitted when new royalty has been updated
+     * @dev Emitted when Hotel royalty has been updated
      * @param oldRoyalty, old buk royalty
      * @param newRoyalty, new buk royalty
-     * @notice This event is used when Buk, Hotel and First Owner royalties are updated
+     * @notice This event is used when Hotel royalty is updated
      */
     event SetHotelRoyalty(uint96 oldRoyalty, uint96 newRoyalty);
 
     /**
-     * @dev Emitted when new royalty has been updated
+     * @dev Emitted when First Owner royalty has been updated
      * @param oldRoyalty, old buk royalty
      * @param newRoyalty, new buk royalty
-     * @notice This event is used when Buk, Hotel and First Owner royalties are updated
+     * @notice This event is used when First Owner royalty is updated
      */
     event SetFirstOwnerRoyalty(uint96 oldRoyalty, uint96 newRoyalty);
 
@@ -68,9 +75,9 @@ interface IBukRoyalties {
      * @notice This function can only be called by `ADMIN_ROLE`
      */
     function setBukRoyaltyInfo(
-        address _recipient, 
+        address _recipient,
         uint96 _royaltyFraction
-        ) external;
+    ) external;
 
     /**
      * @dev Function to define the royalty Fraction for Hotel.
@@ -78,9 +85,9 @@ interface IBukRoyalties {
      * @notice This function can only be called by `ADMIN_ROLE`
      */
     function setHotelRoyaltyInfo(
-        address _recipient, 
+        address _recipient,
         uint96 _royaltyFraction
-        ) external;
+    ) external;
 
     /**
      * @dev Function to define the royalty Fraction for the First Owners.
