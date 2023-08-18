@@ -16,7 +16,7 @@ The `BukNFTs` contract is a Solidity smart contract designed for managing hotel 
 The contract is designed with the following key components:
 
 - **Buk Treasury**: Address of the Buk treasury contract.
-- **Buk PoS NFT Collection**: Name and address of the Buk PoS NFT collection contract.
+- **Buk POS NFT Collection**: Name and address of the Buk POS NFT collection contract.
 - **Buk Protocol**: Address of the Buk Protocol contract.
 - **Token URI Mapping**: Mapping for token URI's for booked tickets.
 - **Roles**: Constants for roles like Buk Protocol contract, marketplace contract, and admin.
@@ -60,7 +60,7 @@ The contract is designed with the following key components:
 - **SetBukTreasury**: Emitted when treasury is updated.
 - **SetMarketplace**: Emitted when marketplace role is granted.
 - **SetNFTContractName**: Event to update the contract name.
-- **SeNftPoSContractRole**: Event to set NFT contract role.
+- **SeNFTPOSContractRole**: Event to set NFT contract role.
 - **SetURI**: Event to set token URI.
 
 ## Interface: IBukNFTs

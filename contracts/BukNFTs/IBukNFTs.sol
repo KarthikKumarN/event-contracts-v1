@@ -41,9 +41,9 @@ interface IBukNFTs is IERC1155 {
     /**
      * @dev Event to set NFT contract role
      */
-    event SetNftPoSContractRole(
-        address indexed oldNftPoSContractAddr,
-        address indexed newNftPoSContractAddr
+    event SetNFTPOSContractRole(
+        address indexed oldNFTPOSContractAddr,
+        address indexed newNFTPOSContractAddr
     );
 
     /**
@@ -78,10 +78,10 @@ interface IBukNFTs is IERC1155 {
 
     /**
      * @dev Function to set the BukPOSNFT to the contract
-     * @param _nftPoSContract address: The address of the NFT contract
+     * @param _nftPOSContract address: The address of the NFT contract
      * @notice This function can only be called by a contract with `ADMIN_ROLE`
      */
-    function setBukPOSNFTRole(address _nftPoSContract) external;
+    function setBukPOSNFTRole(address _nftPOSContract) external;
 
     /**
      * @dev Set the name of the contract.
@@ -120,14 +120,14 @@ interface IBukNFTs is IERC1155 {
      * @param _account - The account to burn the NFT from.
      * @param _id - The token ID of the NFT to burn.
      * @param _amount - The amount of NFTs to burn.
-     * @param _mintPoS - Whether or not to call the Buk PoS NFTs contract to burn the NFT.
+     * @param _mintPOS - Whether or not to call the Buk POS NFTs contract to burn the NFT.
      * @notice This function can only be called by a contract with `BUK_PROTOCOL_CONTRACT_ROLE`
      */
     function burn(
         address _account,
         uint256 _id,
         uint256 _amount,
-        bool _mintPoS
+        bool _mintPOS
     ) external;
 
     /**

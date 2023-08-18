@@ -124,7 +124,7 @@ describe("BukRoyalties Updations", function () {
       bukTreasuryContract.getAddress(),
     );
 
-    //Set BukNFTs address in BukPoSNFTs
+    //Set BukNFTs address in BukPOSNFTs
     await nftPosContract.setBukNFTRole(nftContract.getAddress())
 
     //Marketplace
@@ -141,7 +141,7 @@ describe("BukRoyalties Updations", function () {
     );
 
     //Set BukPOSNFTs address in Buk Protocol
-    const setBukPoSNFTs = await bukProtocolContract.setBukPoSNFTs(
+    const setBukPOSNFTs = await bukProtocolContract.setBukPOSNFTs(
       nftPosContract.getAddress(),
     );
 

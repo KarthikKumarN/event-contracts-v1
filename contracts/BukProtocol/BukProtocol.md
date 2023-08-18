@@ -43,7 +43,7 @@ The contract is designed with the following key components:
 - **setBukWallet**: Update the Buk Wallet address to collect commission.
 - **setStableToken**: Update the stable token address.
 - **setBukNFTs**: Update the BukNFTs contract address.
-- **setBukPoSNFTs**: Update the BukPOSNFTs contract address.
+- **setBukPOSNFTs**: Update the BukPOSNFTs contract address.
 - **setRoyaltiesContract**: Sets the Buk royalties contract address.
 - **setTokenUri**: Update the token uri.
 - **setNFTContractName**: Set the name of the contract.
@@ -70,7 +70,7 @@ The contract is designed with the following key components:
 - **SetCommission**: Emitted when the commission is set.
 - **SetTokenURI**: Emitted when token uri is set.
 - **SetBukNFTs**: Emitted when BukNFTs contract address is updated.
-- **SetBukPoSNFTs**: Emitted when BukPOSNFTs contract address is updated.
+- **SetBukPOSNFTs**: Emitted when BukPOSNFTs contract address is updated.
 - **SetRoyaltiesContract**: Emitted when BukRoyalties contract address is updated.
 - **SetSignerVerifier**: Emitted when signer verifier is updated.
 - **SetBukTreasury**: Emitted when Buk treasury is updated.
