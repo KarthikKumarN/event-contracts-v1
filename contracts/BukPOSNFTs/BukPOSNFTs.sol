@@ -35,7 +35,7 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
     IBukProtocol public bukProtocolContract;
 
     /**
-     * @dev Mapping for token URI's for Buk PoS NFTs
+     * @dev Mapping for token URI's for Buk POS NFTs
      */
     mapping(uint256 => string) public uriByTokenId; //tokenId -> uri
 
@@ -93,9 +93,9 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
     function setBukNFTRole(address _nftContract) external onlyRole(ADMIN_ROLE) {
         _grantRole(BUK_NFT_CONTRACT_ROLE, _nftContract);
         _revokeRole(BUK_NFT_CONTRACT_ROLE, address(nftContract));
-        address oldNftContract_ = address(nftContract);
+        address oldNFTContract_ = address(nftContract);
         nftContract = IBukNFTs(_nftContract);
-        emit SetNftContractRole(oldNftContract_, _nftContract);
+        emit SetNFTContractRole(oldNFTContract_, _nftContract);
     }
 
     /**

@@ -75,16 +75,16 @@ interface IBukProtocol {
      * @dev Emitted when BukNFTs contract address is updated.
      */
     event SetBukNFTs(
-        address indexed oldNftContract,
-        address indexed newNftContract
+        address indexed oldNFTContract,
+        address indexed newNFTContract
     );
 
     /**
      * @dev Emitted when BukPOSNFTs contract address is updated.
      */
-    event SetBukPoSNFTs(
-        address indexed oldNftPoSContract,
-        address indexed newNftPoSContract
+    event SetBukPOSNFTs(
+        address indexed oldNFTPOSContract,
+        address indexed newNFTPOSContract
     );
 
     /**
@@ -218,10 +218,10 @@ interface IBukProtocol {
 
     /**
      * @dev Function to update the BukPOSNFTs contract address.
-     * @param _nftPoSContractAddr Address of the BukPOSNFTs contract.
+     * @param _nftPOSContractAddr Address of the BukPOSNFTs contract.
      * @notice This function can only be called by admin
      */
-    function setBukPoSNFTs(address _nftPoSContractAddr) external;
+    function setBukPOSNFTs(address _nftPOSContractAddr) external;
 
     /**
      * @dev Sets the Buk royalties contract address.

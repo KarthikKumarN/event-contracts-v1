@@ -18,7 +18,7 @@ The contract is designed with the following key components:
 - **Buk Treasury**: Address of the Buk treasury contract.
 - **BukNFTs Contract**: Address of the BukNFTs contract.
 - **Buk Protocol**: Address of the Buk Protocol contract.
-- **Token URI Mapping**: Mapping for token URI's for Buk PoS NFTs.
+- **Token URI Mapping**: Mapping for token URI's for Buk POS NFTs.
 - **Roles**: Constants for roles like Buk NFT contract, Buk Protocol contract, and admin.
 
 ## Features
@@ -51,7 +51,7 @@ The contract is designed with the following key components:
 
 ## Events
 
-- **SetNftContractRole**: Emitted when NFT contract role is set.
+- **SetNFTContractRole**: Emitted when NFT contract role is set.
 - **SetBukProtocol**: Emitted when Buk Protocol Address is updated.
 - **SetBukTreasury**: Emitted when treasury is updated.
 - **SetNFTContractName**: Event to update the contract name.
@@ -63,7 +63,7 @@ The `IBukPOSNFTs` interface provides a blueprint for the main `BukPOSNFTs` contr
 
 ### Key Components:
 
-- **Events**: Various events like `SetNftContractRole`, `SetBukProtocol`, `SetBukTreasury`, etc.
+- **Events**: Various events like `SetNFTContractRole`, `SetBukProtocol`, `SetBukTreasury`, etc.
 - **Functions**: Functions like `setBukProtocol`, `setBukTreasury`, `setBukNFTRole`, etc.
 
 ## License

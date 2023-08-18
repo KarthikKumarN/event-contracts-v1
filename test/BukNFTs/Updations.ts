@@ -143,7 +143,7 @@ describe("BukNFTs Updations", function () {
     );
 
     //Set BukPOSNFTs address in Buk Protocol
-    const setBukPoSNFTs = await bukProtocolContract.setBukPoSNFTs(
+    const setBukPOSNFTs = await bukProtocolContract.setBukPOSNFTs(
       nftPosContract.getAddress(),
     );
 
@@ -245,12 +245,12 @@ describe("BukNFTs Updations", function () {
       expect(await nftContract.setBukPOSNFTRole(await nftPosContract.getAddress()))
         .not.be.reverted;
       //Check if BukPOSNFTs is set
-      expect(await nftContract.nftPoSContract())
+      expect(await nftContract.nftPOSContract())
         .to.equal(await nftPosContract.getAddress());
     })
     it("Should set BukPOSNFTs role and emit event", async function () {
       expect(await nftContract.setBukPOSNFTRole(await nftPosContract.getAddress()))
-        .to.emit(nftContract, "SetNftPoSContractRole")
+        .to.emit(nftContract, "SetNFTPOSContractRole")
         .withArgs(await nftPosContract.getAddress(), await nftPosContract.getAddress());
     })
     it("Should revert if not called by admin", async function () {
@@ -347,8 +347,8 @@ describe("BukNFTs Updations", function () {
     });
   });
 
-  describe("Safe transfer of Buk PoS NFTs", function () {
-    it("Should safe transfer Buk PoS NFTs", async function () {
+  describe("Safe transfer of Buk POS NFTs", function () {
+    it("Should safe transfer Buk POS NFTs", async function () {
       //Approve marketplace
       await expect(nftContract.connect(owner)
         .setApprovalForAll(await testMarketplace1.getAddress(), 1)
@@ -371,7 +371,7 @@ describe("BukNFTs Updations", function () {
 
     })
 
-    it("Should safe transfer Buk PoS NFTs and emit event", async function () {
+    it("Should safe transfer Buk POS NFTs and emit event", async function () {
       //Approve marketplace
       await expect(nftContract.connect(owner)
         .setApprovalForAll(await testMarketplace1.getAddress(), 1)
@@ -419,8 +419,8 @@ describe("BukNFTs Updations", function () {
     })
   });
 
-  describe("Safe batch transfer of Buk PoS NFTs", function () {
-    it("Should safe batch transfer Buk PoS NFTs", async function () {
+  describe("Safe batch transfer of Buk POS NFTs", function () {
+    it("Should safe batch transfer Buk POS NFTs", async function () {
       //Approve marketplace
       await expect(nftContract.connect(owner)
         .setApprovalForAll(await testMarketplace1.getAddress(), 1)
@@ -443,7 +443,7 @@ describe("BukNFTs Updations", function () {
 
     })
 
-    it("Should safe batch transfer Buk PoS NFTs and emit event", async function () {
+    it("Should safe batch transfer Buk POS NFTs and emit event", async function () {
       //Approve marketplace
       await expect(nftContract.connect(owner)
         .setApprovalForAll(await testMarketplace1.getAddress(), 1)

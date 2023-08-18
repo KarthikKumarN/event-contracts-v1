@@ -15,14 +15,14 @@ import { IBukTreasury } from "../BukTreasury/IBukTreasury.sol";
  */
 contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
     /**
-     * @dev Name of the Buk PoS NFT collection contract
+     * @dev Name of the Buk POS NFT collection contract
      */
     string public name;
 
     /**
-     * @dev Address of the Buk PoS NFT collection contract
+     * @dev Address of the Buk POS NFT collection contract
      */
-    IBukPOSNFTs public nftPoSContract;
+    IBukPOSNFTs public nftPOSContract;
 
     /**
      * @dev Address of the Buk Protocol contract
@@ -59,19 +59,19 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
     /**
      * @dev Constructor to initialize the contract
      * @param _contractName NFT contract name
-     * @param _bukPoSContract Address of the Buk PoS NFTs contract
+     * @param _bukPOSContract Address of the Buk POS NFTs contract
      * @param _bukProtocolContract Address of the buk protocol contract
      * @param _bukTreasuryContract Address of the Buk treasury contract.
      */
     constructor(
         string memory _contractName,
-        address _bukPoSContract,
+        address _bukPOSContract,
         address _bukProtocolContract,
         address _bukTreasuryContract
     ) ERC1155("") {
         _setNFTContractName(_contractName);
         _setBukTreasury(_bukTreasuryContract);
-        _setBukPOSNFTRole(_bukPoSContract);
+        _setBukPOSNFTRole(_bukPOSContract);
         _setBukProtocol(_bukProtocolContract);
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(ADMIN_ROLE, _msgSender());
@@ -110,9 +110,9 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
      * @dev See {IBukNFTs-setBukPOSNFTRole}.
      */
     function setBukPOSNFTRole(
-        address _nftPoSContract
+        address _nftPOSContract
     ) external onlyRole(ADMIN_ROLE) {
-        _setBukPOSNFTRole(_nftPoSContract);
+        _setBukPOSNFTRole(_nftPOSContract);
     }
 
     /**
@@ -160,12 +160,12 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
         address _account,
         uint256 _id,
         uint256 _amount,
-        bool _mintPoS
+        bool _mintPOS
     ) external onlyRole(BUK_PROTOCOL_CONTRACT_ROLE) {
         string memory uri_ = uriByTokenId[_id];
         delete uriByTokenId[_id];
-        if (_mintPoS) {
-            nftPoSContract.mint(_account, _id, _amount, uri_, "");
+        if (_mintPOS) {
+            nftPOSContract.mint(_account, _id, _amount, uri_, "");
         }
         _burn(_account, _id, _amount);
     }
@@ -317,12 +317,12 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
 
     /**
      * Private function to set the role to a BukPOSNFT contract
-     * @param _nftPoSContract The address of the BukPOSNFT contract to grant the role to
+     * @param _nftPOSContract The address of the BukPOSNFT contract to grant the role to
      */
-    function _setBukPOSNFTRole(address _nftPoSContract) private {
-        address oldNftPoSContract_ = address(nftPoSContract);
-        nftPoSContract = IBukPOSNFTs(_nftPoSContract);
-        emit SetNftPoSContractRole(oldNftPoSContract_, _nftPoSContract);
+    function _setBukPOSNFTRole(address _nftPOSContract) private {
+        address oldNFTPOSContract_ = address(nftPOSContract);
+        nftPOSContract = IBukPOSNFTs(_nftPOSContract);
+        emit SetNFTPOSContractRole(oldNFTPOSContract_, _nftPOSContract);
     }
 
     /**

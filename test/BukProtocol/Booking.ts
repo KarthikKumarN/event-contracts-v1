@@ -80,7 +80,7 @@ describe("BukProtocol Bookings", function () {
       bukTreasuryContract.getAddress(),
     );
 
-    //Set BukNFTs address in BukPoSNFTs
+    //Set BukNFTs address in BukPOSNFTs
     await nftPosContract.setBukNFTRole(nftContract.getAddress())
 
     //Marketplace
@@ -97,7 +97,7 @@ describe("BukProtocol Bookings", function () {
     );
 
     //Set BukPOSNFTs address in Buk Protocol
-    const setBukPoSNFTs = await bukProtocolContract.setBukPoSNFTs(
+    const setBukPOSNFTs = await bukProtocolContract.setBukPOSNFTs(
       nftPosContract.getAddress(),
     );
 
@@ -1479,7 +1479,7 @@ describe("BukProtocol Bookings", function () {
 
       //Check the balance of NFT
       expect(await nftContract.balanceOf(owner.getAddress(), 1)).to.equal(1);
-      //Check the balance of PoS NFT
+      //Check the balance of POS NFT
       expect(await nftPosContract.balanceOf(owner.getAddress(), 1)).to.equal(0);
 
 
@@ -1510,7 +1510,7 @@ describe("BukProtocol Bookings", function () {
 
       //Check the balance of NFT
       expect(await nftContract.balanceOf(owner.getAddress(), 1)).to.equal(0);
-      //Check the balance of PoS NFT
+      //Check the balance of POS NFT
       expect(await nftPosContract.balanceOf(owner.getAddress(), 1)).to.equal(0);
 
     });
@@ -1804,7 +1804,7 @@ describe("BukProtocol Bookings", function () {
 
       //Check the balance of NFT
       expect(await nftContract.balanceOf(owner.getAddress(), 1)).to.equal(1);
-      //Check the balance of PoS NFT
+      //Check the balance of POS NFT
       expect(await nftPosContract.balanceOf(owner.getAddress(), 1)).to.equal(0);
 
       const _id = 1;
@@ -1824,7 +1824,7 @@ describe("BukProtocol Bookings", function () {
 
       //Check the balance of NFT
       expect(await nftContract.balanceOf(owner.getAddress(), 1)).to.equal(0);
-      //Check the balance of PoS NFT
+      //Check the balance of POS NFT
       expect(await nftPosContract.balanceOf(owner.getAddress(), 1)).to.equal(0);
 
     });

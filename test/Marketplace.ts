@@ -115,7 +115,7 @@ describe("Marketplace", function () {
     // console.log("🚀 ~ file: Marketplace.ts:94 ~ setBukNFTs:");
 
     //Set BukPOSNFTs address in Buk Protocol
-    const setBukPoSNFTs = await bukProtocolContract.setBukPoSNFTs(
+    const setBukPOSNFTs = await bukProtocolContract.setBukPOSNFTs(
       nftPosContract.getAddress(),
     );
 
@@ -126,7 +126,7 @@ describe("Marketplace", function () {
     const setBukProtocolRoyalties = await royaltiesContract.setBukProtocolContract(bukProtocolContract.getAddress())
 
 
-    // console.log("🚀 ~ file: Marketplace.ts:98 ~ setBukPoSNFTs:");
+    // console.log("🚀 ~ file: Marketplace.ts:98 ~ setBukPOSNFTs:");
 
     // Set all required
     await royaltiesContract.setBukRoyaltyInfo(bukTreasuryContract, 200);

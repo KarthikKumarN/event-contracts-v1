@@ -22,13 +22,13 @@ contract BukRoyalties is AccessControl, IBukRoyalties {
     IBukProtocol public bukProtocolContract;
 
     /**
-     * @dev Public variable representing the Buk PoS NFT collection contract.
+     * @dev Public variable representing the Buk POS NFT collection contract.
      * It holds the address of the Buk Royalty contract.
      */
     Royalty public bukRoyalty;
 
     /**
-     * @dev Public variable representing the Buk PoS NFT collection contract.
+     * @dev Public variable representing the Buk POS NFT collection contract.
      * It holds the address of the Hotel Royalty contract.
      */
     Royalty public hotelRoyalty;
@@ -41,7 +41,7 @@ contract BukRoyalties is AccessControl, IBukRoyalties {
 
     /**
      * @dev Dynamic array of the Royalty type representing other royalty contracts associated
-     * with the Buk PoS NFT collection contract.
+     * with the Buk POS NFT collection contract.
      */
     Royalty[] public otherRoyalties;
 

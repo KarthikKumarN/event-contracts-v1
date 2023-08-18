@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { keccak256, toUtf8Bytes } from "ethers";
 
-describe("BukPoSNFTs Access Control", function () {
+describe("BukPOSNFTs Access Control", function () {
   let stableTokenContract;
   let bukProtocolContract;
   let marketplaceContract;
@@ -94,7 +94,7 @@ describe("BukPoSNFTs Access Control", function () {
     );
 
     //Set BukPOSNFTs address in Buk Protocol
-    const setBukPoSNFTs = await bukProtocolContract.setBukPoSNFTs(
+    const setBukPOSNFTs = await bukProtocolContract.setBukPOSNFTs(
       nftPosContract.getAddress(),
     );
 

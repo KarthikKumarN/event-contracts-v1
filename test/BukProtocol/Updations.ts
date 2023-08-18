@@ -128,7 +128,7 @@ describe("BukProtocol Updations", function () {
       bukTreasuryContract.getAddress(),
     );
 
-    //Set BukNFTs address in BukPoSNFTs
+    //Set BukNFTs address in BukPOSNFTs
     await nftPosContract.setBukNFTRole(nftContract.getAddress())
 
     //Marketplace
@@ -145,7 +145,7 @@ describe("BukProtocol Updations", function () {
     );
 
     //Set BukPOSNFTs address in Buk Protocol
-    const setBukPoSNFTs = await bukProtocolContract.setBukPoSNFTs(
+    const setBukPOSNFTs = await bukProtocolContract.setBukPOSNFTs(
       nftPosContract.getAddress(),
     );
 
@@ -322,24 +322,24 @@ describe("BukProtocol Updations", function () {
 
   describe("Set BukPOSNFTs in BukProtocol", function () {
     it("Should set BukPOSNFTs contract address by admin", async function () {
-      // Set BukPoSNFTs
+      // Set BukPOSNFTs
       expect(await bukProtocolContract.connect(adminWallet)
-        .setBukPoSNFTs(await nftPosContract.getAddress())).not.be.reverted;
-      const addr1: string = await bukProtocolContract.nftPoSContract();
+        .setBukPOSNFTs(await nftPosContract.getAddress())).not.be.reverted;
+      const addr1: string = await bukProtocolContract.nftPOSContract();
       const addr2: string = await nftPosContract.getAddress();
       expect(addr1).to.be.equal(addr2);
     });
     it("Should set BukPOSNFTs contract address and emit events", async function () {
-      // Set BukPoSNFTs
+      // Set BukPOSNFTs
       expect(await bukProtocolContract.connect(adminWallet)
-        .setBukPoSNFTs(await nftPosContract.getAddress()))
-        .to.emit(bukProtocolContract, "SetBukPoSNFTs")
+        .setBukPOSNFTs(await nftPosContract.getAddress()))
+        .to.emit(bukProtocolContract, "SetBukPOSNFTs")
         .withArgs(await nftPosContract.getAddress());
     });
     it("Should not set BukPOSNFTs contract address if not admin", async function () {
-      // Set BukPoSNFTs
+      // Set BukPOSNFTs
       await expect(bukProtocolContract.connect(account1)
-        .setBukPoSNFTs(await nftPosContract.getAddress())).to.be.reverted;
+        .setBukPOSNFTs(await nftPosContract.getAddress())).to.be.reverted;
     });
   });
 

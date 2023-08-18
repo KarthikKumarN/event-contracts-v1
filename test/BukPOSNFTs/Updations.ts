@@ -139,7 +139,7 @@ describe("BukPOSNFTs Updations", function () {
     );
 
     //Set BukPOSNFTs address in Buk Protocol
-    const setBukPoSNFTs = await bukProtocolContract.setBukPoSNFTs(
+    const setBukPOSNFTs = await bukProtocolContract.setBukPOSNFTs(
       nftPosContract.getAddress(),
     );
 
@@ -247,7 +247,7 @@ describe("BukPOSNFTs Updations", function () {
     })
     it("Should set BukNFTs role and emit event", async function () {
       expect(await nftPosContract.setBukNFTRole(await nftContract.getAddress()))
-        .to.emit(nftPosContract, "SetNftContractRole")
+        .to.emit(nftPosContract, "SetNFTContractRole")
         .withArgs(await nftContract.getAddress(), await nftContract.getAddress());
     })
     it("Should revert if not called by owner", async function () {
@@ -347,7 +347,7 @@ describe("BukPOSNFTs Updations", function () {
     });
   });
 
-  describe("Safe transfer of Buk PoS NFTs", function () {
+  describe("Safe transfer of Buk POS NFTs", function () {
 
     /* The above code is using the Chai testing framework to define a "before" and "after" hook. */
     beforeEach(async function () {
@@ -370,7 +370,7 @@ describe("BukPOSNFTs Updations", function () {
       await restoreInitialSnapshot();
     });
 
-    it("Should safe transfer Buk PoS NFTs", async function () {
+    it("Should safe transfer Buk POS NFTs", async function () {
       expect(
         await nftPosContract.connect(adminWallet).safeTransferFrom(
           await owner.getAddress(),
@@ -383,7 +383,7 @@ describe("BukPOSNFTs Updations", function () {
 
     })
 
-    it("Should safe transfer Buk PoS NFTs and emit event", async function () {
+    it("Should safe transfer Buk POS NFTs and emit event", async function () {
       expect(
         await nftPosContract.connect(adminWallet).safeTransferFrom(
           await owner.getAddress(),
@@ -413,7 +413,7 @@ describe("BukPOSNFTs Updations", function () {
     })
   });
 
-  describe("Safe batch transfer of Buk PoS NFTs", function () {
+  describe("Safe batch transfer of Buk POS NFTs", function () {
 
     /* The above code is using the Chai testing framework to define a "before" and "after" hook. */
     beforeEach(async function () {
@@ -436,7 +436,7 @@ describe("BukPOSNFTs Updations", function () {
       await restoreInitialSnapshot();
     });
 
-    it("Should safe batch transfer Buk PoS NFTs", async function () {
+    it("Should safe batch transfer Buk POS NFTs", async function () {
       expect(
         await nftPosContract.connect(adminWallet).safeBatchTransferFrom(
           await owner.getAddress(),
@@ -449,7 +449,7 @@ describe("BukPOSNFTs Updations", function () {
 
     })
 
-    it("Should safe batch transfer Buk PoS NFTs and emit event", async function () {
+    it("Should safe batch transfer Buk POS NFTs and emit event", async function () {
 
       //Safe batch transfer
       expect(

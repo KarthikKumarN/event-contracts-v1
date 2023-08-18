@@ -21,7 +21,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
      * @dev address _stableToken          Address of the stable token.
      * @dev address _bukTreasury          Address of the Buk treasury contract.
      * @dev address nftContract Address of the Buk NFT contract.
-     * @dev address nftPoSContract  Address of the Buk NFT PoS Contract.
+     * @dev address nftPOSContract  Address of the Buk NFT POS Contract.
      * @dev address royaltiesContract  Address of the Buk Royalties Contract.
      */
     address private _admin;
@@ -30,7 +30,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
     IBukTreasury private _bukTreasury;
     ISignatureVerifier private _signatureVerifier;
     IBukNFTs public nftContract;
-    IBukPOSNFTs public nftPoSContract;
+    IBukPOSNFTs public nftPOSContract;
     IBukRoyalties public royaltiesContract;
 
     /**
@@ -125,18 +125,18 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
      * @dev See {IBukProtocol-setBukNFTs}.
      */
     function setBukNFTs(address _nftContractAddr) external onlyAdmin {
-        address oldNftContractAddr_ = address(nftContract);
+        address oldNFTContractAddr_ = address(nftContract);
         nftContract = IBukNFTs(_nftContractAddr);
-        emit SetBukNFTs(oldNftContractAddr_, _nftContractAddr);
+        emit SetBukNFTs(oldNFTContractAddr_, _nftContractAddr);
     }
 
     /**
      * @dev See {IBukProtocol-setBukPosNFTs}.
      */
-    function setBukPoSNFTs(address _nftPoSContractAddr) external onlyAdmin {
-        address oldNftPoSContractAddr_ = address(nftPoSContract);
-        nftPoSContract = IBukPOSNFTs(_nftPoSContractAddr);
-        emit SetBukPoSNFTs(oldNftPoSContractAddr_, _nftPoSContractAddr);
+    function setBukPOSNFTs(address _nftPOSContractAddr) external onlyAdmin {
+        address oldNFTPOSContractAddr_ = address(nftPOSContract);
+        nftPOSContract = IBukPOSNFTs(_nftPOSContractAddr);
+        emit SetBukPOSNFTs(oldNFTPOSContractAddr_, _nftPOSContractAddr);
     }
 
     /**
