@@ -78,7 +78,7 @@ contract Marketplace is Context, IMarketplace, AccessControl {
             .getBookingDetails(_tokenId);
         require(
             _price >= bookingDetails.minSalePrice,
-            "Sale price cann't be lessthan minimum sale price"
+            "Sale price can't be less than minimum sale price"
         );
         require(
             bookingDetails.status == IBukProtocol.BookingStatus.confirmed &&
@@ -91,7 +91,7 @@ contract Marketplace is Context, IMarketplace, AccessControl {
         );
         require(
             _bukNFTContract.isApprovedForAll(_msgSender(), address(this)),
-            "Please approve for execute trade"
+            "Please approve marketplace to execute trade"
         );
         require(
             block.timestamp <

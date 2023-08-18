@@ -453,7 +453,7 @@ describe("Marketplace", function () {
       // Approve allowance
       await expect(
         marketplaceContract.createListing(tokenId, salePrice),
-      ).to.be.revertedWith("Please approve for execute trade");
+      ).to.be.revertedWith("Please approve marketplace to execute trade");
     });
     it("Should create list minSale check", async function () {
       let tokenId = 1;
@@ -498,7 +498,7 @@ describe("Marketplace", function () {
       );
       await expect(
         marketplaceContract.createListing(tokenId, salePrice),
-      ).to.be.revertedWith("Sale price cann't be lessthan minimum sale price");
+      ).to.be.revertedWith("Sale price can't be less than minimum sale price");
     });
     it("Create list only confirmed booking check", async function () {
       let tokenId = 1;
