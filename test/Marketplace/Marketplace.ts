@@ -274,44 +274,6 @@ describe("Marketplace", function () {
     });
   });
 
-  // Test cases for setting new admin
-  describe("Set owner for marketplace", function () {
-    const ADMIN_ROLE = keccak256(toUtf8Bytes("ADMIN_ROLE"));
-    it("Should set the owner", async function () {
-      let newAddress = await account1.getAddress();
-      await expect(await marketplaceContract.setOwner(newAddress)).to.not.be
-        .reverted;
-      //Check if the new admin has ADMIN_ROLE
-      expect(
-        await marketplaceContract.hasRole(ADMIN_ROLE, newAddress),
-      ).to.equal(true);
-    });
-    it("Should reverted with error owner", async function () {
-      let newAddress = "0x0000000000000000000000000000000000000000";
-      await expect(marketplaceContract.setOwner(newAddress)).to.be.revertedWith(
-        "Invalid address",
-      );
-    });
-
-    it("Should set the owner and emit event", async function () {
-      let oldAddress = await owner.getAddress();
-      let newAddress = await account1.getAddress();
-      await expect(await marketplaceContract.setOwner(newAddress))
-        .to.emit(marketplaceContract, "OwnerSet")
-        .withArgs(oldAddress, newAddress);
-    });
-
-    it("Should reverted with admin error", async function () {
-      let newAddress = await account1.getAddress();
-
-      await expect(
-        marketplaceContract.connect(account1).setOwner(newAddress),
-      ).to.be.revertedWith(
-        `AccessControl: account ${account1.address.toLowerCase()} is missing role ${await marketplaceContract.ADMIN_ROLE()}`,
-      );
-    });
-  });
-
   // Test cases for getting listed status
   describe("Listed status marketplace", function () {
     it("Should get listed status for not listed tokeId", async function () {

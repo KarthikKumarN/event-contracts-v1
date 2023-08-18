@@ -93,13 +93,6 @@ interface IMarketplace {
     event BukNFTSet(address oldAddress, address newAddress);
 
     /**
-     * @dev Emitted when new Owner address has been updated
-     * @param oldAddress, Address of the old owner
-     * @param newAddress, Address of the new owner
-     */
-    event OwnerSet(address oldAddress, address newAddress);
-
-    /**
      * @dev Emitted when new Stable token address has been updated
      * @param oldAddress, Address of the old address
      * @param newAddress, Address of the new address

@@ -34,9 +34,6 @@ contract Marketplace is Context, IMarketplace, AccessControl {
      */
     IBukNFTs private _bukNFTContract;
 
-    // Address of owner who can perform administrator work
-    address private _owner;
-
     /**
      * @dev Currency used for transaction
      */
@@ -58,7 +55,6 @@ contract Marketplace is Context, IMarketplace, AccessControl {
         address _bukNFTAddress,
         address _tokenAddress
     ) {
-        _setOwner(_msgSender());
         _setStableToken(_tokenAddress);
         _setBukProtocol(_bukProtocalAddress);
         _setBukNFT(_bukNFTAddress);
@@ -206,13 +202,6 @@ contract Marketplace is Context, IMarketplace, AccessControl {
     }
 
     /**
-     * @dev Refer {IMarketplace-setAdmin}.
-     */
-    function setOwner(address _ownerAddress) external onlyRole(ADMIN_ROLE) {
-        _setOwner(_ownerAddress);
-    }
-
-    /**
      * @dev Refer {IMarketplace-setStableToken}.
      */
     function setStableToken(
@@ -282,20 +271,6 @@ contract Marketplace is Context, IMarketplace, AccessControl {
         _revokeRole(BUK_PROTOCOL_ROLE, address(oldAddress));
 
         emit BukProtocolSet(oldAddress, _bukProtocol);
-    }
-
-    /**
-     *
-     * @param _ownerAddress New owner address
-     */
-    function _setOwner(address _ownerAddress) private {
-        require(_ownerAddress != address(0), "Invalid address");
-        address oldAddress = address(_owner);
-        _owner = address(_ownerAddress);
-        _setupRole(ADMIN_ROLE, address(_ownerAddress));
-        _revokeRole(ADMIN_ROLE, oldAddress);
-
-        emit OwnerSet(oldAddress, _owner);
     }
 
     /**
