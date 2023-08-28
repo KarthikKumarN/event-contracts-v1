@@ -107,10 +107,13 @@ describe("BukProtocol Bookings", function () {
     //Set Buk Protocol in BukRoyalties
     const setBukProtocolRoyalties = await royaltiesContract.setBukProtocolContract(bukProtocolContract.getAddress())
 
-    // Set all required
+    //Set Buk Royalty Info in BukRoyalties
     await royaltiesContract.setBukRoyaltyInfo(bukTreasuryContract, 200);
+    //Set Hotel Royalty Info in BukRoyalties
     await royaltiesContract.setHotelRoyaltyInfo(bukTreasuryContract, 200);
+    //Set First Owner Royalty Info in BukRoyalties
     await royaltiesContract.setFirstOwnerRoyaltyInfo(200);
+    //Set Buk Treasury in BukNFTs
     await nftContract.setBukTreasury(await bukTreasuryContract.getAddress());
 
   });
