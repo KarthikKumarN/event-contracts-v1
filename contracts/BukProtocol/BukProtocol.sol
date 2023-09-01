@@ -178,6 +178,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
         uint256[] memory _total,
         uint256[] memory _baseRate,
         uint256[] memory _minSalePrice,
+        bytes32 _propertyId,
         uint256 _checkin,
         uint256 _checkout,
         uint256 _tradeTimeLimit,
@@ -210,8 +211,9 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
             ++_bookingIds;
             _bookingDetails[_bookingIds] = Booking(
                 _bookingIds,
-                BookingStatus.booked,
                 0,
+                _propertyId,
+                BookingStatus.booked,
                 msg.sender,
                 _checkin,
                 _checkout,
