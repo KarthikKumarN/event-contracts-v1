@@ -141,8 +141,9 @@ interface IBukProtocol {
      */
     event BookRoom(
         uint256 indexed booking,
+        bytes32 indexed propertyId,
         uint256 checkin,
-        uint256 checkout,
+        uint256  checkout,
         uint256 total
     );
 

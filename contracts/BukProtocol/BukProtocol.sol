@@ -224,7 +224,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
                 _tradeable
             );
             commissionTotal += (_baseRate[i] * commission) / 100;
-            emit BookRoom(_bookingIds, _checkin, _checkout, _total[i]);
+            emit BookRoom(_bookingIds, _propertyId, _checkin, _checkout, _total[i]);
         }
         return _bookingPayment(commissionTotal, total);
     }
