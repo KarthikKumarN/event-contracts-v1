@@ -4,6 +4,7 @@ import {
   BUK_WALLET,
   BUK_POS_NFT_NAME,
   BUK_NFT_NAME,
+ROYALTIES,
 } from "../constants";
 
 async function main() {
@@ -97,13 +98,13 @@ async function main() {
   await royalties.setBukProtocolContract(bukProtocol.target);
 
   //Set Buk Royalty Info in BukRoyalties
-  await royalties.setBukRoyaltyInfo(treasury.target, 300);
+  await royalties.setBukRoyaltyInfo(treasury.target, ROYALTIES.BUK_ROYALTY_PERCENTAGE);
 
   //Set Hotel Royalty Info in BukRoyalties
-  await royalties.setHotelRoyaltyInfo(treasury.target, 100);
+  await royalties.setHotelRoyaltyInfo(treasury.target, ROYALTIES.HOTEL_ROYALTY_PERCENTAGE);
 
   //Set First Owner Royalty Info in BukRoyalties
-  await royalties.setFirstOwnerRoyaltyInfo(100);
+  await royalties.setFirstOwnerRoyaltyInfo(ROYALTIES.FIRST_OWNER_ROYALTY_PERCENTAGE);
 
   console.log("🚀 All contracts have been deployed and configured");
 
