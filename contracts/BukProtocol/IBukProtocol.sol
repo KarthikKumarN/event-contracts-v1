@@ -33,8 +33,8 @@ interface IBukProtocol {
      * @param uint256 tokenId           Token ID.
      * @param bytes32 propertyId        Property ID.
      * @param BookingStatus status      Booking status.
-     * @param uint8 adult               Number of adults.
-     * @param uint8 child               Number of children.
+     * @param uint8 adult[]             Number of adults.
+     * @param uint8 child[]             Number of children.
      * @param address owner             Address of the booking owner.
      * @param uint256 checkin           Check-in date.
      * @param uint256 checkout          Check-out date.
@@ -260,9 +260,9 @@ interface IBukProtocol {
      * @param _total Total amount to be paid.
      * @param _baseRate Base rate of the room.
      * @param _minSalePrice Minimum sale price for the booking.
-     * @param _propertyId Property ID.
      * @param _adult Number of adults.
      * @param _child Number of children.
+     * @param _propertyId Property ID.
      * @param _checkin Checkin date.
      * @param _checkout Checkout date.
      * @param _tradeTimeLimit Trade Limit of NFT based on Checkin time.
@@ -273,9 +273,9 @@ interface IBukProtocol {
         uint256[] memory _total,
         uint256[] memory _baseRate,
         uint256[] memory _minSalePrice,
+        uint8[] memory _adult,
+        uint8[] memory _child,
         bytes32 _propertyId,
-        uint8 _adult,
-        uint8 _child,
         uint256 _checkin,
         uint256 _checkout,
         uint256 _tradeTimeLimit,
