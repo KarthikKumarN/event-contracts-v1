@@ -17,6 +17,9 @@ async function main() {
   console.log("🚀 ~ Deployed BukTreasury:", treasury.target);
   await treasury.waitForDeployment();
 
+  // NOTE If Treasury already exists, then comment the above code and uncomment the below code
+  // const treasury = "0x5FbDB2315678afecb367f032d93F642f64180aa3" // Assign Treasury address to this variable
+
   // Deploy SignatureVerifier
   const signatureVerifier = await ethers.deployContract(
     "SignatureVerifier",
