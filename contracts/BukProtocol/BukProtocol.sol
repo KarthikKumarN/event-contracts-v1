@@ -178,6 +178,9 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
         uint256[] memory _total,
         uint256[] memory _baseRate,
         uint256[] memory _minSalePrice,
+        uint8[] memory _adult,
+        uint8[] memory _child,
+        bytes32 _propertyId,
         uint256 _checkin,
         uint256 _checkout,
         uint256 _tradeTimeLimit,
@@ -210,8 +213,11 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
             ++_bookingIds;
             _bookingDetails[_bookingIds] = Booking(
                 _bookingIds,
-                BookingStatus.booked,
                 0,
+                _propertyId,
+                BookingStatus.booked,
+                _adult[i],
+                _child[i],
                 msg.sender,
                 _checkin,
                 _checkout,
@@ -222,7 +228,14 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
                 _tradeable
             );
             commissionTotal += (_baseRate[i] * commission) / 100;
-            emit BookRoom(_bookingIds, _checkin, _checkout, _total[i]);
+            emit BookRoom(
+                _bookingIds,
+                _propertyId,
+                _checkin,
+                _checkout,
+                _adult[i],
+                _child[i]
+            );
         }
         return _bookingPayment(commissionTotal, total);
     }

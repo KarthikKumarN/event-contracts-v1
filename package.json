@@ -19,6 +19,7 @@
   "license": "ISC",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^3.0.0",
+    "dotenv": "^16.3.1",
     "eslint": "^8.45.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-config-standard": "^17.1.0",
@@ -33,7 +34,6 @@
     "solhint": "^3.4.1"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.9.2",
-    "dotenv": "^16.3.1"
+    "@openzeppelin/contracts": "^4.9.2"
   }
 }
