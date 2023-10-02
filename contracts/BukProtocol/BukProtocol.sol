@@ -362,42 +362,57 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
      * @dev See {IBukProtocol-cancelRoom}.
      */
     function cancelRoom(
-        uint256 _id,
-        uint256 _penalty,
-        uint256 _refund,
-        uint256 _charges,
+        uint256[] memory _ids,
+        uint256[] memory _penalties,
+        uint256[] memory _refunds,
+        uint256[] memory _charges,
         address _bookingOwner,
         bytes memory _signature
     ) external onlyAdmin {
-        require(
-            ((_bookingDetails[_id].status == BookingStatus.confirmed) ||
-                (_bookingDetails[_id].status == BookingStatus.checkedin)),
-            "Not a confirmed or checkedin Booking"
-        );
-        require(
-            (_bookingDetails[_id].checkin > block.timestamp),
-            "Checkin date should be greater than current date"
-        );
-        require(
-            nftContract.balanceOf(_bookingOwner, _id) > 0,
-            "Check the booking owner"
-        );
-        bytes32 hash = keccak256(
-            abi.encodePacked(_id, _penalty, _refund, _charges)
-        );
-        address signer = _signatureVerifier.verify(hash, _signature);
-        require(signer == _bookingOwner, "Invalid owner signature");
-        require(
-            ((_penalty + _refund + _charges) <
-                (_bookingDetails[_id].total + 1)),
-            "Transfer amount exceeds total"
-        );
-        _bookingDetails[_id].status = BookingStatus.cancelled;
-        _bukTreasury.cancelUSDCRefund(_penalty, _bukWallet);
-        _bukTreasury.cancelUSDCRefund(_refund, _bookingOwner);
-        _bukTreasury.cancelUSDCRefund(_charges, _bukWallet);
-        nftContract.burn(_bookingOwner, _id, 1, false);
-        emit CancelRoom(_id, true);
+        uint256 len = _ids.length;
+        require((len == _penalties.length), "Check Ids and Penalties size");
+        require((len == _refunds.length), "Check Ids and Refunds size");
+        for (uint8 i = 0; i < len; ++i) {
+            require(
+                ((_bookingDetails[_ids[i]].status == BookingStatus.confirmed) ||
+                    (_bookingDetails[_ids[i]].status ==
+                        BookingStatus.checkedin)),
+                "Not a confirmed or checkedin Booking"
+            );
+            require(
+                (_bookingDetails[_ids[i]].checkin > block.timestamp),
+                "Checkin date should be greater than current date"
+            );
+            require(
+                nftContract.balanceOf(_bookingOwner, _ids[i]) > 0,
+                "Check the booking owner balance"
+            );
+            bytes32 hash = keccak256(
+                abi.encodePacked(
+                    _ids[i],
+                    _penalties[i],
+                    _refunds[i],
+                    _charges[i]
+                )
+            );
+            address signer = _signatureVerifier.verify(hash, _signature);
+            require(signer == _bookingOwner, "Invalid owner signature");
+            require(
+                ((_penalties[i] + _refunds[i] + _charges[i]) <
+                    (_bookingDetails[_ids[i]].total + 1)),
+                "Transfer amount exceeds total"
+            );
+        }
+        uint total = 0;
+        for (uint8 i = 0; i < len; ++i) {
+            total += _refunds[i];
+            _bookingDetails[_ids[i]].status = BookingStatus.cancelled;
+            _bukTreasury.cancelUSDCRefund(_penalties[i], _bukWallet);
+            _bukTreasury.cancelUSDCRefund(_refunds[i], _bookingOwner);
+            _bukTreasury.cancelUSDCRefund(_charges[i], _bukWallet);
+            nftContract.burn(_bookingOwner, _ids[i], 1, false);
+        }
+        emit CancelRoom(_ids, total, true);
     }
 
     /**

@@ -175,7 +175,11 @@ interface IBukProtocol {
     /**
      * @dev Emitted when room bookings are cancelled.
      */
-    event CancelRoom(uint256 indexed bookingId, bool indexed status);
+    event CancelRoom(
+        uint256[] indexed bookingId,
+        uint256 indexed total,
+        bool indexed status
+    );
 
     /**
      * @dev Emitted when room bookings are cancelled.
@@ -324,10 +328,10 @@ interface IBukProtocol {
 
     /**
      * @dev Function to cancel the room bookings.
-     * @param _id ID of the booking.
-     * @param _penalty Penalty amount to be refunded.
-     * @param _refund Refund amount to be refunded.
-     * @param _charges Charges amount to be refunded.
+     * @param _ids Array of booking.
+     * @param _penalties Array of penalty amount to be refunded.
+     * @param _refunds Array of refund amount to be refunded.
+     * @param _charges Array of charges amount to be deducted.
      * @param _bookingOwner Owner of the booking.
      * @notice Only the admin can cancel the rooms.
      * @notice The booking status should be confirmed to cancel it.
@@ -335,10 +339,10 @@ interface IBukProtocol {
      * @notice This function can only be called by admin
      */
     function cancelRoom(
-        uint256 _id,
-        uint256 _penalty,
-        uint256 _refund,
-        uint256 _charges,
+        uint256[] memory _ids,
+        uint256[] memory _penalties,
+        uint256[] memory _refunds,
+        uint256[] memory _charges,
         address _bookingOwner,
         bytes memory _signature
     ) external;
