@@ -194,21 +194,18 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
         );
         require(
             (_checkin > block.timestamp),
-            "Checkin date should be greater than current date"
+            "Checkin date must be in the future"
         );
-        require(
-            (_checkout > _checkin),
-            "Checkout date should be greater than checkin date"
-        );
-        uint256 total = 0;
+        require((_checkout > _checkin), "Checkout date must be after checkin");
+        uint256 total;
         for (uint8 i = 0; i < _total.length; ++i) {
             total += _total[i];
         }
         require(
             (_stableToken.allowance(msg.sender, address(this)) >= total),
-            "Check the allowance of the sender"
+            "Check the allowance"
         );
-        uint commissionTotal = 0;
+        uint commissionTotal;
         for (uint8 i = 0; i < _total.length; ++i) {
             ++_bookingIds;
             _bookingDetails[_bookingIds] = Booking(
@@ -259,7 +256,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
                 "Check the Booking status"
             );
         }
-        uint total = 0;
+        uint total;
         for (uint8 i = 0; i < len; ++i) {
             _bookingDetails[_ids[i]].status = BookingStatus.cancelled;
             total +=
@@ -314,7 +311,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
             require(
                 (_admin == msg.sender) ||
                     (nftContract.balanceOf(msg.sender, _ids[i]) > 0),
-                "Only admin or owner of the NFT can access the booking"
+                "Admin or NFT owner can access booking"
             );
             require(
                 _bookingDetails[_ids[i]].status == BookingStatus.confirmed,
@@ -342,7 +339,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
             );
             require(
                 (_bookingDetails[_ids[i]].checkout < block.timestamp),
-                "Checkout date should be less than current date"
+                "Checkout date must be before today"
             );
         }
         for (uint8 i = 0; i < len; ++i) {
@@ -372,8 +369,11 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
         uint256 len = _ids.length;
         require(
             (len == _penalties.length) && (len == _refunds.length),
-            "Check Ids, Refunds and Penalties size"
+            "Validate IDs and amounts"
         );
+        uint totalPenalty;
+        uint totalRefund;
+        uint totalCharges;
         for (uint8 i = 0; i < len; ++i) {
             require(
                 ((_bookingDetails[_ids[i]].status == BookingStatus.confirmed) ||
@@ -383,7 +383,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
             );
             require(
                 (_bookingDetails[_ids[i]].checkin > block.timestamp),
-                "Checkin date should be greater than current date"
+                "Checkin date must be in the future"
             );
             require(
                 nftContract.balanceOf(_bookingOwner, _ids[i]) > 0,
@@ -394,22 +394,23 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
                     (_bookingDetails[_ids[i]].total + 1)),
                 "Transfer amount exceeds total"
             );
+            totalPenalty += _penalties[i];
+            totalRefund += _refunds[i];
+            totalCharges += _charges[i];
         }
         bytes32 hash = keccak256(
-            abi.encodePacked(_ids, _penalties, _refunds, _charges)
+            abi.encodePacked(totalPenalty, totalRefund, totalCharges)
         );
         address signer = _signatureVerifier.verify(hash, _signature);
         require(signer == _bookingOwner, "Invalid owner signature");
-        uint total = 0;
         for (uint8 i = 0; i < len; ++i) {
-            total += _refunds[i];
             _bookingDetails[_ids[i]].status = BookingStatus.cancelled;
             _bukTreasury.cancelUSDCRefund(_penalties[i], _bukWallet);
             _bukTreasury.cancelUSDCRefund(_refunds[i], _bookingOwner);
             _bukTreasury.cancelUSDCRefund(_charges[i], _bukWallet);
             nftContract.burn(_bookingOwner, _ids[i], 1, false);
         }
-        emit CancelRoom(_ids, total, true);
+        emit CancelRoom(_ids, totalRefund, true);
     }
 
     /**
@@ -428,7 +429,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
         );
         require(
             (_bookingDetails[_id].checkin > block.timestamp),
-            "Checkin date should be greater than current date"
+            "Checkin date must be in the future"
         );
         require(
             nftContract.balanceOf(_bookingOwner, _id) > 0,

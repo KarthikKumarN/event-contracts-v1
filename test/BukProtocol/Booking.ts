@@ -242,7 +242,7 @@ describe("BukProtocol Bookings", function () {
             12,
             true,
           ),
-      ).to.be.revertedWith("Checkin date should be greater than current date");
+      ).to.be.revertedWith("Checkin date must be in the future");
     });
     it("Should fail booking when check-out date should be greater than check-in date", async function () {
       //Grant allowance permission
@@ -266,7 +266,7 @@ describe("BukProtocol Bookings", function () {
             12,
             true,
           ),
-      ).to.be.revertedWith("Checkout date should be greater than checkin date");
+      ).to.be.revertedWith("Checkout date must be after checkin");
     });
     it("Should fail booking when there isn't enough allowance from the sender", async function () {
       //Grant allowance permission
@@ -1030,9 +1030,7 @@ describe("BukProtocol Bookings", function () {
 
       await expect(
         bukProtocolContract.connect(owner).checkin([1]),
-      ).to.be.revertedWith(
-        "Only admin or owner of the NFT can access the booking",
-      );
+      ).to.be.revertedWith("Admin or NFT owner can access booking");
     });
   });
 
@@ -1329,7 +1327,7 @@ describe("BukProtocol Bookings", function () {
       //Check-out NFT
       await expect(
         bukProtocolContract.connect(adminWallet).checkout([1]),
-      ).to.be.revertedWith("Checkout date should be less than current date");
+      ).to.be.revertedWith("Checkout date must be before today");
     });
     it("Should not check-out when the booking status is not checkedin", async function () {
       //Grant allowance permission
@@ -1459,13 +1457,11 @@ describe("BukProtocol Bookings", function () {
       const _bookingOwner = await owner.getAddress();
 
       // Formulate the signature
-      const types = ["uint256[]", "uint256[]", "uint256[]", "uint256[]"];
-      const values = [_id, _penalty, _refund, _charges];
+      const types = ["uint256", "uint256", "uint256"];
+      const values = [_penalty[0], _refund[0], _charges[0]];
       const encoded = AbiCoder.defaultAbiCoder().encode(types, values);
       const hash = keccak256(encoded);
       const signature = await owner.signMessage(toBeArray(hash));
-
-      console.log("Hereee)))))))))))))))) ", signature);
       //Cancel Room
       await expect(
         bukProtocolContract
@@ -1527,8 +1523,8 @@ describe("BukProtocol Bookings", function () {
       const _bookingOwner = await owner.getAddress();
 
       // Formulate the signature
-      const types = ["uint256[]", "uint256[]", "uint256[]", "uint256[]"];
-      const values = [_id, _penalty, _refund, _charges];
+      const types = ["uint256", "uint256", "uint256"];
+      const values = [_penalty[0], _refund[0], _charges[0]];
       const encoded = AbiCoder.defaultAbiCoder().encode(types, values);
       const hash = keccak256(encoded);
       const signature = await owner.signMessage(toBeArray(hash));
@@ -1594,8 +1590,8 @@ describe("BukProtocol Bookings", function () {
       const _bookingOwner = await owner.getAddress();
 
       // Formulate the signature
-      const types = ["uint256[]", "uint256[]", "uint256[]", "uint256[]"];
-      const values = [_id, _penalty, _refund, _charges];
+      const types = ["uint256", "uint256", "uint256"];
+      const values = [_penalty[0], _refund[0], _charges[0]];
       const encoded = AbiCoder.defaultAbiCoder().encode(types, values);
       const hash = keccak256(encoded);
       const signature = await owner.signMessage(toBeArray(hash));
@@ -1614,7 +1610,7 @@ describe("BukProtocol Bookings", function () {
           ),
       )
         .to.emit(bukProtocolContract, "CancelRoom")
-        .withArgs(1, true);
+        .withArgs(_id, _refund[0], false);
     });
     it("Should cancel successfully and check the BukNFTs and BukPOSNFTs status", async function () {
       //Grant allowance permission
@@ -1664,8 +1660,8 @@ describe("BukProtocol Bookings", function () {
       const _bookingOwner = await owner.getAddress();
 
       // Formulate the signature
-      const types = ["uint256[]", "uint256[]", "uint256[]", "uint256[]"];
-      const values = [_id, _penalty, _refund, _charges];
+      const types = ["uint256", "uint256", "uint256"];
+      const values = [_penalty[0], _refund[0], _charges[0]];
       const encoded = AbiCoder.defaultAbiCoder().encode(types, values);
       const hash = keccak256(encoded);
       const signature = await owner.signMessage(toBeArray(hash));
@@ -1720,8 +1716,8 @@ describe("BukProtocol Bookings", function () {
       const _bookingOwner = await owner.getAddress();
 
       // Formulate the signature
-      const types = ["uint256[]", "uint256[]", "uint256[]", "uint256[]"];
-      const values = [_id, _penalty, _refund, _charges];
+      const types = ["uint256", "uint256", "uint256"];
+      const values = [_penalty[0], _refund[0], _charges[0]];
       const encoded = AbiCoder.defaultAbiCoder().encode(types, values);
       const hash = keccak256(encoded);
       const signature = await owner.signMessage(toBeArray(hash));

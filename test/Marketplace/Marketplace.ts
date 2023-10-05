@@ -286,7 +286,8 @@ describe("Marketplace", function () {
       let tokenId = 1;
       let price = 100;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = date.setDate(date.getDate() + 2);
       let checkout = date.setDate(date.getDate() + 3);
 
@@ -302,7 +303,7 @@ describe("Marketplace", function () {
           [100000000],
           [80000000],
           [70000000],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -331,7 +332,8 @@ describe("Marketplace", function () {
       let minSalePrice = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = date.setDate(date.getDate() + 2);
       let checkout = date.setDate(date.getDate() + 3);
 
@@ -355,7 +357,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [minSalePrice],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -405,7 +407,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [70000000],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -426,7 +428,7 @@ describe("Marketplace", function () {
       // Approve allowance
       await expect(
         marketplaceContract.createListing(tokenId, salePrice),
-      ).to.be.revertedWith("Please approve marketplace to execute trade");
+      ).to.be.revertedWith("Approve marketplace for trade");
     });
     it("Should create list minSale check", async function () {
       let tokenId = 1;
@@ -449,7 +451,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [70000000],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -474,14 +476,15 @@ describe("Marketplace", function () {
       );
       await expect(
         marketplaceContract.createListing(tokenId, salePrice),
-      ).to.be.revertedWith("Sale price can't be less than minimum sale price");
+      ).to.be.revertedWith("Minimum price requirement not met");
     });
     it("Create list only confirmed booking check", async function () {
       let tokenId = 1;
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = date.setDate(date.getDate() + 2);
       let checkout = date.setDate(date.getDate() + 3);
 
@@ -497,7 +500,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -513,14 +516,15 @@ describe("Marketplace", function () {
       );
       await expect(
         marketplaceContract.createListing(tokenId, salePrice),
-      ).to.be.revertedWith("Only available booking can be tradable");
+      ).to.be.revertedWith("Only tradable if available");
     });
     it("Create list only owner can list", async function () {
       let tokenId = 1;
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = date.setDate(date.getDate() + 2);
       let checkout = date.setDate(date.getDate() + 3);
 
@@ -536,7 +540,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -563,7 +567,8 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 1) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 1) / 1000);
 
@@ -579,7 +584,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -612,7 +617,8 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -628,7 +634,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -663,7 +669,8 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -679,7 +686,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -717,7 +724,8 @@ describe("Marketplace", function () {
       let salePrice = 110000000;
       let transferMoney = 210000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -733,7 +741,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -787,7 +795,8 @@ describe("Marketplace", function () {
       let salePrice = 110000000;
       let transferMoney = 210000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -803,7 +812,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -842,7 +851,8 @@ describe("Marketplace", function () {
       let salePrice = 110000000;
       let transferMoney = 210000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -858,7 +868,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -898,7 +908,7 @@ describe("Marketplace", function () {
       );
       await expect(
         marketplaceContract.connect(account1).buyRoom(tokenId),
-      ).to.be.revertedWith("Check the allowance of the spender");
+      ).to.be.revertedWith("Check the allowance");
     });
     it("Should emit event", async function () {
       let tokenId = 1;
@@ -906,7 +916,8 @@ describe("Marketplace", function () {
       let salePrice = 110000000;
       let transferMoney = 210000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -922,7 +933,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -978,7 +989,8 @@ describe("Marketplace", function () {
       let salePrice = 110000000;
       let transferMoney = 410000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -1006,7 +1018,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -1035,7 +1047,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -1082,7 +1094,8 @@ describe("Marketplace", function () {
       let salePrice = 110000000;
       let transferMoney = 410000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -1103,7 +1116,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -1133,7 +1146,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -1169,7 +1182,8 @@ describe("Marketplace", function () {
       let salePrice = 110000000;
       let transferMoney = 410000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -1190,7 +1204,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -1220,7 +1234,7 @@ describe("Marketplace", function () {
       );
       await expect(
         marketplaceContract.connect(account1).buyRoomBatch([tokenId1]),
-      ).to.be.revertedWith("Check the allowance of the spender");
+      ).to.be.revertedWith("Check the allowance");
     });
     it("Should emit event", async function () {
       let tokenId1 = 1;
@@ -1229,7 +1243,8 @@ describe("Marketplace", function () {
       let salePrice = 110000000;
       let transferMoney = 410000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -1250,7 +1265,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -1301,7 +1316,8 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -1317,7 +1333,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -1356,7 +1372,8 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -1372,7 +1389,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -1408,7 +1425,8 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -1424,7 +1442,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -1464,7 +1482,8 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -1480,7 +1499,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -1519,7 +1538,8 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -1535,7 +1555,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -1568,7 +1588,8 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -1584,7 +1605,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -1621,7 +1642,8 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -1637,7 +1659,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -1677,7 +1699,8 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -1693,7 +1716,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -1720,7 +1743,7 @@ describe("Marketplace", function () {
       await marketplaceContract.createListing(tokenId, salePrice);
       await expect(
         marketplaceContract.connect(account1).deleteListing(tokenId),
-      ).to.be.revertedWith("Only owner or Buk protocol can delete");
+      ).to.be.revertedWith("Owner or Buk protocol can delete");
     });
   });
 
@@ -1805,7 +1828,8 @@ describe("Marketplace", function () {
       let newPrice = 120000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -1821,7 +1845,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -1862,7 +1886,8 @@ describe("Marketplace", function () {
       let newPrice = 120000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -1878,7 +1903,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -1915,7 +1940,8 @@ describe("Marketplace", function () {
       let newPrice = 120000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -1931,7 +1957,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -1966,7 +1992,8 @@ describe("Marketplace", function () {
       let newPrice = 90000000;
       let salePrice = 100000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -1982,7 +2009,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -2009,7 +2036,7 @@ describe("Marketplace", function () {
       await marketplaceContract.createListing(tokenId, salePrice);
       await expect(
         marketplaceContract.relist(tokenId, newPrice),
-      ).to.be.revertedWith("Sale price cann't be lessthan minimum sale price");
+      ).to.be.revertedWith("Minimum price requirement not met");
     });
     it("Should emit event on relist token ID", async function () {
       let tokenId = 1;
@@ -2017,7 +2044,8 @@ describe("Marketplace", function () {
       let newPrice = 120000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -2033,7 +2061,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,

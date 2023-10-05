@@ -78,12 +78,12 @@ contract Marketplace is Context, IMarketplace, AccessControl {
             .getBookingDetails(_tokenId);
         require(
             _price >= bookingDetails.minSalePrice,
-            "Sale price can't be less than minimum sale price"
+            "Minimum price requirement not met"
         );
         require(
             bookingDetails.status == IBukProtocol.BookingStatus.confirmed &&
                 bookingDetails.tradeable,
-            "Only available booking can be tradable"
+            "Only tradable if available"
         );
         require(
             _bukNFTContract.balanceOf(_msgSender(), _tokenId) == 1,
@@ -91,7 +91,7 @@ contract Marketplace is Context, IMarketplace, AccessControl {
         );
         require(
             _bukNFTContract.isApprovedForAll(_msgSender(), address(this)),
-            "Please approve marketplace to execute trade"
+            "Approve marketplace for trade"
         );
         require(
             block.timestamp <
@@ -130,7 +130,7 @@ contract Marketplace is Context, IMarketplace, AccessControl {
         require(
             _bukNFTContract.balanceOf(_msgSender(), _tokenId) == 1 ||
                 hasRole(BUK_PROTOCOL_ROLE, _msgSender()),
-            "Only owner or Buk protocol can delete"
+            "Owner or Buk protocol can delete"
         );
         delete _listedNFT[_tokenId];
         emit DeletedListing(_tokenId);
@@ -149,11 +149,11 @@ contract Marketplace is Context, IMarketplace, AccessControl {
         );
         require(
             bookingDetails.status == IBukProtocol.BookingStatus.confirmed,
-            "Only available booking can be tradable"
+            "Tradeable if available"
         );
         require(
             _newPrice >= bookingDetails.minSalePrice,
-            "Sale price cann't be lessthan minimum sale price"
+            "Minimum price requirement not met"
         );
         uint256 oldPrice = _listedNFT[_tokenId].price;
         _listedNFT[_tokenId].status = ListingStatus.active;
@@ -300,7 +300,7 @@ contract Marketplace is Context, IMarketplace, AccessControl {
         require(
             bookingDetails.status == IBukProtocol.BookingStatus.confirmed &&
                 bookingDetails.tradeable,
-            "Only available booking can be tradable"
+            "Tradeable if available"
         );
         require(
             block.timestamp <
@@ -311,7 +311,7 @@ contract Marketplace is Context, IMarketplace, AccessControl {
         require(
             (_stableToken.allowance(_msgSender(), address(this)) >=
                 _listedNFT[_tokenId].price),
-            "Check the allowance of the spender"
+            "Check the allowance"
         );
         address nftOwner = _listedNFT[_tokenId].owner;
         require(

@@ -119,7 +119,7 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
     ) external onlyRole(ADMIN_ROLE) {
         require(
             bytes(uriByTokenId[_id]).length != 0,
-            "Token does not exist on BukPOSNFTs"
+            "Token not exist on BukPOSNFTs"
         );
         _setURI(_id, _newuri);
     }

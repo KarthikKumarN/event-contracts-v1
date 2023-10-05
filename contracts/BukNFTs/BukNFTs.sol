@@ -216,7 +216,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
         );
         require(
             isApprovedForAll(_from, _msgSender()),
-            "ERC1155: caller is not token owner or approved"
+            "Not a owner or approved"
         );
         require(balanceOf(_from, _id) > 0, "From address does not own NFT");
         super._safeTransferFrom(_from, _to, _id, _amount, _data);
@@ -239,7 +239,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
     {
         require(
             isApprovedForAll(_from, _msgSender()),
-            "ERC1155: caller is not token owner or approved"
+            "Not a token owner or approved"
         );
         uint256 len = _ids.length;
         for (uint i = 0; i < len; ++i) {
