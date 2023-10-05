@@ -105,7 +105,7 @@ interface IBukNFTs is IERC1155 {
      * @param _data - The data to store with the NFT.
      * @param _uri - The URI to associate with the NFT.
      * @return uint256 - The token ID of the newly minted NFT.
-     * @notice This function can only be called by a contract with `BUK_PROTOCOL_CONTRACT_ROLE`
+     * @notice This function can only be called by a contract with `BUK_PROTOCOL_ROLE`
      */
     function mint(
         uint256 _id,
@@ -121,7 +121,7 @@ interface IBukNFTs is IERC1155 {
      * @param _id - The token ID of the NFT to burn.
      * @param _amount - The amount of NFTs to burn.
      * @param _mintPOS - Whether or not to call the Buk POS NFTs contract to burn the NFT.
-     * @notice This function can only be called by a contract with `BUK_PROTOCOL_CONTRACT_ROLE`
+     * @notice This function can only be called by a contract with `BUK_PROTOCOL_ROLE`
      */
     function burn(
         address _account,

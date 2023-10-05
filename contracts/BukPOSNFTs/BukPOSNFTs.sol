@@ -41,14 +41,17 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
 
     /**
      * @dev Constant for the role of the Buk NFT contract
+     * @notice its a hash of keccak256("BUK_NFT_CONTRACT_ROLE")
      */
     bytes32 public constant BUK_NFT_CONTRACT_ROLE =
-        keccak256("BUK_NFT_CONTRACT_ROLE");
+        0x6f175d21d6dd2f858978c1597b4f5520369b996b309c4b19f3efbf37f3c323e0;
 
     /**
      * @dev Constant for the role of the admin
+     * @notice its a hash of keccak256("ADMIN_ROLE")
      */
-    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+    bytes32 public constant ADMIN_ROLE =
+        0xa49807205ce4d355092ef5a8a18f56e8913cf4a201fbe287825b095693c21775;
 
     /**
      * @dev Constructor to initialize the contract

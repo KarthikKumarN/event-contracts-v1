@@ -41,20 +41,24 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
 
     /**
      * @dev Constant for the role of the Buk Protocol contract
+     * @notice its a hash of keccak256("BUK_PROTOCOL_ROLE")
      */
-    bytes32 public constant BUK_PROTOCOL_CONTRACT_ROLE =
-        keccak256("BUK_PROTOCOL_CONTRACT_ROLE");
+    bytes32 public constant BUK_PROTOCOL_ROLE =
+        0xc90056e279113999fe5438fedaf4c98ded59812067ad79dd0c968b1a84dc7c97;
 
     /**
      * @dev Constant for the role of the marketplace contract
+     * @notice its a hash of keccak256("MARKETPLACE_CONTRACT_ROLE")
      */
     bytes32 public constant MARKETPLACE_CONTRACT_ROLE =
-        keccak256("MARKETPLACE_CONTRACT_ROLE");
+        0x0d718b8af83cb9b4167cc490bac82a506e58f2696ce3ccf6e4e1deac9240d19f;
 
     /**
      * @dev Constant for the role of the admin
+     * @notice its a hash of keccak256("ADMIN_ROLE")
      */
-    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+    bytes32 public constant ADMIN_ROLE =
+        0xa49807205ce4d355092ef5a8a18f56e8913cf4a201fbe287825b095693c21775;
 
     /**
      * @dev Constructor to initialize the contract
@@ -75,7 +79,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
         _setBukProtocol(_bukProtocolContract);
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(ADMIN_ROLE, _msgSender());
-        _grantRole(BUK_PROTOCOL_CONTRACT_ROLE, _bukProtocolContract);
+        _grantRole(BUK_PROTOCOL_ROLE, _bukProtocolContract);
     }
 
     /**
@@ -147,7 +151,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
         uint256 _amount,
         bytes calldata _data,
         string calldata _uri
-    ) external onlyRole(BUK_PROTOCOL_CONTRACT_ROLE) returns (uint256) {
+    ) external onlyRole(BUK_PROTOCOL_ROLE) returns (uint256) {
         _mint(_account, _id, _amount, _data);
         _setURI(_id, _uri);
         return (_id);
@@ -161,7 +165,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
         uint256 _id,
         uint256 _amount,
         bool _mintPOS
-    ) external onlyRole(BUK_PROTOCOL_CONTRACT_ROLE) {
+    ) external onlyRole(BUK_PROTOCOL_ROLE) {
         string memory uri_ = uriByTokenId[_id];
         delete uriByTokenId[_id];
         if (_mintPOS) {
@@ -300,8 +304,8 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
     function _setBukProtocol(address _bukProtocolContract) private {
         address oldBukProtocolContract_ = address(bukProtocolContract);
         bukProtocolContract = IBukProtocol(_bukProtocolContract);
-        _grantRole(BUK_PROTOCOL_CONTRACT_ROLE, _bukProtocolContract);
-        _revokeRole(BUK_PROTOCOL_CONTRACT_ROLE, oldBukProtocolContract_);
+        _grantRole(BUK_PROTOCOL_ROLE, _bukProtocolContract);
+        _revokeRole(BUK_PROTOCOL_ROLE, oldBukProtocolContract_);
         emit SetBukProtocol(oldBukProtocolContract_, _bukProtocolContract);
     }
 

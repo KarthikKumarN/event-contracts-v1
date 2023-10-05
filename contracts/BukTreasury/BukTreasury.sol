@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.19;
 
-import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /**
  * @title BUK Treasury Contract
@@ -20,8 +20,10 @@ contract BukTreasury is AccessControl {
 
     /**
      * @dev - Constant variable representing the role of the administrator
+     * @notice its a hash of keccak256("ADMIN_ROLE")
      */
-    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN");
+    bytes32 public constant ADMIN_ROLE =
+        0xa49807205ce4d355092ef5a8a18f56e8913cf4a201fbe287825b095693c21775;
 
     /**
      * @dev Emitted when the currency address is set.
@@ -75,7 +77,9 @@ contract BukTreasury is AccessControl {
      * @param _bukProtocol - Address of the Buk Protocol contract
      * @dev - This function sets the address of the Buk Protocol contract. It can be executed only by the administrator.
      */
-    function setBukProtocol(address _bukProtocol) external onlyRole(ADMIN_ROLE) {
+    function setBukProtocol(
+        address _bukProtocol
+    ) external onlyRole(ADMIN_ROLE) {
         bukProtocol = _bukProtocol;
         emit SetBukProtocol(_bukProtocol);
     }

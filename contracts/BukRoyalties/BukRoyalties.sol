@@ -13,8 +13,10 @@ import { IBukProtocol } from "../BukProtocol/IBukProtocol.sol";
 contract BukRoyalties is AccessControl, IBukRoyalties {
     /**
      * @dev Constant for the role of the admin
+     * @notice its a hash of keccak256("ADMIN_ROLE")
      */
-    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+    bytes32 public constant ADMIN_ROLE =
+        0xa49807205ce4d355092ef5a8a18f56e8913cf4a201fbe287825b095693c21775;
 
     /**
      * @dev Address of the Buk Protocol contract

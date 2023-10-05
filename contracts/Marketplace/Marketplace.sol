@@ -15,14 +15,18 @@ contract Marketplace is Context, IMarketplace, AccessControl {
     using SafeERC20 for IERC20;
 
     /**
-     * @dev Constant for the role of the Admin
+     * @dev Constant for the role of the admin
+     * @notice its a hash of keccak256("ADMIN_ROLE")
      */
+    bytes32 public constant ADMIN_ROLE =
+        0xa49807205ce4d355092ef5a8a18f56e8913cf4a201fbe287825b095693c21775;
 
-    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
     /**
      * @dev Constant for the role of the Buk Protocol contract
+     * @notice its a hash of keccak256("BUK_PROTOCOL_ROLE")
      */
-    bytes32 public constant BUK_PROTOCOL_ROLE = keccak256("BUK_PROTOCOL_ROLE");
+    bytes32 public constant BUK_PROTOCOL_ROLE =
+        0xc90056e279113999fe5438fedaf4c98ded59812067ad79dd0c968b1a84dc7c97;
 
     /**
      * @dev Constant address Buk Protocol contract
