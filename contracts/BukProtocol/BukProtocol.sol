@@ -370,8 +370,10 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
         bytes memory _signature
     ) external onlyAdmin {
         uint256 len = _ids.length;
-        require((len == _penalties.length), "Check Ids and Penalties size");
-        require((len == _refunds.length), "Check Ids and Refunds size");
+        require(
+            (len == _penalties.length) && (len == _refunds.length),
+            "Check Ids, Refunds and Penalties size"
+        );
         for (uint8 i = 0; i < len; ++i) {
             require(
                 ((_bookingDetails[_ids[i]].status == BookingStatus.confirmed) ||
@@ -387,22 +389,17 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
                 nftContract.balanceOf(_bookingOwner, _ids[i]) > 0,
                 "Check the booking owner balance"
             );
-            bytes32 hash = keccak256(
-                abi.encodePacked(
-                    _ids[i],
-                    _penalties[i],
-                    _refunds[i],
-                    _charges[i]
-                )
-            );
-            address signer = _signatureVerifier.verify(hash, _signature);
-            require(signer == _bookingOwner, "Invalid owner signature");
             require(
                 ((_penalties[i] + _refunds[i] + _charges[i]) <
                     (_bookingDetails[_ids[i]].total + 1)),
                 "Transfer amount exceeds total"
             );
         }
+        bytes32 hash = keccak256(
+            abi.encodePacked(_ids, _penalties, _refunds, _charges)
+        );
+        address signer = _signatureVerifier.verify(hash, _signature);
+        require(signer == _bookingOwner, "Invalid owner signature");
         uint total = 0;
         for (uint8 i = 0; i < len; ++i) {
             total += _refunds[i];
