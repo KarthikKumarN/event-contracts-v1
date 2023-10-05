@@ -176,7 +176,7 @@ interface IBukProtocol {
      * @dev Emitted when room bookings are cancelled.
      */
     event CancelRoom(
-        uint256[] indexed bookingId,
+        uint256[] indexed bookingIds,
         uint256 indexed total,
         bool indexed status
     );
