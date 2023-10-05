@@ -140,3 +140,5 @@ typechain-types
 cache
 artifacts
 
+.vscode/settings.json
+.DS_Store
