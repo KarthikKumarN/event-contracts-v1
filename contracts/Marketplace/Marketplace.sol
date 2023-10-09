@@ -314,6 +314,7 @@ contract Marketplace is Context, IMarketplace, AccessControl {
             "Check the allowance"
         );
         address nftOwner = _listedNFT[_tokenId].owner;
+        uint256 totalPrice = _listedNFT[_tokenId].price;
         require(
             _bukNFTContract.balanceOf(nftOwner, _tokenId) == 1,
             "NFT owner mismatch"
@@ -338,11 +339,7 @@ contract Marketplace is Context, IMarketplace, AccessControl {
             1,
             ""
         );
-        emit RoomBought(
-            _tokenId,
-            nftOwner,
-            _msgSender(),
-            _listedNFT[_tokenId].price
-        );
+        delete _listedNFT[_tokenId];
+        emit RoomBought(_tokenId, nftOwner, _msgSender(), totalPrice);
     }
 }
