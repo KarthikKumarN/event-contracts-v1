@@ -34,4 +34,21 @@ describe("SignatureVerifier", function () {
     // Check if the recovered address matches the signer's address
     expect(recoveredAddress).to.equal(signer.address);
   });
+
+  it("should verify the signature using the verify function", async function () {
+    // Construct a message
+    const message = "This is a test message for verification.";
+    const messageHash = keccak256(toUtf8Bytes(message));
+
+    // Sign the message
+    const byteArray = Buffer.from(messageHash.slice(2), 'hex');
+    const signature = await signer.signMessage(byteArray);
+
+    // Call the verify function
+    const recoveredAddress = await verifier.verify(messageHash, signature);
+
+    // Check if the recovered address matches the signer's address
+    expect(recoveredAddress).to.equal(signer.address);
+});
+
 });
