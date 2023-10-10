@@ -28,19 +28,13 @@ contract Marketplace is Context, IMarketplace, AccessControl {
     bytes32 public constant BUK_PROTOCOL_ROLE =
         0xc90056e279113999fe5438fedaf4c98ded59812067ad79dd0c968b1a84dc7c97;
 
-    /**
-     * @dev Constant address Buk Protocol contract
-     */
+    /// @dev Constant address Buk Protocol contract
     IBukProtocol private _bukProtocalContract;
 
-    /**
-     * @dev Constant address Buk NFT contract
-     */
+    /// @dev Constant address Buk NFT contract
     IBukNFTs private _bukNFTContract;
 
-    /**
-     * @dev Currency used for transaction
-     */
+    /// @dev Currency used for transaction
     IERC20 private _stableToken;
 
     /**
@@ -69,9 +63,7 @@ contract Marketplace is Context, IMarketplace, AccessControl {
         _grantRole(ADMIN_ROLE, _msgSender());
     }
 
-    /**
-     * @dev Refer {IMarketplace-createListing}.
-     */
+    /// @dev Refer {IMarketplace-createListing}.
     function createListing(uint256 _tokenId, uint256 _price) external {
         require(!isBookingListed(_tokenId), "NFT already listed");
         IBukProtocol.Booking memory bookingDetails = _bukProtocalContract
@@ -108,23 +100,7 @@ contract Marketplace is Context, IMarketplace, AccessControl {
         emit ListingCreated(_msgSender(), _tokenId, _price);
     }
 
-    /**
-     * @dev Refer {IMarketplace-delist}.
-     */
-    function delist(uint256 _tokenId) external {
-        require(isBookingListed(_tokenId), "NFT not listed");
-        require(
-            _bukNFTContract.balanceOf(_msgSender(), _tokenId) == 1,
-            "Only owner can delist"
-        );
-
-        _listedNFT[_tokenId].status = ListingStatus.inactive;
-        emit Delisted(_tokenId);
-    }
-
-    /**
-     * @dev Refer {IMarketplace-deleteListing}.
-     */
+    /// @dev Refer {IMarketplace-deleteListing}.
     function deleteListing(uint256 _tokenId) external {
         require(isBookingListed(_tokenId), "NFT not listed");
         require(
@@ -136,9 +112,7 @@ contract Marketplace is Context, IMarketplace, AccessControl {
         emit DeletedListing(_tokenId);
     }
 
-    /**
-     * @dev Refer {IMarketplace-relist}.
-     */
+    /// @dev Refer {IMarketplace-relist}.
     function relist(uint256 _tokenId, uint256 _newPrice) external {
         require(isBookingListed(_tokenId), "NFT not listed");
         IBukProtocol.Booking memory bookingDetails = _bukProtocalContract
@@ -161,9 +135,7 @@ contract Marketplace is Context, IMarketplace, AccessControl {
         emit Relisted(_tokenId, oldPrice, _newPrice);
     }
 
-    /**
-     * @dev Refer {IMarketplace-buyRoom}.
-     */
+    /// @dev Refer {IMarketplace-buyRoom}.
     function buyRoom(uint256 _tokenId) external {
         require(
             _listedNFT[_tokenId].status == ListingStatus.active,
@@ -172,9 +144,7 @@ contract Marketplace is Context, IMarketplace, AccessControl {
         _buy(_tokenId);
     }
 
-    /**
-     * @dev Refer {IMarketplace-buyRoomBatch}.
-     */
+    /// @dev Refer {IMarketplace-buyRoomBatch}.
     function buyRoomBatch(uint256[] calldata _tokenIds) external {
         uint256 len = _tokenIds.length;
         for (uint256 i = 0; i < len; ) {
@@ -189,71 +159,53 @@ contract Marketplace is Context, IMarketplace, AccessControl {
         }
     }
 
-    /**
-     * @dev Refer {IMarketplace-setBukProtocol}.
-     */
+    /// @dev Refer {IMarketplace-setBukProtocol}.
     function setBukProtocol(
         address _bukProtocol
     ) external onlyRole(ADMIN_ROLE) {
         _setBukProtocol(_bukProtocol);
     }
 
-    /**
-     * @dev Refer {IMarketplace-setBukNFT}.
-     */
+    /// @dev Refer {IMarketplace-setBukNFT}.
     function setBukNFT(address _bukNFT) external onlyRole(ADMIN_ROLE) {
         _setBukNFT(_bukNFT);
     }
 
-    /**
-     * @dev Refer {IMarketplace-setStableToken}.
-     */
+    /// @dev Refer {IMarketplace-setStableToken}.
     function setStableToken(
         address _tokenAddress
     ) external onlyRole(ADMIN_ROLE) {
         _setStableToken(_tokenAddress);
     }
 
-    /**
-     * @dev Refer {IMarketplace-getStableToken}.
-     */
+    /// @dev Refer {IMarketplace-getStableToken}.
     function getStableToken() external view returns (address) {
         return address(_stableToken);
     }
 
-    /**
-     * @dev Refer {IMarketplace-getBukProtocol}.
-     */
+    /// @dev Refer {IMarketplace-getBukProtocol}.
     function getBukProtocol() external view returns (address) {
         return address(_bukProtocalContract);
     }
 
-    /**
-     * @dev Refer {IMarketplace-getBukNFT}.
-     */
+    /// @dev Refer {IMarketplace-getBukNFT}.
     function getBukNFT() external view returns (address) {
         return address(_bukNFTContract);
     }
 
-    /**
-     * @dev Refer {IMarketplace-getListingDetails}.
-     */
+    /// @dev Refer {IMarketplace-getListingDetails}.
     function getListingDetails(
         uint256 _tokenId
     ) external view returns (ListingDetails memory) {
         return _listedNFT[_tokenId];
     }
 
-    /**
-     * @dev Refer {IMarketplace-isBookingListed}.
-     */
+    /// @dev Refer {IMarketplace-isBookingListed}.
     function isBookingListed(uint256 _tokenId) public view returns (bool) {
         return _listedNFT[_tokenId].price > 0 ? true : false;
     }
 
-    /**
-     * @dev Function sets new Buk NFT address
-     */
+    /// @dev Function sets new Buk NFT address
     function _setBukNFT(address _bukNFT) private {
         require(_bukNFT != address(0), "Invalid address");
         address oldAddress = address(_bukNFTContract);
@@ -277,10 +229,7 @@ contract Marketplace is Context, IMarketplace, AccessControl {
         emit BukProtocolSet(oldAddress, _bukProtocol);
     }
 
-    /**
-     *
-     * @param _tokenAddress New stable token address
-     */
+    /// @param _tokenAddress New stable token address
     function _setStableToken(address _tokenAddress) private {
         require(_tokenAddress != address(0), "Invalid address");
         address oldAddress = address(_stableToken);
@@ -314,6 +263,7 @@ contract Marketplace is Context, IMarketplace, AccessControl {
             "Check the allowance"
         );
         address nftOwner = _listedNFT[_tokenId].owner;
+        uint256 totalPrice = _listedNFT[_tokenId].price;
         require(
             _bukNFTContract.balanceOf(nftOwner, _tokenId) == 1,
             "NFT owner mismatch"
@@ -338,11 +288,7 @@ contract Marketplace is Context, IMarketplace, AccessControl {
             1,
             ""
         );
-        emit RoomBought(
-            _tokenId,
-            nftOwner,
-            _msgSender(),
-            _listedNFT[_tokenId].price
-        );
+        delete _listedNFT[_tokenId];
+        emit RoomBought(_tokenId, nftOwner, _msgSender(), totalPrice);
     }
 }

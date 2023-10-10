@@ -9,41 +9,28 @@ import { IERC1155 } from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
  * @dev Collection of all procedures related to the BUK Proof of Stay NFTs.
  */
 interface IBukPOSNFTs is IERC1155 {
-    /**
-     * @dev Emitted when Buk Protocol Address is updated.
-     */
+    /// @dev Emitted when Buk Protocol Address is updated.
     event SetBukProtocol(
         address oldBukProtocolContract,
         address newBukProtocolContract
     );
 
-    /**
-     * @dev Emitted when treasury is updated.
-     */
+    /// @dev Emitted when treasury is updated.
     event SetBukTreasury(
         address oldTreasuryContract,
         address newTreasuryContract
     );
 
-    /**
-     * @dev Event to update the contract name
-     */
-    event SetNFTContractName(
-        string oldContractName,
-        string newContractName
-    );
+    /// @dev Event to update the contract name
+    event SetNFTContractName(string oldContractName, string newContractName);
 
-    /**
-     * @dev Event to set NFT contract role
-     */
+    /// @dev Event to set NFT contract role
     event SetNFTContractRole(
         address oldNFTContractAddr,
         address newNFTContractAddr
     );
 
-    /**
-     * @dev Event to set token URI
-     */
+    /// @dev Event to set token URI
     event SetURI(uint id, string oldUri, string newUri);
 
     /**
