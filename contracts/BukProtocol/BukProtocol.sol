@@ -398,18 +398,25 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
             totalRefund += _refunds[i];
             totalCharges += _charges[i];
         }
-        bytes32 hash = keccak256(
-            abi.encodePacked(totalPenalty, totalRefund, totalCharges)
-        );
-        address signer = _signatureVerifier.verify(hash, _signature);
+
+        // Verify the signature using the generateAndVerify function
+        address signer = _signatureVerifier.generateAndVerify(totalPenalty, totalRefund, totalCharges, _signature);
+
+        // bytes32 hash = keccak256(
+        //     abi.encodePacked(totalPenalty, totalRefund, totalCharges)
+        // );
+        // address signer = _signatureVerifier.verify(hash, _signature);
         require(signer == _bookingOwner, "Invalid owner signature");
         for (uint8 i = 0; i < len; ++i) {
             _bookingDetails[_ids[i]].status = BookingStatus.cancelled;
-            _bukTreasury.cancelUSDCRefund(_penalties[i], _bukWallet);
-            _bukTreasury.cancelUSDCRefund(_refunds[i], _bookingOwner);
-            _bukTreasury.cancelUSDCRefund(_charges[i], _bukWallet);
             nftContract.burn(_bookingOwner, _ids[i], 1, false);
         }
+        if(totalPenalty > 0)
+            _bukTreasury.cancelUSDCRefund(totalPenalty, _bukWallet);
+        if(totalRefund > 0)
+            _bukTreasury.cancelUSDCRefund(totalRefund, _bookingOwner);
+        if(totalCharges > 0)
+            _bukTreasury.cancelUSDCRefund(totalCharges, _bukWallet);
         emit CancelRoom(_ids, totalRefund, true);
     }
 

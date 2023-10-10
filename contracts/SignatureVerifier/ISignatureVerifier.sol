@@ -18,4 +18,11 @@ interface ISignatureVerifier {
         bytes32 _hash,
         bytes memory _signature
     ) external view returns (address);
+
+    function generateAndVerify(
+        uint256 _totalPenalty,
+        uint256 _totalRefund,
+        uint256 _totalCharges,
+        bytes memory _signature
+    ) external view returns (address);
 }

@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { keccak256, AbiCoder, toBeArray, ethers as eth } from "ethers";
+import { keccak256, toUtf8Bytes, AbiCoder, toBeArray, ethers as eth } from "ethers";
 
 describe("BukProtocol Bookings", function () {
   let stableTokenContract;
@@ -1456,12 +1456,21 @@ describe("BukProtocol Bookings", function () {
       const _charges = [20000000];
       const _bookingOwner = await owner.getAddress();
 
-      // Formulate the signature
-      const types = ["uint256", "uint256", "uint256"];
-      const values = [_penalty[0], _refund[0], _charges[0]];
-      const encoded = AbiCoder.defaultAbiCoder().encode(types, values);
-      const hash = keccak256(encoded);
-      const signature = await owner.signMessage(toBeArray(hash));
+      // // Formulate the signature
+      // const types = ["uint256", "uint256", "uint256"];
+      // const values = [_penalty[0], _refund[0], _charges[0]];
+      // const encoded = AbiCoder.defaultAbiCoder().encode(types, values);
+      // const hash = keccak256(encoded);
+      // const signature = await owner.signMessage(toBeArray(hash));
+
+  // Formulate the message for signing
+  const message = `Cancellation Details:\nTotal Penalty: ${_penalty[0]}\nTotal Refund: ${_refund[0]}\nTotal Charges: ${_charges[0]}`;
+  const messageHash = keccak256(toUtf8Bytes(message));
+  console.log("🚀 ~ file: Booking.ts:1469 ~ messageHash:", messageHash)
+  const signature = await owner.signMessage(toBeArray(messageHash));
+  console.log("🚀 ~ file: Booking.ts:1471 ~ signature:", signature)
+
+
       //Cancel Room
       await expect(
         bukProtocolContract
