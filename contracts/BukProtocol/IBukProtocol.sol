@@ -61,77 +61,44 @@ interface IBukProtocol {
         bool tradeable;
     }
 
-    /**
-     * @dev Emitted when the admin wallet is set.
-     */
-    event SetAdminWallet(
-        address oldCAdminWallet,
-        address newAdminWallet
-    );
+    /// @dev Emitted when the admin wallet is set.
+    event SetAdminWallet(address oldCAdminWallet, address newAdminWallet);
 
-    /**
-     * @dev Emitted when the commission is set.
-     */
-    event SetCommission(
-        uint256 oldCommission,
-        uint256 newCommission
-    );
+    /// @dev Emitted when the commission is set.
+    event SetCommission(uint256 oldCommission, uint256 newCommission);
 
-    /**
-     * @dev Emitted when BukNFTs contract address is updated.
-     */
-    event SetBukNFTs(
-        address oldNFTContract,
-        address newNFTContract
-    );
+    /// @dev Emitted when BukNFTs contract address is updated.
+    event SetBukNFTs(address oldNFTContract, address newNFTContract);
 
-    /**
-     * @dev Emitted when BukPOSNFTs contract address is updated.
-     */
-    event SetBukPOSNFTs(
-        address oldNFTPOSContract,
-        address newNFTPOSContract
-    );
+    /// @dev Emitted when BukPOSNFTs contract address is updated.
+    event SetBukPOSNFTs(address oldNFTPOSContract, address newNFTPOSContract);
 
-    /**
-     * @dev Emitted when BukRoyalties contract address is updated.
-     */
+    /// @dev Emitted when BukRoyalties contract address is updated.
     event SetRoyaltiesContract(
         address oldRoyaltiesContract,
         address newRoyaltiesContract
     );
 
-    /**
-     * @dev Emitted when signer verifier is updated.
-     */
+    /// @dev Emitted when signer verifier is updated.
     event SetSignerVerifier(
         address oldSignerVerifier,
         address newSignerVerifier
     );
 
-    /**
-     * @dev Emitted when Buk treasury is updated.
-     */
+    /// @dev Emitted when Buk treasury is updated.
     event SetBukTreasury(
         address oldTreasuryContract,
         address newTreasuryContract
     );
 
-    /**
-     * @dev Emitted when Buk Wallet is updated.
-     */
+    /// @dev Emitted when Buk Wallet is updated.
     event SetBukWallet(
         address oldBukWalletContract,
         address newBukWalletContract
     );
 
-    /**
-     * @dev Emitted when stable token is updated.
-     */
-    event SetStableToken(
-        address oldStableToken,
-        address newStableToken
-    );
+    /// @dev Emitted when stable token is updated.
+    event SetStableToken(address oldStableToken, address newStableToken);
 
     /**
      * @dev Emitted when the tradeability of a Buk NFT is toggled.
@@ -140,9 +107,7 @@ interface IBukProtocol {
      */
     event ToggleTradeability(uint256 indexed tokenId, bool indexed tradeable);
 
-    /**
-     * @dev Emitted when single room is booked.
-     */
+    /// @dev Emitted when single room is booked.
     event BookRoom(
         uint256 indexed booking,
         bytes32 indexed propertyId,
@@ -152,38 +117,26 @@ interface IBukProtocol {
         uint8 child
     );
 
-    /**
-     * @dev Emitted when booking refund is done.
-     */
+    /// @dev Emitted when booking refund is done.
     event BookingRefund(uint256 total, address owner);
 
-    /**
-     * @dev Emitted when room bookings are confirmed.
-     */
+    /// @dev Emitted when room bookings are confirmed.
     event MintedBookingNFT(uint256[] bookings, bool status);
 
-    /**
-     * @dev Emitted when room bookings are checked in.
-     */
+    /// @dev Emitted when room bookings are checked in.
     event CheckinRooms(uint256[] bookings, bool status);
 
-    /**
-     * @dev Emitted when room bookings are checked out.
-     */
+    /// @dev Emitted when room bookings are checked out.
     event CheckoutRooms(uint256[] bookings, bool status);
 
-    /**
-     * @dev Emitted when room bookings are cancelled.
-     */
+    /// @dev Emitted when room bookings are cancelled.
     event CancelRoom(
         uint256[] bookingIds,
         uint256 indexed total,
         bool indexed status
     );
 
-    /**
-     * @dev Emitted when room bookings are cancelled.
-     */
+    /// @dev Emitted when room bookings are cancelled.
     event EmergencyCancellation(uint256 indexed bookingId, bool indexed status);
 
     /**

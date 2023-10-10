@@ -9,13 +9,10 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  * @author BUK Technology Inc
  */
 contract BukTreasury is AccessControl {
-    /**
-     * @dev address currency          Address of the default currency.
-     */
+    /// @dev address currency          Address of the default currency.
     address public currency;
-    /**
-     * @dev address bukProtocol       Address of the Buk Protocol contract.
-     */
+
+    /// @dev address bukProtocol       Address of the Buk Protocol contract.
     address public bukProtocol;
 
     /**
@@ -25,24 +22,16 @@ contract BukTreasury is AccessControl {
     bytes32 public constant ADMIN_ROLE =
         0xa49807205ce4d355092ef5a8a18f56e8913cf4a201fbe287825b095693c21775;
 
-    /**
-     * @dev Emitted when the currency address is set.
-     */
+    /// @dev Emitted when the currency address is set.
     event SetCurrency(address indexed currency);
 
-    /**
-     * @dev Emitted when the Buk Protocol address is set.
-     */
+    /// @dev Emitted when the Buk Protocol address is set.
     event SetBukProtocol(address indexed bukProtocol);
 
-    /**
-     * @dev Emitted when the deployers are set.
-     */
+    /// @dev Emitted when the deployers are set.
     event WithdrawFund(address indexed _account, uint256 indexed _total);
 
-    /**
-     * @dev Emitted when the deployers are set.
-     */
+    /// @dev Emitted when the deployers are set.
     event CancelFund(address indexed _account, uint256 indexed _total);
 
     /**

@@ -18,9 +18,7 @@ contract BukRoyalties is AccessControl, IBukRoyalties {
     bytes32 public constant ADMIN_ROLE =
         0xa49807205ce4d355092ef5a8a18f56e8913cf4a201fbe287825b095693c21775;
 
-    /**
-     * @dev Address of the Buk Protocol contract
-     */
+    /// @dev Address of the Buk Protocol contract
     IBukProtocol public bukProtocolContract;
 
     /**
@@ -56,9 +54,7 @@ contract BukRoyalties is AccessControl, IBukRoyalties {
         _setupRole(ADMIN_ROLE, msg.sender);
     }
 
-    /**
-     * @dev See {IBukRoyalties-setBukProtocolContract}.
-     */
+    /// @dev See {IBukRoyalties-setBukProtocolContract}.
     function setBukProtocolContract(
         address _bukProtocolContract
     ) external onlyRole(ADMIN_ROLE) {
@@ -68,9 +64,7 @@ contract BukRoyalties is AccessControl, IBukRoyalties {
         emit SetBukProtocol(oldBukProtocolContract, _bukProtocolContract);
     }
 
-    /**
-     * @dev See {IBukRoyalties-setBukRoyaltyInfo}.
-     */
+    /// @dev See {IBukRoyalties-setBukRoyaltyInfo}.
     function setBukRoyaltyInfo(
         address _recipient,
         uint96 _royaltyFraction
@@ -81,9 +75,7 @@ contract BukRoyalties is AccessControl, IBukRoyalties {
         emit SetBukRoyalty(bukRoyalty_, _royaltyFraction);
     }
 
-    /**
-     * @dev See {IBukRoyalties-setHotelRoyaltyInfo}.
-     */
+    /// @dev See {IBukRoyalties-setHotelRoyaltyInfo}.
     function setHotelRoyaltyInfo(
         address _recipient,
         uint96 _royaltyFraction
@@ -94,9 +86,7 @@ contract BukRoyalties is AccessControl, IBukRoyalties {
         emit SetHotelRoyalty(hotelRoyalty_, _royaltyFraction);
     }
 
-    /**
-     * @dev See {IBukRoyalties-setFirstOwnerRoyaltyInfo}.
-     */
+    /// @dev See {IBukRoyalties-setFirstOwnerRoyaltyInfo}.
     function setFirstOwnerRoyaltyInfo(
         uint96 _royaltyFraction
     ) external onlyRole(ADMIN_ROLE) {
@@ -106,9 +96,7 @@ contract BukRoyalties is AccessControl, IBukRoyalties {
         emit SetFirstOwnerRoyalty(firstOwnerFraction_, _royaltyFraction);
     }
 
-    /**
-     * @dev See {IBukRoyalties-setRoyaltyInfo}.
-     */
+    /// @dev See {IBukRoyalties-setRoyaltyInfo}.
     function setOtherRoyaltyInfo(
         address[] memory _recipients,
         uint96[] memory _royaltyFractions
@@ -143,9 +131,7 @@ contract BukRoyalties is AccessControl, IBukRoyalties {
         emit SetOtherRoyalties(oldRoyalties_, _royaltyFractions);
     }
 
-    /**
-     * @dev See {IBukRoyalties-getRoyaltyInfo}.
-     */
+    /// @dev See {IBukRoyalties-getRoyaltyInfo}.
     function getRoyaltyInfo(
         uint256 _tokenId
     ) external view returns (Royalty[] memory) {

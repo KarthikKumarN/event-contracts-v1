@@ -14,29 +14,19 @@ import { IBukTreasury } from "../BukTreasury/IBukTreasury.sol";
  * @dev Contract for managing Proof-of-Stay utility NFT ERC1155 token
  */
 contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
-    /**
-     * @dev Name of the contract
-     */
+    /// @dev Name of the contract
     string public name;
 
-    /**
-     * @dev Address of the Buk treasury contract.
-     */
+    /// @dev Address of the Buk treasury contract.
     IBukTreasury private _bukTreasury;
 
-    /**
-     * @dev Address of the BukNFTs contract
-     */
+    /// @dev Address of the BukNFTs contract
     IBukNFTs public nftContract;
 
-    /**
-     * @dev Address of the Buk Protocol contract
-     */
+    /// @dev Address of the Buk Protocol contract
     IBukProtocol public bukProtocolContract;
 
-    /**
-     * @dev Mapping for token URI's for Buk POS NFTs
-     */
+    /// @dev Mapping for token URI's for Buk POS NFTs
     mapping(uint256 => string) public uriByTokenId; //tokenId -> uri
 
     /**
@@ -72,27 +62,21 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
         _grantRole(ADMIN_ROLE, _msgSender());
     }
 
-    /**
-     * @dev See {IBukPOSNFTs-setBukProtocol}.
-     */
+    /// @dev See {IBukPOSNFTs-setBukProtocol}.
     function setBukProtocol(
         address _bukProtocolContract
     ) external onlyRole(ADMIN_ROLE) {
         _setBukProtocol(_bukProtocolContract);
     }
 
-    /**
-     * @dev See {IBukPOSNFTs-setBukTreasury}.
-     */
+    /// @dev See {IBukPOSNFTs-setBukTreasury}.
     function setBukTreasury(
         address _bukTreasuryContract
     ) external onlyRole(ADMIN_ROLE) {
         _setBukTreasury(_bukTreasuryContract);
     }
 
-    /**
-     * @dev See {IBukPOSNFTs-setBukNFTRole}.
-     */
+    /// @dev See {IBukPOSNFTs-setBukNFTRole}.
     function setBukNFTRole(address _nftContract) external onlyRole(ADMIN_ROLE) {
         _grantRole(BUK_NFT_CONTRACT_ROLE, _nftContract);
         _revokeRole(BUK_NFT_CONTRACT_ROLE, address(nftContract));
@@ -101,18 +85,14 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
         emit SetNFTContractRole(oldNFTContract_, _nftContract);
     }
 
-    /**
-     * @dev See {IBukPOSNFTs-setNFTContractName}.
-     */
+    /// @dev See {IBukPOSNFTs-setNFTContractName}.
     function setNFTContractName(
         string memory _contractName
     ) external onlyRole(ADMIN_ROLE) {
         _setNFTContractName(_contractName);
     }
 
-    /**
-     * @dev See {IBukPOSNFTs-setURI}.
-     */
+    /// @dev See {IBukPOSNFTs-setURI}.
     function setURI(
         uint256 _id,
         string memory _newuri
@@ -124,9 +104,7 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
         _setURI(_id, _newuri);
     }
 
-    /**
-     * @dev See {IBukPOSNFTs-mint}.
-     */
+    /// @dev See {IBukPOSNFTs-mint}.
     function mint(
         address _account,
         uint256 _id,
@@ -138,9 +116,7 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
         _setURI(_id, _newuri);
     }
 
-    /**
-     * @dev See {IBukPOSNFTs-safeTransferFrom}.
-     */
+    /// @dev See {IBukPOSNFTs-safeTransferFrom}.
     function safeTransferFrom(
         address _from,
         address _to,
@@ -152,9 +128,7 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
         super._safeTransferFrom(_from, _to, _id, _amount, _data);
     }
 
-    /**
-     * @dev See {IBukPOSNFTs-safeBatchTransferFrom}.
-     */
+    /// @dev See {IBukPOSNFTs-safeBatchTransferFrom}.
     function safeBatchTransferFrom(
         address _from,
         address _to,
@@ -172,9 +146,7 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
         super._safeBatchTransferFrom(_from, _to, _ids, _amounts, _data);
     }
 
-    /**
-     * @dev See {IBukPOSNFTs-uri}.
-     */
+    /// @dev See {IBukPOSNFTs-uri}.
     function uri(
         uint256 _id
     )
@@ -187,9 +159,7 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
         return uriByTokenId[_id];
     }
 
-    /**
-     * @dev See {IERC165-supportsInterface}.
-     */
+    /// @dev See {IERC165-supportsInterface}.
     function supportsInterface(
         bytes4 interfaceId
     ) public view override(AccessControl, IERC165, ERC1155) returns (bool) {
