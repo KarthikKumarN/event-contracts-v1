@@ -206,12 +206,10 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
         override(ERC1155, IBukNFTs)
         onlyRole(MARKETPLACE_CONTRACT_ROLE)
     {
+
+        IBukProtocol.Booking memory details = bukProtocolContract.getBookingDetails(_id);
         require(
-            (block.timestamp <
-                (bukProtocolContract.getBookingDetails(_id).checkin -
-                    (bukProtocolContract.getBookingDetails(_id).tradeTimeLimit *
-                        3600)) &&
-                bukProtocolContract.getBookingDetails(_id).tradeable),
+            (block.timestamp < (details.checkin - (details.tradeTimeLimit * 3600)) && details.tradeable),
             "Trade limit time crossed"
         );
         require(
@@ -243,13 +241,14 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
         );
         uint256 len = _ids.length;
         for (uint i = 0; i < len; ++i) {
+        IBukProtocol.Booking memory details = bukProtocolContract.getBookingDetails(_ids[i]);
             require(
                 (block.timestamp <
-                    (bukProtocolContract.getBookingDetails(_ids[i]).checkin -
+                    (details.checkin -
                         (bukProtocolContract
                             .getBookingDetails(_ids[i])
                             .tradeTimeLimit * 3600)) &&
-                    bukProtocolContract.getBookingDetails(_ids[i]).tradeable),
+                    details.tradeable),
                 "Trade limit time crossed"
             );
             require(
