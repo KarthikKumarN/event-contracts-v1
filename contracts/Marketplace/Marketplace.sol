@@ -100,18 +100,6 @@ contract Marketplace is Context, IMarketplace, AccessControl {
         emit ListingCreated(_msgSender(), _tokenId, _price);
     }
 
-    /// @dev Refer {IMarketplace-delist}.
-    function delist(uint256 _tokenId) external {
-        require(isBookingListed(_tokenId), "NFT not listed");
-        require(
-            _bukNFTContract.balanceOf(_msgSender(), _tokenId) == 1,
-            "Only owner can delist"
-        );
-
-        _listedNFT[_tokenId].status = ListingStatus.inactive;
-        emit Delisted(_tokenId);
-    }
-
     /// @dev Refer {IMarketplace-deleteListing}.
     function deleteListing(uint256 _tokenId) external {
         require(isBookingListed(_tokenId), "NFT not listed");
