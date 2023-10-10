@@ -14,29 +14,19 @@ import { IBukTreasury } from "../BukTreasury/IBukTreasury.sol";
  * @dev Contract for managing hotel room-night inventory and ERC1155 token management for room-night NFTs
  */
 contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
-    /**
-     * @dev Name of the Buk POS NFT collection contract
-     */
+    /// @dev Name of the Buk POS NFT collection contract
     string public name;
 
-    /**
-     * @dev Address of the Buk POS NFT collection contract
-     */
+    /// @dev Address of the Buk POS NFT collection contract
     IBukPOSNFTs public nftPOSContract;
 
-    /**
-     * @dev Address of the Buk Protocol contract
-     */
+    /// @dev Address of the Buk Protocol contract
     IBukProtocol public bukProtocolContract;
 
-    /**
-     * @dev Address of the Buk treasury contract.
-     */
+    /// @dev Address of the Buk treasury contract.
     IBukTreasury private _bukTreasury;
 
-    /**
-     * @dev Mapping for token URI's for booked tickets
-     */
+    /// @dev Mapping for token URI's for booked tickets
     mapping(uint256 => string) public uriByTokenId; //tokenId -> uri
 
     /**
@@ -82,9 +72,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
         _grantRole(BUK_PROTOCOL_ROLE, _bukProtocolContract);
     }
 
-    /**
-     * @dev See {IBukNFTs-setBukProtocol}.
-     */
+    /// @dev See {IBukNFTs-setBukProtocol}.
     function setBukProtocol(
         address _bukProtocolContract
     ) external onlyRole(ADMIN_ROLE) {
