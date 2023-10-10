@@ -1466,7 +1466,7 @@ describe("BukProtocol Bookings", function () {
       await expect(
         bukProtocolContract
           .connect(adminWallet)
-          .cancelRoom(
+          .cancelRooms(
             _id,
             _penalty,
             _refund,
@@ -1533,7 +1533,7 @@ describe("BukProtocol Bookings", function () {
       await expect(
         bukProtocolContract
           .connect(adminWallet)
-          .cancelRoom(
+          .cancelRooms(
             _id,
             _penalty,
             _refund,
@@ -1600,7 +1600,7 @@ describe("BukProtocol Bookings", function () {
       await expect(
         bukProtocolContract
           .connect(adminWallet)
-          .cancelRoom(
+          .cancelRooms(
             _id,
             _penalty,
             _refund,
@@ -1610,7 +1610,7 @@ describe("BukProtocol Bookings", function () {
           ),
       )
         .to.emit(bukProtocolContract, "CancelRoom")
-        .withArgs(_id, _refund[0], false);
+        .withArgs([1], 30000000, true);
     });
     it("Should cancel successfully and check the BukNFTs and BukPOSNFTs status", async function () {
       //Grant allowance permission
@@ -1670,7 +1670,7 @@ describe("BukProtocol Bookings", function () {
       await expect(
         bukProtocolContract
           .connect(adminWallet)
-          .cancelRoom(
+          .cancelRooms(
             _id,
             _penalty,
             _refund,
@@ -1726,7 +1726,7 @@ describe("BukProtocol Bookings", function () {
       await expect(
         bukProtocolContract
           .connect(adminWallet)
-          .cancelRoom(
+          .cancelRooms(
             _id,
             _penalty,
             _refund,
@@ -1789,7 +1789,7 @@ describe("BukProtocol Bookings", function () {
       await expect(
         bukProtocolContract
           .connect(adminWallet)
-          .cancelRoom(
+          .cancelRooms(
             _id,
             _penalty,
             _refund,

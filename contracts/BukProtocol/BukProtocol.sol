@@ -356,9 +356,9 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
     }
 
     /**
-     * @dev See {IBukProtocol-cancelRoom}.
+     * @dev See {IBukProtocol-cancelRooms}.
      */
-    function cancelRoom(
+    function cancelRooms(
         uint256[] memory _ids,
         uint256[] memory _penalties,
         uint256[] memory _refunds,

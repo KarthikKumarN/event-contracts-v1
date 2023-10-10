@@ -39,9 +39,9 @@ interface IMarketplace {
      * @param price, Price of the bought booking
      */
     event RoomBought(
-        uint256 tokenId,
-        address indexed previousOwner,
-        address indexed newOwner,
+        uint256 indexed tokenId,
+        address previousOwner,
+        address newOwner,
         uint256 price
     );
 
@@ -52,7 +52,7 @@ interface IMarketplace {
      * @param price, Sale price of room/booking
      */
     event ListingCreated(
-        address indexed owner,
+        address owner,
         uint256 indexed tokenId,
         uint256 price
     );

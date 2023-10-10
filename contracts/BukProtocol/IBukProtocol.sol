@@ -155,28 +155,28 @@ interface IBukProtocol {
     /**
      * @dev Emitted when booking refund is done.
      */
-    event BookingRefund(uint256 indexed total, address indexed owner);
+    event BookingRefund(uint256 total, address owner);
 
     /**
      * @dev Emitted when room bookings are confirmed.
      */
-    event MintedBookingNFT(uint256[] indexed bookings, bool indexed status);
+    event MintedBookingNFT(uint256[] bookings, bool status);
 
     /**
      * @dev Emitted when room bookings are checked in.
      */
-    event CheckinRooms(uint256[] indexed bookings, bool indexed status);
+    event CheckinRooms(uint256[] bookings, bool status);
 
     /**
      * @dev Emitted when room bookings are checked out.
      */
-    event CheckoutRooms(uint256[] indexed bookings, bool indexed status);
+    event CheckoutRooms(uint256[] bookings, bool status);
 
     /**
      * @dev Emitted when room bookings are cancelled.
      */
     event CancelRoom(
-        uint256[] indexed bookingIds,
+        uint256[] bookingIds,
         uint256 indexed total,
         bool indexed status
     );
@@ -338,7 +338,7 @@ interface IBukProtocol {
      * @notice The Active Booking NFTs are burnt from the owner's account.
      * @notice This function can only be called by admin
      */
-    function cancelRoom(
+    function cancelRooms(
         uint256[] memory _ids,
         uint256[] memory _penalties,
         uint256[] memory _refunds,
