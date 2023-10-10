@@ -23,8 +23,8 @@ interface IBukRoyalties {
      * @param newBukProtocol, new buk protocol address
      */
     event SetBukProtocol(
-        address indexed oldBukProtocol,
-        address indexed newBukProtocol
+        address oldBukProtocol,
+        address newBukProtocol
     );
 
     /**

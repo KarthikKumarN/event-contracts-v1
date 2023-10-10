@@ -65,72 +65,72 @@ interface IBukProtocol {
      * @dev Emitted when the admin wallet is set.
      */
     event SetAdminWallet(
-        address indexed oldCAdminWallet,
-        address indexed newAdminWallet
+        address oldCAdminWallet,
+        address newAdminWallet
     );
 
     /**
      * @dev Emitted when the commission is set.
      */
     event SetCommission(
-        uint256 indexed oldCommission,
-        uint256 indexed newCommission
+        uint256 oldCommission,
+        uint256 newCommission
     );
 
     /**
      * @dev Emitted when BukNFTs contract address is updated.
      */
     event SetBukNFTs(
-        address indexed oldNFTContract,
-        address indexed newNFTContract
+        address oldNFTContract,
+        address newNFTContract
     );
 
     /**
      * @dev Emitted when BukPOSNFTs contract address is updated.
      */
     event SetBukPOSNFTs(
-        address indexed oldNFTPOSContract,
-        address indexed newNFTPOSContract
+        address oldNFTPOSContract,
+        address newNFTPOSContract
     );
 
     /**
      * @dev Emitted when BukRoyalties contract address is updated.
      */
     event SetRoyaltiesContract(
-        address indexed oldRoyaltiesContract,
-        address indexed newRoyaltiesContract
+        address oldRoyaltiesContract,
+        address newRoyaltiesContract
     );
 
     /**
      * @dev Emitted when signer verifier is updated.
      */
     event SetSignerVerifier(
-        address indexed oldSignerVerifier,
-        address indexed newSignerVerifier
+        address oldSignerVerifier,
+        address newSignerVerifier
     );
 
     /**
      * @dev Emitted when Buk treasury is updated.
      */
     event SetBukTreasury(
-        address indexed oldTreasuryContract,
-        address indexed newTreasuryContract
+        address oldTreasuryContract,
+        address newTreasuryContract
     );
 
     /**
      * @dev Emitted when Buk Wallet is updated.
      */
     event SetBukWallet(
-        address indexed oldBukWalletContract,
-        address indexed newBukWalletContract
+        address oldBukWalletContract,
+        address newBukWalletContract
     );
 
     /**
      * @dev Emitted when stable token is updated.
      */
     event SetStableToken(
-        address indexed oldStableToken,
-        address indexed newStableToken
+        address oldStableToken,
+        address newStableToken
     );
 
     /**
@@ -138,7 +138,7 @@ interface IBukProtocol {
      * @param tokenId Token Id whose tradeability is being toggled.
      * @param tradeable Is the NFT tradeable.
      */
-    event ToggleTradeability(uint256 indexed tokenId, bool tradeable);
+    event ToggleTradeability(uint256 indexed tokenId, bool indexed tradeable);
 
     /**
      * @dev Emitted when single room is booked.
@@ -155,28 +155,28 @@ interface IBukProtocol {
     /**
      * @dev Emitted when booking refund is done.
      */
-    event BookingRefund(uint256 indexed total, address indexed owner);
+    event BookingRefund(uint256 total, address owner);
 
     /**
      * @dev Emitted when room bookings are confirmed.
      */
-    event MintedBookingNFT(uint256[] indexed bookings, bool indexed status);
+    event MintedBookingNFT(uint256[] bookings, bool status);
 
     /**
      * @dev Emitted when room bookings are checked in.
      */
-    event CheckinRooms(uint256[] indexed bookings, bool indexed status);
+    event CheckinRooms(uint256[] bookings, bool status);
 
     /**
      * @dev Emitted when room bookings are checked out.
      */
-    event CheckoutRooms(uint256[] indexed bookings, bool indexed status);
+    event CheckoutRooms(uint256[] bookings, bool status);
 
     /**
      * @dev Emitted when room bookings are cancelled.
      */
     event CancelRoom(
-        uint256[] indexed bookingIds,
+        uint256[] bookingIds,
         uint256 indexed total,
         bool indexed status
     );
@@ -338,7 +338,7 @@ interface IBukProtocol {
      * @notice The Active Booking NFTs are burnt from the owner's account.
      * @notice This function can only be called by admin
      */
-    function cancelRoom(
+    function cancelRooms(
         uint256[] memory _ids,
         uint256[] memory _penalties,
         uint256[] memory _refunds,

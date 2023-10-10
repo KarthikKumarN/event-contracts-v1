@@ -13,46 +13,46 @@ interface IBukNFTs is IERC1155 {
      * @dev Emitted when Buk Protocol Address is updated.
      */
     event SetBukProtocol(
-        address indexed oldBukProtocolContract,
-        address indexed newBukProtocolContract
+        address oldBukProtocolContract,
+        address newBukProtocolContract
     );
 
     /**
      * @dev Emitted when treasury is updated.
      */
     event SetBukTreasury(
-        address indexed oldTreasuryContract,
-        address indexed newTreasuryContract
+        address oldTreasuryContract,
+        address newTreasuryContract
     );
 
     /**
      * @dev Emitted when marketplace role is granted.
      */
-    event SetMarketplace(address indexed marketplaceContract);
+    event SetMarketplace(address marketplaceContract);
 
     /**
      * @dev Event to update the contract name
      */
     event SetNFTContractName(
-        string indexed oldContractName,
-        string indexed newContractName
+        string oldContractName,
+        string newContractName
     );
 
     /**
      * @dev Event to set NFT contract role
      */
     event SetNFTPOSContractRole(
-        address indexed oldNFTPOSContractAddr,
-        address indexed newNFTPOSContractAddr
+        address oldNFTPOSContractAddr,
+        address newNFTPOSContractAddr
     );
 
     /**
      * @dev Event to set token URI
      */
     event SetURI(
-        uint256 indexed id,
-        string indexed oldUri,
-        string indexed newUri
+        uint256 id,
+        string oldUri,
+        string newUri
     );
 
     /**
