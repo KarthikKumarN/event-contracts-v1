@@ -11,8 +11,8 @@ import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
  */
 contract SignatureVerifier {
     using Strings for uint256;
-    
-    // @dev See {ISignatureVerifier-verify}.
+
+    /// @dev See {ISignatureVerifier-verify}.
     function verify(
         bytes32 _hash,
         bytes memory _signature
@@ -21,7 +21,7 @@ contract SignatureVerifier {
         return ECDSA.recover(ethSignedHash, _signature);
     }
 
-    // @dev See {ISignatureVerifier-generateAndVerify}.
+    /// @dev See {ISignatureVerifier-generateAndVerify}.
     function generateAndVerify(
         uint256 _totalPenalty,
         uint256 _totalRefund,
