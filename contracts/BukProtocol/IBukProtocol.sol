@@ -317,21 +317,27 @@ interface IBukProtocol {
 
     /**
      * Function to get wallet addresses
-     * @return bukTreasury The address of the bukTreasury contract
-     * @return bukWallet The address of the bukWallet contract
-     * @return stableToken The address of the stable token contract
-     * @return admin The address of the stable token contract
+     * @return nftContract The address of the nft contract
+     * @return nftPOSContract The address of the nftPOS contract
+     * @return royaltiesContract The address of the royalties contract
      * @return signatureVerifier The address of the signature verifier contract
+     * @return bukTreasury The address of the bukTreasury contract
+     * @return stableToken The address of the stable token contract
+     * @return bukWallet The address of the bukWallet contract
+     * @return admin The address of the stable token contract
      */
     function getWallets()
         external
         view
         returns (
+            address nftContract,
+            address nftPOSContract,
+            address royaltiesContract,
+            address signatureVerifier,
             address bukTreasury,
-            address bukWallet,
             address stableToken,
-            address admin,
-            address signatureVerifier
+            address bukWallet,
+            address admin
         );
 
     /**
