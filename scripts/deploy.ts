@@ -4,13 +4,16 @@ import {
   BUK_WALLET,
   BUK_POS_NFT_NAME,
   BUK_NFT_NAME,
-ROYALTIES,
+  ROYALTIES,
 } from "../constants";
 
 async function main() {
   const [deployer] = await ethers.getSigners();
 
-  console.log("🚀 ~ 🚀 ~ Deploying contracts with the account:", deployer.address);
+  console.log(
+    "🚀 ~ 🚀 ~ Deploying contracts with the account:",
+    deployer.address,
+  );
 
   // Deploy Treasury
   const treasury = await ethers.deployContract("BukTreasury", [USDC_CONTRACT]);
@@ -97,17 +100,28 @@ async function main() {
   //Set Buk Treasury in BukNFTs
   await bukNFTs.setBukTreasury(treasury.target);
 
+  //Set Marketplace in BukNFTs
+  await bukNFTs.setMarketplaceRole(marketplace.target);
+
   //Set Buk Protocol in BukRoyalties
   await royalties.setBukProtocolContract(bukProtocol.target);
 
   //Set Buk Royalty Info in BukRoyalties
-  await royalties.setBukRoyaltyInfo(treasury.target, ROYALTIES.BUK_ROYALTY_PERCENTAGE);
+  await royalties.setBukRoyaltyInfo(
+    treasury.target,
+    ROYALTIES.BUK_ROYALTY_PERCENTAGE,
+  );
 
   //Set Hotel Royalty Info in BukRoyalties
-  await royalties.setHotelRoyaltyInfo(treasury.target, ROYALTIES.HOTEL_ROYALTY_PERCENTAGE);
+  await royalties.setHotelRoyaltyInfo(
+    treasury.target,
+    ROYALTIES.HOTEL_ROYALTY_PERCENTAGE,
+  );
 
   //Set First Owner Royalty Info in BukRoyalties
-  await royalties.setFirstOwnerRoyaltyInfo(ROYALTIES.FIRST_OWNER_ROYALTY_PERCENTAGE);
+  await royalties.setFirstOwnerRoyaltyInfo(
+    ROYALTIES.FIRST_OWNER_ROYALTY_PERCENTAGE,
+  );
 
   console.log("🚀 All contracts have been deployed and configured");
 
@@ -118,43 +132,43 @@ async function main() {
   //Verify Treasury contract
   await run("verify:verify", {
     address: treasury.target,
-    constructorArguments: [USDC_CONTRACT]
+    constructorArguments: [USDC_CONTRACT],
   });
 
   //Verify SignatureVerifier contract
   await run("verify:verify", {
     address: signatureVerifier.target,
-    constructorArguments: []
+    constructorArguments: [],
   });
 
   //Verify BukRoyalties contract
   await run("verify:verify", {
     address: royalties.target,
-    constructorArguments: []
+    constructorArguments: [],
   });
 
   //Verify BukProtocol contract
   await run("verify:verify", {
     address: bukProtocol.target,
-    constructorArguments: bukProtocolArgs
+    constructorArguments: bukProtocolArgs,
   });
 
   //Verify BukPOSNFTs contract
   await run("verify:verify", {
     address: bukPOSNFTs.target,
-    constructorArguments: bukPOSNFTsArgs
+    constructorArguments: bukPOSNFTsArgs,
   });
 
   //Verify BukNFTs contract
   await run("verify:verify", {
     address: bukNFTs.target,
-    constructorArguments: bukNFTsArgs
+    constructorArguments: bukNFTsArgs,
   });
 
   //Verify Marketplace contract
   await run("verify:verify", {
     address: marketplace.target,
-    constructorArguments: marketplaceArgs
+    constructorArguments: marketplaceArgs,
   });
 
   console.log("Contracts verified!");
