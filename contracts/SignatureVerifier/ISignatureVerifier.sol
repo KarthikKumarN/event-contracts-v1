@@ -19,6 +19,15 @@ interface ISignatureVerifier {
         bytes memory _signature
     ) external view returns (address);
 
+    /**
+     * @dev Function generateAndVerify
+     * Generates a hash from the given parameters and verifies the signature of the hash using ECDSA.
+     * @param _totalPenalty The total penalty amount.
+     * @param _totalRefund The total refund amount.
+     * @param _totalCharges The total charges amount.
+     * @param _signature The signature of the message.
+     * @return The address of the signer who generated the given signature.
+     */
     function generateAndVerify(
         uint256 _totalPenalty,
         uint256 _totalRefund,

@@ -24,12 +24,10 @@ interface IMarketplace {
      * @dev Enum for listing statuses.
      * @var ListingStatus.inactive   Listing has been inactive
      * @var ListingStatus.active     Listing has been active.
-     * @var ListingStatus.sold   Listing has been sold
      */
     enum ListingStatus {
         inactive,
-        active,
-        sold
+        active
     }
 
     /**

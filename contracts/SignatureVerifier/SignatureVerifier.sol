@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
 /**
  * @title SignatureVerifier contract
@@ -9,9 +10,9 @@ import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
  * @dev Contract to verify the signature
  */
 contract SignatureVerifier {
-    /**
-     * @dev See {ISignatureVerifier-verify}.
-     */
+    using Strings for uint256;
+    
+    // @dev See {ISignatureVerifier-verify}.
     function verify(
         bytes32 _hash,
         bytes memory _signature
@@ -20,6 +21,7 @@ contract SignatureVerifier {
         return ECDSA.recover(ethSignedHash, _signature);
     }
 
+    // @dev See {ISignatureVerifier-generateAndVerify}.
     function generateAndVerify(
         uint256 _totalPenalty,
         uint256 _totalRefund,
@@ -30,11 +32,11 @@ contract SignatureVerifier {
         bytes32 messageHash = keccak256(
             abi.encodePacked(
                 "Cancellation Details:\nTotal Penalty: ",
-                _uintToString(_totalPenalty),
+                _totalPenalty.toString(),
                 "\nTotal Refund: ",
-                _uintToString(_totalRefund),
+                _totalRefund.toString(),
                 "\nTotal Charges: ",
-                _uintToString(_totalCharges)
+                _totalCharges.toString()
             )
         );
 
@@ -45,22 +47,5 @@ contract SignatureVerifier {
 
         // Recover the signer's address
         return ECDSA.recover(ethSignedMessageHash, _signature);
-    }
-
-    function _uintToString(uint256 _numVal) internal pure returns (string memory) {
-        if (_numVal == 0) return "0";
-        uint256 maxlength = 100;
-        bytes memory reversed = new bytes(maxlength);
-        uint256 i = 0;
-        while (_numVal != 0) {
-            uint256 remainder = _numVal % 10;
-            _numVal = _numVal / 10;
-            reversed[i++] = bytes1(uint8(48 + remainder));
-        }
-        bytes memory s = new bytes(i);
-        for (uint256 j = 0; j < i; j++) {
-            s[j] = reversed[i - 1 - j];
-        }
-        return string(s);
     }
 }

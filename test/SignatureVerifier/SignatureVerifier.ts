@@ -22,14 +22,21 @@ describe("SignatureVerifier", function () {
     // Construct the message
     const message = `Cancellation Details:\nTotal Penalty: ${totalPenalty}\nTotal Refund: ${totalRefund}\nTotal Charges: ${totalCharges}`;
     const messageHash = keccak256(toUtf8Bytes(message));
-    
+
+    // Create a new buffer object from the sliced version of the messageHash string
+    // The first two characters are removed before converting to byte representation
+    const byteArray = Buffer.from(messageHash.slice(2), "hex");
+
     // Sign the message
-    const byteArray = Buffer.from(messageHash.slice(2), 'hex');
-    
     const signature = await signer.signMessage(byteArray);
-    
+
     // Call the generateAndVerify function
-    const recoveredAddress = await verifier.generateAndVerify(totalPenalty, totalRefund, totalCharges, signature);
+    const recoveredAddress = await verifier.generateAndVerify(
+      totalPenalty,
+      totalRefund,
+      totalCharges,
+      signature,
+    );
 
     // Check if the recovered address matches the signer's address
     expect(recoveredAddress).to.equal(signer.address);
@@ -40,8 +47,11 @@ describe("SignatureVerifier", function () {
     const message = "This is a test message for verification.";
     const messageHash = keccak256(toUtf8Bytes(message));
 
+    // Create a new buffer object from the sliced version of the messageHash string
+    // The first two characters are removed before converting to byte representation
+    const byteArray = Buffer.from(messageHash.slice(2), "hex");
+
     // Sign the message
-    const byteArray = Buffer.from(messageHash.slice(2), 'hex');
     const signature = await signer.signMessage(byteArray);
 
     // Call the verify function
@@ -49,6 +59,5 @@ describe("SignatureVerifier", function () {
 
     // Check if the recovered address matches the signer's address
     expect(recoveredAddress).to.equal(signer.address);
-});
-
+  });
 });
