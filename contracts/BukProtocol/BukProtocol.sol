@@ -147,8 +147,8 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
         emit ToggleTradeability(_tokenId, _bookingDetails[_tokenId].tradeable);
     }
 
-    /// @dev See {IBukProtocol-bookRoom}.
-    function bookRoom(
+    /// @dev See {IBukProtocol-bookRooms}.
+    function bookRooms(
         uint256[] memory _total,
         uint256[] memory _baseRate,
         uint256[] memory _minSalePrice,

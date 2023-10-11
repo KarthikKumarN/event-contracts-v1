@@ -94,6 +94,7 @@ contract Marketplace is Context, IMarketplace, AccessControl {
         _listedNFT[_tokenId] = ListingDetails(
             _price,
             _msgSender(),
+            _listedNFT[_tokenId].index +1,
             ListingStatus.active
         );
 
@@ -108,7 +109,9 @@ contract Marketplace is Context, IMarketplace, AccessControl {
                 hasRole(BUK_PROTOCOL_ROLE, _msgSender()),
             "Owner or Buk protocol can delete"
         );
+        uint256 listingIndex = _listedNFT[_tokenId].index;
         delete _listedNFT[_tokenId];
+        _listedNFT[_tokenId].index = listingIndex + 1;
         emit DeletedListing(_tokenId);
     }
 
@@ -132,6 +135,7 @@ contract Marketplace is Context, IMarketplace, AccessControl {
         uint256 oldPrice = _listedNFT[_tokenId].price;
         _listedNFT[_tokenId].status = ListingStatus.active;
         _listedNFT[_tokenId].price = _newPrice;
+        _listedNFT[_tokenId].index = _listedNFT[_tokenId].index + 1;
         emit Relisted(_tokenId, oldPrice, _newPrice);
     }
 
@@ -288,7 +292,9 @@ contract Marketplace is Context, IMarketplace, AccessControl {
             1,
             ""
         );
+        uint256 listingIndex = _listedNFT[_tokenId].index;
         delete _listedNFT[_tokenId];
+        _listedNFT[_tokenId].index = listingIndex + 1;
         emit RoomBought(_tokenId, nftOwner, _msgSender(), totalPrice);
     }
 }

@@ -145,7 +145,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000],
             [80000000],
             [70000000],
@@ -175,7 +175,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000],
             [80000000],
             [70000000],
@@ -208,7 +208,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000],
             [80000000],
             [70000000],
@@ -236,7 +236,7 @@ describe("BukProtocol Bookings", function () {
       await expect(
         bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000],
             [80000000],
             [70000000],
@@ -260,7 +260,7 @@ describe("BukProtocol Bookings", function () {
       await expect(
         bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000],
             [80000000],
             [70000000],
@@ -284,7 +284,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000],
             [80000000],
             [70000000],
@@ -308,7 +308,7 @@ describe("BukProtocol Bookings", function () {
       await expect(
         bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000],
             [80000000, 80000000],
             [70000000, 70000000],
@@ -335,7 +335,7 @@ describe("BukProtocol Bookings", function () {
       await expect(
         bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000, 100000000],
             [80000000, 80000000],
             [70000000, 70000000],
@@ -366,7 +366,7 @@ describe("BukProtocol Bookings", function () {
       await expect(
         bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000, 100000000],
             [80000000, 80000000],
             [70000000, 70000000],
@@ -399,7 +399,7 @@ describe("BukProtocol Bookings", function () {
       await expect(
         bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000, 100000000],
             [80000000, 80000000],
             [70000000, 70000000],
@@ -430,7 +430,7 @@ describe("BukProtocol Bookings", function () {
       await expect(
         bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000, 100000000],
             [80000000, 80000000],
             [70000000, 70000000],
@@ -461,7 +461,7 @@ describe("BukProtocol Bookings", function () {
       await expect(
         bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000, 100000000],
             [80000000, 80000000],
             [70000000, 70000000],
@@ -495,7 +495,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000],
             [80000000],
             [70000000],
@@ -531,7 +531,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000],
             [80000000],
             [70000000],
@@ -568,7 +568,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000],
             [80000000],
             [70000000],
@@ -604,7 +604,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [
               100000000, 100000000, 100000000, 100000000, 100000000, 100000000,
               100000000, 100000000, 100000000, 100000000, 100000000, 100000000,
@@ -678,7 +678,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000],
             [80000000],
             [70000000],
@@ -717,7 +717,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000],
             [80000000],
             [70000000],
@@ -757,7 +757,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000],
             [80000000],
             [70000000],
@@ -797,7 +797,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000],
             [80000000],
             [70000000],
@@ -833,7 +833,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000, 100000000],
             [80000000, 80000000],
             [70000000, 70000000],
@@ -920,7 +920,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000],
             [80000000],
             [70000000],
@@ -961,7 +961,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [
               100000000, 100000000, 100000000, 100000000, 100000000, 100000000,
               100000000, 100000000, 100000000, 100000000, 100000000, 100000000,
@@ -1020,7 +1020,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000],
             [80000000],
             [70000000],
@@ -1104,7 +1104,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000],
             [80000000],
             [70000000],
@@ -1150,7 +1150,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000],
             [80000000],
             [70000000],
@@ -1197,7 +1197,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000],
             [80000000],
             [70000000],
@@ -1244,7 +1244,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [
               100000000, 100000000, 100000000, 100000000, 100000000, 100000000,
               100000000, 100000000, 100000000, 100000000, 100000000, 100000000,
@@ -1300,7 +1300,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000],
             [80000000],
             [70000000],
@@ -1345,7 +1345,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000],
             [80000000],
             [70000000],
@@ -1386,7 +1386,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000],
             [80000000],
             [70000000],
@@ -1430,7 +1430,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000],
             [80000000],
             [70000000],
@@ -1491,7 +1491,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000],
             [80000000],
             [70000000],
@@ -1556,7 +1556,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000],
             [80000000],
             [70000000],
@@ -1623,7 +1623,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000],
             [80000000],
             [70000000],
@@ -1695,7 +1695,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000],
             [80000000],
             [70000000],
@@ -1744,7 +1744,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000],
             [80000000],
             [70000000],
@@ -1810,7 +1810,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000],
             [80000000],
             [70000000],
@@ -1858,7 +1858,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000],
             [80000000],
             [70000000],
@@ -1910,7 +1910,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000],
             [80000000],
             [70000000],
@@ -1964,7 +1964,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000],
             [80000000],
             [70000000],
@@ -2022,7 +2022,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000],
             [80000000],
             [70000000],
@@ -2058,7 +2058,7 @@ describe("BukProtocol Bookings", function () {
       expect(
         await bukProtocolContract
           .connect(owner)
-          .bookRoom(
+          .bookRooms(
             [100000000],
             [80000000],
             [70000000],

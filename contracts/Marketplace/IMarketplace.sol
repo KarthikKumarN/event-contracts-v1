@@ -16,6 +16,7 @@ interface IMarketplace {
     struct ListingDetails {
         uint256 price;
         address owner;
+        uint256 index;
         ListingStatus status;
     }
 

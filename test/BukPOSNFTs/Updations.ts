@@ -176,7 +176,7 @@ describe("BukPOSNFTs Updations", function () {
     expect(
       await bukProtocolContract
         .connect(owner)
-        .bookRoom(
+        .bookRooms(
           [100000000],
           [80000000],
           [70000000],

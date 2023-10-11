@@ -226,7 +226,7 @@ interface IBukProtocol {
      * @param _tradeable Is the booking NFT tradeable.
      * @return ids IDs of the bookings.
      */
-    function bookRoom(
+    function bookRooms(
         uint256[] memory _total,
         uint256[] memory _baseRate,
         uint256[] memory _minSalePrice,
