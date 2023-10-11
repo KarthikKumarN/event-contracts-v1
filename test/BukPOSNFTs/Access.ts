@@ -46,7 +46,9 @@ describe("BukPOSNFTs Access Control", function () {
     );
 
     //Deploy SignatureVerifier contract
-    const SignatureVerifier = await ethers.getContractFactory("SignatureVerifier");
+    const SignatureVerifier = await ethers.getContractFactory(
+      "SignatureVerifier",
+    );
     signatureVerifierContract = await SignatureVerifier.deploy();
 
     //Deploy BukRoyalties contract
@@ -99,312 +101,292 @@ describe("BukPOSNFTs Access Control", function () {
     );
 
     //Set Buk Protocol in Treasury
-    const setBukProtocol = await bukTreasuryContract.setBukProtocol(bukProtocolContract.getAddress())
+    const setBukProtocol = await bukTreasuryContract.setBukProtocol(
+      bukProtocolContract.getAddress(),
+    );
   });
 
   describe("Manage Default Admin Role", function () {
     it("Should set new default admin", async function () {
       //Assign the value of DEFAULT_ADMIN_ROLE
-      const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
+      const DEFAULT_ADMIN_ROLE =
+        "0x0000000000000000000000000000000000000000000000000000000000000000";
 
       //Add new address to Admin role
       expect(
-        await nftPosContract.connect(adminWallet).grantRole(
-          DEFAULT_ADMIN_ROLE,
-          account1
-        ),
+        await nftPosContract
+          .connect(adminWallet)
+          .grantRole(DEFAULT_ADMIN_ROLE, account1),
       ).not.be.reverted;
 
       //Check if the new admin has DEFAULT_ADMIN_ROLE
       expect(
-        await nftPosContract.connect(adminWallet).hasRole(
-          DEFAULT_ADMIN_ROLE,
-          account1
-        ),
-      ).to.equal(true)
-    })
+        await nftPosContract
+          .connect(adminWallet)
+          .hasRole(DEFAULT_ADMIN_ROLE, account1),
+      ).to.equal(true);
+    });
     it("Should set new default admin and revoke old one", async function () {
       //Assign the value of DEFAULT_ADMIN_ROLE
-      const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
+      const DEFAULT_ADMIN_ROLE =
+        "0x0000000000000000000000000000000000000000000000000000000000000000";
 
       //Add new address to Admin role
       expect(
-        await nftPosContract.connect(adminWallet).grantRole(
-          DEFAULT_ADMIN_ROLE,
-          account1
-        ),
+        await nftPosContract
+          .connect(adminWallet)
+          .grantRole(DEFAULT_ADMIN_ROLE, account1),
       ).not.be.reverted;
 
       //Check if the new admin has DEFAULT_ADMIN_ROLE
       expect(
-        await nftPosContract.connect(adminWallet).hasRole(
-          DEFAULT_ADMIN_ROLE,
-          account1
-        ),
-      ).to.equal(true)
+        await nftPosContract
+          .connect(adminWallet)
+          .hasRole(DEFAULT_ADMIN_ROLE, account1),
+      ).to.equal(true);
 
       //Revoke the new admin's access
       expect(
-        await nftPosContract.connect(adminWallet).revokeRole(
-          DEFAULT_ADMIN_ROLE,
-          account1
-        ),
+        await nftPosContract
+          .connect(adminWallet)
+          .revokeRole(DEFAULT_ADMIN_ROLE, account1),
       ).not.be.reverted;
 
       //Check if the new admin still has DEFAULT_ADMIN_ROLE
       expect(
-        await nftPosContract.connect(adminWallet).hasRole(
-          DEFAULT_ADMIN_ROLE,
-          account1
-        ),
-      ).to.equal(false)
-    })
+        await nftPosContract
+          .connect(adminWallet)
+          .hasRole(DEFAULT_ADMIN_ROLE, account1),
+      ).to.equal(false);
+    });
     it("Should set new default admin and check function with new one", async function () {
       // Assign the value of DEFAULT_ADMIN_ROLE
-      const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
+      const DEFAULT_ADMIN_ROLE =
+        "0x0000000000000000000000000000000000000000000000000000000000000000";
 
       // Add new address to default admin role
       await expect(
-        nftPosContract.connect(adminWallet).grantRole(
-          DEFAULT_ADMIN_ROLE,
-          await account1.getAddress()
-        )
+        nftPosContract
+          .connect(adminWallet)
+          .grantRole(DEFAULT_ADMIN_ROLE, await account1.getAddress()),
       ).to.not.be.reverted;
 
       // Check if the new admin has DEFAULT_ADMIN_ROLE
       expect(
-        await nftPosContract.connect(account1).hasRole(
-          DEFAULT_ADMIN_ROLE,
-          await account1.getAddress()
-        )
+        await nftPosContract
+          .connect(account1)
+          .hasRole(DEFAULT_ADMIN_ROLE, await account1.getAddress()),
       ).to.equal(true);
 
       //Revoke the old admin's access
       expect(
-        await nftPosContract.connect(adminWallet).revokeRole(
-          DEFAULT_ADMIN_ROLE,
-          await adminWallet.getAddress()
-        ),
+        await nftPosContract
+          .connect(adminWallet)
+          .revokeRole(DEFAULT_ADMIN_ROLE, await adminWallet.getAddress()),
       ).not.be.reverted;
 
       await expect(
-        nftPosContract.connect(account1).grantRole(
-          DEFAULT_ADMIN_ROLE,
-          await account1.getAddress()
-        )
+        nftPosContract
+          .connect(account1)
+          .grantRole(DEFAULT_ADMIN_ROLE, await account1.getAddress()),
       ).to.not.be.reverted;
-    })
+    });
 
     it("Should set new default admin and check function with old one", async function () {
       // Assign the value of DEFAULT_ADMIN_ROLE
-      const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
+      const DEFAULT_ADMIN_ROLE =
+        "0x0000000000000000000000000000000000000000000000000000000000000000";
 
       // Add new address to default admin role
       await expect(
-        nftPosContract.connect(adminWallet).grantRole(
-          DEFAULT_ADMIN_ROLE,
-          await account1.getAddress()
-        )
+        nftPosContract
+          .connect(adminWallet)
+          .grantRole(DEFAULT_ADMIN_ROLE, await account1.getAddress()),
       ).to.not.be.reverted;
 
       // Check if the new admin has DEFAULT_ADMIN_ROLE
       expect(
-        await nftPosContract.connect(account1).hasRole(
-          DEFAULT_ADMIN_ROLE,
-          await account1.getAddress()
-        )
+        await nftPosContract
+          .connect(account1)
+          .hasRole(DEFAULT_ADMIN_ROLE, await account1.getAddress()),
       ).to.equal(true);
 
       //Revoke the old admin's access
       expect(
-        await nftPosContract.connect(adminWallet).revokeRole(
-          DEFAULT_ADMIN_ROLE,
-          await adminWallet.getAddress()
-        ),
+        await nftPosContract
+          .connect(adminWallet)
+          .revokeRole(DEFAULT_ADMIN_ROLE, await adminWallet.getAddress()),
       ).not.be.reverted;
 
       await expect(
-        nftPosContract.connect(adminWallet).grantRole(
-          DEFAULT_ADMIN_ROLE,
-          await account1.getAddress()
-        )
+        nftPosContract
+          .connect(adminWallet)
+          .grantRole(DEFAULT_ADMIN_ROLE, await account1.getAddress()),
       ).to.be.reverted;
-    })
-  })
+    });
+  });
 
   describe("Manage Admin Role", function () {
-
     it("Should add new admin", async function () {
       //Assign the value of DEFAULT_ADMIN_ROLE
-      const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
+      const DEFAULT_ADMIN_ROLE =
+        "0x0000000000000000000000000000000000000000000000000000000000000000";
 
       //Add new address to Admin role
       expect(
-        await nftPosContract.connect(adminWallet).grantRole(
-          DEFAULT_ADMIN_ROLE,
-          account1
-        ),
+        await nftPosContract
+          .connect(adminWallet)
+          .grantRole(DEFAULT_ADMIN_ROLE, account1),
       ).not.be.reverted;
 
       //Check if the new admin has ADMIN_ROLE
       expect(
-        await nftPosContract.connect(adminWallet).hasRole(
-          DEFAULT_ADMIN_ROLE,
-          account1
-        ),
-      ).to.equal(true)
+        await nftPosContract
+          .connect(adminWallet)
+          .hasRole(DEFAULT_ADMIN_ROLE, account1),
+      ).to.equal(true);
     });
 
     it("Should set new admin and revoke old admin", async function () {
       //Assign the value of DEFAULT_ADMIN_ROLE
-      const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
+      const DEFAULT_ADMIN_ROLE =
+        "0x0000000000000000000000000000000000000000000000000000000000000000";
 
       //Add new address to Admin role
       expect(
-        await nftPosContract.connect(adminWallet).grantRole(
-          DEFAULT_ADMIN_ROLE,
-          account1
-        ),
+        await nftPosContract
+          .connect(adminWallet)
+          .grantRole(DEFAULT_ADMIN_ROLE, account1),
       ).not.be.reverted;
 
       //Check if the new admin has DEFAULT_ADMIN_ROLE
       expect(
-        await nftPosContract.connect(adminWallet).hasRole(
-          DEFAULT_ADMIN_ROLE,
-          account1
-        ),
-      ).to.equal(true)
+        await nftPosContract
+          .connect(adminWallet)
+          .hasRole(DEFAULT_ADMIN_ROLE, account1),
+      ).to.equal(true);
 
       //Revoke the new admin's access
       expect(
-        await nftPosContract.connect(adminWallet).revokeRole(
-          DEFAULT_ADMIN_ROLE,
-          account1
-        ),
+        await nftPosContract
+          .connect(adminWallet)
+          .revokeRole(DEFAULT_ADMIN_ROLE, account1),
       ).not.be.reverted;
 
       //Check if the new admin still has DEFAULT_ADMIN_ROLE
       expect(
-        await nftPosContract.connect(adminWallet).hasRole(
-          DEFAULT_ADMIN_ROLE,
-          account1
-        ),
-      ).to.equal(false)
+        await nftPosContract
+          .connect(adminWallet)
+          .hasRole(DEFAULT_ADMIN_ROLE, account1),
+      ).to.equal(false);
     });
 
     it("Should set new admin and check function with new admin", async function () {
       // Assign the value of DEFAULT_ADMIN_ROLE
-      const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
+      const DEFAULT_ADMIN_ROLE =
+        "0x0000000000000000000000000000000000000000000000000000000000000000";
 
       // Add new address to Admin role
       await expect(
-        nftPosContract.connect(adminWallet).grantRole(
-          DEFAULT_ADMIN_ROLE,
-          account1
-        )
+        nftPosContract
+          .connect(adminWallet)
+          .grantRole(DEFAULT_ADMIN_ROLE, account1),
       ).to.not.be.reverted;
 
       // Check if the new admin has DEFAULT_ADMIN_ROLE
       expect(
-        await nftPosContract.connect(account1).hasRole(
-          DEFAULT_ADMIN_ROLE,
-          account1
-        )
+        await nftPosContract
+          .connect(account1)
+          .hasRole(DEFAULT_ADMIN_ROLE, account1),
       ).to.equal(true);
 
-      expect(await nftPosContract.connect(adminWallet).setBukProtocol(await bukProtocolContract.getAddress()))
-        .not.be.reverted;
+      expect(
+        await nftPosContract
+          .connect(adminWallet)
+          .setBukProtocol(await bukProtocolContract.getAddress()),
+      ).not.be.reverted;
     });
-
-
   });
 
   describe("Manage Buk Protocol Role", function () {
-
     it("Should add new Buk Protocol address", async function () {
-      //Get the keccak256 hash of the BUK_PROTOCOL_CONTRACT_ROLE
-      const BUK_PROTOCOL_CONTRACT_ROLE = keccak256(toUtf8Bytes("BUK_PROTOCOL_CONTRACT_ROLE"));
+      //Get the keccak256 hash of the BUK_PROTOCOL_ROLE
+      const BUK_PROTOCOL_ROLE = keccak256(toUtf8Bytes("BUK_PROTOCOL_ROLE"));
 
       //Add new address to Buk Protocol role
       expect(
-        await nftPosContract.connect(adminWallet).grantRole(
-          BUK_PROTOCOL_CONTRACT_ROLE,
-          await bukProtocolContract.getAddress()
-        ),
+        await nftPosContract
+          .connect(adminWallet)
+          .grantRole(BUK_PROTOCOL_ROLE, await bukProtocolContract.getAddress()),
       ).not.be.reverted;
 
       //Check if the new admin has ADMIN_ROLE
       expect(
-        await nftPosContract.connect(adminWallet).hasRole(
-          BUK_PROTOCOL_CONTRACT_ROLE,
-          await bukProtocolContract.getAddress()
-        ),
-      ).to.equal(true)
+        await nftPosContract
+          .connect(adminWallet)
+          .hasRole(BUK_PROTOCOL_ROLE, await bukProtocolContract.getAddress()),
+      ).to.equal(true);
     });
 
     it("Should set new Buk Protocol address and revoke old one", async function () {
-      //Get the keccak256 hash of the BUK_PROTOCOL_CONTRACT_ROLE
-      const BUK_PROTOCOL_CONTRACT_ROLE = keccak256(toUtf8Bytes("BUK_PROTOCOL_CONTRACT_ROLE"));
+      //Get the keccak256 hash of the BUK_PROTOCOL_ROLE
+      const BUK_PROTOCOL_ROLE = keccak256(toUtf8Bytes("BUK_PROTOCOL_ROLE"));
 
       //Add new address to Admin role
       expect(
-        await nftPosContract.connect(adminWallet).grantRole(
-          BUK_PROTOCOL_CONTRACT_ROLE,
-          await bukProtocolContract.getAddress()
-        ),
+        await nftPosContract
+          .connect(adminWallet)
+          .grantRole(BUK_PROTOCOL_ROLE, await bukProtocolContract.getAddress()),
       ).not.be.reverted;
 
-      //Check if the new admin has BUK_PROTOCOL_CONTRACT_ROLE
+      //Check if the new admin has BUK_PROTOCOL_ROLE
       expect(
-        await nftPosContract.connect(adminWallet).hasRole(
-          BUK_PROTOCOL_CONTRACT_ROLE,
-          await bukProtocolContract.getAddress()
-        ),
-      ).to.equal(true)
+        await nftPosContract
+          .connect(adminWallet)
+          .hasRole(BUK_PROTOCOL_ROLE, await bukProtocolContract.getAddress()),
+      ).to.equal(true);
 
       //Revoke the new admin's access
       expect(
-        await nftPosContract.connect(adminWallet).revokeRole(
-          BUK_PROTOCOL_CONTRACT_ROLE,
-          await bukProtocolContract.getAddress()
-        ),
+        await nftPosContract
+          .connect(adminWallet)
+          .revokeRole(
+            BUK_PROTOCOL_ROLE,
+            await bukProtocolContract.getAddress(),
+          ),
       ).not.be.reverted;
 
-      //Check if the new admin still has BUK_PROTOCOL_CONTRACT_ROLE
+      //Check if the new admin still has BUK_PROTOCOL_ROLE
       expect(
-        await nftPosContract.connect(adminWallet).hasRole(
-          BUK_PROTOCOL_CONTRACT_ROLE,
-          await bukProtocolContract.getAddress()
-        ),
-      ).to.equal(false)
+        await nftPosContract
+          .connect(adminWallet)
+          .hasRole(BUK_PROTOCOL_ROLE, await bukProtocolContract.getAddress()),
+      ).to.equal(false);
     });
 
     it("Should set new Buk Protocol address and check function with new one", async function () {
-      // Get the keccak256 hash of the BUK_PROTOCOL_CONTRACT_ROLE
-      const BUK_PROTOCOL_CONTRACT_ROLE = keccak256(toUtf8Bytes("BUK_PROTOCOL_CONTRACT_ROLE"));
+      // Get the keccak256 hash of the BUK_PROTOCOL_ROLE
+      const BUK_PROTOCOL_ROLE = keccak256(toUtf8Bytes("BUK_PROTOCOL_ROLE"));
 
       // Add new address to Admin role
       await expect(
-        nftPosContract.connect(adminWallet).grantRole(
-          BUK_PROTOCOL_CONTRACT_ROLE,
-          await bukProtocolContract.getAddress()
-        )
+        nftPosContract
+          .connect(adminWallet)
+          .grantRole(BUK_PROTOCOL_ROLE, await bukProtocolContract.getAddress()),
       ).to.not.be.reverted;
 
-      // Check if the new admin has BUK_PROTOCOL_CONTRACT_ROLE
+      // Check if the new admin has BUK_PROTOCOL_ROLE
       expect(
-        await nftPosContract.connect(account1).hasRole(
-          BUK_PROTOCOL_CONTRACT_ROLE,
-          await bukProtocolContract.getAddress()
-        )
+        await nftPosContract
+          .connect(account1)
+          .hasRole(BUK_PROTOCOL_ROLE, await bukProtocolContract.getAddress()),
       ).to.equal(true);
 
-      expect(await nftPosContract.connect(adminWallet).setBukProtocol(await bukProtocolContract.getAddress()))
-        .not.be.reverted;
+      expect(
+        await nftPosContract
+          .connect(adminWallet)
+          .setBukProtocol(await bukProtocolContract.getAddress()),
+      ).not.be.reverted;
     });
-
-
   });
-
-
 });

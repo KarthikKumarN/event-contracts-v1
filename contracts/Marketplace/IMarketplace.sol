@@ -16,6 +16,7 @@ interface IMarketplace {
     struct ListingDetails {
         uint256 price;
         address owner;
+        uint256 index;
         ListingStatus status;
     }
 
@@ -23,12 +24,10 @@ interface IMarketplace {
      * @dev Enum for listing statuses.
      * @var ListingStatus.inactive   Listing has been inactive
      * @var ListingStatus.active     Listing has been active.
-     * @var ListingStatus.sold   Listing has been sold
      */
     enum ListingStatus {
         inactive,
-        active,
-        sold
+        active
     }
 
     /**
@@ -39,9 +38,9 @@ interface IMarketplace {
      * @param price, Price of the bought booking
      */
     event RoomBought(
-        uint256 tokenId,
-        address indexed previousOwner,
-        address indexed newOwner,
+        uint256 indexed tokenId,
+        address previousOwner,
+        address newOwner,
         uint256 price
     );
 
@@ -51,11 +50,7 @@ interface IMarketplace {
      * @param tokenId, tokenId is the unique identifier of booking NFT
      * @param price, Sale price of room/booking
      */
-    event ListingCreated(
-        address indexed owner,
-        uint256 indexed tokenId,
-        uint256 price
-    );
+    event ListingCreated(address owner, uint256 indexed tokenId, uint256 price);
 
     /**
      * @dev Emitted when a booking/room NFT is relisted
@@ -64,13 +59,6 @@ interface IMarketplace {
      * @param newPrice, new price of the room/booking
      */
     event Relisted(uint256 indexed tokenId, uint256 oldPrice, uint256 newPrice);
-
-    /**
-     * @dev Emitted when a booking/room is delisted
-     * @dev Updates status to ListingStatus.inactive
-     * @param tokenId, unique ID of the booking NFT
-     */
-    event Delisted(uint256 indexed tokenId);
 
     /**
      * @dev Emitted when a booking/room is deleted from list
@@ -110,13 +98,6 @@ interface IMarketplace {
      * @notice Trade time limit hours not crossed. Ex:Only able to trade before 12 hours of checkin
      */
     function createListing(uint256 _tokenId, uint256 _price) external;
-
-    /**
-     * @dev Function will delist of NFT
-     * @dev NFT owner can delist
-     * @param _tokenId Unique ID
-     */
-    function delist(uint256 _tokenId) external;
 
     /**
      * @dev Function will delete listing

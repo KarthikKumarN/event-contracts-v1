@@ -61,88 +61,53 @@ interface IBukProtocol {
         bool tradeable;
     }
 
-    /**
-     * @dev Emitted when the admin wallet is set.
-     */
-    event SetAdminWallet(
-        address indexed oldCAdminWallet,
-        address indexed newAdminWallet
-    );
+    /// @dev Emitted when the admin wallet is set.
+    event SetAdminWallet(address oldCAdminWallet, address newAdminWallet);
 
-    /**
-     * @dev Emitted when the commission is set.
-     */
-    event SetCommission(
-        uint256 indexed oldCommission,
-        uint256 indexed newCommission
-    );
+    /// @dev Emitted when the commission is set.
+    event SetCommission(uint256 oldCommission, uint256 newCommission);
 
-    /**
-     * @dev Emitted when BukNFTs contract address is updated.
-     */
-    event SetBukNFTs(
-        address indexed oldNFTContract,
-        address indexed newNFTContract
-    );
+    /// @dev Emitted when BukNFTs contract address is updated.
+    event SetBukNFTs(address oldNFTContract, address newNFTContract);
 
-    /**
-     * @dev Emitted when BukPOSNFTs contract address is updated.
-     */
-    event SetBukPOSNFTs(
-        address indexed oldNFTPOSContract,
-        address indexed newNFTPOSContract
-    );
+    /// @dev Emitted when BukPOSNFTs contract address is updated.
+    event SetBukPOSNFTs(address oldNFTPOSContract, address newNFTPOSContract);
 
-    /**
-     * @dev Emitted when BukRoyalties contract address is updated.
-     */
+    /// @dev Emitted when BukRoyalties contract address is updated.
     event SetRoyaltiesContract(
-        address indexed oldRoyaltiesContract,
-        address indexed newRoyaltiesContract
+        address oldRoyaltiesContract,
+        address newRoyaltiesContract
     );
 
-    /**
-     * @dev Emitted when signer verifier is updated.
-     */
+    /// @dev Emitted when signer verifier is updated.
     event SetSignerVerifier(
-        address indexed oldSignerVerifier,
-        address indexed newSignerVerifier
+        address oldSignerVerifier,
+        address newSignerVerifier
     );
 
-    /**
-     * @dev Emitted when Buk treasury is updated.
-     */
+    /// @dev Emitted when Buk treasury is updated.
     event SetBukTreasury(
-        address indexed oldTreasuryContract,
-        address indexed newTreasuryContract
+        address oldTreasuryContract,
+        address newTreasuryContract
     );
 
-    /**
-     * @dev Emitted when Buk Wallet is updated.
-     */
+    /// @dev Emitted when Buk Wallet is updated.
     event SetBukWallet(
-        address indexed oldBukWalletContract,
-        address indexed newBukWalletContract
+        address oldBukWalletContract,
+        address newBukWalletContract
     );
 
-    /**
-     * @dev Emitted when stable token is updated.
-     */
-    event SetStableToken(
-        address indexed oldStableToken,
-        address indexed newStableToken
-    );
+    /// @dev Emitted when stable token is updated.
+    event SetStableToken(address oldStableToken, address newStableToken);
 
     /**
      * @dev Emitted when the tradeability of a Buk NFT is toggled.
      * @param tokenId Token Id whose tradeability is being toggled.
      * @param tradeable Is the NFT tradeable.
      */
-    event ToggleTradeability(uint256 indexed tokenId, bool tradeable);
+    event ToggleTradeability(uint256 indexed tokenId, bool indexed tradeable);
 
-    /**
-     * @dev Emitted when single room is booked.
-     */
+    /// @dev Emitted when single room is booked.
     event BookRoom(
         uint256 indexed booking,
         bytes32 indexed propertyId,
@@ -152,34 +117,26 @@ interface IBukProtocol {
         uint8 child
     );
 
-    /**
-     * @dev Emitted when booking refund is done.
-     */
-    event BookingRefund(uint256 indexed total, address indexed owner);
+    /// @dev Emitted when booking refund is done.
+    event BookingRefund(uint256 total, address owner);
 
-    /**
-     * @dev Emitted when room bookings are confirmed.
-     */
-    event MintedBookingNFT(uint256[] indexed bookings, bool indexed status);
+    /// @dev Emitted when room bookings are confirmed.
+    event MintedBookingNFT(uint256[] bookings, bool status);
 
-    /**
-     * @dev Emitted when room bookings are checked in.
-     */
-    event CheckinRooms(uint256[] indexed bookings, bool indexed status);
+    /// @dev Emitted when room bookings are checked in.
+    event CheckinRooms(uint256[] bookings, bool status);
 
-    /**
-     * @dev Emitted when room bookings are checked out.
-     */
-    event CheckoutRooms(uint256[] indexed bookings, bool indexed status);
+    /// @dev Emitted when room bookings are checked out.
+    event CheckoutRooms(uint256[] bookings, bool status);
 
-    /**
-     * @dev Emitted when room bookings are cancelled.
-     */
-    event CancelRoom(uint256 indexed bookingId, bool indexed status);
+    /// @dev Emitted when room bookings are cancelled.
+    event CancelRoom(
+        uint256[] bookingIds,
+        uint256 indexed total,
+        bool indexed status
+    );
 
-    /**
-     * @dev Emitted when room bookings are cancelled.
-     */
+    /// @dev Emitted when room bookings are cancelled.
     event EmergencyCancellation(uint256 indexed bookingId, bool indexed status);
 
     /**
@@ -269,7 +226,7 @@ interface IBukProtocol {
      * @param _tradeable Is the booking NFT tradeable.
      * @return ids IDs of the bookings.
      */
-    function bookRoom(
+    function bookRooms(
         uint256[] memory _total,
         uint256[] memory _baseRate,
         uint256[] memory _minSalePrice,
@@ -324,21 +281,21 @@ interface IBukProtocol {
 
     /**
      * @dev Function to cancel the room bookings.
-     * @param _id ID of the booking.
-     * @param _penalty Penalty amount to be refunded.
-     * @param _refund Refund amount to be refunded.
-     * @param _charges Charges amount to be refunded.
+     * @param _ids Array of booking.
+     * @param _penalties Array of penalty amount to be refunded.
+     * @param _refunds Array of refund amount to be refunded.
+     * @param _charges Array of charges amount to be deducted.
      * @param _bookingOwner Owner of the booking.
      * @notice Only the admin can cancel the rooms.
      * @notice The booking status should be confirmed to cancel it.
      * @notice The Active Booking NFTs are burnt from the owner's account.
      * @notice This function can only be called by admin
      */
-    function cancelRoom(
-        uint256 _id,
-        uint256 _penalty,
-        uint256 _refund,
-        uint256 _charges,
+    function cancelRooms(
+        uint256[] memory _ids,
+        uint256[] memory _penalties,
+        uint256[] memory _refunds,
+        uint256[] memory _charges,
         address _bookingOwner,
         bytes memory _signature
     ) external;
@@ -360,21 +317,27 @@ interface IBukProtocol {
 
     /**
      * Function to get wallet addresses
-     * @return bukTreasury The address of the bukTreasury contract
-     * @return bukWallet The address of the bukWallet contract
-     * @return stableToken The address of the stable token contract
-     * @return admin The address of the stable token contract
+     * @return nftContract The address of the nft contract
+     * @return nftPOSContract The address of the nftPOS contract
+     * @return royaltiesContract The address of the royalties contract
      * @return signatureVerifier The address of the signature verifier contract
+     * @return bukTreasury The address of the bukTreasury contract
+     * @return stableToken The address of the stable token contract
+     * @return bukWallet The address of the bukWallet contract
+     * @return admin The address of the stable token contract
      */
     function getWallets()
         external
         view
         returns (
+            address nftContract,
+            address nftPOSContract,
+            address royaltiesContract,
+            address signatureVerifier,
             address bukTreasury,
-            address bukWallet,
             address stableToken,
-            address admin,
-            address signatureVerifier
+            address bukWallet,
+            address admin
         );
 
     /**

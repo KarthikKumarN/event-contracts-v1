@@ -29,18 +29,14 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
     IERC20 private _stableToken;
     IBukTreasury private _bukTreasury;
     ISignatureVerifier private _signatureVerifier;
-    IBukNFTs public nftContract;
-    IBukPOSNFTs public nftPOSContract;
-    IBukRoyalties public royaltiesContract;
+    IBukNFTs private _nftContract;
+    IBukPOSNFTs private _nftPOSContract;
+    IBukRoyalties private _royaltiesContract;
 
-    /**
-     * @dev Commission charged on bookings.
-     */
+    /// @dev Commission charged on bookings.
     uint8 public commission = 5;
 
-    /**
-     * @dev Counters.Counter bookingIds    Counter for booking IDs.
-     */
+    /// @dev Counters.Counter bookingIds    Counter for booking IDs.
     uint256 private _bookingIds;
 
     /**
@@ -67,16 +63,16 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
      * @param _stableTokenAddr Address of the stable token.
      * @param _bukWalletAddr Address of the Buk wallet.
      * @param _signVerifierContract Address of the signature verifier contract.
-     * @param _royaltiesContract Address of the Buk royalties contract.
+     * @param _royaltiesContractAddr Address of the Buk royalties contract.
      */
     constructor(
         address _bukTreasuryContract,
         address _stableTokenAddr,
         address _bukWalletAddr,
         address _signVerifierContract,
-        address _royaltiesContract
+        address _royaltiesContractAddr
     ) {
-        _setRoyaltiesContract(_royaltiesContract);
+        _setRoyaltiesContract(_royaltiesContractAddr);
         _setAdmin(msg.sender);
         _setBukTreasury(_bukTreasuryContract);
         _setStableToken(_stableTokenAddr);
@@ -84,73 +80,55 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
         _setSignatureVerifier(_signVerifierContract);
     }
 
-    /**
-     * @dev See {IBukProtocol-setAdmin}.
-     */
+    /// @dev See {IBukProtocol-setAdmin}.
     function setAdmin(address _adminAddr) external onlyAdmin {
         _setAdmin(_adminAddr);
     }
 
-    /**
-     * @dev See {IBukProtocol-setSignatureVerifier}.
-     */
+    /// @dev See {IBukProtocol-setSignatureVerifier}.
     function setSignatureVerifier(
         address __signatureVerifier
     ) external onlyAdmin {
         _setSignatureVerifier(__signatureVerifier);
     }
 
-    /**
-     * @dev See {IBukProtocol-setBukTreasury}.
-     */
+    /// @dev See {IBukProtocol-setBukTreasury}.
     function setBukTreasury(address _bukTreasuryContract) external onlyAdmin {
         _setBukTreasury(_bukTreasuryContract);
     }
 
-    /**
-     * @dev See {IBukProtocol-setBukWallet}.
-     */
+    /// @dev See {IBukProtocol-setBukWallet}.
     function setBukWallet(address _bukWalletAddr) external onlyAdmin {
         _setBukWallet(_bukWalletAddr);
     }
 
-    /**
-     * @dev See {IBukProtocol-setStableToken}.
-     */
+    /// @dev See {IBukProtocol-setStableToken}.
     function setStableToken(address _stableTokenAddress) external onlyAdmin {
         _setStableToken(_stableTokenAddress);
     }
 
-    /**
-     * @dev See {IBukProtocol-setBukNFTs}.
-     */
+    /// @dev See {IBukProtocol-setBukNFTs}.
     function setBukNFTs(address _nftContractAddr) external onlyAdmin {
-        address oldNFTContractAddr_ = address(nftContract);
-        nftContract = IBukNFTs(_nftContractAddr);
+        address oldNFTContractAddr_ = address(_nftContract);
+        _nftContract = IBukNFTs(_nftContractAddr);
         emit SetBukNFTs(oldNFTContractAddr_, _nftContractAddr);
     }
 
-    /**
-     * @dev See {IBukProtocol-setBukPosNFTs}.
-     */
+    /// @dev See {IBukProtocol-setBukPosNFTs}.
     function setBukPOSNFTs(address _nftPOSContractAddr) external onlyAdmin {
-        address oldNFTPOSContractAddr_ = address(nftPOSContract);
-        nftPOSContract = IBukPOSNFTs(_nftPOSContractAddr);
+        address oldNFTPOSContractAddr_ = address(_nftPOSContract);
+        _nftPOSContract = IBukPOSNFTs(_nftPOSContractAddr);
         emit SetBukPOSNFTs(oldNFTPOSContractAddr_, _nftPOSContractAddr);
     }
 
-    /**
-     * @dev See {IBukProtocol-setRoyalties}.
-     */
+    /// @dev See {IBukProtocol-setRoyalties}.
     function setRoyaltiesContract(
-        address _royaltiesContract
+        address _royaltiesContractAddr
     ) external onlyAdmin {
-        _setRoyaltiesContract(_royaltiesContract);
+        _setRoyaltiesContract(_royaltiesContractAddr);
     }
 
-    /**
-     * @dev See {IBukProtocol-setCommission}.
-     */
+    /// @dev See {IBukProtocol-setCommission}.
     function setCommission(uint8 _newCommission) external onlyAdmin {
         require(_newCommission <= 100, "Commission is more than 100");
         uint oldCommission_ = commission;
@@ -158,9 +136,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
         emit SetCommission(oldCommission_, _newCommission);
     }
 
-    /**
-     * @dev See {IBukProtocol-toggleTradeability}.
-     */
+    /// @dev See {IBukProtocol-toggleTradeability}.
     function toggleTradeability(uint256 _tokenId) external onlyAdmin {
         require(
             _bookingDetails[_tokenId].status != BookingStatus.nil,
@@ -171,10 +147,8 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
         emit ToggleTradeability(_tokenId, _bookingDetails[_tokenId].tradeable);
     }
 
-    /**
-     * @dev See {IBukProtocol-bookRoom}.
-     */
-    function bookRoom(
+    /// @dev See {IBukProtocol-bookRooms}.
+    function bookRooms(
         uint256[] memory _total,
         uint256[] memory _baseRate,
         uint256[] memory _minSalePrice,
@@ -194,21 +168,18 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
         );
         require(
             (_checkin > block.timestamp),
-            "Checkin date should be greater than current date"
+            "Checkin date must be in the future"
         );
-        require(
-            (_checkout > _checkin),
-            "Checkout date should be greater than checkin date"
-        );
-        uint256 total = 0;
+        require((_checkout > _checkin), "Checkout date must be after checkin");
+        uint256 total;
         for (uint8 i = 0; i < _total.length; ++i) {
             total += _total[i];
         }
         require(
             (_stableToken.allowance(msg.sender, address(this)) >= total),
-            "Check the allowance of the sender"
+            "Check the allowance"
         );
-        uint commissionTotal = 0;
+        uint commissionTotal;
         for (uint8 i = 0; i < _total.length; ++i) {
             ++_bookingIds;
             _bookingDetails[_bookingIds] = Booking(
@@ -240,9 +211,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
         return _bookingPayment(commissionTotal, total);
     }
 
-    /**
-     * @dev See {IBukProtocol-bookingRefund}.
-     */
+    /// @dev See {IBukProtocol-bookingRefund}.
     function bookingRefund(
         uint256[] memory _ids,
         address _owner
@@ -259,7 +228,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
                 "Check the Booking status"
             );
         }
-        uint total = 0;
+        uint total;
         for (uint8 i = 0; i < len; ++i) {
             _bookingDetails[_ids[i]].status = BookingStatus.cancelled;
             total +=
@@ -271,9 +240,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
         emit BookingRefund(total, _owner);
     }
 
-    /**
-     * @dev See {IBukProtocol-mintBukNFT}.
-     */
+    /// @dev See {IBukProtocol-mintBukNFT}.
     function mintBukNFT(
         uint256[] memory _ids,
         string[] memory _uri
@@ -293,7 +260,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
         }
         for (uint8 i = 0; i < len; ++i) {
             _bookingDetails[_ids[i]].status = BookingStatus.confirmed;
-            nftContract.mint(
+            _nftContract.mint(
                 _ids[i],
                 _bookingDetails[_ids[i]].firstOwner,
                 1,
@@ -305,16 +272,14 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
         emit MintedBookingNFT(_ids, true);
     }
 
-    /**
-     * @dev See {IBukProtocol-checkin}.
-     */
+    /// @dev See {IBukProtocol-checkin}.
     function checkin(uint256[] memory _ids) external {
         uint256 len = _ids.length;
         for (uint8 i = 0; i < len; ++i) {
             require(
                 (_admin == msg.sender) ||
-                    (nftContract.balanceOf(msg.sender, _ids[i]) > 0),
-                "Only admin or owner of the NFT can access the booking"
+                    (_nftContract.balanceOf(msg.sender, _ids[i]) > 0),
+                "Admin or NFT owner can access booking"
             );
             require(
                 _bookingDetails[_ids[i]].status == BookingStatus.confirmed,
@@ -329,9 +294,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
         emit CheckinRooms(_ids, true);
     }
 
-    /**
-     * @dev See {IBukProtocol-checkout}.
-     */
+    /// @dev See {IBukProtocol-checkout}.
     function checkout(uint256[] memory _ids) external onlyAdmin {
         uint256 len = _ids.length;
         require(((len > 0) && (len < 11)), "Not in max-min booking limit");
@@ -342,13 +305,13 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
             );
             require(
                 (_bookingDetails[_ids[i]].checkout < block.timestamp),
-                "Checkout date should be less than current date"
+                "Checkout date must be before today"
             );
         }
         for (uint8 i = 0; i < len; ++i) {
             _bookingDetails[_ids[i]].status = BookingStatus.checkedout;
             _bookingDetails[_ids[i]].tradeable = false;
-            nftContract.burn(
+            _nftContract.burn(
                 _bookingDetails[_ids[i]].firstOwner,
                 _ids[i],
                 1,
@@ -358,51 +321,64 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
         emit CheckoutRooms(_ids, true);
     }
 
-    /**
-     * @dev See {IBukProtocol-cancelRoom}.
-     */
-    function cancelRoom(
-        uint256 _id,
-        uint256 _penalty,
-        uint256 _refund,
-        uint256 _charges,
+    /// @dev See {IBukProtocol-cancelRooms}.
+    function cancelRooms(
+        uint256[] memory _ids,
+        uint256[] memory _penalties,
+        uint256[] memory _refunds,
+        uint256[] memory _charges,
         address _bookingOwner,
         bytes memory _signature
     ) external onlyAdmin {
+        uint256 len = _ids.length;
         require(
-            ((_bookingDetails[_id].status == BookingStatus.confirmed) ||
-                (_bookingDetails[_id].status == BookingStatus.checkedin)),
-            "Not a confirmed or checkedin Booking"
+            (len == _penalties.length) && (len == _refunds.length),
+            "Validate IDs and amounts"
         );
-        require(
-            (_bookingDetails[_id].checkin > block.timestamp),
-            "Checkin date should be greater than current date"
-        );
-        require(
-            nftContract.balanceOf(_bookingOwner, _id) > 0,
-            "Check the booking owner"
-        );
-        bytes32 hash = keccak256(
-            abi.encodePacked(_id, _penalty, _refund, _charges)
-        );
-        address signer = _signatureVerifier.verify(hash, _signature);
+        uint totalPenalty;
+        uint totalRefund;
+        uint totalCharges;
+        for (uint8 i = 0; i < len; ++i) {
+            require(
+                ((_bookingDetails[_ids[i]].status == BookingStatus.confirmed) ||
+                    (_bookingDetails[_ids[i]].status ==
+                        BookingStatus.checkedin)),
+                "Not a confirmed or checkedin Booking"
+            );
+            require(
+                (_bookingDetails[_ids[i]].checkin > block.timestamp),
+                "Checkin date must be in the future"
+            );
+            require(
+                _nftContract.balanceOf(_bookingOwner, _ids[i]) > 0,
+                "Check the booking owner balance"
+            );
+            require(
+                ((_penalties[i] + _refunds[i] + _charges[i]) <
+                    (_bookingDetails[_ids[i]].total + 1)),
+                "Transfer amount exceeds total"
+            );
+            totalPenalty += _penalties[i];
+            totalRefund += _refunds[i];
+            totalCharges += _charges[i];
+        }
+        // Verify the signature using the generateAndVerify function
+        address signer = _signatureVerifier.generateAndVerify(totalPenalty, totalRefund, totalCharges, _signature);
         require(signer == _bookingOwner, "Invalid owner signature");
-        require(
-            ((_penalty + _refund + _charges) <
-                (_bookingDetails[_id].total + 1)),
-            "Transfer amount exceeds total"
-        );
-        _bookingDetails[_id].status = BookingStatus.cancelled;
-        _bukTreasury.cancelUSDCRefund(_penalty, _bukWallet);
-        _bukTreasury.cancelUSDCRefund(_refund, _bookingOwner);
-        _bukTreasury.cancelUSDCRefund(_charges, _bukWallet);
-        nftContract.burn(_bookingOwner, _id, 1, false);
-        emit CancelRoom(_id, true);
+        for (uint8 i = 0; i < len; ++i) {
+            _bookingDetails[_ids[i]].status = BookingStatus.cancelled;
+            _nftContract.burn(_bookingOwner, _ids[i], 1, false);
+        }
+        if(totalPenalty > 0)
+            _bukTreasury.cancelUSDCRefund(totalPenalty, _bukWallet);
+        if(totalRefund > 0)
+            _bukTreasury.cancelUSDCRefund(totalRefund, _bookingOwner);
+        if(totalCharges > 0)
+            _bukTreasury.cancelUSDCRefund(totalCharges, _bukWallet);
+        emit CancelRoom(_ids, totalRefund, true);
     }
 
-    /**
-     * @dev See {IBukProtocol-emergencyCancellation}.
-     */
+    /// @dev See {IBukProtocol-emergencyCancellation}.
     function emergencyCancellation(
         uint256 _id,
         uint256 _refund,
@@ -416,10 +392,10 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
         );
         require(
             (_bookingDetails[_id].checkin > block.timestamp),
-            "Checkin date should be greater than current date"
+            "Checkin date must be in the future"
         );
         require(
-            nftContract.balanceOf(_bookingOwner, _id) > 0,
+            _nftContract.balanceOf(_bookingOwner, _id) > 0,
             "Check the booking owner"
         );
         require(
@@ -429,52 +405,51 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
         _bookingDetails[_id].status = BookingStatus.cancelled;
         _bukTreasury.cancelUSDCRefund(_refund, _bookingOwner);
         _bukTreasury.cancelUSDCRefund(_charges, address(_bukTreasury));
-        nftContract.burn(_bookingOwner, _id, 1, false);
+        _nftContract.burn(_bookingOwner, _id, 1, false);
         emit EmergencyCancellation(_id, true);
     }
 
-    /**
-     * @dev See {IBukProtocol-getWallets}.
-     */
-    function getWallets()
-        external
-        view
-        onlyAdmin
-        returns (
-            address bukTreasury,
-            address bukWallet,
-            address stableToken,
-            address admin,
-            address signatureVerifier
-        )
-    {
-        return (
-            address(_bukTreasury),
-            address(_bukWallet),
-            address(_stableToken),
-            address(_admin),
-            address(_signatureVerifier)
-        );
-    }
-
-    /**
-     * @dev See {IBukProtocol-getBookingDetails}.
-     */
+    /// @dev See {IBukProtocol-getBookingDetails}.
     function getBookingDetails(
         uint256 _tokenId
     ) external view returns (Booking memory) {
         return _bookingDetails[_tokenId];
     }
 
-    /**
-     * @dev See {IBukProtocol-getRoyaltyInfo}.
-     */
+    /// @dev See {IBukProtocol-getRoyaltyInfo}.
     function getRoyaltyInfo(
         uint256 _tokenId
     ) external view returns (IBukRoyalties.Royalty[] memory) {
-        IBukRoyalties.Royalty[] memory royalties = royaltiesContract
+        IBukRoyalties.Royalty[] memory royalties = _royaltiesContract
             .getRoyaltyInfo(_tokenId);
         return royalties;
+    }
+
+    /// @dev See {IBukProtocol-getWallets}.
+    function getWallets()
+        external
+        view
+        returns (
+            address nftContract,
+            address nftPOSContract,
+            address royaltiesContract,
+            address signatureVerifier,
+            address bukTreasury,
+            address stableToken,
+            address bukWallet,
+            address admin
+        )
+    {
+        return (
+            address(_nftContract),
+            address(_nftPOSContract),
+            address(_royaltiesContract),
+            address(_signatureVerifier),
+            address(_bukTreasury),
+            address(_stableToken),
+            address(_bukWallet),
+            address(_admin)
+        );
     }
 
     /**
@@ -502,12 +477,12 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
 
     /**
      * Private function to set the Royalty contract address
-     * @param _royaltiesContract The address of the Royalties contract
+     * @param _royaltiesContractAddr The address of the Royalties contract
      */
-    function _setRoyaltiesContract(address _royaltiesContract) private {
-        address oldRoyaltiesContract_ = address(royaltiesContract);
-        royaltiesContract = IBukRoyalties(_royaltiesContract);
-        emit SetRoyaltiesContract(oldRoyaltiesContract_, _royaltiesContract);
+    function _setRoyaltiesContract(address _royaltiesContractAddr) private {
+        address oldRoyaltiesContract_ = address(_royaltiesContract);
+        _royaltiesContract = IBukRoyalties(_royaltiesContractAddr);
+        emit SetRoyaltiesContract(oldRoyaltiesContract_, _royaltiesContractAddr);
     }
 
     /**
@@ -545,7 +520,6 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
      * @param _commission Total BUK commission.
      * @param _total Total Booking Charge Excluding BUK commission.
      */
-
     function _bookingPayment(
         uint256 _commission,
         uint256 _total

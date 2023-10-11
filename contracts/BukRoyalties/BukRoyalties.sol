@@ -13,12 +13,12 @@ import { IBukProtocol } from "../BukProtocol/IBukProtocol.sol";
 contract BukRoyalties is AccessControl, IBukRoyalties {
     /**
      * @dev Constant for the role of the admin
+     * @notice its a hash of keccak256("ADMIN_ROLE")
      */
-    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+    bytes32 public constant ADMIN_ROLE =
+        0xa49807205ce4d355092ef5a8a18f56e8913cf4a201fbe287825b095693c21775;
 
-    /**
-     * @dev Address of the Buk Protocol contract
-     */
+    /// @dev Address of the Buk Protocol contract
     IBukProtocol public bukProtocolContract;
 
     /**
@@ -54,78 +54,56 @@ contract BukRoyalties is AccessControl, IBukRoyalties {
         _setupRole(ADMIN_ROLE, msg.sender);
     }
 
-    /**
-     * @dev See {IBukRoyalties-setBukProtocolContract}.
-     */
+    /// @dev See {IBukRoyalties-setBukProtocolContract}.
     function setBukProtocolContract(
         address _bukProtocolContract
     ) external onlyRole(ADMIN_ROLE) {
-        require(
-            _bukProtocolContract != address(0),
-            "Buk Protocol Address cannot be zero"
-        );
+        require(_bukProtocolContract != address(0), "Address cannot be zero");
         address oldBukProtocolContract = address(bukProtocolContract);
         bukProtocolContract = IBukProtocol(_bukProtocolContract);
         emit SetBukProtocol(oldBukProtocolContract, _bukProtocolContract);
     }
 
-    /**
-     * @dev See {IBukRoyalties-setBukRoyaltyInfo}.
-     */
+    /// @dev See {IBukRoyalties-setBukRoyaltyInfo}.
     function setBukRoyaltyInfo(
         address _recipient,
         uint96 _royaltyFraction
     ) external onlyRole(ADMIN_ROLE) {
-        require(
-            _royaltyFraction <= 10000,
-            "Royalty fraction is more than 10000"
-        );
+        require(_royaltyFraction <= 10000, "Royalty is more than 10000");
         uint96 bukRoyalty_ = bukRoyalty.royaltyFraction;
         bukRoyalty = Royalty(_recipient, _royaltyFraction);
         emit SetBukRoyalty(bukRoyalty_, _royaltyFraction);
     }
 
-    /**
-     * @dev See {IBukRoyalties-setHotelRoyaltyInfo}.
-     */
+    /// @dev See {IBukRoyalties-setHotelRoyaltyInfo}.
     function setHotelRoyaltyInfo(
         address _recipient,
         uint96 _royaltyFraction
     ) external onlyRole(ADMIN_ROLE) {
-        require(
-            _royaltyFraction <= 10000,
-            "Royalty fraction is more than 10000"
-        );
+        require(_royaltyFraction <= 10000, "Royalty is more than 10000");
         uint96 hotelRoyalty_ = hotelRoyalty.royaltyFraction;
         hotelRoyalty = Royalty(_recipient, _royaltyFraction);
         emit SetHotelRoyalty(hotelRoyalty_, _royaltyFraction);
     }
 
-    /**
-     * @dev See {IBukRoyalties-setFirstOwnerRoyaltyInfo}.
-     */
+    /// @dev See {IBukRoyalties-setFirstOwnerRoyaltyInfo}.
     function setFirstOwnerRoyaltyInfo(
         uint96 _royaltyFraction
     ) external onlyRole(ADMIN_ROLE) {
-        require(
-            _royaltyFraction <= 10000,
-            "Royalty fraction is more than 10000"
-        );
+        require(_royaltyFraction <= 10000, "Royalty is more than 10000");
         uint96 firstOwnerFraction_ = firstOwnerFraction;
         firstOwnerFraction = _royaltyFraction;
         emit SetFirstOwnerRoyalty(firstOwnerFraction_, _royaltyFraction);
     }
 
-    /**
-     * @dev See {IBukRoyalties-setRoyaltyInfo}.
-     */
+    /// @dev See {IBukRoyalties-setRoyaltyInfo}.
     function setOtherRoyaltyInfo(
         address[] memory _recipients,
         uint96[] memory _royaltyFractions
     ) external onlyRole(ADMIN_ROLE) {
         require(
             _recipients.length == _royaltyFractions.length,
-            "Input arrays must have the same length"
+            "Arrays must have the same length"
         );
         uint96[] memory oldRoyalties_ = new uint96[](otherRoyalties.length);
         for (uint i = 0; i < otherRoyalties.length; i++) {
@@ -137,14 +115,11 @@ contract BukRoyalties is AccessControl, IBukRoyalties {
         for (uint i = 0; i < _recipients.length; i++) {
             require(
                 _royaltyFractions[i] <= 10000,
-                "Royalty fraction is more than 10000"
+                "Royalty is more than 10000"
             );
             totalRoyalties_ += _royaltyFractions[i];
         }
-        require(
-            totalRoyalties_ < 10000,
-            "Total Royalties cannot be more than 10000"
-        );
+        require(totalRoyalties_ < 10000, "Total cannot be more than 10000");
         delete otherRoyalties;
         for (uint i = 0; i < _recipients.length; i++) {
             Royalty memory newRoyalty = Royalty(
@@ -156,9 +131,7 @@ contract BukRoyalties is AccessControl, IBukRoyalties {
         emit SetOtherRoyalties(oldRoyalties_, _royaltyFractions);
     }
 
-    /**
-     * @dev See {IBukRoyalties-getRoyaltyInfo}.
-     */
+    /// @dev See {IBukRoyalties-getRoyaltyInfo}.
     function getRoyaltyInfo(
         uint256 _tokenId
     ) external view returns (Royalty[] memory) {

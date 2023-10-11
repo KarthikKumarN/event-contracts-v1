@@ -286,7 +286,8 @@ describe("Marketplace", function () {
       let tokenId = 1;
       let price = 100;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = date.setDate(date.getDate() + 2);
       let checkout = date.setDate(date.getDate() + 3);
 
@@ -298,11 +299,11 @@ describe("Marketplace", function () {
 
       // Book room and mint NFT
       expect(
-        await bukProtocolContract.bookRoom(
+        await bukProtocolContract.bookRooms(
           [100000000],
           [80000000],
           [70000000],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -331,7 +332,8 @@ describe("Marketplace", function () {
       let minSalePrice = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = date.setDate(date.getDate() + 2);
       let checkout = date.setDate(date.getDate() + 3);
 
@@ -351,11 +353,11 @@ describe("Marketplace", function () {
 
       // Book room and mint NFT
       expect(
-        await bukProtocolContract.bookRoom(
+        await bukProtocolContract.bookRooms(
           [price],
           [price],
           [minSalePrice],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -401,11 +403,11 @@ describe("Marketplace", function () {
 
       // Book room and mint NFT
       expect(
-        await bukProtocolContract.bookRoom(
+        await bukProtocolContract.bookRooms(
           [price],
           [price],
           [70000000],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -426,7 +428,7 @@ describe("Marketplace", function () {
       // Approve allowance
       await expect(
         marketplaceContract.createListing(tokenId, salePrice),
-      ).to.be.revertedWith("Please approve marketplace to execute trade");
+      ).to.be.revertedWith("Approve marketplace for trade");
     });
     it("Should create list minSale check", async function () {
       let tokenId = 1;
@@ -445,11 +447,11 @@ describe("Marketplace", function () {
 
       // Book room and mint NFT
       expect(
-        await bukProtocolContract.bookRoom(
+        await bukProtocolContract.bookRooms(
           [price],
           [price],
           [70000000],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -474,14 +476,15 @@ describe("Marketplace", function () {
       );
       await expect(
         marketplaceContract.createListing(tokenId, salePrice),
-      ).to.be.revertedWith("Sale price can't be less than minimum sale price");
+      ).to.be.revertedWith("Minimum price requirement not met");
     });
     it("Create list only confirmed booking check", async function () {
       let tokenId = 1;
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = date.setDate(date.getDate() + 2);
       let checkout = date.setDate(date.getDate() + 3);
 
@@ -493,11 +496,11 @@ describe("Marketplace", function () {
 
       // Book room and mint NFT
       expect(
-        await bukProtocolContract.bookRoom(
+        await bukProtocolContract.bookRooms(
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -513,14 +516,15 @@ describe("Marketplace", function () {
       );
       await expect(
         marketplaceContract.createListing(tokenId, salePrice),
-      ).to.be.revertedWith("Only available booking can be tradable");
+      ).to.be.revertedWith("Only tradable if available");
     });
     it("Create list only owner can list", async function () {
       let tokenId = 1;
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = date.setDate(date.getDate() + 2);
       let checkout = date.setDate(date.getDate() + 3);
 
@@ -532,11 +536,11 @@ describe("Marketplace", function () {
 
       // Book room and mint NFT
       expect(
-        await bukProtocolContract.bookRoom(
+        await bukProtocolContract.bookRooms(
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -563,7 +567,8 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 1) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 1) / 1000);
 
@@ -575,11 +580,11 @@ describe("Marketplace", function () {
 
       // Book room and mint NFT
       expect(
-        await bukProtocolContract.bookRoom(
+        await bukProtocolContract.bookRooms(
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -612,7 +617,8 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -624,11 +630,11 @@ describe("Marketplace", function () {
 
       // Book room and mint NFT
       expect(
-        await bukProtocolContract.bookRoom(
+        await bukProtocolContract.bookRooms(
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -663,7 +669,8 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -675,11 +682,11 @@ describe("Marketplace", function () {
 
       // Book room and mint NFT
       expect(
-        await bukProtocolContract.bookRoom(
+        await bukProtocolContract.bookRooms(
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -717,7 +724,8 @@ describe("Marketplace", function () {
       let salePrice = 110000000;
       let transferMoney = 210000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -729,11 +737,11 @@ describe("Marketplace", function () {
 
       // Book room and mint NFT
       expect(
-        await bukProtocolContract.bookRoom(
+        await bukProtocolContract.bookRooms(
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -781,68 +789,14 @@ describe("Marketplace", function () {
         await nftContract.balanceOf(await account1.getAddress(), tokenId),
       ).to.equal(1);
     });
-    it("Listing should be active", async function () {
-      let tokenId = 1;
-      let price = 100000000;
-      let salePrice = 110000000;
-      let transferMoney = 210000000;
-      let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
-      let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
-      let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
-
-      //Grant allowance permission
-      const res = await stableTokenContract.approve(
-        await bukProtocolContract.getAddress(),
-        200000000000,
-      );
-
-      // Book room and mint NFT
-      expect(
-        await bukProtocolContract.bookRoom(
-          [price],
-          [price],
-          [price],
-          [2], 
-          [0],
-          "0x3633666663356135366139343361313561626261336134630000000000000000",
-          checkin,
-          checkout,
-          24,
-          true,
-        ),
-      ).not.be.reverted;
-
-      //Mint
-      await expect(
-        bukProtocolContract.mintBukNFT(
-          [tokenId],
-          [
-            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-          ],
-        ),
-      ).not.be.reverted;
-      // Approve allowance
-      await nftContract.setApprovalForAll(
-        await marketplaceContract.getAddress(),
-        true,
-      );
-
-      await expect(marketplaceContract.createListing(tokenId, salePrice)).not.to
-        .be.reverted;
-      await expect(await marketplaceContract.delist(tokenId)).to.not.be
-        .reverted;
-      await expect(
-        marketplaceContract.connect(account1).buyRoom(tokenId),
-      ).to.be.revertedWith("NFT not listed");
-    });
     it("Spender allowance", async function () {
       let tokenId = 1;
       let price = 100000000;
       let salePrice = 110000000;
       let transferMoney = 210000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -854,11 +808,11 @@ describe("Marketplace", function () {
 
       // Book room and mint NFT
       expect(
-        await bukProtocolContract.bookRoom(
+        await bukProtocolContract.bookRooms(
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -898,7 +852,7 @@ describe("Marketplace", function () {
       );
       await expect(
         marketplaceContract.connect(account1).buyRoom(tokenId),
-      ).to.be.revertedWith("Check the allowance of the spender");
+      ).to.be.revertedWith("Check the allowance");
     });
     it("Should emit event", async function () {
       let tokenId = 1;
@@ -906,7 +860,8 @@ describe("Marketplace", function () {
       let salePrice = 110000000;
       let transferMoney = 210000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -918,11 +873,11 @@ describe("Marketplace", function () {
 
       // Book room and mint NFT
       expect(
-        await bukProtocolContract.bookRoom(
+        await bukProtocolContract.bookRooms(
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -978,7 +933,8 @@ describe("Marketplace", function () {
       let salePrice = 110000000;
       let transferMoney = 410000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -1002,11 +958,11 @@ describe("Marketplace", function () {
 
       // Book room and mint NFT 1
       expect(
-        await bukProtocolContract.bookRoom(
+        await bukProtocolContract.bookRooms(
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -1031,11 +987,11 @@ describe("Marketplace", function () {
 
       // Book room and mint NFT 2
       expect(
-        await bukProtocolContract.bookRoom(
+        await bukProtocolContract.bookRooms(
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -1075,93 +1031,6 @@ describe("Marketplace", function () {
         await nftContract.balanceOf(await account1.getAddress(), tokenId2),
       ).to.equal(1);
     });
-    it("Listing should be active", async function () {
-      let tokenId1 = 1;
-      let tokenId2 = 2;
-      let price = 100000000;
-      let salePrice = 110000000;
-      let transferMoney = 410000000;
-      let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
-      let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
-      let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
-
-      //Grant allowance permission
-      const res = await stableTokenContract.approve(
-        await bukProtocolContract.getAddress(),
-        400000000000,
-      );
-      // Approve allowance
-      await nftContract.setApprovalForAll(
-        await marketplaceContract.getAddress(),
-        true,
-      );
-
-      // Book room and mint NFT 1
-      expect(
-        await bukProtocolContract.bookRoom(
-          [price],
-          [price],
-          [price],
-          [2], 
-          [0],
-          "0x3633666663356135366139343361313561626261336134630000000000000000",
-          checkin,
-          checkout,
-          24,
-          true,
-        ),
-      ).not.be.reverted;
-
-      //Mint 1
-      await expect(
-        bukProtocolContract.mintBukNFT(
-          [tokenId1],
-          [
-            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-          ],
-        ),
-      ).not.be.reverted;
-
-      //Listing 1
-      await expect(marketplaceContract.createListing(tokenId1, salePrice)).not
-        .to.be.reverted;
-
-      // Book room and mint NFT 2
-      expect(
-        await bukProtocolContract.bookRoom(
-          [price],
-          [price],
-          [price],
-          [2], 
-          [0],
-          "0x3633666663356135366139343361313561626261336134630000000000000000",
-          checkin,
-          checkout,
-          24,
-          true,
-        ),
-      ).not.be.reverted;
-
-      //Mint 2
-      await expect(
-        bukProtocolContract.mintBukNFT(
-          [tokenId2],
-          [
-            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-          ],
-        ),
-      ).not.be.reverted;
-      //Listing 2
-      await expect(marketplaceContract.createListing(tokenId2, salePrice)).not
-        .to.be.reverted;
-      await expect(await marketplaceContract.delist(tokenId1)).to.not.be
-        .reverted;
-      await expect(
-        marketplaceContract.connect(account1).buyRoomBatch([tokenId1]),
-      ).to.be.revertedWith("NFT not listed");
-    });
-
     it("Spender allowance", async function () {
       let tokenId1 = 1;
       let tokenId2 = 2;
@@ -1169,7 +1038,8 @@ describe("Marketplace", function () {
       let salePrice = 110000000;
       let transferMoney = 410000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -1186,11 +1056,11 @@ describe("Marketplace", function () {
 
       // Book room and mint NFT 1
       expect(
-        await bukProtocolContract.bookRoom(
+        await bukProtocolContract.bookRooms(
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -1220,7 +1090,7 @@ describe("Marketplace", function () {
       );
       await expect(
         marketplaceContract.connect(account1).buyRoomBatch([tokenId1]),
-      ).to.be.revertedWith("Check the allowance of the spender");
+      ).to.be.revertedWith("Check the allowance");
     });
     it("Should emit event", async function () {
       let tokenId1 = 1;
@@ -1229,7 +1099,8 @@ describe("Marketplace", function () {
       let salePrice = 110000000;
       let transferMoney = 410000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -1246,11 +1117,11 @@ describe("Marketplace", function () {
 
       // Book room and mint NFT 1
       expect(
-        await bukProtocolContract.bookRoom(
+        await bukProtocolContract.bookRooms(
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -1301,7 +1172,8 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -1313,11 +1185,11 @@ describe("Marketplace", function () {
 
       // Book room and mint NFT
       expect(
-        await bukProtocolContract.bookRoom(
+        await bukProtocolContract.bookRooms(
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -1349,169 +1221,6 @@ describe("Marketplace", function () {
     });
   });
 
-  // Test cases for delist
-  describe("Delist function marketplace", function () {
-    it("Should delist and verify status", async function () {
-      let tokenId = 1;
-      let price = 100000000;
-      let salePrice = 150000000;
-      let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
-      let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
-      let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
-
-      //Grant allowance permission
-      const res = await stableTokenContract.approve(
-        await bukProtocolContract.getAddress(),
-        200000000000,
-      );
-
-      // Book room and mint NFT
-      expect(
-        await bukProtocolContract.bookRoom(
-          [price],
-          [price],
-          [price],
-          [2], 
-          [0],
-          "0x3633666663356135366139343361313561626261336134630000000000000000",
-          checkin,
-          checkout,
-          24,
-          true,
-        ),
-      ).not.be.reverted;
-
-      //Mint
-      await expect(
-        bukProtocolContract.mintBukNFT(
-          [tokenId],
-          [
-            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-          ],
-        ),
-      ).not.be.reverted;
-      // Approve allowance
-      await nftContract.setApprovalForAll(
-        await marketplaceContract.getAddress(),
-        true,
-      );
-      await marketplaceContract.createListing(tokenId, salePrice);
-      await expect(await marketplaceContract.delist(tokenId)).to.not.be
-        .reverted;
-      let listingDetails = await marketplaceContract.getListingDetails(tokenId);
-      await expect(listingDetails[0]).to.equal(salePrice);
-      await expect(listingDetails[2]).to.equal(0);
-    });
-    it("Should emit event delisted token ID", async function () {
-      let tokenId = 1;
-      let price = 100000000;
-      let salePrice = 150000000;
-      let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
-      let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
-      let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
-
-      //Grant allowance permission
-      const res = await stableTokenContract.approve(
-        await bukProtocolContract.getAddress(),
-        200000000000,
-      );
-
-      // Book room and mint NFT
-      expect(
-        await bukProtocolContract.bookRoom(
-          [price],
-          [price],
-          [price],
-          [2], 
-          [0],
-          "0x3633666663356135366139343361313561626261336134630000000000000000",
-          checkin,
-          checkout,
-          24,
-          true,
-        ),
-      ).not.be.reverted;
-
-      //Mint
-      await expect(
-        bukProtocolContract.mintBukNFT(
-          [tokenId],
-          [
-            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-          ],
-        ),
-      ).not.be.reverted;
-      // Approve allowance
-      await nftContract.setApprovalForAll(
-        await marketplaceContract.getAddress(),
-        true,
-      );
-      await marketplaceContract.createListing(tokenId, salePrice);
-      await expect(await marketplaceContract.delist(tokenId))
-        .to.emit(marketplaceContract, "Delisted")
-        .withArgs(tokenId);
-    });
-    it("Should revert delist for not listed token ", async function () {
-      let tokenId = 1;
-      await expect(marketplaceContract.delist(tokenId)).to.be.revertedWith(
-        "NFT not listed",
-      );
-    });
-    it("Only owner can delist ", async function () {
-      let tokenId = 1;
-      let price = 100000000;
-      let salePrice = 150000000;
-      let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
-      let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
-      let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
-
-      //Grant allowance permission
-      const res = await stableTokenContract.approve(
-        await bukProtocolContract.getAddress(),
-        200000000000,
-      );
-
-      // Book room and mint NFT
-      expect(
-        await bukProtocolContract.bookRoom(
-          [price],
-          [price],
-          [price],
-          [2], 
-          [0],
-          "0x3633666663356135366139343361313561626261336134630000000000000000",
-          checkin,
-          checkout,
-          24,
-          true,
-        ),
-      ).not.be.reverted;
-
-      //Mint
-      await expect(
-        bukProtocolContract.mintBukNFT(
-          [tokenId],
-          [
-            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-          ],
-        ),
-      ).not.be.reverted;
-      // Approve allowance
-      await nftContract.setApprovalForAll(
-        await marketplaceContract.getAddress(),
-        true,
-      );
-      await marketplaceContract.createListing(tokenId, salePrice);
-      await expect(
-        marketplaceContract.connect(account1).delist(tokenId),
-      ).to.be.revertedWith("Only owner can delist");
-    });
-    // TODO for owner validation
-  });
-
   // Test cases for delete listing
   describe("Delete listing function marketplace", function () {
     it("Should delete listing ", async function () {
@@ -1519,7 +1228,8 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -1531,11 +1241,11 @@ describe("Marketplace", function () {
 
       // Book room and mint NFT
       expect(
-        await bukProtocolContract.bookRoom(
+        await bukProtocolContract.bookRooms(
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -1568,7 +1278,8 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -1580,11 +1291,11 @@ describe("Marketplace", function () {
 
       // Book room and mint NFT
       expect(
-        await bukProtocolContract.bookRoom(
+        await bukProtocolContract.bookRooms(
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -1613,7 +1324,7 @@ describe("Marketplace", function () {
         .reverted;
       let listingDetails = await marketplaceContract.getListingDetails(tokenId);
       await expect(listingDetails[0]).to.equal(0);
-      await expect(listingDetails[2]).to.equal(0);
+      await expect(listingDetails[3]).to.equal(0);
     });
 
     it("Should emit event deleted token ID", async function () {
@@ -1621,7 +1332,8 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -1633,11 +1345,11 @@ describe("Marketplace", function () {
 
       // Book room and mint NFT
       expect(
-        await bukProtocolContract.bookRoom(
+        await bukProtocolContract.bookRooms(
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -1677,7 +1389,8 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -1689,11 +1402,11 @@ describe("Marketplace", function () {
 
       // Book room and mint NFT
       expect(
-        await bukProtocolContract.bookRoom(
+        await bukProtocolContract.bookRooms(
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -1720,7 +1433,7 @@ describe("Marketplace", function () {
       await marketplaceContract.createListing(tokenId, salePrice);
       await expect(
         marketplaceContract.connect(account1).deleteListing(tokenId),
-      ).to.be.revertedWith("Only owner or Buk protocol can delete");
+      ).to.be.revertedWith("Owner or Buk protocol can delete");
     });
   });
 
@@ -1805,7 +1518,8 @@ describe("Marketplace", function () {
       let newPrice = 120000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -1817,11 +1531,11 @@ describe("Marketplace", function () {
 
       // Book room and mint NFT
       expect(
-        await bukProtocolContract.bookRoom(
+        await bukProtocolContract.bookRooms(
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -1862,7 +1576,8 @@ describe("Marketplace", function () {
       let newPrice = 120000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -1874,11 +1589,11 @@ describe("Marketplace", function () {
 
       // Book room and mint NFT
       expect(
-        await bukProtocolContract.bookRoom(
+        await bukProtocolContract.bookRooms(
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -1907,7 +1622,7 @@ describe("Marketplace", function () {
         .be.reverted;
       let listingDetails = await marketplaceContract.getListingDetails(tokenId);
       await expect(listingDetails[0]).to.equal(newPrice);
-      await expect(listingDetails[2]).to.equal(1);
+      await expect(listingDetails[3]).to.equal(1);
     });
     it("Should owner only can relist listing", async function () {
       let tokenId = 1;
@@ -1915,7 +1630,8 @@ describe("Marketplace", function () {
       let newPrice = 120000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -1927,11 +1643,11 @@ describe("Marketplace", function () {
 
       // Book room and mint NFT
       expect(
-        await bukProtocolContract.bookRoom(
+        await bukProtocolContract.bookRooms(
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -1950,6 +1666,7 @@ describe("Marketplace", function () {
           ],
         ),
       ).not.be.reverted;
+
       // Approve allowance
       await nftContract.setApprovalForAll(
         await marketplaceContract.getAddress(),
@@ -1966,7 +1683,8 @@ describe("Marketplace", function () {
       let newPrice = 90000000;
       let salePrice = 100000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -1978,11 +1696,11 @@ describe("Marketplace", function () {
 
       // Book room and mint NFT
       expect(
-        await bukProtocolContract.bookRoom(
+        await bukProtocolContract.bookRooms(
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -2009,7 +1727,7 @@ describe("Marketplace", function () {
       await marketplaceContract.createListing(tokenId, salePrice);
       await expect(
         marketplaceContract.relist(tokenId, newPrice),
-      ).to.be.revertedWith("Sale price cann't be lessthan minimum sale price");
+      ).to.be.revertedWith("Minimum price requirement not met");
     });
     it("Should emit event on relist token ID", async function () {
       let tokenId = 1;
@@ -2017,7 +1735,8 @@ describe("Marketplace", function () {
       let newPrice = 120000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId = "0x3633666663356135366139343361313561626261336134630000000000000000"
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
@@ -2029,11 +1748,11 @@ describe("Marketplace", function () {
 
       // Book room and mint NFT
       expect(
-        await bukProtocolContract.bookRoom(
+        await bukProtocolContract.bookRooms(
           [price],
           [price],
           [price],
-          [2], 
+          [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
@@ -2061,6 +1780,181 @@ describe("Marketplace", function () {
       await expect(await marketplaceContract.relist(tokenId, newPrice))
         .to.emit(marketplaceContract, "Relisted")
         .withArgs(tokenId, salePrice, newPrice);
+    });
+  });
+
+
+  // Test cases for indexing
+  describe("Indexing for all the listings on marketplace", function () {
+    it("Buy bookings", async function () {
+      let tokenId1 = 1;
+      let tokenId2 = 2;
+      let tokenId3 = 3;
+      let price = 100000000;
+      let salePrice = 110000000;
+      let newPrice = 150000000;
+      let transferMoney = 410000000;
+      let date = new Date();
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
+      let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
+      let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
+
+      //Grant allowance permission
+      const res = await stableTokenContract.approve(
+        await bukProtocolContract.getAddress(),
+        500000000000,
+      );
+
+      //Grant permission to the marketplace
+      await nftContract.setApprovalForAll(
+        await marketplaceContract.getAddress(),
+        true,
+      );
+
+      //Approve and transfer amount for transaction for buyer
+      await stableTokenContract.transfer(
+        await account1.getAddress(),
+        transferMoney,
+      );
+
+      // Book room and mint NFT 1
+      expect(
+        await bukProtocolContract.bookRooms(
+          [price],
+          [price],
+          [price],
+          [2],
+          [0],
+          "0x3633666663356135366139343361313561626261336134630000000000000000",
+          checkin,
+          checkout,
+          24,
+          true,
+        ),
+      ).not.be.reverted;
+
+      //Mint 1
+      await expect(
+        bukProtocolContract.mintBukNFT(
+          [tokenId1],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
+      ).not.be.reverted;
+
+      let listingDetails1 = await marketplaceContract.getListingDetails(tokenId1);
+      await expect(listingDetails1[2]).to.equal(0);
+
+      // List 1
+      await expect(marketplaceContract.createListing(tokenId1, salePrice)).not
+        .to.be.reverted;
+
+      let listingDetails2 = await marketplaceContract.getListingDetails(tokenId1);
+      await expect(listingDetails2[2]).to.equal(1);
+
+      await expect(await marketplaceContract.relist(tokenId1, newPrice)).to.not
+        .be.reverted;
+
+        let listingDetails3 = await marketplaceContract.getListingDetails(tokenId1);
+        await expect(listingDetails3[2]).to.equal(2);
+
+      // Book room and mint NFT 2
+      expect(
+        await bukProtocolContract.bookRooms(
+          [price],
+          [price],
+          [price],
+          [2],
+          [0],
+          "0x3633666663356135366139343361313561626261336134630000000000000000",
+          checkin,
+          checkout,
+          24,
+          true,
+        ),
+      ).not.be.reverted;
+
+      //Mint 2
+      await expect(
+        bukProtocolContract.mintBukNFT(
+          [tokenId2],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
+      ).not.be.reverted;
+
+      // List 2
+      await expect(marketplaceContract.createListing(tokenId2, salePrice)).not
+        .to.be.reverted;
+
+      // Book room and mint NFT 3
+      expect(
+        await bukProtocolContract.bookRooms(
+          [price],
+          [price],
+          [price],
+          [2],
+          [0],
+          "0x3633666663356135366139343361313561626261336134630000000000000000",
+          checkin,
+          checkout,
+          24,
+          true,
+        ),
+      ).not.be.reverted;
+
+      //Mint 3
+      await expect(
+        bukProtocolContract.mintBukNFT(
+          [tokenId3],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
+      ).not.be.reverted;
+
+      let listingDetails3_1 = await marketplaceContract.getListingDetails(tokenId3);
+      await expect(listingDetails3_1[2]).to.equal(0);
+
+      // List 3
+      await expect(marketplaceContract.createListing(tokenId3, salePrice)).not
+        .to.be.reverted;
+
+        let listingDetails3_2 = await marketplaceContract.getListingDetails(tokenId3);
+        await expect(listingDetails3_2[2]).to.equal(1);
+
+      await expect(await marketplaceContract.deleteListing(tokenId3)).to.not.be
+      .reverted;
+
+      let listingDetails3_3 = await marketplaceContract.getListingDetails(tokenId3);
+      await expect(listingDetails3_3[2]).to.equal(2);
+
+      await expect(marketplaceContract.createListing(tokenId3, salePrice)).not
+        .to.be.reverted;
+
+        let listingDetails3_4 = await marketplaceContract.getListingDetails(tokenId3);
+        await expect(listingDetails3_4[2]).to.equal(3);
+
+      await stableTokenContract
+        .connect(account1)
+        .approve(await marketplaceContract.getAddress(), transferMoney);
+
+      await expect(
+        marketplaceContract
+          .connect(account1)
+          .buyRoomBatch([tokenId1, tokenId2]),
+      ).not.to.be.reverted;
+      let listingDetails4 = await marketplaceContract.getListingDetails(tokenId1);
+      await expect(listingDetails4[2]).to.equal(3);
+      await expect(
+        await nftContract.balanceOf(await account1.getAddress(), tokenId1),
+      ).to.equal(1);
+      await expect(
+        await nftContract.balanceOf(await account1.getAddress(), tokenId2),
+      ).to.equal(1);
     });
   });
 });

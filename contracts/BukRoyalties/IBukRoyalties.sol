@@ -23,8 +23,8 @@ interface IBukRoyalties {
      * @param newBukProtocol, new buk protocol address
      */
     event SetBukProtocol(
-        address indexed oldBukProtocol,
-        address indexed newBukProtocol
+        address oldBukProtocol,
+        address newBukProtocol
     );
 
     /**
@@ -71,6 +71,7 @@ interface IBukRoyalties {
 
     /**
      * @dev Function to define the royalty Fraction for Buk.
+     * @param _recipient Recipient address.
      * @param _royaltyFraction Royalty Fraction.
      * @notice This function can only be called by `ADMIN_ROLE`
      */
@@ -81,6 +82,7 @@ interface IBukRoyalties {
 
     /**
      * @dev Function to define the royalty Fraction for Hotel.
+     * @param _recipient Recipient address.
      * @param _royaltyFraction Royalty Fraction.
      * @notice This function can only be called by `ADMIN_ROLE`
      */

@@ -158,7 +158,7 @@ describe("BukNFTs Updations", function () {
 
     //Book room
     expect(
-      await bukProtocolContract.connect(owner).bookRoom(
+      await bukProtocolContract.connect(owner).bookRooms(
         [100000000],
         [80000000],
         [70000000],

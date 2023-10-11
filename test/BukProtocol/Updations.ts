@@ -164,7 +164,7 @@ describe("BukProtocol Updations", function () {
       //Set treasury
       expect(await bukProtocolContract.connect(adminWallet).setBukTreasury(account1)).not.be.reverted;
       const addresses = await bukProtocolContract.connect(adminWallet).getWallets()
-      expect(addresses[0]).to.equal(await account1.getAddress());
+      expect(addresses[4]).to.equal(await account1.getAddress());
     });
     it("Should set treasury and emit events", async function () {
       //Set treasury
@@ -186,12 +186,12 @@ describe("BukProtocol Updations", function () {
       //Set admin
       expect(await bukProtocolContract.connect(adminWallet).setAdmin(account1)).not.be.reverted;
       const addresses = await bukProtocolContract.connect(account1).getWallets()
-      expect(addresses[3]).to.equal(await account1.getAddress());
+      expect(addresses[7]).to.equal(await account1.getAddress());
     });
     it("Should set admin and emit events", async function () {
       const addresses = await bukProtocolContract.connect(adminWallet).getWallets()
       //Get the old admin
-      const oldAdmin = addresses[3];
+      const oldAdmin = addresses[7];
       //Set admin
       expect(
         await bukProtocolContract
@@ -211,7 +211,7 @@ describe("BukProtocol Updations", function () {
       //Set signature verifier
       expect(await bukProtocolContract.connect(adminWallet).setSignatureVerifier(account1)).not.be.reverted;
       const addresses = await bukProtocolContract.connect(adminWallet).getWallets()
-      expect(addresses[4]).to.equal(await account1.getAddress());
+      expect(addresses[3]).to.equal(await account1.getAddress());
     });
     it("Should set signature verifier and emit events", async function () {
       //Set signature verifier
@@ -232,8 +232,8 @@ describe("BukProtocol Updations", function () {
     it("Should set royalties contract by admin", async function () {
       //Set royalties
       expect(await bukProtocolContract.connect(adminWallet).setRoyaltiesContract(account1)).not.be.reverted;
-      const addr = await bukProtocolContract.connect(adminWallet).royaltiesContract()
-      expect(addr).to.equal(await account1.getAddress());
+      const addresses = await bukProtocolContract.connect(account1).getWallets()
+      expect(addresses[2]).to.equal(await account1.getAddress());
     });
     it("Should set royalties contract and emit events", async function () {
       //Set royalties
@@ -255,7 +255,7 @@ describe("BukProtocol Updations", function () {
       //Set Buk Wallet
       expect(await bukProtocolContract.connect(adminWallet).setBukWallet(account1)).not.be.reverted;
       const addresses = await bukProtocolContract.connect(adminWallet).getWallets()
-      expect(addresses[1]).to.equal(await account1.getAddress());
+      expect(addresses[6]).to.equal(await account1.getAddress());
     });
     it("Should set Buk Wallet and emit events", async function () {
       //Set Buk Wallet
@@ -277,7 +277,7 @@ describe("BukProtocol Updations", function () {
       //Set Stable Token
       expect(await bukProtocolContract.connect(adminWallet).setStableToken(account1)).not.be.reverted;
       const addresses = await bukProtocolContract.connect(adminWallet).getWallets()
-      expect(addresses[2]).to.equal(await account1.getAddress());
+      expect(addresses[5]).to.equal(await account1.getAddress());
     });
     it("Should set stable token and emit events", async function () {
       //Set Stable Token
@@ -299,9 +299,9 @@ describe("BukProtocol Updations", function () {
       // Set BukNFTs
       expect(await bukProtocolContract.connect(adminWallet)
         .setBukNFTs(await nftContract.getAddress())).not.be.reverted;
-      const addr1: string = await bukProtocolContract.nftContract();
+      const addresses = await bukProtocolContract.connect(account1).getWallets()
       const addr2: string = await nftContract.getAddress();
-      expect(addr1).to.be.equal(addr2);
+      expect(addresses[0]).to.be.equal(addr2);
     });
 
 
@@ -325,9 +325,9 @@ describe("BukProtocol Updations", function () {
       // Set BukPOSNFTs
       expect(await bukProtocolContract.connect(adminWallet)
         .setBukPOSNFTs(await nftPosContract.getAddress())).not.be.reverted;
-      const addr1: string = await bukProtocolContract.nftPOSContract();
+      const addresses = await bukProtocolContract.connect(account1).getWallets()
       const addr2: string = await nftPosContract.getAddress();
-      expect(addr1).to.be.equal(addr2);
+      expect(addresses[1]).to.be.equal(addr2);
     });
     it("Should set BukPOSNFTs contract address and emit events", async function () {
       // Set BukPOSNFTs
@@ -347,7 +347,8 @@ describe("BukProtocol Updations", function () {
     it("Should set royaltiesContract by admin", async function () {
       //Set royaltiesContract
       expect(await bukProtocolContract.connect(adminWallet).setRoyaltiesContract(account1)).not.be.reverted;
-      const addr1: string = await bukProtocolContract.royaltiesContract();
+      const addresses = await bukProtocolContract.connect(account1).getWallets()
+      const addr1: string = addresses[2];
       const addr2: string = await account1.getAddress();
       expect(addr1).to.be.equal(addr2);
     });
