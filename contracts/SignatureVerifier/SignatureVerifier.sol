@@ -47,14 +47,14 @@ contract SignatureVerifier {
         return ECDSA.recover(ethSignedMessageHash, _signature);
     }
 
-    function _uintToString(uint256 v) internal pure returns (string memory) {
-        if (v == 0) return "0";
+    function _uintToString(uint256 _numVal) internal pure returns (string memory) {
+        if (_numVal == 0) return "0";
         uint256 maxlength = 100;
         bytes memory reversed = new bytes(maxlength);
         uint256 i = 0;
-        while (v != 0) {
-            uint256 remainder = v % 10;
-            v = v / 10;
+        while (_numVal != 0) {
+            uint256 remainder = _numVal % 10;
+            _numVal = _numVal / 10;
             reversed[i++] = bytes1(uint8(48 + remainder));
         }
         bytes memory s = new bytes(i);
