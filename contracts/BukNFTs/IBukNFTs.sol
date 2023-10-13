@@ -24,9 +24,6 @@ interface IBukNFTs is IERC1155 {
     /// @dev Emitted when marketplace role is granted.
     event SetMarketplace(address marketplaceContract);
 
-    /// @dev Event to update the contract name
-    event SetNFTContractName(string oldContractName, string newContractName);
-
     /// @dev Event to set NFT contract role
     event SetNFTPOSContractRole(
         address oldNFTPOSContractAddr,
@@ -63,12 +60,6 @@ interface IBukNFTs is IERC1155 {
      * @notice This function can only be called by a contract with `ADMIN_ROLE`
      */
     function setBukPOSNFTRole(address _nftPOSContract) external;
-
-    /**
-     * @dev Set the name of the contract.
-     * @notice This function can only be called by addresses with `ADMIN_ROLE`
-     */
-    function setNFTContractName(string memory _contractName) external;
 
     /**
      * @dev Sets the URI for a specific token ID.

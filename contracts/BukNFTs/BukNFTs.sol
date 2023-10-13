@@ -17,6 +17,13 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
     /// @dev Name of the Buk POS NFT collection contract
     string public name;
 
+    /**
+     * @dev The denominator with which to interpret the fee set in {_setTokenRoyalty} and {_setDefaultRoyalty} as a
+     * fraction of the sale price. Defaults to 10000 so fees are expressed in basis points, but may be customized by an
+     * override.
+     */
+    uint16 public constant FEE_DENOMINATOR = 10000;
+
     /// @dev Address of the Buk POS NFT collection contract
     IBukPOSNFTs public nftPOSContract;
 
@@ -63,7 +70,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
         address _bukProtocolContract,
         address _bukTreasuryContract
     ) ERC1155("") {
-        _setNFTContractName(_contractName);
+        name = _contractName;
         _setBukTreasury(_bukTreasuryContract);
         _setBukPOSNFTRole(_bukPOSContract);
         _setBukProtocol(_bukProtocolContract);
@@ -101,13 +108,6 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
         _setBukPOSNFTRole(_nftPOSContract);
     }
 
-    /// @dev See {IBukNFTs-setNFTContractName}.
-    function setNFTContractName(
-        string memory _contractName
-    ) external onlyRole(ADMIN_ROLE) {
-        _setNFTContractName(_contractName);
-    }
-
     /// @dev See {IBukNFTs-setURI}.
     function setURI(
         uint256 _id,
@@ -140,11 +140,12 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
         uint256 _amount,
         bool _mintPOS
     ) external onlyRole(BUK_PROTOCOL_ROLE) {
-        string memory uri_ = uriByTokenId[_id];
-        delete uriByTokenId[_id];
         if (_mintPOS) {
+            string memory uri_ = uriByTokenId[_id];
             nftPOSContract.mint(_account, _id, _amount, uri_, "");
         }
+        delete uriByTokenId[_id];
+
         _burn(_account, _id, _amount);
     }
 
@@ -158,7 +159,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
         uint256 royaltyAmount_;
         for (uint i = 0; i < royaltyArray.length; i++) {
             royaltyAmount_ += ((_salePrice * royaltyArray[i].royaltyFraction) /
-                _feeDenominator());
+                FEE_DENOMINATOR);
         }
         return (address(_bukTreasury), royaltyAmount_);
     }
@@ -188,7 +189,6 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
             isApprovedForAll(_from, _msgSender()),
             "Not a token owner or approved"
         );
-        require(balanceOf(_from, _id) > 0, "From address does not own NFT");
         super._safeTransferFrom(_from, _to, _id, _amount, _data);
     }
 
@@ -222,10 +222,6 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
                     details.tradeable),
                 "Trade limit time crossed"
             );
-            require(
-                balanceOf(_from, _ids[i]) > 0,
-                "From address does not own NFT"
-            );
         }
         super._safeBatchTransferFrom(_from, _to, _ids, _amounts, _data);
     }
@@ -242,25 +238,6 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
         bytes4 interfaceId
     ) public view override(AccessControl, IERC165, ERC1155) returns (bool) {
         return super.supportsInterface(interfaceId);
-    }
-
-    /**
-     * @dev The denominator with which to interpret the fee set in {_setTokenRoyalty} and {_setDefaultRoyalty} as a
-     * fraction of the sale price. Defaults to 10000 so fees are expressed in basis points, but may be customized by an
-     * override.
-     */
-    function _feeDenominator() internal pure virtual returns (uint96) {
-        return 10000;
-    }
-
-    /**
-     * Private function to update the contract name
-     * @param _contractName The new name for the contract
-     */
-    function _setNFTContractName(string memory _contractName) private {
-        string memory oldName_ = name;
-        name = _contractName;
-        emit SetNFTContractName(oldName_, _contractName);
     }
 
     /**
