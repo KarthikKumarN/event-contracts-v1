@@ -6,6 +6,7 @@ import {
   AbiCoder,
   toBeArray,
   ethers as eth,
+  recoverAddress
 } from "ethers";
 
 describe("BukProtocol Bookings", function () {
@@ -1457,15 +1458,17 @@ describe("BukProtocol Bookings", function () {
       ).not.be.reverted;
 
       const _id = [1];
-      const _penalty = [50000000]; // Example values, use your actual logic
-      const _refund = [30000000];
-      const _charges = [20000000];
+      const _penalty = [0]; // Example values, use your actual logic
+      const _refund = [18950000];
+      const _charges = [0];
       const _bookingOwner = await owner.getAddress();
 
       // Formulate the message for signing
       const message = `Cancellation Details:\nTotal Penalty: ${_penalty[0]}\nTotal Refund: ${_refund[0]}\nTotal Charges: ${_charges[0]}`;
-      const messageHash = keccak256(toUtf8Bytes(message));
-      const signature = await owner.signMessage(toBeArray(messageHash));
+      const signature = await owner.signMessage(message);
+      console.log("🚀 ~ file: Booking.ts:1468 ~ owner:", _bookingOwner)
+      console.log("🚀 ~ file: Booking.ts:1468 ~ message:", message)
+      console.log("🚀 ~ file: Booking.ts:1468 ~ signature:", signature)
 
       //Cancel Room
       await expect(
@@ -1529,8 +1532,7 @@ describe("BukProtocol Bookings", function () {
 
       // Formulate the message for signing
       const message = `Cancellation Details:\nTotal Penalty: ${_penalty[0]}\nTotal Refund: ${_refund[0]}\nTotal Charges: ${_charges[0]}`;
-      const messageHash = keccak256(toUtf8Bytes(message));
-      const signature = await owner.signMessage(toBeArray(messageHash));
+      const signature = await owner.signMessage(message);
 
       //Cancel Room
       await expect(
@@ -1594,8 +1596,7 @@ describe("BukProtocol Bookings", function () {
 
       // Formulate the message for signing
       const message = `Cancellation Details:\nTotal Penalty: ${_penalty[0]}\nTotal Refund: ${_refund[0]}\nTotal Charges: ${_charges[0]}`;
-      const messageHash = keccak256(toUtf8Bytes(message));
-      const signature = await owner.signMessage(toBeArray(messageHash));
+      const signature = await owner.signMessage(message);
 
       //Cancel Room
       await expect(
@@ -1663,8 +1664,7 @@ describe("BukProtocol Bookings", function () {
 
       // Formulate the message for signing
       const message = `Cancellation Details:\nTotal Penalty: ${_penalty[0]}\nTotal Refund: ${_refund[0]}\nTotal Charges: ${_charges[0]}`;
-      const messageHash = keccak256(toUtf8Bytes(message));
-      const signature = await owner.signMessage(toBeArray(messageHash));
+      const signature = await owner.signMessage(message);
 
       //Cancel Room
       await expect(
@@ -1717,8 +1717,7 @@ describe("BukProtocol Bookings", function () {
 
       // Formulate the message for signing
       const message = `Cancellation Details:\nTotal Penalty: ${_penalty[0]}\nTotal Refund: ${_refund[0]}\nTotal Charges: ${_charges[0]}`;
-      const messageHash = keccak256(toUtf8Bytes(message));
-      const signature = await owner.signMessage(toBeArray(messageHash));
+      const signature = await owner.signMessage(message);
 
       //Cancel Room
       await expect(
@@ -1776,12 +1775,9 @@ describe("BukProtocol Bookings", function () {
       const _charges = [20000000];
       const _bookingOwner = await owner.getAddress();
 
-      // Formulate the signature
-      const types = ["uint256[]", "uint256[]", "uint256[]", "uint256[]"];
-      const values = [_id, _penalty, _refund, _charges];
-      const encoded = AbiCoder.defaultAbiCoder().encode(types, values);
-      const hash = keccak256(encoded);
-      const signature = await owner.signMessage(toBeArray(hash));
+      // Formulate the message for signing
+      const message = `Cancellation Details:\nTotal Penalty: ${_penalty[0]}\nTotal Refund: ${_refund[0]}\nTotal Charges: ${_charges[0]}`;
+      const signature = await owner.signMessage(message);
 
       //Cancel Room
       await expect(

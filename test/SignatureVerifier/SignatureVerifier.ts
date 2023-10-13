@@ -21,14 +21,9 @@ describe("SignatureVerifier", function () {
 
     // Construct the message
     const message = `Cancellation Details:\nTotal Penalty: ${totalPenalty}\nTotal Refund: ${totalRefund}\nTotal Charges: ${totalCharges}`;
-    const messageHash = keccak256(toUtf8Bytes(message));
-
-    // Create a new buffer object from the sliced version of the messageHash string
-    // The first two characters are removed before converting to byte representation
-    const byteArray = Buffer.from(messageHash.slice(2), "hex");
 
     // Sign the message
-    const signature = await signer.signMessage(byteArray);
+    const signature = await signer.signMessage(message);
 
     // Call the generateAndVerify function
     const recoveredAddress = await verifier.generateAndVerify(

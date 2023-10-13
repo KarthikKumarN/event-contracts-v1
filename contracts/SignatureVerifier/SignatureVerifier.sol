@@ -12,15 +12,6 @@ import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 contract SignatureVerifier {
     using Strings for uint256;
 
-    /// @dev See {ISignatureVerifier-verify}.
-    function verify(
-        bytes32 _hash,
-        bytes memory _signature
-    ) external pure returns (address) {
-        bytes32 ethSignedHash = ECDSA.toEthSignedMessageHash(_hash);
-        return ECDSA.recover(ethSignedHash, _signature);
-    }
-
     /// @dev See {ISignatureVerifier-generateAndVerify}.
     function generateAndVerify(
         uint256 _totalPenalty,
@@ -29,7 +20,7 @@ contract SignatureVerifier {
         bytes memory _signature
     ) external pure returns (address) {
         // Construct the message hash
-        bytes32 messageHash = keccak256(
+        bytes memory message = 
             abi.encodePacked(
                 "Cancellation Details:\nTotal Penalty: ",
                 _totalPenalty.toString(),
@@ -37,15 +28,19 @@ contract SignatureVerifier {
                 _totalRefund.toString(),
                 "\nTotal Charges: ",
                 _totalCharges.toString()
-            )
-        );
+            );
 
-        // Prefix the message hash (Ethereum Signed Message)
-        bytes32 ethSignedMessageHash = ECDSA.toEthSignedMessageHash(
-            messageHash
-        );
+        // Verify the signature
+        address signer = verify(message, _signature);
+        return signer;
+    }
 
-        // Recover the signer's address
-        return ECDSA.recover(ethSignedMessageHash, _signature);
+    /// @dev See {ISignatureVerifier-verify}.
+    function verify(
+        bytes memory _hash,
+        bytes memory _signature
+    ) public pure returns (address) {
+        bytes32 ethSignedHash = ECDSA.toEthSignedMessageHash(_hash);
+        return ECDSA.recover(ethSignedHash, _signature);
     }
 }

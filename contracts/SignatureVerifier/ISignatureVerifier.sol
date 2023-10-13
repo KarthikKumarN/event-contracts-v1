@@ -15,7 +15,7 @@ interface ISignatureVerifier {
      * @return The address of the signer who generated the given signature.
      */
     function verify(
-        bytes32 _hash,
+        bytes memory _hash,
         bytes memory _signature
     ) external view returns (address);
 
