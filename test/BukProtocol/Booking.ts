@@ -6,6 +6,7 @@ import {
   AbiCoder,
   toBeArray,
   ethers as eth,
+  recoverAddress
 } from "ethers";
 
 describe("BukProtocol Bookings", function () {
@@ -1465,6 +1466,9 @@ describe("BukProtocol Bookings", function () {
       // Formulate the message for signing
       const message = `Cancellation Details:\nTotal Penalty: ${_penalty[0]}\nTotal Refund: ${_refund[0]}\nTotal Charges: ${_charges[0]}`;
       const signature = await owner.signMessage(message);
+      console.log("🚀 ~ file: Booking.ts:1468 ~ owner:", _bookingOwner)
+      console.log("🚀 ~ file: Booking.ts:1468 ~ message:", message)
+      console.log("🚀 ~ file: Booking.ts:1468 ~ signature:", signature)
 
       //Cancel Room
       await expect(
