@@ -70,7 +70,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
         address _bukProtocolContract,
         address _bukTreasuryContract
     ) ERC1155("") {
-        _setNFTContractName(_contractName);
+        name = _contractName;
         _setBukTreasury(_bukTreasuryContract);
         _setBukPOSNFTRole(_bukPOSContract);
         _setBukProtocol(_bukProtocolContract);
@@ -106,13 +106,6 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
         address _nftPOSContract
     ) external onlyRole(ADMIN_ROLE) {
         _setBukPOSNFTRole(_nftPOSContract);
-    }
-
-    /// @dev See {IBukNFTs-setNFTContractName}.
-    function setNFTContractName(
-        string memory _contractName
-    ) external onlyRole(ADMIN_ROLE) {
-        _setNFTContractName(_contractName);
     }
 
     /// @dev See {IBukNFTs-setURI}.
@@ -245,16 +238,6 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
         bytes4 interfaceId
     ) public view override(AccessControl, IERC165, ERC1155) returns (bool) {
         return super.supportsInterface(interfaceId);
-    }
-
-    /**
-     * Private function to update the contract name
-     * @param _contractName The new name for the contract
-     */
-    function _setNFTContractName(string memory _contractName) private {
-        string memory oldName_ = name;
-        name = _contractName;
-        emit SetNFTContractName(oldName_, _contractName);
     }
 
     /**
