@@ -22,7 +22,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
      * fraction of the sale price. Defaults to 10000 so fees are expressed in basis points, but may be customized by an
      * override.
      */
-    uint16 private immutable _feeDenominator = 10000;
+    uint16 public constant FEE_DENOMINATOR = 10000;
 
     /// @dev Address of the Buk POS NFT collection contract
     IBukPOSNFTs public nftPOSContract;
@@ -159,7 +159,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
         uint256 royaltyAmount_;
         for (uint i = 0; i < royaltyArray.length; i++) {
             royaltyAmount_ += ((_salePrice * royaltyArray[i].royaltyFraction) /
-                _feeDenominator);
+                FEE_DENOMINATOR);
         }
         return (address(_bukTreasury), royaltyAmount_);
     }
