@@ -29,7 +29,7 @@ contract SignatureVerifier {
         bytes memory _signature
     ) external pure returns (address) {
         // Construct the message hash
-        bytes32 messageHash = keccak256(
+        bytes memory message = 
             abi.encodePacked(
                 "Cancellation Details:\nTotal Penalty: ",
                 _totalPenalty.toString(),
@@ -37,12 +37,11 @@ contract SignatureVerifier {
                 _totalRefund.toString(),
                 "\nTotal Charges: ",
                 _totalCharges.toString()
-            )
-        );
+            );
 
         // Prefix the message hash (Ethereum Signed Message)
         bytes32 ethSignedMessageHash = ECDSA.toEthSignedMessageHash(
-            messageHash
+            message
         );
 
         // Recover the signer's address
