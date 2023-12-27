@@ -213,6 +213,18 @@ interface IBukProtocol {
     function toggleTradeability(uint256 _tokenId) external;
 
     /**
+     * @dev Function to pause the contract.
+     * @notice This function can only be called by admin
+     */
+    function pause() external;
+
+    /**
+     * @dev Function to unpause the contract.
+     * @notice This function can only be called by admin
+     */
+    function unpause() external;
+
+    /**
      * @dev Function to book rooms.
      * @param _total Total amount to be paid.
      * @param _baseRate Base rate of the room.

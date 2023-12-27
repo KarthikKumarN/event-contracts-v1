@@ -3,6 +3,7 @@ pragma solidity =0.8.19;
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
 import { IBukPOSNFTs } from "../BukPOSNFTs/IBukPOSNFTs.sol";
 import { IBukNFTs } from "../BukNFTs/IBukNFTs.sol";
 import { IBukTreasury } from "../BukTreasury/IBukTreasury.sol";
@@ -15,7 +16,7 @@ import { IBukProtocol } from "../BukProtocol/IBukProtocol.sol";
  * @author BUK Technology Inc
  * @dev Contract to manage operations of the BUK protocol to manage BukNFTs tokens and underlying sub-contracts.
  */
-contract BukProtocol is ReentrancyGuard, IBukProtocol {
+contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
     /**
      * @dev address _bukWallet        Address of the Buk wallet.
      * @dev address _stableToken          Address of the stable token.
@@ -129,7 +130,9 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
     }
 
     /// @dev See {IBukProtocol-setCommission}.
-    function setCommission(uint8 _newCommission) external onlyAdmin {
+    function setCommission(
+        uint8 _newCommission
+    ) external onlyAdmin whenNotPaused {
         require(_newCommission <= 100, "Commission is more than 100");
         uint oldCommission_ = commission;
         commission = _newCommission;
@@ -147,6 +150,16 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
         emit ToggleTradeability(_tokenId, _bookingDetails[_tokenId].tradeable);
     }
 
+    /// @dev See {IBukProtocol-pause}.
+    function pause() external onlyAdmin {
+        _pause();
+    }
+
+    /// @dev See {IBukProtocol-unpause}.
+    function unpause() external onlyAdmin {
+        _unpause();
+    }
+
     /// @dev See {IBukProtocol-bookRooms}.
     function bookRooms(
         uint256[] memory _total,
@@ -159,7 +172,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
         uint256 _checkout,
         uint256 _tradeTimeLimit,
         bool _tradeable
-    ) external nonReentrant returns (bool) {
+    ) external nonReentrant whenNotPaused returns (bool) {
         require(
             ((_total.length == _baseRate.length) &&
                 (_total.length == _minSalePrice.length) &&
@@ -215,7 +228,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
     function bookingRefund(
         uint256[] memory _ids,
         address _owner
-    ) external onlyAdmin {
+    ) external whenNotPaused onlyAdmin {
         uint256 len = _ids.length;
         require((len > 0), "Array is empty");
         for (uint8 i = 0; i < len; ++i) {
@@ -244,7 +257,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
     function mintBukNFT(
         uint256[] memory _ids,
         string[] memory _uri
-    ) external nonReentrant {
+    ) external whenNotPaused nonReentrant {
         uint256 len = _ids.length;
         require((len == _uri.length), "Check Ids and URIs size");
         require(((len > 0) && (len < 11)), "Not in max - min booking limit");
@@ -329,7 +342,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
         uint256[] memory _charges,
         address _bookingOwner,
         bytes memory _signature
-    ) external onlyAdmin {
+    ) external whenNotPaused onlyAdmin {
         uint256 len = _ids.length;
         require(
             (len == _penalties.length) && (len == _refunds.length),
@@ -363,17 +376,22 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
             totalCharges += _charges[i];
         }
         // Verify the signature using the generateAndVerify function
-        address signer = _signatureVerifier.generateAndVerify(totalPenalty, totalRefund, totalCharges, _signature);
+        address signer = _signatureVerifier.generateAndVerify(
+            totalPenalty,
+            totalRefund,
+            totalCharges,
+            _signature
+        );
         require(signer == _bookingOwner, "Invalid owner signature");
         for (uint8 i = 0; i < len; ++i) {
             _bookingDetails[_ids[i]].status = BookingStatus.cancelled;
             _nftContract.burn(_bookingOwner, _ids[i], 1, false);
         }
-        if(totalPenalty > 0)
+        if (totalPenalty > 0)
             _bukTreasury.cancelUSDCRefund(totalPenalty, _bukWallet);
-        if(totalRefund > 0)
+        if (totalRefund > 0)
             _bukTreasury.cancelUSDCRefund(totalRefund, _bookingOwner);
-        if(totalCharges > 0)
+        if (totalCharges > 0)
             _bukTreasury.cancelUSDCRefund(totalCharges, _bukWallet);
         emit CancelRoom(_ids, totalRefund, true);
     }
@@ -384,7 +402,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
         uint256 _refund,
         uint256 _charges,
         address _bookingOwner
-    ) external onlyAdmin {
+    ) external whenNotPaused onlyAdmin {
         require(
             ((_bookingDetails[_id].status == BookingStatus.confirmed) ||
                 (_bookingDetails[_id].status == BookingStatus.checkedin)),
@@ -482,7 +500,10 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol {
     function _setRoyaltiesContract(address _royaltiesContractAddr) private {
         address oldRoyaltiesContract_ = address(_royaltiesContract);
         _royaltiesContract = IBukRoyalties(_royaltiesContractAddr);
-        emit SetRoyaltiesContract(oldRoyaltiesContract_, _royaltiesContractAddr);
+        emit SetRoyaltiesContract(
+            oldRoyaltiesContract_,
+            _royaltiesContractAddr
+        );
     }
 
     /**
