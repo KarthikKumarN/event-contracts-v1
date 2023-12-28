@@ -9,8 +9,9 @@ import { IMarketplace } from "contracts/Marketplace/IMarketplace.sol";
 import { IBukProtocol } from "contracts/BukProtocol/IBukProtocol.sol";
 import { IBukNFTs } from "contracts/BukNFTs/IBukNFTs.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
+import { Pausable } from "@openzeppelin/contracts/security/Pausable.sol";
 
-contract Marketplace is Context, IMarketplace, AccessControl {
+contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
     // Using safeERC20
     using SafeERC20 for IERC20;
 
@@ -63,8 +64,21 @@ contract Marketplace is Context, IMarketplace, AccessControl {
         _grantRole(ADMIN_ROLE, _msgSender());
     }
 
+    /// @dev See {IMarketplace-pause}.
+    function pause() external onlyRole(ADMIN_ROLE) {
+        _pause();
+    }
+
+    /// @dev See {IMarketplace-unpause}.
+    function unpause() external onlyRole(ADMIN_ROLE) {
+        _unpause();
+    }
+
     /// @dev Refer {IMarketplace-createListing}.
-    function createListing(uint256 _tokenId, uint256 _price) external {
+    function createListing(
+        uint256 _tokenId,
+        uint256 _price
+    ) external whenNotPaused {
         require(!isBookingListed(_tokenId), "NFT already listed");
         IBukProtocol.Booking memory bookingDetails = _bukProtocalContract
             .getBookingDetails(_tokenId);
@@ -94,7 +108,7 @@ contract Marketplace is Context, IMarketplace, AccessControl {
         _listedNFT[_tokenId] = ListingDetails(
             _price,
             _msgSender(),
-            _listedNFT[_tokenId].index +1,
+            _listedNFT[_tokenId].index + 1,
             ListingStatus.active
         );
 
@@ -140,7 +154,7 @@ contract Marketplace is Context, IMarketplace, AccessControl {
     }
 
     /// @dev Refer {IMarketplace-buyRoom}.
-    function buyRoom(uint256 _tokenId) external {
+    function buyRoom(uint256 _tokenId) external whenNotPaused {
         require(
             _listedNFT[_tokenId].status == ListingStatus.active,
             "NFT not listed"
@@ -149,7 +163,7 @@ contract Marketplace is Context, IMarketplace, AccessControl {
     }
 
     /// @dev Refer {IMarketplace-buyRoomBatch}.
-    function buyRoomBatch(uint256[] calldata _tokenIds) external {
+    function buyRoomBatch(uint256[] calldata _tokenIds) external whenNotPaused {
         uint256 len = _tokenIds.length;
         for (uint256 i = 0; i < len; ) {
             require(

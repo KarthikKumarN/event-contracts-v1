@@ -88,6 +88,18 @@ interface IMarketplace {
     event StableTokenSet(address oldAddress, address newAddress);
 
     /**
+     * @dev Function to pause the contract.
+     * @notice This function can only be called by admin
+     */
+    function pause() external;
+
+    /**
+     * @dev Function to unpause the contract.
+     * @notice This function can only be called by admin
+     */
+    function unpause() external;
+
+    /**
      * @dev Function will create a listing of Booking/Room NFT
      * @dev Seller has to approve marketplace to execute transfer before listing
      * @notice Only NFT owner can list
