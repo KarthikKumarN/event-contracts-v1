@@ -3,12 +3,13 @@ pragma solidity =0.8.19;
 
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
 
 /**
  * @title BUK Treasury Contract
  * @author BUK Technology Inc
  */
-contract BukTreasury is AccessControl {
+contract BukTreasury is AccessControl, Pausable {
     /// @dev address currency          Address of the default currency.
     address public currency;
 
@@ -52,6 +53,22 @@ contract BukTreasury is AccessControl {
     }
 
     /**
+     * @dev Pauses the Buk protocol.
+     * Only the admin role can call this function.
+     */
+    function pause() external onlyRole(ADMIN_ROLE) {
+        _pause();
+    }
+
+    /**
+     * @dev Unpauses the Buk protocol.
+     * Only the admin role can call this function.
+     */
+    function unpause() external onlyRole(ADMIN_ROLE) {
+        _unpause();
+    }
+
+    /**
      * @notice - Set the ERC20 token contract address
      * @param _currency-Address of the ERC20 token contract
      * @dev - This function sets the currency for the Treasury contract. It can be executed only by the administrator.
@@ -83,7 +100,7 @@ contract BukTreasury is AccessControl {
     function withdrawUSDCFund(
         uint256 _total,
         address _account
-    ) external onlyRole(ADMIN_ROLE) {
+    ) external onlyRole(ADMIN_ROLE) whenNotPaused {
         IERC20(currency).transfer(_account, _total);
         emit WithdrawFund(_account, _total);
     }
@@ -100,7 +117,7 @@ contract BukTreasury is AccessControl {
         uint256 _total,
         address _account,
         address _currency
-    ) external onlyRole(ADMIN_ROLE) {
+    ) external onlyRole(ADMIN_ROLE) whenNotPaused {
         IERC20(_currency).transfer(_account, _total);
         emit WithdrawFund(_account, _total);
     }
@@ -115,7 +132,7 @@ contract BukTreasury is AccessControl {
     function cancelUSDCRefund(
         uint256 _total,
         address _account
-    ) external onlyBukProtocol(_msgSender()) {
+    ) external onlyBukProtocol(_msgSender()) whenNotPaused {
         IERC20(currency).transfer(_account, _total);
         emit CancelFund(_account, _total);
     }
@@ -132,7 +149,7 @@ contract BukTreasury is AccessControl {
         uint256 _total,
         address _account,
         address _currency
-    ) external onlyBukProtocol(_msgSender()) {
+    ) external onlyBukProtocol(_msgSender()) whenNotPaused {
         IERC20(_currency).transfer(_account, _total);
         emit CancelFund(_account, _total);
     }
