@@ -116,7 +116,7 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
     }
 
     /// @dev Refer {IMarketplace-deleteListing}.
-    function deleteListing(uint256 _tokenId) external {
+    function deleteListing(uint256 _tokenId) external whenNotPaused {
         require(isBookingListed(_tokenId), "NFT not listed");
         require(
             _bukNFTContract.balanceOf(_msgSender(), _tokenId) == 1 ||
@@ -130,7 +130,10 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
     }
 
     /// @dev Refer {IMarketplace-relist}.
-    function relist(uint256 _tokenId, uint256 _newPrice) external {
+    function relist(
+        uint256 _tokenId,
+        uint256 _newPrice
+    ) external whenNotPaused {
         require(isBookingListed(_tokenId), "NFT not listed");
         IBukProtocol.Booking memory bookingDetails = _bukProtocalContract
             .getBookingDetails(_tokenId);
