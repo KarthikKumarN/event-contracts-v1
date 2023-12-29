@@ -249,7 +249,8 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
                 (_bookingDetails[_ids[i]].baseRate * commission) /
                 100;
         }
-        _bukTreasury.cancelUSDCRefund(total, _owner);
+        _bukTreasury.stableRefund(total, _owner);
+        (total, _owner);
         emit BookingRefund(total, _owner);
     }
 
@@ -388,11 +389,11 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
             _nftContract.burn(_bookingOwner, _ids[i], 1, false);
         }
         if (totalPenalty > 0)
-            _bukTreasury.cancelUSDCRefund(totalPenalty, _bukWallet);
+            _bukTreasury.stableRefund(totalPenalty, _bukWallet);
         if (totalRefund > 0)
-            _bukTreasury.cancelUSDCRefund(totalRefund, _bookingOwner);
+            _bukTreasury.stableRefund(totalRefund, _bookingOwner);
         if (totalCharges > 0)
-            _bukTreasury.cancelUSDCRefund(totalCharges, _bukWallet);
+            _bukTreasury.stableRefund(totalCharges, _bukWallet);
         emit CancelRoom(_ids, totalRefund, true);
     }
 
@@ -421,8 +422,8 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
             "Transfer amount exceeds total"
         );
         _bookingDetails[_id].status = BookingStatus.cancelled;
-        _bukTreasury.cancelUSDCRefund(_refund, _bookingOwner);
-        _bukTreasury.cancelUSDCRefund(_charges, address(_bukTreasury));
+        _bukTreasury.stableRefund(_refund, _bookingOwner);
+        _bukTreasury.stableRefund(_charges, address(_bukTreasury));
         _nftContract.burn(_bookingOwner, _id, 1, false);
         emit EmergencyCancellation(_id, true);
     }
