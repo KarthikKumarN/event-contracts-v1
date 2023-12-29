@@ -3,17 +3,21 @@ import { ethers } from "hardhat";
 
 describe("BukTreasury", () => {
   let stableTokenContract;
+  let otherTokenContract;
   let bukProtocolContract;
   let signatureVerifierContract;
   let royaltiesContract;
   let owner;
   let account1;
+  let account2;
   let adminWallet;
   let bukWallet;
   let bukTreasuryContract;
+  let bukProtocolContract1;
 
   beforeEach("deploy the contract instance first", async function () {
-    [owner, account1, adminWallet, bukWallet] = await ethers.getSigners();
+    [owner, account1, account2, adminWallet, bukWallet, bukProtocolContract1] =
+      await ethers.getSigners();
 
     // Token
     const Token = await ethers.getContractFactory("Token");
@@ -24,7 +28,14 @@ describe("BukTreasury", () => {
       owner.address,
       100000000000,
     );
-    // await stableTokenContract.deployed();
+
+    otherTokenContract = await Token.deploy(
+      "USD Dollar",
+      "USDC1",
+      18,
+      owner.address,
+      100000000000,
+    );
 
     //BukTreasury
     const BukTreasury = await ethers.getContractFactory("BukTreasury");
@@ -95,5 +106,219 @@ describe("BukTreasury", () => {
         bukTreasuryContract.withdrawStableToken(100, adminWallet.address),
       ).to.be.revertedWith("Pausable: paused");
     });
+  });
+
+  describe("setStableToken", () => {
+    it("Should set the stable token address", async () => {
+      await bukTreasuryContract.setStableToken(account1.address);
+      expect(await bukTreasuryContract.getStableToken()).to.equal(
+        account1.address,
+      );
+    });
+
+    it("Should revert if not called by the owner", async () => {
+      await expect(
+        bukTreasuryContract.connect(account1).setStableToken(account1.address),
+      ).to.be.revertedWith(
+        `AccessControl: account ${account1.address.toLowerCase()} is missing role ${await bukTreasuryContract.ADMIN_ROLE()}`,
+      );
+    });
+    it("Should revert if the address is 0", async () => {
+      let newContract = "0x0000000000000000000000000000000000000000";
+      await expect(
+        bukTreasuryContract.setStableToken(newContract),
+      ).to.be.revertedWith("Invalid address");
+    });
+  });
+
+  // Add all possible testcase for the BukTreasury setBukProtocol function
+  describe("setBukProtocol", () => {
+    it("Should set the BukProtocol address", async () => {
+      expect(await bukTreasuryContract.setBukProtocol(account1.address)).to.not
+        .be.reverted;
+    });
+
+    it("Should revert if not called by the owner", async () => {
+      await expect(
+        bukTreasuryContract.connect(account1).setBukProtocol(account1.address),
+      ).to.be.revertedWith(
+        `AccessControl: account ${account1.address.toLowerCase()} is missing role ${await bukTreasuryContract.ADMIN_ROLE()}`,
+      );
+    });
+    it("Should revert if the address is 0", async () => {
+      let newContract = "0x0000000000000000000000000000000000000000";
+      await expect(
+        bukTreasuryContract.setBukProtocol(newContract),
+      ).to.be.revertedWith("Invalid address");
+    });
+
+    it("Should emit event when BukProtocol address is set", async () => {
+      await bukTreasuryContract.setBukProtocol(account1.address);
+      let oldAddress = await bukTreasuryContract.bukProtocolContract();
+      await expect(bukTreasuryContract.setBukProtocol(account2.address))
+        .to.emit(bukTreasuryContract, "BukProtocolSet")
+        .withArgs(oldAddress, account2.address);
+    });
+  });
+
+  describe("withdrawStableToken", () => {
+    it("Should withdraw the stable token", async () => {
+      await stableTokenContract.transfer(
+        await bukTreasuryContract.getAddress(),
+        100000000000,
+      );
+      await bukTreasuryContract.withdrawStableToken(
+        100000000000,
+        adminWallet.address,
+      );
+      expect(await stableTokenContract.balanceOf(adminWallet.address)).to.equal(
+        100000000000,
+      );
+    });
+
+    it("Should revert if not called by the owner", async () => {
+      await stableTokenContract.transfer(
+        await bukTreasuryContract.getAddress(),
+        100000000000,
+      );
+      await expect(
+        bukTreasuryContract
+          .connect(account1)
+          .withdrawStableToken(100000000000, adminWallet.address),
+      ).to.be.revertedWith(
+        `AccessControl: account ${account1.address.toLowerCase()} is missing role ${await bukTreasuryContract.ADMIN_ROLE()}`,
+      );
+    });
+    it("Should revert if the address is 0", async () => {
+      let newContract = "0x0000000000000000000000000000000000000000";
+      await expect(
+        bukTreasuryContract.withdrawStableToken(10000000000, newContract),
+      ).to.be.revertedWith("Invalid address");
+    });
+    // Test when paused
+    it("Should revert if the contract is paused", async () => {
+      await bukTreasuryContract.pause();
+      await expect(
+        bukTreasuryContract.withdrawStableToken(
+          10000000000,
+          adminWallet.address,
+        ),
+      ).to.be.revertedWith("Pausable: paused");
+    });
+  });
+
+  describe("withdrawOtherToken", () => {
+    it("Should withdraw the other token", async () => {
+      await otherTokenContract.transfer(
+        await bukTreasuryContract.getAddress(),
+        10000000000,
+      );
+      await bukTreasuryContract.withdrawOtherToken(
+        1000000000,
+        adminWallet.address,
+        await otherTokenContract.getAddress(),
+      );
+      expect(await otherTokenContract.balanceOf(adminWallet.address)).to.equal(
+        1000000000,
+      );
+    });
+
+    it("Should revert if not called by the owner", async () => {
+      await otherTokenContract.transfer(
+        await bukTreasuryContract.getAddress(),
+        100000000000,
+      );
+      await expect(
+        bukTreasuryContract
+          .connect(account1)
+          .withdrawOtherToken(
+            10000000000,
+            adminWallet.address,
+            await otherTokenContract.getAddress(),
+          ),
+      ).to.be.revertedWith(
+        `AccessControl: account ${account1.address.toLowerCase()} is missing role ${await bukTreasuryContract.ADMIN_ROLE()}`,
+      );
+    });
+    // Add more test cases to test whenNotPaused modifier
+    it("Should revert if the contract is paused", async () => {
+      await bukTreasuryContract.pause();
+      await expect(
+        bukTreasuryContract.withdrawOtherToken(
+          10000000000,
+          adminWallet.address,
+          await otherTokenContract.getAddress(),
+        ),
+      ).to.be.revertedWith("Pausable: paused");
+    });
+    it("Should revert if the address is 0", async () => {
+      let newContract = "0x0000000000000000000000000000000000000000";
+      await expect(
+        bukTreasuryContract.withdrawOtherToken(
+          10000000000,
+          newContract,
+          await otherTokenContract.getAddress(),
+        ),
+      ).to.be.revertedWith("Invalid address");
+    });
+    it("Should revert if the address is 0", async () => {
+      let newContract = "0x0000000000000000000000000000000000000000";
+      await expect(
+        bukTreasuryContract.withdrawOtherToken(
+          10000000000,
+          await otherTokenContract.getAddress(),
+          newContract,
+        ),
+      ).to.be.revertedWith("Invalid token address");
+    });
+  });
+
+  describe("stableRefund", () => {
+    it("Should refund the stable token", async () => {
+      await stableTokenContract.transfer(
+        await bukTreasuryContract.getAddress(),
+        100000000000,
+      );
+      await bukTreasuryContract.setBukProtocol(
+        bukProtocolContract1.getAddress(),
+      );
+      await bukTreasuryContract
+        .connect(bukProtocolContract1)
+        .stableRefund(10000000000, adminWallet.address);
+      expect(await stableTokenContract.balanceOf(adminWallet.address)).to.equal(
+        10000000000,
+      );
+    });
+
+    // it("Should revert if not called by the owner", async () => {
+    //   await stableTokenContract.transfer(
+    //     await bukTreasuryContract.getAddress(),
+    //     100000000000,
+    //   );
+    //   await expect(
+    //     bukTreasuryContract
+    //       .connect(account1)
+    //       .stableRefund(100000000000, adminWallet.address),
+    //   ).to.be.revertedWith(
+    //     `AccessControl: account ${account1.address.toLowerCase()} is missing role ${await bukTreasuryContract.ADMIN_ROLE()}`,
+    //   );
+    // });
+    // it("Should revert if the address is 0", async () => {
+    //   let newContract = "0x0000000000000000000000000000000000000000";
+    //   await expect(
+    //     bukTreasuryContract
+    //       .connect(bukProtocolContract)
+    //       .stableRefund(10000000000, newContract),
+    //   ).to.be.revertedWith("Invalid address");
+    // });
+    // // Test when paused
+    // it("Should revert if the contract is paused", async () => {
+    //   await bukTreasuryContract.pause();
+    //   await expect(
+    //     bukTreasuryContract
+    //       .connect(bukProtocolContract)
+    //       .stableRefund(10000000000, adminWallet.address),
+    //   ).to.be.revertedWith("Pausable: paused");
+    // });
   });
 });
