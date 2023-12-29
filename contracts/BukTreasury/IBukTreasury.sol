@@ -6,43 +6,64 @@ pragma solidity =0.8.19;
  * @dev Interface for the BukTreasury contract.
  */
 interface IBukTreasury {
-    /// @dev Emitted when the stable token address is set.
-    event SetStableToken(address indexed oldToken, address indexed newToken);
+    /**
+     * @dev Emitted when new Stable token address has been updated
+     * @param oldAddress, Address of the old address
+     * @param newAddress, Address of the new address
+     */
+    event SetStableToken(
+        address indexed oldAddress,
+        address indexed newAddress
+    );
 
-    /// @dev Emitted when the Buk Protocol address is set.
+    /**
+     * @dev Emitted when new Buk Protocol address has been updated
+     * @param oldAddress, Address of the old address
+     * @param newAddress, Address of the new address
+     */
     event BukProtocolSet(
-        address indexed oldBukProtocol,
-        address indexed newBukProtocol
+        address indexed oldAddress,
+        address indexed newAddress
     );
 
-    /// @dev Emitted when the amount withdrawn.
+    /**
+     * @dev Emitted when amount is withdrawn
+     * @param account, Address of the amount sent
+     * @param amount, Total amount withdrawn
+     * @param token, Address of the token
+     */
     event WithdrawnToken(
-        address indexed _account,
-        uint256 indexed _amout,
-        address _token
+        address indexed account,
+        uint256 indexed amount,
+        address token
     );
 
-    /// @dev Emitted when the amount Refunds.
+    /**
+     * @dev Emitted when the amount Refunds.
+     * @param account, Address of the amount sent
+     * @param amount, Total amount withdrawn
+     * @param token, Address of the token
+     */
     event Refund(
-        address indexed _account,
-        uint256 indexed _amount,
-        address _token
+        address indexed account,
+        uint256 indexed amount,
+        address token
     );
 
     /**
      * Transfer stable tokens to the specified account.
-     * @param _amount - Total funds to transfer
-     * @param _account -A ddress of the account to which funds will be transferred
-     * @dev - To transfer the cancellation charges in USDC to the specified account.
+     * @param _amount, Total funds to transfer
+     * @param _account, Address of the account, funds transferred
+     * @dev To transfer the amount in stable to the account.
      * @notice This function can only be called by Buk Protocol contract
      */
     function stableRefund(uint256 _amount, address _account) external;
 
     /**
      * Transfer other tokens
-     * @param _amount - Total funds to transfer
-     * @param _account - Address of the account to which funds will be transferred
-     * @dev To transfer the cancellation charges in specified currency to the specified account.
+     * @param _amount, Total funds to transfer
+     * @param _account, Address of the account, funds transferred
+     * @dev To transfer the amount in specified currency to the account.
      * @notice This function can only be called by the Buk Protocol contract
      */
     function otherRefund(

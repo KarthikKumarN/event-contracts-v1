@@ -33,7 +33,7 @@ contract BukTreasury is AccessControl, IBukTreasury, Pausable {
 
     /**
      * @dev Constructor to initialize the contract
-     * @notice - This constructor function sets the token and the administrator of the contract.
+     * @notice This constructor function sets the token and the administrator of the contract.
      * @param _tokenAddress - Address of the ERC20 token contract
      */
     constructor(address _tokenAddress) {
@@ -61,9 +61,10 @@ contract BukTreasury is AccessControl, IBukTreasury, Pausable {
     }
 
     /**
-     * @notice - Set the ERC20 token contract address
-     * @param _tokenAddress - Address of the ERC20 token contract
-     * @dev - This function sets the currency for the Treasury contract. It can be executed only by the administrator.
+     * Set the ERC20 token contract address
+     * @param _tokenAddress, Address of the ERC20 token contract
+     * @dev This function sets the currency for the Treasury contract.
+     * @notice It can be executed only by the administrator.
      */
     function setStableToken(
         address _tokenAddress
@@ -72,9 +73,10 @@ contract BukTreasury is AccessControl, IBukTreasury, Pausable {
     }
 
     /**
-     * @notice - Set the Buk Protocol contract address
-     * @param _bukProtocol - Address of the Buk Protocol contract
-     * @dev - This function sets the address of the Buk Protocol contract. It can be executed only by the administrator.
+     * Set the Buk Protocol contract address
+     * @param _bukProtocol, Address of the Buk Protocol contract
+     * @dev Function sets the address of the Buk Protocol contract.
+     * @notice It can be executed only by the administrator.
      */
     function setBukProtocol(
         address _bukProtocol
@@ -91,9 +93,9 @@ contract BukTreasury is AccessControl, IBukTreasury, Pausable {
 
     /**
      * Withdraw the USDC funds
-     * @param _amount - Total funds to withdraw
-     * @param _account - Address of the account to which funds will be transferred
-     * @dev - This function allows the administrator to withdraw funds in stable token to the specified account.
+     * @param _amount, Total funds to withdraw
+     * @param _account, Address of the account, funds transferred
+     * @dev Function allows the administrator to withdraw funds in stable token to the specified account.
      * @notice This function can only be called by an address with `ADMIN_ROLE`
      */
     function withdrawStableToken(
@@ -108,10 +110,10 @@ contract BukTreasury is AccessControl, IBukTreasury, Pausable {
 
     /**
      * Withdraw funds in the specified token
-     * @param _amount - Total funds to withdraw
-     * @param _token - Address of the ERC20 token contract
-     * @param _account - Address of the account to which funds will be transferred
-     * @dev - To withdraw funds in the specified currency to the specified account.
+     * @param _amount, Total funds to withdraw
+     * @param _token, Address of the ERC20 token contract
+     * @param _account, Address of the account, funds transferred
+     * @dev To withdraw funds in the specified currency to the specified account.
      * @notice This function can only be called by an address with `ADMIN_ROLE`
      */
     function withdrawOtherToken(
