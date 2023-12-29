@@ -3,18 +3,19 @@ pragma solidity =0.8.19;
 
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { IBukTreasury } from "contracts/BukTreasury/IBukTreasury.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 
 /**
  * @title BUK Treasury Contract
  * @author BUK Technology Inc
  */
-contract BukTreasury is AccessControl, Pausable {
-    /// @dev address currency          Address of the default currency.
-    address public currency;
+contract BukTreasury is AccessControl, IBukTreasury, Pausable {
+    /// @dev Token used for transaction
+    IERC20 private _stableToken;
 
     /// @dev address bukProtocol       Address of the Buk Protocol contract.
-    address public bukProtocol;
+    address public bukProtocolContract;
 
     /**
      * @dev - Constant variable representing the role of the administrator
@@ -23,32 +24,23 @@ contract BukTreasury is AccessControl, Pausable {
     bytes32 public constant ADMIN_ROLE =
         0xa49807205ce4d355092ef5a8a18f56e8913cf4a201fbe287825b095693c21775;
 
-    /// @dev Emitted when the currency address is set.
-    event SetCurrency(address indexed currency);
-
-    /// @dev Emitted when the Buk Protocol address is set.
-    event SetBukProtocol(address indexed bukProtocol);
-
-    /// @dev Emitted when the deployers are set.
-    event WithdrawFund(address indexed _account, uint256 indexed _total);
-
-    /// @dev Emitted when the deployers are set.
-    event CancelFund(address indexed _account, uint256 indexed _total);
+    /**
+     * @dev Constant for the role of the Buk Protocol contract
+     * @notice its a hash of keccak256("BUK_PROTOCOL_ROLE")
+     */
+    bytes32 public constant BUK_PROTOCOL_ROLE =
+        0xc90056e279113999fe5438fedaf4c98ded59812067ad79dd0c968b1a84dc7c97;
 
     /**
-     * @notice - Modifier that allows only the Buk Protocol contract to execute the function
+     * @dev Constructor to initialize the contract
+     * @notice - This constructor function sets the token and the administrator of the contract.
+     * @param _tokenAddress - Address of the ERC20 token contract
      */
-    modifier onlyBukProtocol(address addr) {
-        require(addr == bukProtocol, "Only Buk Protocol has Access");
-        _;
-    }
+    constructor(address _tokenAddress) {
+        _setStableToken(_tokenAddress);
 
-    /**
-     * @notice - This constructor function sets the currency and the administrator of the contract.
-     * @param _currency-Address of the ERC20 token contract
-     */
-    constructor(address _currency) {
-        currency = _currency;
+        // Updating permissions
+        _setupRole(ADMIN_ROLE, _msgSender());
         _grantRole(ADMIN_ROLE, _msgSender());
     }
 
@@ -70,12 +62,13 @@ contract BukTreasury is AccessControl, Pausable {
 
     /**
      * @notice - Set the ERC20 token contract address
-     * @param _currency-Address of the ERC20 token contract
+     * @param _tokenAddress - Address of the ERC20 token contract
      * @dev - This function sets the currency for the Treasury contract. It can be executed only by the administrator.
      */
-    function setCurrency(address _currency) external onlyRole(ADMIN_ROLE) {
-        currency = _currency;
-        emit SetCurrency(_currency);
+    function setStableToken(
+        address _tokenAddress
+    ) external onlyRole(ADMIN_ROLE) {
+        _setStableToken(_tokenAddress);
     }
 
     /**
@@ -86,71 +79,83 @@ contract BukTreasury is AccessControl, Pausable {
     function setBukProtocol(
         address _bukProtocol
     ) external onlyRole(ADMIN_ROLE) {
-        bukProtocol = _bukProtocol;
-        emit SetBukProtocol(_bukProtocol);
+        require(_bukProtocol != address(0), "Invalid address");
+        address oldAddress = address(bukProtocolContract);
+        bukProtocolContract = _bukProtocol;
+
+        _grantRole(BUK_PROTOCOL_ROLE, address(_bukProtocol));
+        _revokeRole(BUK_PROTOCOL_ROLE, address(oldAddress));
+
+        emit BukProtocolSet(oldAddress, _bukProtocol);
     }
 
     /**
      * Withdraw the USDC funds
-     * @param _total-Total funds to withdraw
-     * @param _account-Address of the account to which funds will be transferred
-     * @dev - This function allows the administrator to withdraw funds in USDC token to the specified account.
+     * @param _amount - Total funds to withdraw
+     * @param _account - Address of the account to which funds will be transferred
+     * @dev - This function allows the administrator to withdraw funds in stable token to the specified account.
      * @notice This function can only be called by an address with `ADMIN_ROLE`
      */
-    function withdrawUSDCFund(
-        uint256 _total,
+    function withdrawStableToken(
+        uint256 _amount,
         address _account
     ) external onlyRole(ADMIN_ROLE) whenNotPaused {
-        IERC20(currency).transfer(_account, _total);
-        emit WithdrawFund(_account, _total);
+        require(_account != address(0), "Invalid address");
+
+        _stableToken.transfer(_account, _amount);
+        emit WithdrawnToken(_account, _amount, address(_stableToken));
     }
 
     /**
-     * Withdraw funds in the specified currency
-     * @param _total-Total funds to withdraw
-     * @param _currency-Address of the ERC20 token contract
-     * @param _account-Address of the account to which funds will be transferred
+     * Withdraw funds in the specified token
+     * @param _amount - Total funds to withdraw
+     * @param _token - Address of the ERC20 token contract
+     * @param _account - Address of the account to which funds will be transferred
      * @dev - To withdraw funds in the specified currency to the specified account.
      * @notice This function can only be called by an address with `ADMIN_ROLE`
      */
-    function withdrawFund(
-        uint256 _total,
+    function withdrawOtherToken(
+        uint256 _amount,
         address _account,
-        address _currency
+        address _token
     ) external onlyRole(ADMIN_ROLE) whenNotPaused {
-        IERC20(_currency).transfer(_account, _total);
-        emit WithdrawFund(_account, _total);
+        require(_token != address(0), "Invalid token address");
+        require(_account != address(0), "Invalid address");
+
+        IERC20(_token).transfer(_account, _amount);
+        emit WithdrawnToken(_account, _amount, _token);
     }
 
-    /**
-     * Transfer cancellation charges in  USDC
-     * @param _total-Total funds to transfer
-     * @param _account-Address of the account to which funds will be transferred
-     * @dev - To transfer the cancellation charges in USDC to the specified account.
-     * @notice This function can only be called by Buk Protocol contract
-     */
-    function cancelUSDCRefund(
-        uint256 _total,
+    /// @dev Refer {IBukTreasury-stableRefund}.
+    function stableRefund(
+        uint256 _amount,
         address _account
-    ) external onlyBukProtocol(_msgSender()) whenNotPaused {
-        IERC20(currency).transfer(_account, _total);
-        emit CancelFund(_account, _total);
+    ) external onlyRole(BUK_PROTOCOL_ROLE) whenNotPaused {
+        require(_account != address(0), "Invalid address");
+
+        _stableToken.transfer(_account, _amount);
+        emit Refund(_account, _amount, address(_stableToken));
     }
 
-    /**
-     * Transfer cancellation charges in specified currency.
-     * @param _total - Total funds to transfer
-     * @param _account - Address of the account to which funds will be transferred
-     * @dev To transfer the cancellation charges in specified currency to the specified account.
-     * @notice This function can only be called by the Buk Protocol contract
-     */
-
-    function cancelRefund(
-        uint256 _total,
+    /// @dev Refer {IBukTreasury-otherRefund}.
+    function otherRefund(
+        uint256 _amount,
         address _account,
-        address _currency
-    ) external onlyBukProtocol(_msgSender()) whenNotPaused {
-        IERC20(_currency).transfer(_account, _total);
-        emit CancelFund(_account, _total);
+        address _token
+    ) external onlyRole(BUK_PROTOCOL_ROLE) whenNotPaused {
+        require(_token != address(0), "Invalid token address");
+        require(_account != address(0), "Invalid address");
+
+        IERC20(_token).transfer(_account, _amount);
+        emit Refund(_account, _amount, _token);
+    }
+
+    /// @param _tokenAddress New stable token address
+    function _setStableToken(address _tokenAddress) private {
+        require(_tokenAddress != address(0), "Invalid address");
+        address oldAddress = address(_stableToken);
+        _stableToken = IERC20(_tokenAddress);
+
+        emit SetStableToken(oldAddress, _tokenAddress);
     }
 }
