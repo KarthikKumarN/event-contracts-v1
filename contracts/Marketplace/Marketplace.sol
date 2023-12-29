@@ -30,7 +30,7 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
         0xc90056e279113999fe5438fedaf4c98ded59812067ad79dd0c968b1a84dc7c97;
 
     /// @dev Constant address Buk Protocol contract
-    IBukProtocol private _bukProtocalContract;
+    IBukProtocol private _bukProtocolContract;
 
     /// @dev Constant address Buk NFT contract
     IBukNFTs private _bukNFTContract;
@@ -45,17 +45,17 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
 
     /**
      * @dev Constructor to initialize the contract
-     * @param _bukProtocalAddress address of Buk protocol
+     * @param _bukProtocolAddress address of Buk protocol
      * @param _bukNFTAddress address of Buk NFT
      * @param _tokenAddress address of the stable token
      */
     constructor(
-        address _bukProtocalAddress,
+        address _bukProtocolAddress,
         address _bukNFTAddress,
         address _tokenAddress
     ) {
         _setStableToken(_tokenAddress);
-        _setBukProtocol(_bukProtocalAddress);
+        _setBukProtocol(_bukProtocolAddress);
         _setBukNFT(_bukNFTAddress);
 
         // Updating permission
@@ -80,7 +80,7 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
         uint256 _price
     ) external whenNotPaused {
         require(!isBookingListed(_tokenId), "NFT already listed");
-        IBukProtocol.Booking memory bookingDetails = _bukProtocalContract
+        IBukProtocol.Booking memory bookingDetails = _bukProtocolContract
             .getBookingDetails(_tokenId);
         require(
             _price >= bookingDetails.minSalePrice,
@@ -135,7 +135,7 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
         uint256 _newPrice
     ) external whenNotPaused {
         require(isBookingListed(_tokenId), "NFT not listed");
-        IBukProtocol.Booking memory bookingDetails = _bukProtocalContract
+        IBukProtocol.Booking memory bookingDetails = _bukProtocolContract
             .getBookingDetails(_tokenId);
         require(
             _bukNFTContract.balanceOf(_msgSender(), _tokenId) == 1,
@@ -206,7 +206,7 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
 
     /// @dev Refer {IMarketplace-getBukProtocol}.
     function getBukProtocol() external view returns (address) {
-        return address(_bukProtocalContract);
+        return address(_bukProtocolContract);
     }
 
     /// @dev Refer {IMarketplace-getBukNFT}.
@@ -241,8 +241,8 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
      */
     function _setBukProtocol(address _bukProtocol) private {
         require(_bukProtocol != address(0), "Invalid address");
-        address oldAddress = address(_bukProtocalContract);
-        _bukProtocalContract = IBukProtocol(_bukProtocol);
+        address oldAddress = address(_bukProtocolContract);
+        _bukProtocolContract = IBukProtocol(_bukProtocol);
 
         _grantRole(BUK_PROTOCOL_ROLE, address(_bukProtocol));
         _revokeRole(BUK_PROTOCOL_ROLE, address(oldAddress));
@@ -256,7 +256,7 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
         address oldAddress = address(_stableToken);
         _stableToken = IERC20(_tokenAddress);
 
-        emit BukNFTSet(oldAddress, _tokenAddress);
+        emit StableTokenSet(oldAddress, _tokenAddress);
     }
 
     /**
@@ -265,7 +265,7 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
      * @param _tokenId, NFT/Booking ID
      */
     function _buy(uint256 _tokenId) private {
-        IBukProtocol.Booking memory bookingDetails = _bukProtocalContract
+        IBukProtocol.Booking memory bookingDetails = _bukProtocolContract
             .getBookingDetails(_tokenId);
         require(
             bookingDetails.status == IBukProtocol.BookingStatus.confirmed &&
