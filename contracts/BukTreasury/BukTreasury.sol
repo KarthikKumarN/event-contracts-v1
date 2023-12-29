@@ -152,6 +152,11 @@ contract BukTreasury is AccessControl, IBukTreasury, Pausable {
         emit Refund(_account, _amount, _token);
     }
 
+    /// @dev Refer {IBukTreasury-getStableToken}.
+    function getStableToken() external view returns (address) {
+        return address(_stableToken);
+    }
+
     /// @param _tokenAddress New stable token address
     function _setStableToken(address _tokenAddress) private {
         require(_tokenAddress != address(0), "Invalid address");

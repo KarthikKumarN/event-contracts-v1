@@ -71,4 +71,10 @@ interface IBukTreasury {
         address _account,
         address _token
     ) external;
+
+    /**
+     * @dev Gets stable token address
+     * @return address, Address of the stable token contract
+     */
+    function getStableToken() external view returns (address);
 }
