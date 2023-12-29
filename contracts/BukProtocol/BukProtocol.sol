@@ -308,7 +308,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
     }
 
     /// @dev See {IBukProtocol-checkout}.
-    function checkout(uint256[] memory _ids) external onlyAdmin {
+    function checkout(uint256[] memory _ids) external onlyAdmin whenNotPaused {
         uint256 len = _ids.length;
         require(((len > 0) && (len < 11)), "Not in max-min booking limit");
         for (uint8 i = 0; i < len; ++i) {

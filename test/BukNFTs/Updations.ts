@@ -170,8 +170,8 @@ describe("BukNFTs Updations", function () {
           [2],
           [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
-          1701504548,
-          1701590948,
+          1729847061,
+          1729947061,
           12,
           true,
         ),
@@ -553,6 +553,42 @@ describe("BukNFTs Updations", function () {
             "0x",
           ),
       ).to.be.reverted;
+    });
+  });
+
+  // Add test cases for pause and unpause and test whenNotPaused modifier
+  describe("Pause and Unpause", function () {
+    it("Should pause the contract", async function () {
+      expect(await nftContract.pause()).not.be.reverted;
+      expect(await nftContract.paused()).to.equal(true);
+    });
+    it("Should unpause the contract", async function () {
+      expect(await nftContract.pause()).not.be.reverted;
+      expect(await nftContract.paused()).to.equal(true);
+      expect(await nftContract.unpause()).not.be.reverted;
+      expect(await nftContract.paused()).to.equal(false);
+    });
+    it("Should revert if not called by admin", async function () {
+      await expect(nftContract.connect(account1).pause()).to.be.reverted;
+      await expect(nftContract.connect(account1).unpause()).to.be.reverted;
+    });
+    it("Should revert if paused", async function () {
+      expect(await nftContract.connect(adminWallet).pause()).not.be.reverted;
+      expect(await nftContract.paused()).to.equal(true);
+      expect(
+        await nftContract.setMarketplaceRole(testMarketplace1.getAddress()),
+      ).not.be.reverted;
+      await expect(
+        nftContract
+          .connect(testMarketplace1)
+          .safeTransferFrom(
+            await owner.getAddress(),
+            await account1.getAddress(),
+            1,
+            1,
+            "0x",
+          ),
+      ).to.be.revertedWith("Pausable: paused");
     });
   });
 });

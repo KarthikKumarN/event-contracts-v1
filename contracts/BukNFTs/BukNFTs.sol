@@ -3,6 +3,7 @@ pragma solidity =0.8.19;
 
 import { ERC1155, IERC165 } from "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
 import { IBukNFTs } from "../BukNFTs/IBukNFTs.sol";
 import { IBukPOSNFTs } from "../BukPOSNFTs/IBukPOSNFTs.sol";
 import { IBukProtocol, IBukRoyalties } from "../BukProtocol/IBukProtocol.sol";
@@ -13,7 +14,7 @@ import { IBukTreasury } from "../BukTreasury/IBukTreasury.sol";
  * @author BUK Technology Inc
  * @dev Contract for managing hotel room-night inventory and ERC1155 token management for room-night NFTs
  */
-contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
+contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
     /// @dev Name of the Buk POS NFT collection contract
     string public name;
 
@@ -77,6 +78,22 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(ADMIN_ROLE, _msgSender());
         _grantRole(BUK_PROTOCOL_ROLE, _bukProtocolContract);
+    }
+
+    /**
+     * @dev Function to pause the contract.
+     * @notice This function can only be called by admin
+     */
+    function pause() external onlyRole(ADMIN_ROLE) {
+        _pause();
+    }
+
+    /**
+     * @dev Function to unpause the contract.
+     * @notice This function can only be called by admin
+     */
+    function unpause() external onlyRole(ADMIN_ROLE) {
+        _unpause();
     }
 
     /// @dev See {IBukNFTs-setBukProtocol}.
@@ -176,6 +193,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
         virtual
         override(ERC1155, IBukNFTs)
         onlyRole(MARKETPLACE_CONTRACT_ROLE)
+        whenNotPaused
     {
         IBukProtocol.Booking memory details = bukProtocolContract
             .getBookingDetails(_id);
@@ -204,6 +222,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs {
         virtual
         override(ERC1155, IBukNFTs)
         onlyRole(MARKETPLACE_CONTRACT_ROLE)
+        whenNotPaused
     {
         require(
             isApprovedForAll(_from, _msgSender()),
