@@ -297,7 +297,7 @@ describe("BukPOSNFTs Updations", function () {
   });
   describe("Set Token URIs for NFTS in BukPOSNFTs", function () {
     it("Should set Token URIs for BukPOSNFTs by admin", async function () {
-      await fastForwardTo(1701590949);
+      await fastForwardTo(1729997061);
 
       //Check-out NFT
       await expect(bukProtocolContract.connect(adminWallet).checkout([1])).not
@@ -312,7 +312,7 @@ describe("BukPOSNFTs Updations", function () {
       expect(uri).to.equal(newUri);
     });
     it("Should set Token URIs and emit events", async function () {
-      await fastForwardTo(1701590949);
+      await fastForwardTo(1729997061);
 
       //Check-out NFT
       await expect(bukProtocolContract.connect(adminWallet).checkout([1])).not
@@ -373,7 +373,7 @@ describe("BukPOSNFTs Updations", function () {
     beforeEach(async function () {
       await saveInitialSnapshot();
 
-      await fastForwardTo(1701590949);
+      await fastForwardTo(1729997061);
 
       //Check-out NFT
       await expect(bukProtocolContract.connect(adminWallet).checkout([1])).not
@@ -443,7 +443,7 @@ describe("BukPOSNFTs Updations", function () {
     beforeEach(async function () {
       await saveInitialSnapshot();
 
-      await fastForwardTo(1701590949);
+      await fastForwardTo(1729997061);
 
       //Check-out NFT
       await expect(bukProtocolContract.connect(adminWallet).checkout([1])).not

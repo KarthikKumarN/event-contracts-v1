@@ -1284,7 +1284,7 @@ describe("BukProtocol Bookings", function () {
       await expect(bukProtocolContract.connect(owner).checkin([1])).not.be
         .reverted;
 
-      await fastForwardTo(1701590949);
+      await fastForwardTo(1729997061);
 
       //Check-out NFT
       await expect(
