@@ -259,7 +259,7 @@ describe("Marketplace", function () {
       let oldAddress = await marketplaceContract.getStableToken();
       let newAddress = "0xa9a1C7be37Cb72811A6C4C278cA7C403D6459b78";
       await expect(await marketplaceContract.setStableToken(newAddress))
-        .to.emit(marketplaceContract, "BukNFTSet")
+        .to.emit(marketplaceContract, "StableTokenSet")
         .withArgs(oldAddress, newAddress);
     });
 
@@ -1783,7 +1783,6 @@ describe("Marketplace", function () {
     });
   });
 
-
   // Test cases for indexing
   describe("Indexing for all the listings on marketplace", function () {
     it("Buy bookings", async function () {
@@ -1844,21 +1843,27 @@ describe("Marketplace", function () {
         ),
       ).not.be.reverted;
 
-      let listingDetails1 = await marketplaceContract.getListingDetails(tokenId1);
+      let listingDetails1 = await marketplaceContract.getListingDetails(
+        tokenId1,
+      );
       await expect(listingDetails1[2]).to.equal(0);
 
       // List 1
       await expect(marketplaceContract.createListing(tokenId1, salePrice)).not
         .to.be.reverted;
 
-      let listingDetails2 = await marketplaceContract.getListingDetails(tokenId1);
+      let listingDetails2 = await marketplaceContract.getListingDetails(
+        tokenId1,
+      );
       await expect(listingDetails2[2]).to.equal(1);
 
       await expect(await marketplaceContract.relist(tokenId1, newPrice)).to.not
         .be.reverted;
 
-        let listingDetails3 = await marketplaceContract.getListingDetails(tokenId1);
-        await expect(listingDetails3[2]).to.equal(2);
+      let listingDetails3 = await marketplaceContract.getListingDetails(
+        tokenId1,
+      );
+      await expect(listingDetails3[2]).to.equal(2);
 
       // Book room and mint NFT 2
       expect(
@@ -1916,27 +1921,35 @@ describe("Marketplace", function () {
         ),
       ).not.be.reverted;
 
-      let listingDetails3_1 = await marketplaceContract.getListingDetails(tokenId3);
+      let listingDetails3_1 = await marketplaceContract.getListingDetails(
+        tokenId3,
+      );
       await expect(listingDetails3_1[2]).to.equal(0);
 
       // List 3
       await expect(marketplaceContract.createListing(tokenId3, salePrice)).not
         .to.be.reverted;
 
-        let listingDetails3_2 = await marketplaceContract.getListingDetails(tokenId3);
-        await expect(listingDetails3_2[2]).to.equal(1);
+      let listingDetails3_2 = await marketplaceContract.getListingDetails(
+        tokenId3,
+      );
+      await expect(listingDetails3_2[2]).to.equal(1);
 
       await expect(await marketplaceContract.deleteListing(tokenId3)).to.not.be
-      .reverted;
+        .reverted;
 
-      let listingDetails3_3 = await marketplaceContract.getListingDetails(tokenId3);
+      let listingDetails3_3 = await marketplaceContract.getListingDetails(
+        tokenId3,
+      );
       await expect(listingDetails3_3[2]).to.equal(2);
 
       await expect(marketplaceContract.createListing(tokenId3, salePrice)).not
         .to.be.reverted;
 
-        let listingDetails3_4 = await marketplaceContract.getListingDetails(tokenId3);
-        await expect(listingDetails3_4[2]).to.equal(3);
+      let listingDetails3_4 = await marketplaceContract.getListingDetails(
+        tokenId3,
+      );
+      await expect(listingDetails3_4[2]).to.equal(3);
 
       await stableTokenContract
         .connect(account1)
@@ -1947,7 +1960,9 @@ describe("Marketplace", function () {
           .connect(account1)
           .buyRoomBatch([tokenId1, tokenId2]),
       ).not.to.be.reverted;
-      let listingDetails4 = await marketplaceContract.getListingDetails(tokenId1);
+      let listingDetails4 = await marketplaceContract.getListingDetails(
+        tokenId1,
+      );
       await expect(listingDetails4[2]).to.equal(3);
       await expect(
         await nftContract.balanceOf(await account1.getAddress(), tokenId1),
@@ -1955,6 +1970,123 @@ describe("Marketplace", function () {
       await expect(
         await nftContract.balanceOf(await account1.getAddress(), tokenId2),
       ).to.equal(1);
+    });
+  });
+
+  // Add test cases for pause and unpause
+  describe("Pause and unpause", function () {
+    it("Should pause the contract", async function () {
+      await expect(marketplaceContract.pause()).not.to.be.reverted;
+      // check paused stauts is true
+      expect(await marketplaceContract.paused()).to.equal(true);
+    });
+    it("Should unpause the contract", async function () {
+      await expect(marketplaceContract.pause()).not.to.be.reverted;
+      await expect(marketplaceContract.unpause()).not.to.be.reverted;
+    });
+    it("Should revert create listing when paused", async function () {
+      let tokenId = 1;
+      let price = 100;
+      let salePrice = 150;
+      await marketplaceContract.pause();
+      await expect(
+        marketplaceContract.createListing(tokenId, salePrice),
+      ).to.be.revertedWith("Pausable: paused");
+    });
+    it("Should revert buy listing when paused", async function () {
+      let tokenId = 1;
+      let price = 100;
+      let salePrice = 150;
+      await marketplaceContract.pause();
+      await expect(
+        marketplaceContract.buyRoomBatch([tokenId]),
+      ).to.be.revertedWith("Pausable: paused");
+    });
+    it("Should revert relist listing when paused", async function () {
+      let tokenId1 = 1;
+      let price = 100000000;
+      let salePrice = 110000000;
+      let transferMoney = 410000000;
+      let date = new Date();
+      let propertyId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
+      let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
+      let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
+
+      //Grant allowance permission
+      const res = await stableTokenContract.approve(
+        await bukProtocolContract.getAddress(),
+        500000000000,
+      );
+
+      //Grant permission to the marketplace
+      await nftContract.setApprovalForAll(
+        await marketplaceContract.getAddress(),
+        true,
+      );
+
+      //Approve and transfer amount for transaction for buyer
+      await stableTokenContract.transfer(
+        await account1.getAddress(),
+        transferMoney,
+      );
+
+      // Book room and mint NFT 1
+      expect(
+        await bukProtocolContract.bookRooms(
+          [price],
+          [price],
+          [price],
+          [2],
+          [0],
+          "0x3633666663356135366139343361313561626261336134630000000000000000",
+          checkin,
+          checkout,
+          24,
+          true,
+        ),
+      ).not.be.reverted;
+
+      //Mint 1
+      await expect(
+        bukProtocolContract.mintBukNFT(
+          [tokenId1],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
+      ).not.be.reverted;
+      await expect(marketplaceContract.createListing(tokenId1, salePrice)).not
+        .to.be.reverted;
+      await marketplaceContract.pause();
+      await expect(
+        marketplaceContract.relist(tokenId1, salePrice),
+      ).to.be.revertedWith("Pausable: paused");
+    });
+    it("Should revert pause the contract with other than owner", async function () {
+      await expect(
+        marketplaceContract.connect(account1).pause(),
+      ).to.be.revertedWith(
+        `AccessControl: account ${account1.address.toLowerCase()} is missing role ${await marketplaceContract.ADMIN_ROLE()}`,
+      );
+    });
+    it("Should revert buyRoom when paused", async function () {
+      let tokenId = 1;
+      let price = 100;
+      let salePrice = 150;
+      await marketplaceContract.pause();
+      await expect(
+        marketplaceContract.buyRoomBatch([tokenId]),
+      ).to.be.revertedWith("Pausable: paused");
+    });
+    it("Should revert buyRoomBatch when paused", async function () {
+      let tokenId = 1;
+      let price = 100;
+      let salePrice = 150;
+      await marketplaceContract.pause();
+      await expect(
+        marketplaceContract.buyRoomBatch([tokenId]),
+      ).to.be.revertedWith("Pausable: paused");
     });
   });
 });
