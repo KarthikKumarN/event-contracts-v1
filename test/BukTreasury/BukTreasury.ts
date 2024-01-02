@@ -332,4 +332,99 @@ describe("BukTreasury", () => {
       ).to.be.revertedWith("Pausable: paused");
     });
   });
+
+  // Add all possible testcase for the BukTreasury otherRefund function
+  describe("otherRefund", () => {
+    it("Should refund the other token", async () => {
+      await otherTokenContract.transfer(
+        await bukTreasuryContract.getAddress(),
+        10000000000,
+      );
+      await bukTreasuryContract.setBukProtocol(
+        bukProtocolContract1.getAddress(),
+      );
+      await bukTreasuryContract
+        .connect(bukProtocolContract1)
+        .otherRefund(
+          1000000000,
+          adminWallet.address,
+          await otherTokenContract.getAddress(),
+        );
+      expect(await otherTokenContract.balanceOf(adminWallet.address)).to.equal(
+        1000000000,
+      );
+    });
+
+    it("Should revert if not called by the owner", async () => {
+      await otherTokenContract.transfer(
+        await bukTreasuryContract.getAddress(),
+        100000000000,
+      );
+      await expect(
+        bukTreasuryContract
+          .connect(account1)
+          .otherRefund(
+            10000000000,
+            adminWallet.address,
+            await otherTokenContract.getAddress(),
+          ),
+      ).to.be.revertedWith(
+        `AccessControl: account ${account1.address.toLowerCase()} is missing role ${await bukTreasuryContract.BUK_PROTOCOL_ROLE()}`,
+      );
+    });
+    // Add more test cases to test whenNotPaused modifier
+    it("Should revert if the contract is paused", async () => {
+      await bukTreasuryContract.setBukProtocol(
+        await bukProtocolContract1.getAddress(),
+      );
+      await bukTreasuryContract.pause();
+      await expect(
+        bukTreasuryContract
+          .connect(bukProtocolContract1)
+          .otherRefund(
+            10000000000,
+            adminWallet.address,
+            await otherTokenContract.getAddress(),
+          ),
+      ).to.be.revertedWith("Pausable: paused");
+    });
+    it("Should revert if the address is 0", async () => {
+      await stableTokenContract.transfer(
+        await bukProtocolContract1.getAddress(),
+        100000000000,
+      );
+      await bukTreasuryContract.setBukProtocol(
+        bukProtocolContract1.getAddress(),
+      );
+      let newContract = "0x0000000000000000000000000000000000000000";
+      await expect(
+        bukTreasuryContract
+          .connect(bukProtocolContract1)
+          .otherRefund(
+            10000000000,
+            newContract,
+            await otherTokenContract.getAddress(),
+          ),
+      ).to.be.revertedWith("Invalid address");
+    });
+    it("Should revert if the address is 0", async () => {
+      await stableTokenContract.transfer(
+        await bukProtocolContract1.getAddress(),
+        100000000000,
+      );
+      await bukTreasuryContract.setBukProtocol(
+        bukProtocolContract1.getAddress(),
+      );
+      let newContract = "0x0000000000000000000000000000000000000000";
+      await expect(
+        bukTreasuryContract
+          .connect(bukProtocolContract1)
+          .otherRefund(
+            10000000000,
+            await otherTokenContract.getAddress(),
+            newContract,
+          ),
+      ).to.be.revertedWith("Invalid token address");
+    });
+  });
 });
