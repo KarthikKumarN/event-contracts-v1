@@ -259,7 +259,7 @@ describe("Marketplace", function () {
       let oldAddress = await marketplaceContract.getStableToken();
       let newAddress = "0xa9a1C7be37Cb72811A6C4C278cA7C403D6459b78";
       await expect(await marketplaceContract.setStableToken(newAddress))
-        .to.emit(marketplaceContract, "BukNFTSet")
+        .to.emit(marketplaceContract, "StableTokenSet")
         .withArgs(oldAddress, newAddress);
     });
 
