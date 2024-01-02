@@ -1,10 +1,6 @@
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
-import {
-  WALLET_PRIVATE_KEY,
-  POLYGONSCAN_API_KEY,
-  ALCHEMY_MUMBAI_API_KEY,
-} from "./constants";
+import { WALLET_PRIVATE_KEY, ALCHEMY_API_KEY } from "./constants";
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -19,7 +15,15 @@ const config: HardhatUserConfig = {
   networks: {
     mumbai: {
       // url: "https://rpc-mumbai.maticvigil.com",
-      url: `https://polygon-mumbai.g.alchemy.com/v2/${ALCHEMY_MUMBAI_API_KEY}`,
+      url: `https://polygon-mumbai.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
+      accounts:
+        process.env.WALLET_PRIVATE_KEY !== undefined
+          ? [process.env.WALLET_PRIVATE_KEY]
+          : [],
+    },
+    polygon_mainnet: {
+      // url: "https://rpc-mumbai.maticvigil.com",
+      url: `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
       accounts:
         process.env.WALLET_PRIVATE_KEY !== undefined
           ? [process.env.WALLET_PRIVATE_KEY]
@@ -30,9 +34,9 @@ const config: HardhatUserConfig = {
     enabled: process.env.REPORT_GAS !== undefined,
     currency: "USD",
   },
-  etherscan: {
-    apiKey: POLYGONSCAN_API_KEY,
-  },
+  // etherscan: {
+  //   apiKey: POLYGONSCAN_API_KEY,
+  // },
 };
 
 export default config;
