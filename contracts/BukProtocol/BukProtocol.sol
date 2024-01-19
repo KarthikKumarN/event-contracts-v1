@@ -173,55 +173,50 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         uint256 _tradeTimeLimit,
         bool _tradeable
     ) external nonReentrant whenNotPaused returns (bool) {
-        require(
-            ((_total.length == _baseRate.length) &&
-                (_total.length == _minSalePrice.length) &&
-                (_total.length > 0)),
-            "Array sizes mismatch"
+        (uint commissionTotal, uint256 total) = _booking(
+            _total,
+            _baseRate,
+            _minSalePrice,
+            _adult,
+            _child,
+            _propertyId,
+            _checkin,
+            _checkout,
+            _tradeTimeLimit,
+            _tradeable,
+            msg.sender
         );
-        require(
-            (_checkin > block.timestamp),
-            "Checkin date must be in the future"
-        );
-        require((_checkout > _checkin), "Checkout date must be after checkin");
-        uint256 total;
-        for (uint8 i = 0; i < _total.length; ++i) {
-            total += _total[i];
-        }
-        require(
-            (_stableToken.allowance(msg.sender, address(this)) >= total),
-            "Check the allowance"
-        );
-        uint commissionTotal;
-        for (uint8 i = 0; i < _total.length; ++i) {
-            ++_bookingIds;
-            _bookingDetails[_bookingIds] = Booking(
-                _bookingIds,
-                0,
-                _propertyId,
-                BookingStatus.booked,
-                _adult[i],
-                _child[i],
-                msg.sender,
-                _checkin,
-                _checkout,
-                _total[i],
-                _baseRate[i],
-                _minSalePrice[i],
-                _tradeTimeLimit,
-                _tradeable
-            );
-            commissionTotal += (_baseRate[i] * commission) / 100;
-            emit BookRoom(
-                _bookingIds,
-                _propertyId,
-                _checkin,
-                _checkout,
-                _adult[i],
-                _child[i]
-            );
-        }
         return _bookingPayment(commissionTotal, total);
+    }
+
+    /// @dev See {IBukProtocol-bookRoomsOwner}.
+    function bookRoomsOwner(
+        uint256[] memory _total,
+        uint256[] memory _baseRate,
+        uint256[] memory _minSalePrice,
+        uint8[] memory _adult,
+        uint8[] memory _child,
+        bytes32 _propertyId,
+        uint256 _checkin,
+        uint256 _checkout,
+        uint256 _tradeTimeLimit,
+        bool _tradeable,
+        address _user
+    ) external onlyAdmin nonReentrant whenNotPaused returns (bool) {
+        _booking(
+            _total,
+            _baseRate,
+            _minSalePrice,
+            _adult,
+            _child,
+            _propertyId,
+            _checkin,
+            _checkout,
+            _tradeTimeLimit,
+            _tradeable,
+            _user
+        );
+        return true;
     }
 
     /// @dev See {IBukProtocol-bookingRefund}.
@@ -344,15 +339,15 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         address _bookingOwner,
         bytes memory _signature
     ) external whenNotPaused onlyAdmin {
-        uint256 len = _ids.length;
         require(
-            (len == _penalties.length) && (len == _refunds.length),
+            (_ids.length == _penalties.length) &&
+                (_ids.length == _refunds.length),
             "Validate IDs and amounts"
         );
         uint totalPenalty;
         uint totalRefund;
         uint totalCharges;
-        for (uint8 i = 0; i < len; ++i) {
+        for (uint8 i = 0; i < _ids.length; ++i) {
             require(
                 ((_bookingDetails[_ids[i]].status == BookingStatus.confirmed) ||
                     (_bookingDetails[_ids[i]].status ==
@@ -384,7 +379,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
             _signature
         );
         require(signer == _bookingOwner, "Invalid owner signature");
-        for (uint8 i = 0; i < len; ++i) {
+        for (uint8 i = 0; i < _ids.length; ++i) {
             _bookingDetails[_ids[i]].status = BookingStatus.cancelled;
             _nftContract.burn(_bookingOwner, _ids[i], 1, false);
         }
@@ -563,5 +558,69 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
             "Booking payment failed"
         );
         return true;
+    }
+
+    function _booking(
+        uint256[] memory _total,
+        uint256[] memory _baseRate,
+        uint256[] memory _minSalePrice,
+        uint8[] memory _adult,
+        uint8[] memory _child,
+        bytes32 _propertyId,
+        uint256 _checkin,
+        uint256 _checkout,
+        uint256 _tradeTimeLimit,
+        bool _tradeable,
+        address _user
+    ) private returns (uint, uint256) {
+        require(
+            ((_total.length == _baseRate.length) &&
+                (_total.length == _minSalePrice.length) &&
+                (_total.length > 0)),
+            "Array sizes mismatch"
+        );
+        require(
+            (_checkin > block.timestamp),
+            "Checkin date must be in the future"
+        );
+        require((_checkout > _checkin), "Checkout date must be after checkin");
+        uint256 totalAmount;
+        for (uint8 i = 0; i < _total.length; ++i) {
+            totalAmount += _total[i];
+        }
+        require(
+            (_stableToken.allowance(msg.sender, address(this)) >= totalAmount),
+            "Check the allowance"
+        );
+        uint commissionTotal;
+        for (uint8 i = 0; i < _total.length; ++i) {
+            ++_bookingIds;
+            _bookingDetails[_bookingIds] = Booking(
+                _bookingIds,
+                0,
+                _propertyId,
+                BookingStatus.booked,
+                _adult[i],
+                _child[i],
+                _user,
+                _checkin,
+                _checkout,
+                _total[i],
+                _baseRate[i],
+                _minSalePrice[i],
+                _tradeTimeLimit,
+                _tradeable
+            );
+            commissionTotal += (_baseRate[i] * commission) / 100;
+            emit BookRoom(
+                _bookingIds,
+                _propertyId,
+                _checkin,
+                _checkout,
+                _adult[i],
+                _child[i]
+            );
+        }
+        return (commissionTotal, totalAmount);
     }
 }
