@@ -331,6 +331,23 @@ interface IBukProtocol {
     function mintBukNFT(uint256[] memory _ids, string[] memory _uri) external;
 
     /**
+     * @dev Function to mint new BukNFT tokens based on the provided booking IDs and URIs.
+     * @param _ids An array of booking IDs representing the unique identifier for each BukNFT token.
+     * @param _uri An array of URIs corresponding to each booking ID, which will be associated with the Buk NFTs.
+     * @param _user Address of user which we are minting.
+     * @notice Only the owner of the booking can book the NFTs and confirm the rooms.
+     * @notice The number of bookings and URIs should be same.
+     * @notice The booking status should be booked to confirm it.
+     * @notice The NFTs are minted to the owner of the booking.
+     * @notice This function can only be called by admin
+     */
+    function mintBukNFTOwner(
+        uint256[] memory _ids,
+        string[] memory _uri,
+        address _user
+    ) external;
+
+    /**
      * @dev Function to checkin the rooms.
      * @param _ids An array of booking IDs representing the unique identifier for each BukNFT token.
      * @notice The booking status should be confirmed to checkin it.
