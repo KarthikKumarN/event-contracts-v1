@@ -275,30 +275,6 @@ describe("BukProtocol Bookings", function () {
           ),
       ).to.be.revertedWith("Checkout date must be after checkin");
     });
-    it("Should fail booking when there isn't enough allowance from the sender", async function () {
-      //Grant allowance permission
-      const res = await stableTokenContract
-        .connect(owner)
-        .approve(await bukProtocolContract.getAddress(), 150000000);
-
-      //Book room
-      expect(
-        await bukProtocolContract
-          .connect(owner)
-          .bookRooms(
-            [100000000],
-            [80000000],
-            [70000000],
-            [2],
-            [0],
-            "0x3633666663356135366139343361313561626261336134630000000000000000",
-            1729847061,
-            1729947061,
-            12,
-            true,
-          ),
-      ).to.be.revertedWith("Check the allowance of the sender");
-    });
     it("Should fail booking when there is array size mismatch", async function () {
       //Grant allowance permission
       const res = await stableTokenContract
@@ -322,6 +298,199 @@ describe("BukProtocol Bookings", function () {
             true,
           ),
       ).to.be.revertedWith("Array sizes mismatch");
+    });
+  });
+
+  /**
+   * This describe block contains tests for booking rooms in the Buk Protocol.
+   * It includes multiple test cases to cover different scenarios related to the booking process.
+   */
+  describe("Book rooms by admin in Buk Protocol", function () {
+    it("Should succeed booking", async function () {
+      expect(await bukProtocolContract.connect(adminWallet).setAdmin(account2))
+        .not.be.reverted;
+
+      //Book room
+      expect(
+        await bukProtocolContract
+          .connect(account2)
+          .bookRoomsOwner(
+            [100000000],
+            [80000000],
+            [70000000],
+            [2],
+            [0],
+            "0x3633666663356135366139343361313561626261336134630000000000000000",
+            1729847061,
+            1729947061,
+            12,
+            true,
+            account1.getAddress(),
+          ),
+      ).not.be.reverted;
+      const bookingDetails = await bukProtocolContract.getBookingDetails(1);
+    });
+
+    it("Should succeed booking and emit events", async function () {
+      //Grant allowance permission
+      // const res = await stableTokenContract
+      //   .connect(owner)
+      //   .approve(await bukProtocolContract.getAddress(), 150000000);
+      //Set admin
+      expect(await bukProtocolContract.connect(adminWallet).setAdmin(account2))
+        .not.be.reverted;
+
+      let total: number = 0;
+      for (let i: number = 0; i < 1; ++i) {
+        total += 100000000 + 80000000 * 0.05;
+      }
+      //Book room
+      expect(
+        await bukProtocolContract
+          .connect(account2)
+          .bookRoomsOwner(
+            [100000000],
+            [80000000],
+            [70000000],
+            [2],
+            [0],
+            "0x3633666663356135366139343361313561626261336134630000000000000000",
+            1729847061,
+            1729947061,
+            12,
+            true,
+            account1.getAddress(),
+          ),
+      )
+        .to.emit(bukProtocolContract, "BookRoom")
+        .withArgs(
+          1,
+          "0x3633666663356135366139343361313561626261336134630000000000000000",
+          1729847061,
+          1729947061,
+          2,
+          0,
+        );
+    });
+    it("Should succeed booking and get booking details", async function () {
+      //Set admin
+      expect(await bukProtocolContract.connect(adminWallet).setAdmin(account2))
+        .not.be.reverted;
+
+      //Book room
+      expect(
+        await bukProtocolContract
+          .connect(account2)
+          .bookRoomsOwner(
+            [100000000],
+            [80000000],
+            [70000000],
+            [2],
+            [0],
+            "0x3633666663356135366139343361313561626261336134630000000000000000",
+            1729847061,
+            1729947061,
+            12,
+            true,
+            account1.getAddress(),
+          ),
+      ).not.be.reverted;
+
+      //Get booking details
+      const bookingDetails = await bukProtocolContract.getBookingDetails(1);
+      expect(bookingDetails[0]).to.equal(1);
+    });
+    it("Should fail booking when check-in date is less than current date", async function () {
+      //Set admin
+      expect(await bukProtocolContract.connect(adminWallet).setAdmin(account2))
+        .not.be.reverted;
+
+      //Book room
+      await expect(
+        bukProtocolContract
+          .connect(account2)
+          .bookRoomsOwner(
+            [100000000],
+            [80000000],
+            [70000000],
+            [2],
+            [0],
+            "0x3633666663356135366139343361313561626261336134630000000000000000",
+            1677830948,
+            1729947061,
+            12,
+            true,
+            account1.getAddress(),
+          ),
+      ).to.be.revertedWith("Checkin date must be in the future");
+    });
+    it("Should fail booking when check-out date should be greater than check-in date", async function () {
+      //Set admin
+      expect(await bukProtocolContract.connect(adminWallet).setAdmin(account2))
+        .not.be.reverted;
+      //Book room
+      await expect(
+        bukProtocolContract
+          .connect(account2)
+          .bookRoomsOwner(
+            [100000000],
+            [80000000],
+            [70000000],
+            [2],
+            [0],
+            "0x3633666663356135366139343361313561626261336134630000000000000000",
+            1729947061,
+            1729847061,
+            12,
+            true,
+            account1.getAddress(),
+          ),
+      ).to.be.revertedWith("Checkout date must be after checkin");
+    });
+    it("Should fail booking when there is array size mismatch", async function () {
+      //Set admin
+      expect(await bukProtocolContract.connect(adminWallet).setAdmin(account2))
+        .not.be.reverted;
+
+      //Book room
+      await expect(
+        bukProtocolContract
+          .connect(account2)
+          .bookRoomsOwner(
+            [100000000],
+            [80000000, 80000000],
+            [70000000, 70000000],
+            [2],
+            [0],
+            "0x3633666663356135366139343361313561626261336134630000000000000000",
+            1729847061,
+            1729947061,
+            12,
+            true,
+            account1.getAddress(),
+          ),
+      ).to.be.revertedWith("Array sizes mismatch");
+    });
+
+    it("Should fail booking when non admin called", async function () {
+      //Book room
+      await expect(
+        bukProtocolContract
+          .connect(account2)
+          .bookRoomsOwner(
+            [100000000],
+            [80000000, 80000000],
+            [70000000, 70000000],
+            [2],
+            [0],
+            "0x3633666663356135366139343361313561626261336134630000000000000000",
+            1729847061,
+            1729947061,
+            12,
+            true,
+            account1.getAddress(),
+          ),
+      ).to.be.revertedWith("Only admin has access to this function");
     });
   });
 

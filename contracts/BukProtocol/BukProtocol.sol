@@ -586,13 +586,6 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
             "Checkout date must be after checkin"
         );
         uint256 totalAmount;
-        for (uint8 i = 0; i < _bookingData.total.length; ++i) {
-            totalAmount += _bookingData.total[i];
-        }
-        require(
-            (_stableToken.allowance(msg.sender, address(this)) >= totalAmount),
-            "Check the allowance"
-        );
         uint commissionTotal;
         for (uint8 i = 0; i < _bookingData.total.length; ++i) {
             ++_bookingIds;
@@ -612,6 +605,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
                 _bookingData.tradeTimeLimit,
                 _bookingData.tradeable
             );
+            totalAmount += _bookingData.total[i];
             commissionTotal += (_bookingData.baseRate[i] * commission) / 100;
             emit BookRoom(
                 _bookingIds,
