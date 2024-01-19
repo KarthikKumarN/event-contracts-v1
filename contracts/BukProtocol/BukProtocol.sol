@@ -173,7 +173,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         uint256 _tradeTimeLimit,
         bool _tradeable
     ) external nonReentrant whenNotPaused returns (bool) {
-        (uint commissionTotal, uint256 total) = _booking(
+        BookingList memory _params = BookingList(
             _total,
             _baseRate,
             _minSalePrice,
@@ -186,6 +186,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
             _tradeable,
             msg.sender
         );
+        (uint commissionTotal, uint256 total) = _booking(_params);
         return _bookingPayment(commissionTotal, total);
     }
 
@@ -203,7 +204,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         bool _tradeable,
         address _user
     ) external onlyAdmin nonReentrant whenNotPaused returns (bool) {
-        _booking(
+        BookingList memory _params = BookingList(
             _total,
             _baseRate,
             _minSalePrice,
@@ -216,6 +217,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
             _tradeable,
             _user
         );
+        _booking(_params);
         return true;
     }
 
@@ -560,65 +562,64 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         return true;
     }
 
+    /**
+     * Function to capture booking details.
+     * @param _bookingData It contains the booking details.
+     * @return commissionTotal Total BUK commission.
+     */
     function _booking(
-        uint256[] memory _total,
-        uint256[] memory _baseRate,
-        uint256[] memory _minSalePrice,
-        uint8[] memory _adult,
-        uint8[] memory _child,
-        bytes32 _propertyId,
-        uint256 _checkin,
-        uint256 _checkout,
-        uint256 _tradeTimeLimit,
-        bool _tradeable,
-        address _user
+        BookingList memory _bookingData
     ) private returns (uint, uint256) {
         require(
-            ((_total.length == _baseRate.length) &&
-                (_total.length == _minSalePrice.length) &&
-                (_total.length > 0)),
+            ((_bookingData.total.length == _bookingData.baseRate.length) &&
+                (_bookingData.total.length ==
+                    _bookingData.minSalePrice.length) &&
+                (_bookingData.total.length > 0)),
             "Array sizes mismatch"
         );
         require(
-            (_checkin > block.timestamp),
+            (_bookingData.checkIn > block.timestamp),
             "Checkin date must be in the future"
         );
-        require((_checkout > _checkin), "Checkout date must be after checkin");
+        require(
+            (_bookingData.checkOut > _bookingData.checkIn),
+            "Checkout date must be after checkin"
+        );
         uint256 totalAmount;
-        for (uint8 i = 0; i < _total.length; ++i) {
-            totalAmount += _total[i];
+        for (uint8 i = 0; i < _bookingData.total.length; ++i) {
+            totalAmount += _bookingData.total[i];
         }
         require(
             (_stableToken.allowance(msg.sender, address(this)) >= totalAmount),
             "Check the allowance"
         );
         uint commissionTotal;
-        for (uint8 i = 0; i < _total.length; ++i) {
+        for (uint8 i = 0; i < _bookingData.total.length; ++i) {
             ++_bookingIds;
             _bookingDetails[_bookingIds] = Booking(
                 _bookingIds,
                 0,
-                _propertyId,
+                _bookingData.propertyId,
                 BookingStatus.booked,
-                _adult[i],
-                _child[i],
-                _user,
-                _checkin,
-                _checkout,
-                _total[i],
-                _baseRate[i],
-                _minSalePrice[i],
-                _tradeTimeLimit,
-                _tradeable
+                _bookingData.adult[i],
+                _bookingData.child[i],
+                _bookingData.user,
+                _bookingData.checkIn,
+                _bookingData.checkOut,
+                _bookingData.total[i],
+                _bookingData.baseRate[i],
+                _bookingData.minSalePrice[i],
+                _bookingData.tradeTimeLimit,
+                _bookingData.tradeable
             );
-            commissionTotal += (_baseRate[i] * commission) / 100;
+            commissionTotal += (_bookingData.baseRate[i] * commission) / 100;
             emit BookRoom(
                 _bookingIds,
-                _propertyId,
-                _checkin,
-                _checkout,
-                _adult[i],
-                _child[i]
+                _bookingData.propertyId,
+                _bookingData.checkIn,
+                _bookingData.checkOut,
+                _bookingData.adult[i],
+                _bookingData.child[i]
             );
         }
         return (commissionTotal, totalAmount);

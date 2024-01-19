@@ -61,6 +61,34 @@ interface IBukProtocol {
         bool tradeable;
     }
 
+    /**
+     * @dev Struct for booking details.
+     * @param uint256 total             Total price.
+     * @param uint256 baseRate          Base rate.
+     * @param uint256 minSalePrice      Min Sale Price.
+     * @param uint8 adult[]             Number of adults.
+     * @param uint8 child[]             Number of children.
+     * @param bytes32 propertyId        Property ID.
+     * @param uint256 checkin           Check-in date.
+     * @param uint256 checkout          Check-out date.
+     * @param uint256 tradeTimeLimit    Buy will excecute if tradeLimitTime is not crossed (in hours)
+     * @param bool tradeable            Is the NFT Tradeable.
+     * @param address user             Address of the booking owner.
+     */
+    struct BookingList {
+        uint256[] total;
+        uint256[] baseRate;
+        uint256[] minSalePrice;
+        uint8[] adult;
+        uint8[] child;
+        bytes32 propertyId;
+        uint256 checkIn;
+        uint256 checkOut;
+        uint256 tradeTimeLimit;
+        bool tradeable;
+        address user;
+    }
+
     /// @dev Emitted when the admin wallet is set.
     event SetAdminWallet(address oldCAdminWallet, address newAdminWallet);
 
@@ -249,6 +277,37 @@ interface IBukProtocol {
         uint256 _checkout,
         uint256 _tradeTimeLimit,
         bool _tradeable
+    ) external returns (bool);
+
+    /**
+     * @dev Function to book rooms.
+     * @param _total Total amount to be paid.
+     * @param _baseRate Base rate of the room.
+     * @param _minSalePrice Minimum sale price for the booking.
+     * @param _adult Number of adults.
+     * @param _child Number of children.
+     * @param _propertyId Property ID.
+     * @param _checkin Checkin date.
+     * @param _checkout Checkout date.
+     * @param _tradeTimeLimit Trade Limit of NFT based on Checkin time.
+     * @param _tradeable Is the booking NFT tradeable.
+     * @param _user Address of user which we are booking.
+     * @return ids IDs of the bookings.
+     * @notice This function can only be called by admin
+     * @notice This function is used to book rooms on behalf of the user.
+     */
+    function bookRoomsOwner(
+        uint256[] memory _total,
+        uint256[] memory _baseRate,
+        uint256[] memory _minSalePrice,
+        uint8[] memory _adult,
+        uint8[] memory _child,
+        bytes32 _propertyId,
+        uint256 _checkin,
+        uint256 _checkout,
+        uint256 _tradeTimeLimit,
+        bool _tradeable,
+        address _user
     ) external returns (bool);
 
     /**
