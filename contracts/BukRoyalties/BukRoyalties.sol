@@ -58,7 +58,7 @@ contract BukRoyalties is AccessControl, IBukRoyalties {
     function setBukProtocolContract(
         address _bukProtocolContract
     ) external onlyRole(ADMIN_ROLE) {
-        require(_bukProtocolContract != address(0), "Address cannot be zero");
+        require(_bukProtocolContract != address(0), "Invalid address");
         address oldBukProtocolContract = address(bukProtocolContract);
         bukProtocolContract = IBukProtocol(_bukProtocolContract);
         emit SetBukProtocol(oldBukProtocolContract, _bukProtocolContract);
