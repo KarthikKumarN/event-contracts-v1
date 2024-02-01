@@ -193,6 +193,11 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         uint commissionTotal;
         for (uint256 i = 0; i < _total.length; ++i) {
             ++_bookingIds;
+            require(
+                _bookingDetails[_bookingIds].status == BookingStatus.nil &&
+                    _bookingDetails[_bookingIds].tokenId == 0,
+                "Booking ID already used"
+            );
             _bookingDetails[_bookingIds] = Booking(
                 _bookingIds,
                 0,
