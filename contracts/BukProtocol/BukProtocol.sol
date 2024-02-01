@@ -40,6 +40,9 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
     /// @dev Counters.Counter bookingIds    Counter for booking IDs.
     uint256 private _bookingIds;
 
+    /// @dev Max booking limit per transaction.
+    uint256 public constant MAX_BOOKING_LIMIT = 11;
+
     /**
      * @dev mapping(uint256 => Booking) _bookingDetails   Mapping of booking IDs to booking details.
      */
@@ -176,7 +179,10 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
                 (_total.length > 0)),
             "Array sizes mismatch"
         );
-        require(_total.length <= 11, "Exceeded max rooms per booking");
+        require(
+            _total.length <= MAX_BOOKING_LIMIT,
+            "Exceeded max rooms per booking"
+        );
         require(
             (_checkin > block.timestamp),
             "Checkin date must be in the future"
@@ -264,7 +270,10 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
     ) external whenNotPaused nonReentrant {
         uint256 len = _ids.length;
         require((len == _uri.length), "Check Ids and URIs size");
-        require(((len > 0) && (len < 11)), "Not in max - min booking limit");
+        require(
+            ((len > 0) && (len < MAX_BOOKING_LIMIT)),
+            "Not in max - min booking limit"
+        );
         for (uint256 i = 0; i < len; ++i) {
             require(
                 _bookingDetails[_ids[i]].status == BookingStatus.booked,
@@ -303,7 +312,10 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
                 "Check the Booking status"
             );
         }
-        require(((len > 0) && (len < 11)), "Not in max-min booking limit");
+        require(
+            ((len > 0) && (len < MAX_BOOKING_LIMIT)),
+            "Not in max-min booking limit"
+        );
         for (uint256 i = 0; i < len; ++i) {
             _bookingDetails[_ids[i]].status = BookingStatus.checkedin;
             _bookingDetails[_ids[i]].tradeable = false;
@@ -314,7 +326,10 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
     /// @dev See {IBukProtocol-checkout}.
     function checkout(uint256[] memory _ids) external onlyAdmin whenNotPaused {
         uint256 len = _ids.length;
-        require(((len > 0) && (len < 11)), "Not in max-min booking limit");
+        require(
+            ((len > 0) && (len < MAX_BOOKING_LIMIT)),
+            "Not in max-min booking limit"
+        );
         for (uint256 i = 0; i < len; ++i) {
             require(
                 _bookingDetails[_ids[i]].status == BookingStatus.checkedin,
