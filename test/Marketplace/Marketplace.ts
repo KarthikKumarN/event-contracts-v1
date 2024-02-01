@@ -189,11 +189,10 @@ describe("Marketplace", function () {
     });
 
     it("Should set the Buk protocol contract and emit event", async function () {
-      let oldAddress = await marketplaceContract.getBukProtocol();
       let newAddress = "0xa9a1C7be37Cb72811A6C4C278cA7C403D6459b78";
       await expect(await marketplaceContract.setBukProtocol(newAddress))
         .to.emit(marketplaceContract, "BukProtocolSet")
-        .withArgs(oldAddress, newAddress);
+        .withArgs(newAddress);
     });
 
     it("Should reverted with admin error Buk protocol contract", async function () {
@@ -222,11 +221,10 @@ describe("Marketplace", function () {
     });
 
     it("Should set the Buk NFT contract and emit event", async function () {
-      let oldAddress = await marketplaceContract.getBukNFT();
       let newAddress = "0xa9a1C7be37Cb72811A6C4C278cA7C403D6459b78";
       await expect(await marketplaceContract.setBukNFT(newAddress))
         .to.emit(marketplaceContract, "BukNFTSet")
-        .withArgs(oldAddress, newAddress);
+        .withArgs(newAddress);
     });
 
     it("Should reverted with admin error Buk NFT contract", async function () {
@@ -256,11 +254,10 @@ describe("Marketplace", function () {
     });
 
     it("Should set the Stable token and emit event", async function () {
-      let oldAddress = await marketplaceContract.getStableToken();
       let newAddress = "0xa9a1C7be37Cb72811A6C4C278cA7C403D6459b78";
       await expect(await marketplaceContract.setStableToken(newAddress))
         .to.emit(marketplaceContract, "StableTokenSet")
-        .withArgs(oldAddress, newAddress);
+        .withArgs(newAddress);
     });
 
     it("Should reverted with admin error Stable token", async function () {

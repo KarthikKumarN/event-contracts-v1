@@ -68,24 +68,21 @@ interface IMarketplace {
 
     /**
      * @dev Emitted when new BukProtocol address has been updated
-     * @param oldAddress, Address of the old bukProtocol
      * @param newAddress, Address of the new bukProtocol
      */
-    event BukProtocolSet(address oldAddress, address newAddress);
+    event BukProtocolSet(address newAddress);
 
     /**
      * @dev Emitted when new BukNFT address has been updated
-     * @param oldAddress, Address of the old bukNFT
      * @param newAddress, Address of the new bukNFT
      */
-    event BukNFTSet(address oldAddress, address newAddress);
+    event BukNFTSet(address newAddress);
 
     /**
      * @dev Emitted when new Stable token address has been updated
-     * @param oldAddress, Address of the old address
      * @param newAddress, Address of the new address
      */
-    event StableTokenSet(address oldAddress, address newAddress);
+    event StableTokenSet(address newAddress);
 
     /**
      * @dev Function to pause the contract.

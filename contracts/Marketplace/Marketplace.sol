@@ -229,10 +229,9 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
     /// @dev Function sets new Buk NFT address
     function _setBukNFT(address _bukNFT) private {
         require(_bukNFT != address(0), "Invalid address");
-        address oldAddress = address(_bukNFTContract);
         _bukNFTContract = IBukNFTs(_bukNFT);
 
-        emit BukNFTSet(oldAddress, _bukNFT);
+        emit BukNFTSet(_bukNFT);
     }
 
     /**
@@ -247,16 +246,15 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
         _grantRole(BUK_PROTOCOL_ROLE, address(_bukProtocol));
         _revokeRole(BUK_PROTOCOL_ROLE, address(oldAddress));
 
-        emit BukProtocolSet(oldAddress, _bukProtocol);
+        emit BukProtocolSet(_bukProtocol);
     }
 
     /// @param _tokenAddress New stable token address
     function _setStableToken(address _tokenAddress) private {
         require(_tokenAddress != address(0), "Invalid address");
-        address oldAddress = address(_stableToken);
         _stableToken = IERC20(_tokenAddress);
 
-        emit StableTokenSet(oldAddress, _tokenAddress);
+        emit StableTokenSet(_tokenAddress);
     }
 
     /**
