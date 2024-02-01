@@ -196,7 +196,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
             require(
                 _bookingDetails[_bookingIds].status == BookingStatus.nil &&
                     _bookingDetails[_bookingIds].tokenId == 0,
-                "Booking ID already used"
+                "Booking already used"
             );
             _bookingDetails[_bookingIds] = Booking(
                 _bookingIds,
