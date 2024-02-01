@@ -62,43 +62,31 @@ interface IBukProtocol {
     }
 
     /// @dev Emitted when the admin wallet is set.
-    event SetAdminWallet(address oldCAdminWallet, address newAdminWallet);
+    event SetAdminWallet(address newAdminWallet);
 
     /// @dev Emitted when the commission is set.
-    event SetCommission(uint256 oldCommission, uint256 newCommission);
+    event SetCommission(uint256 newCommission);
 
     /// @dev Emitted when BukNFTs contract address is updated.
-    event SetBukNFTs(address oldNFTContract, address newNFTContract);
+    event SetBukNFTs(address newNFTContract);
 
     /// @dev Emitted when BukPOSNFTs contract address is updated.
-    event SetBukPOSNFTs(address oldNFTPOSContract, address newNFTPOSContract);
+    event SetBukPOSNFTs(address newNFTPOSContract);
 
     /// @dev Emitted when BukRoyalties contract address is updated.
-    event SetRoyaltiesContract(
-        address oldRoyaltiesContract,
-        address newRoyaltiesContract
-    );
+    event SetRoyaltiesContract(address newRoyaltiesContract);
 
     /// @dev Emitted when signer verifier is updated.
-    event SetSignerVerifier(
-        address oldSignerVerifier,
-        address newSignerVerifier
-    );
+    event SetSignerVerifier(address newSignerVerifier);
 
     /// @dev Emitted when Buk treasury is updated.
-    event SetBukTreasury(
-        address oldTreasuryContract,
-        address newTreasuryContract
-    );
+    event SetBukTreasury(address newTreasuryContract);
 
     /// @dev Emitted when Buk Wallet is updated.
-    event SetBukWallet(
-        address oldBukWalletContract,
-        address newBukWalletContract
-    );
+    event SetBukWallet(address newBukWalletContract);
 
     /// @dev Emitted when stable token is updated.
-    event SetStableToken(address oldStableToken, address newStableToken);
+    event SetStableToken(address newStableToken);
 
     /**
      * @dev Emitted when the tradeability of a Buk NFT is toggled.

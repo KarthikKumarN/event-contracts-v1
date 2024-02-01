@@ -110,16 +110,14 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
 
     /// @dev See {IBukProtocol-setBukNFTs}.
     function setBukNFTs(address _nftContractAddr) external onlyAdmin {
-        address oldNFTContractAddr_ = address(_nftContract);
         _nftContract = IBukNFTs(_nftContractAddr);
-        emit SetBukNFTs(oldNFTContractAddr_, _nftContractAddr);
+        emit SetBukNFTs(_nftContractAddr);
     }
 
     /// @dev See {IBukProtocol-setBukPosNFTs}.
     function setBukPOSNFTs(address _nftPOSContractAddr) external onlyAdmin {
-        address oldNFTPOSContractAddr_ = address(_nftPOSContract);
         _nftPOSContract = IBukPOSNFTs(_nftPOSContractAddr);
-        emit SetBukPOSNFTs(oldNFTPOSContractAddr_, _nftPOSContractAddr);
+        emit SetBukPOSNFTs(_nftPOSContractAddr);
     }
 
     /// @dev See {IBukProtocol-setRoyalties}.
@@ -134,9 +132,8 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         uint256 _newCommission
     ) external onlyAdmin whenNotPaused {
         require(_newCommission <= 100, "Commission is more than 100");
-        uint oldCommission_ = commission;
         commission = _newCommission;
-        emit SetCommission(oldCommission_, _newCommission);
+        emit SetCommission(_newCommission);
     }
 
     /// @dev See {IBukProtocol-toggleTradeability}.
@@ -477,9 +474,9 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
      * @param _adminAddr The address of the Admin Wallet
      */
     function _setAdmin(address _adminAddr) private {
-        address oldAdminWallet_ = _admin;
+        require(_adminAddr != address(0), "Invalid address");
         _admin = _adminAddr;
-        emit SetAdminWallet(oldAdminWallet_, _adminAddr);
+        emit SetAdminWallet(_adminAddr);
     }
 
     /**
@@ -487,12 +484,8 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
      * @param _signatureVerifierContract The address of the Signature Verifier contract
      */
     function _setSignatureVerifier(address _signatureVerifierContract) private {
-        address oldSignatureVerifierContract_ = address(_signatureVerifier);
         _signatureVerifier = ISignatureVerifier(_signatureVerifierContract);
-        emit SetSignerVerifier(
-            oldSignatureVerifierContract_,
-            _signatureVerifierContract
-        );
+        emit SetSignerVerifier(_signatureVerifierContract);
     }
 
     /**
@@ -500,12 +493,8 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
      * @param _royaltiesContractAddr The address of the Royalties contract
      */
     function _setRoyaltiesContract(address _royaltiesContractAddr) private {
-        address oldRoyaltiesContract_ = address(_royaltiesContract);
         _royaltiesContract = IBukRoyalties(_royaltiesContractAddr);
-        emit SetRoyaltiesContract(
-            oldRoyaltiesContract_,
-            _royaltiesContractAddr
-        );
+        emit SetRoyaltiesContract(_royaltiesContractAddr);
     }
 
     /**
@@ -513,9 +502,9 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
      * @param _bukTreasuryContract The address of the BukTreasury contract
      */
     function _setBukTreasury(address _bukTreasuryContract) private {
-        address oldBukTreasuryContract_ = address(_bukTreasury);
+        require(_bukTreasuryContract != address(0), "Invalid address");
         _bukTreasury = IBukTreasury(_bukTreasuryContract);
-        emit SetBukTreasury(oldBukTreasuryContract_, _bukTreasuryContract);
+        emit SetBukTreasury(_bukTreasuryContract);
     }
 
     /**
@@ -523,9 +512,9 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
      * @param _bukWalletAddr The address of the BukWallet contract
      */
     function _setBukWallet(address _bukWalletAddr) private {
-        address oldBukWallet_ = _bukWallet;
+        require(_bukWalletAddr != address(0), "Invalid address");
         _bukWallet = _bukWalletAddr;
-        emit SetBukWallet(oldBukWallet_, _bukWalletAddr);
+        emit SetBukWallet(_bukWalletAddr);
     }
 
     /**
@@ -533,9 +522,9 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
      * @param _stableTokenAddress The address of the stable token contract
      */
     function _setStableToken(address _stableTokenAddress) private {
-        address oldStableToken_ = address(_stableToken);
+        require(_stableTokenAddress != address(0), "Invalid address");
         _stableToken = IERC20(_stableTokenAddress);
-        emit SetStableToken(oldStableToken_, _stableTokenAddress);
+        emit SetStableToken(_stableTokenAddress);
     }
 
     /**
