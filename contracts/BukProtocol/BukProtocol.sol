@@ -179,6 +179,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
                 (_total.length > 0)),
             "Array sizes mismatch"
         );
+        require(_total.length <= 11, "Exceeded max rooms per booking");
         require(
             (_checkin > block.timestamp),
             "Checkin date must be in the future"
