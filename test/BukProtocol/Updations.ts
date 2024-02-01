@@ -488,6 +488,13 @@ describe("BukProtocol Updations", function () {
         bukProtocolContract.connect(account1).setCommission(COMMISSION),
       ).to.be.reverted;
     });
+    it("Should not set Buk commission if greater than 100", async function () {
+      //Set Commission
+      const COMMISSION: number = 110;
+      await expect(
+        bukProtocolContract.connect(adminWallet).setCommission(COMMISSION),
+      ).to.be.revertedWith("Commission is more than 100");
+    });
   });
 
   // Define the all possible test cased for pause and unpause functions and add test case to check whenNotPaused modifier
