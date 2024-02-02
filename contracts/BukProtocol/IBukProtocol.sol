@@ -66,8 +66,8 @@ interface IBukProtocol {
      * @param uint256 total             Total price.
      * @param uint256 baseRate          Base rate.
      * @param uint256 minSalePrice      Min Sale Price.
-     * @param uint8 adult[]             Number of adults.
-     * @param uint8 child[]             Number of children.
+     * @param uint256 adult[]             Number of adults.
+     * @param uint256 child[]             Number of children.
      * @param bytes32 propertyId        Property ID.
      * @param uint256 checkin           Check-in date.
      * @param uint256 checkout          Check-out date.
@@ -79,8 +79,8 @@ interface IBukProtocol {
         uint256[] total;
         uint256[] baseRate;
         uint256[] minSalePrice;
-        uint8[] adult;
-        uint8[] child;
+        uint256[] adult;
+        uint256[] child;
         bytes32 propertyId;
         uint256 checkIn;
         uint256 checkOut;
@@ -288,8 +288,8 @@ interface IBukProtocol {
         uint256[] memory _total,
         uint256[] memory _baseRate,
         uint256[] memory _minSalePrice,
-        uint8[] memory _adult,
-        uint8[] memory _child,
+        uint256[] memory _adult,
+        uint256[] memory _child,
         bytes32 _propertyId,
         uint256 _checkin,
         uint256 _checkout,

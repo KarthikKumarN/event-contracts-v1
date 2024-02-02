@@ -195,8 +195,8 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         uint256[] memory _total,
         uint256[] memory _baseRate,
         uint256[] memory _minSalePrice,
-        uint8[] memory _adult,
-        uint8[] memory _child,
+        uint256[] memory _adult,
+        uint256[] memory _child,
         bytes32 _propertyId,
         uint256 _checkin,
         uint256 _checkout,
@@ -574,7 +574,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         );
         uint256 totalAmount;
         uint commissionTotal;
-        for (uint8 i = 0; i < _bookingData.total.length; ++i) {
+        for (uint256 i = 0; i < _bookingData.total.length; ++i) {
             ++_bookingIds;
             _bookingDetails[_bookingIds] = Booking(
                 _bookingIds,
@@ -615,7 +615,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         uint256 len = _ids.length;
         require((len == _uri.length), "Check Ids and URIs size");
         require(((len > 0) && (len < 11)), "Not in max - min booking limit");
-        for (uint8 i = 0; i < len; ++i) {
+        for (uint256 i = 0; i < len; ++i) {
             require(
                 _bookingDetails[_ids[i]].status == BookingStatus.booked,
                 "Check the Booking status"
@@ -625,7 +625,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
                 "Only booking owner can mint"
             );
         }
-        for (uint8 i = 0; i < len; ++i) {
+        for (uint256 i = 0; i < len; ++i) {
             _bookingDetails[_ids[i]].status = BookingStatus.confirmed;
             _nftContract.mint(
                 _ids[i],
