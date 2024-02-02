@@ -324,7 +324,7 @@ describe("BukProtocol Bookings", function () {
       ).to.be.revertedWith("Array sizes mismatch");
     });
 
-    it("Should fail booking when there is array and crossed the limit", async function () {
+    it("Booking should fail when multiple bookings array crosses the limit", async function () {
       //Grant allowance permission
       const res = await stableTokenContract
         .connect(owner)

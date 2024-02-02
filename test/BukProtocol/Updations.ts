@@ -497,7 +497,6 @@ describe("BukProtocol Updations", function () {
     });
   });
 
-  // Define the all possible test cased for pause and unpause functions and add test case to check whenNotPaused modifier
   describe("Pause and Unpause functions", function () {
     it("Should pause the contract by admin", async function () {
       //Pause
