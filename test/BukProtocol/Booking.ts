@@ -275,6 +275,30 @@ describe("BukProtocol Bookings", function () {
           ),
       ).to.be.revertedWith("Checkout date must be after checkin");
     });
+    it("Should fail booking when there isn't enough allowance from the sender", async function () {
+      //Grant allowance permission
+      const res = await stableTokenContract
+        .connect(owner)
+        .approve(await bukProtocolContract.getAddress(), 150000000);
+
+      //Book room
+      expect(
+        await bukProtocolContract
+          .connect(owner)
+          .bookRooms(
+            [100000000],
+            [80000000],
+            [70000000],
+            [2],
+            [0],
+            "0x3633666663356135366139343361313561626261336134630000000000000000",
+            1729847061,
+            1729947061,
+            12,
+            true,
+          ),
+      ).to.be.revertedWith("Check the allowance of the sender");
+    });
     it("Should fail booking when there is array size mismatch", async function () {
       //Grant allowance permission
       const res = await stableTokenContract
