@@ -225,7 +225,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
     function bookingRefund(
         uint256[] memory _ids,
         address _owner
-    ) external whenNotPaused onlyAdmin {
+    ) external whenNotPaused onlyAdmin nonReentrant {
         uint256 len = _ids.length;
         require((len > 0), "Array is empty");
         for (uint256 i = 0; i < len; ++i) {
