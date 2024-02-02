@@ -33,8 +33,8 @@ interface IBukProtocol {
      * @param uint256 tokenId           Token ID.
      * @param bytes32 propertyId        Property ID.
      * @param BookingStatus status      Booking status.
-     * @param uint8 adult[]             Number of adults.
-     * @param uint8 child[]             Number of children.
+     * @param uint256 adult[]             Number of adults.
+     * @param uint256 child[]             Number of children.
      * @param address owner             Address of the booking owner.
      * @param uint256 checkin           Check-in date.
      * @param uint256 checkout          Check-out date.
@@ -49,8 +49,8 @@ interface IBukProtocol {
         uint256 tokenId;
         bytes32 propertyId;
         BookingStatus status;
-        uint8 adult;
-        uint8 child;
+        uint256 adult;
+        uint256 child;
         address firstOwner;
         uint256 checkin;
         uint256 checkout;
@@ -90,43 +90,31 @@ interface IBukProtocol {
     }
 
     /// @dev Emitted when the admin wallet is set.
-    event SetAdminWallet(address oldCAdminWallet, address newAdminWallet);
+    event SetAdminWallet(address newAdminWallet);
 
     /// @dev Emitted when the commission is set.
-    event SetCommission(uint256 oldCommission, uint256 newCommission);
+    event SetCommission(uint256 newCommission);
 
     /// @dev Emitted when BukNFTs contract address is updated.
-    event SetBukNFTs(address oldNFTContract, address newNFTContract);
+    event SetBukNFTs(address newNFTContract);
 
     /// @dev Emitted when BukPOSNFTs contract address is updated.
-    event SetBukPOSNFTs(address oldNFTPOSContract, address newNFTPOSContract);
+    event SetBukPOSNFTs(address newNFTPOSContract);
 
     /// @dev Emitted when BukRoyalties contract address is updated.
-    event SetRoyaltiesContract(
-        address oldRoyaltiesContract,
-        address newRoyaltiesContract
-    );
+    event SetRoyaltiesContract(address newRoyaltiesContract);
 
     /// @dev Emitted when signer verifier is updated.
-    event SetSignerVerifier(
-        address oldSignerVerifier,
-        address newSignerVerifier
-    );
+    event SetSignerVerifier(address newSignerVerifier);
 
     /// @dev Emitted when Buk treasury is updated.
-    event SetBukTreasury(
-        address oldTreasuryContract,
-        address newTreasuryContract
-    );
+    event SetBukTreasury(address newTreasuryContract);
 
     /// @dev Emitted when Buk Wallet is updated.
-    event SetBukWallet(
-        address oldBukWalletContract,
-        address newBukWalletContract
-    );
+    event SetBukWallet(address newBukWalletContract);
 
     /// @dev Emitted when stable token is updated.
-    event SetStableToken(address oldStableToken, address newStableToken);
+    event SetStableToken(address newStableToken);
 
     /**
      * @dev Emitted when the tradeability of a Buk NFT is toggled.
@@ -141,8 +129,8 @@ interface IBukProtocol {
         bytes32 indexed propertyId,
         uint256 checkin,
         uint256 checkout,
-        uint8 adult,
-        uint8 child
+        uint256 adult,
+        uint256 child
     );
 
     /// @dev Emitted when booking refund is done.
@@ -231,7 +219,7 @@ interface IBukProtocol {
      * @param _commission Commission percentage.
      * @notice This function can only be called by admin
      */
-    function setCommission(uint8 _commission) external;
+    function setCommission(uint256 _commission) external;
 
     /**
      * @dev Function to toggle the tradeability of an asset.
@@ -270,8 +258,8 @@ interface IBukProtocol {
         uint256[] memory _total,
         uint256[] memory _baseRate,
         uint256[] memory _minSalePrice,
-        uint8[] memory _adult,
-        uint8[] memory _child,
+        uint256[] memory _adult,
+        uint256[] memory _child,
         bytes32 _propertyId,
         uint256 _checkin,
         uint256 _checkout,
