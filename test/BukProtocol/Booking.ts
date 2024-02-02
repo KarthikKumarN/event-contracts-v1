@@ -1021,7 +1021,11 @@ describe("BukProtocol Bookings", function () {
           ),
       ).to.be.revertedWith("Check Ids and URIs size");
     });
-    it("Should fail minting with array size limit", async function () {
+    it("Should fail minting with array size limit 11", async function () {
+      const res = await stableTokenContract
+        .connect(owner)
+        .approve(await bukProtocolContract.getAddress(), 250000000);
+
       //Grant allowance permission
       expect(await bukProtocolContract.connect(adminWallet).setAdmin(account2))
         .not.be.reverted;
