@@ -19,6 +19,7 @@
   "license": "ISC",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^3.0.0",
+    "@nomicfoundation/hardhat-verify": "^2.0.4",
     "dotenv": "^16.3.1",
     "eslint": "^8.45.0",
     "eslint-config-prettier": "^8.8.0",
