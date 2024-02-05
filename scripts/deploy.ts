@@ -20,7 +20,7 @@ async function main() {
   console.log("🚀 ~ Deployed BukTreasury:", treasury.target);
   await treasury.waitForDeployment();
 
-  // NOTE If Treasury already exists, then comment the above code and uncomment the below code
+  // FIXME NOTE If Treasury already exists, then comment the above code and uncomment the below code
   // const treasury = "0x5FbDB2315678afecb367f032d93F642f64180aa3" // Assign Treasury address to this variable
 
   // Deploy SignatureVerifier
@@ -124,10 +124,7 @@ async function main() {
   );
 
   console.log("🚀 All contracts have been deployed and configured");
-
   console.log("🚀 ~ 🚀 ~ Verifying contracts");
-
-  // Verify the contracts
 
   //Verify Treasury contract
   await run("verify:verify", {
@@ -177,6 +174,6 @@ async function main() {
 main()
   .then(() => process.exit(0))
   .catch((error) => {
-    console.error(error);
+    console.error(error.stack || error);
     process.exit(1);
   });
