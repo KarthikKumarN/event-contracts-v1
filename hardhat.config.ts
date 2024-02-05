@@ -29,7 +29,6 @@ const config: HardhatUserConfig = {
           : [],
     },
     polygon_mainnet: {
-      // url: "https://rpc-mumbai.maticvigil.com",
       url: `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
       accounts:
         process.env.WALLET_PRIVATE_KEY !== undefined
@@ -41,12 +40,9 @@ const config: HardhatUserConfig = {
     enabled: process.env.REPORT_GAS !== undefined,
     currency: "USD",
   },
-  // etherscan: {
-  //   apiKey: process.env.POLYGONSCAN_API_KEY,
-  // },
   etherscan: {
     apiKey: {
-      plum_test: "",
+      plum_test: "test",
       polygonMumbai: process.env.POLYGONSCAN_API_KEY || "",
       polygon_mainnet: process.env.POLYGONSCAN_API_KEY || "",
     },
@@ -55,8 +51,8 @@ const config: HardhatUserConfig = {
         network: "plum_test",
         chainId: 161221135,
         urls: {
-          apiURL: "https://plume-testnet.rpc.caldera.xyz/http",
-          browserURL: "https://plume-testnet.explorer.caldera.xyz/",
+          apiURL: "https://plume-testnet.explorer.caldera.xyz/api?",
+          browserURL: "https://plume-testnet.explorer.caldera.xyz",
         },
       },
     ],
