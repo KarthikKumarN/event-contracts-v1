@@ -323,6 +323,40 @@ describe("BukProtocol Bookings", function () {
           ),
       ).to.be.revertedWith("Array sizes mismatch");
     });
+
+    it("Booking should fail when multiple bookings array crosses the limit", async function () {
+      //Grant allowance permission
+      const res = await stableTokenContract
+        .connect(owner)
+        .approve(await bukProtocolContract.getAddress(), 150000000);
+
+      //Book room
+      await expect(
+        bukProtocolContract
+          .connect(owner)
+          .bookRooms(
+            [
+              100000000, 100000000, 100000000, 100000000, 100000000, 100000000,
+              100000000, 100000000, 100000000, 100000000, 100000000, 100000000,
+            ],
+            [
+              80000000, 80000000, 80000000, 80000000, 80000000, 80000000,
+              80000000, 80000000, 80000000, 80000000, 80000000, 80000000,
+            ],
+            [
+              70000000, 70000000, 70000000, 70000000, 70000000, 70000000,
+              70000000, 70000000, 70000000, 70000000, 70000000, 70000000,
+            ],
+            [2],
+            [0],
+            "0x3633666663356135366139343361313561626261336134630000000000000000",
+            1729847061,
+            1729947061,
+            12,
+            true,
+          ),
+      ).to.be.revertedWith("Exceeded max rooms per booking");
+    });
   });
 
   describe("Refund amount for failed booking in Buk Protocol", function () {
@@ -608,18 +642,18 @@ describe("BukProtocol Bookings", function () {
           .bookRooms(
             [
               100000000, 100000000, 100000000, 100000000, 100000000, 100000000,
-              100000000, 100000000, 100000000, 100000000, 100000000, 100000000,
+              100000000, 100000000, 100000000, 100000000, 100000000,
             ],
             [
               80000000, 80000000, 80000000, 80000000, 80000000, 80000000,
-              80000000, 80000000, 80000000, 80000000, 80000000, 80000000,
+              80000000, 80000000, 80000000, 80000000, 80000000,
             ],
             [
               70000000, 70000000, 70000000, 70000000, 70000000, 70000000,
-              70000000, 70000000, 70000000, 70000000, 70000000, 70000000,
+              70000000, 70000000, 70000000, 70000000, 70000000,
             ],
-            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -952,65 +986,6 @@ describe("BukProtocol Bookings", function () {
         bukProtocolContract.connect(owner).checkin([]),
       ).to.be.revertedWith("Not in max-min booking limit");
     });
-    it("Should not check-in with array limit error", async function () {
-      //Grant allowance permission
-      const res = await stableTokenContract
-        .connect(owner)
-        .approve(await bukProtocolContract.getAddress(), 15000000000);
-
-      //Book room
-      expect(
-        await bukProtocolContract
-          .connect(owner)
-          .bookRooms(
-            [
-              100000000, 100000000, 100000000, 100000000, 100000000, 100000000,
-              100000000, 100000000, 100000000, 100000000, 100000000, 100000000,
-            ],
-            [
-              80000000, 80000000, 80000000, 80000000, 80000000, 80000000,
-              80000000, 80000000, 80000000, 80000000, 80000000, 80000000,
-            ],
-            [
-              70000000, 70000000, 70000000, 70000000, 70000000, 70000000,
-              70000000, 70000000, 70000000, 70000000, 70000000, 70000000,
-            ],
-            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            "0x3633666663356135366139343361313561626261336134630000000000000000",
-            1729847061,
-            1729947061,
-            12,
-            true,
-          ),
-      ).not.be.reverted;
-
-      const uris = [
-        "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-        "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-        "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-        "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-        "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-        "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-      ];
-
-      //Mint NFT
-      await expect(
-        bukProtocolContract.connect(owner).mintBukNFT([1, 2, 3, 4, 5, 6], uris),
-      ).not.be.reverted;
-      await expect(
-        bukProtocolContract
-          .connect(owner)
-          .mintBukNFT([7, 8, 9, 10, 11, 12], uris),
-      ).not.be.reverted;
-
-      //Check-in NFT
-      await expect(
-        bukProtocolContract
-          .connect(owner)
-          .checkin([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]),
-      ).to.be.revertedWith("Not in max-min booking limit");
-    });
     it("Should not check-in when the booking status is not confirmed", async function () {
       //Grant allowance permission
       const res = await stableTokenContract
@@ -1248,18 +1223,18 @@ describe("BukProtocol Bookings", function () {
           .bookRooms(
             [
               100000000, 100000000, 100000000, 100000000, 100000000, 100000000,
-              100000000, 100000000, 100000000, 100000000, 100000000, 100000000,
+              100000000, 100000000, 100000000, 100000000, 100000000,
             ],
             [
               80000000, 80000000, 80000000, 80000000, 80000000, 80000000,
-              80000000, 80000000, 80000000, 80000000, 80000000, 80000000,
+              80000000, 80000000, 80000000, 80000000, 80000000,
             ],
             [
               70000000, 70000000, 70000000, 70000000, 70000000, 70000000,
-              70000000, 70000000, 70000000, 70000000, 70000000, 70000000,
+              70000000, 70000000, 70000000, 70000000, 70000000,
             ],
-            [2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 4, 6],
-            [0, 2, 1, 2, 0, 2, 0, 2, 0, 2, 1, 2],
+            [2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 4],
+            [0, 2, 1, 2, 0, 2, 0, 2, 0, 2, 2],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,

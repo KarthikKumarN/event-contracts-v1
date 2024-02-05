@@ -66,6 +66,7 @@ describe("BukProtocol Updations", function () {
   let nftPosContract;
   let sellerWallet;
   let buyerWallet;
+  let zeroAddress = "0x0000000000000000000000000000000000000000";
 
   beforeEach("deploy the contract instance first", async function () {
     [
@@ -188,6 +189,12 @@ describe("BukProtocol Updations", function () {
         bukProtocolContract.connect(account2).setBukTreasury(account1),
       ).to.be.reverted;
     });
+    it("Should not set treasury if zero address", async function () {
+      //Set treasury
+      await expect(
+        bukProtocolContract.connect(adminWallet).setBukTreasury(zeroAddress),
+      ).to.be.revertedWith("Invalid address");
+    });
   });
 
   describe("Set Admin in BukProtocol", function () {
@@ -215,6 +222,12 @@ describe("BukProtocol Updations", function () {
       //Set admin
       await expect(bukProtocolContract.connect(account2).setAdmin(account1)).to
         .be.reverted;
+    });
+    it("Should not set if zero address", async function () {
+      //Set treasury
+      await expect(
+        bukProtocolContract.connect(adminWallet).setAdmin(zeroAddress),
+      ).to.be.revertedWith("Invalid address");
     });
   });
 
@@ -304,6 +317,12 @@ describe("BukProtocol Updations", function () {
       await expect(bukProtocolContract.connect(account2).setBukWallet(account1))
         .to.be.reverted;
     });
+    it("Should not set if zero address", async function () {
+      //Set treasury
+      await expect(
+        bukProtocolContract.connect(adminWallet).setBukWallet(zeroAddress),
+      ).to.be.revertedWith("Invalid address");
+    });
   });
 
   describe("Set stable token in BukProtocol", function () {
@@ -330,6 +349,12 @@ describe("BukProtocol Updations", function () {
       await expect(
         bukProtocolContract.connect(account2).setStableToken(account1),
       ).to.be.reverted;
+    });
+    it("Should not set if zero address", async function () {
+      //Set treasury
+      await expect(
+        bukProtocolContract.connect(adminWallet).setStableToken(zeroAddress),
+      ).to.be.revertedWith("Invalid address");
     });
   });
 
@@ -454,7 +479,7 @@ describe("BukProtocol Updations", function () {
         bukProtocolContract.connect(adminWallet).setCommission(COMMISSION),
       )
         .to.emit(bukProtocolContract, "SetCommission")
-        .withArgs(5, COMMISSION);
+        .withArgs(COMMISSION);
     });
     it("Should not set Buk commission if not admin", async function () {
       //Set Commission
@@ -463,9 +488,15 @@ describe("BukProtocol Updations", function () {
         bukProtocolContract.connect(account1).setCommission(COMMISSION),
       ).to.be.reverted;
     });
+    it("Should not set Buk commission if greater than 100", async function () {
+      //Set Commission
+      const COMMISSION: number = 110;
+      await expect(
+        bukProtocolContract.connect(adminWallet).setCommission(COMMISSION),
+      ).to.be.revertedWith("Commission is more than 100");
+    });
   });
 
-  // Define the all possible test cased for pause and unpause functions and add test case to check whenNotPaused modifier
   describe("Pause and Unpause functions", function () {
     it("Should pause the contract by admin", async function () {
       //Pause
