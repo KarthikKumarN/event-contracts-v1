@@ -173,71 +173,59 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         uint256 _tradeTimeLimit,
         bool _tradeable
     ) external nonReentrant whenNotPaused returns (bool) {
-        require(
-            ((_total.length == _baseRate.length) &&
-                (_total.length == _minSalePrice.length) &&
-                (_total.length > 0)),
-            "Array sizes mismatch"
+        BookingList memory _params = BookingList(
+            _total,
+            _baseRate,
+            _minSalePrice,
+            _adult,
+            _child,
+            _propertyId,
+            _checkin,
+            _checkout,
+            _tradeTimeLimit,
+            _tradeable,
+            msg.sender
         );
-        require(
-            _total.length <= MAX_BOOKING_LIMIT,
-            "Exceeded max rooms per booking"
-        );
-        require(
-            (_checkin > block.timestamp),
-            "Checkin date must be in the future"
-        );
-        require((_checkout > _checkin), "Checkout date must be after checkin");
-        uint256 total;
-        for (uint256 i = 0; i < _total.length; ++i) {
-            total += _total[i];
-        }
-        require(
-            (_stableToken.allowance(msg.sender, address(this)) >= total),
-            "Check the allowance"
-        );
-        uint commissionTotal;
-        for (uint256 i = 0; i < _total.length; ++i) {
-            ++_bookingIds;
-            require(
-                _bookingDetails[_bookingIds].status == BookingStatus.nil &&
-                    _bookingDetails[_bookingIds].tokenId == 0,
-                "Booking already used"
-            );
-            _bookingDetails[_bookingIds] = Booking(
-                _bookingIds,
-                0,
-                _propertyId,
-                BookingStatus.booked,
-                _adult[i],
-                _child[i],
-                msg.sender,
-                _checkin,
-                _checkout,
-                _total[i],
-                _baseRate[i],
-                _minSalePrice[i],
-                _tradeTimeLimit,
-                _tradeable
-            );
-            commissionTotal += (_baseRate[i] * commission) / 100;
-            emit BookRoom(
-                _bookingIds,
-                _propertyId,
-                _checkin,
-                _checkout,
-                _adult[i],
-                _child[i]
-            );
-        }
+        (uint commissionTotal, uint256 total) = _booking(_params);
         return _bookingPayment(commissionTotal, total);
+    }
+
+    /// @dev See {IBukProtocol-bookRoomsOwner}.
+    function bookRoomsOwner(
+        uint256[] memory _total,
+        uint256[] memory _baseRate,
+        uint256[] memory _minSalePrice,
+        uint256[] memory _adult,
+        uint256[] memory _child,
+        bytes32 _propertyId,
+        uint256 _checkin,
+        uint256 _checkout,
+        uint256 _tradeTimeLimit,
+        bool _tradeable,
+        address _user
+    ) external onlyAdmin nonReentrant whenNotPaused returns (bool) {
+        BookingList memory _params = BookingList(
+            _total,
+            _baseRate,
+            _minSalePrice,
+            _adult,
+            _child,
+            _propertyId,
+            _checkin,
+            _checkout,
+            _tradeTimeLimit,
+            _tradeable,
+            _user
+        );
+        _booking(_params);
+        return true;
     }
 
     /// @dev See {IBukProtocol-bookingRefund}.
     function bookingRefund(
         uint256[] memory _ids,
         address _owner
-    ) external whenNotPaused onlyAdmin {
+    ) external whenNotPaused onlyAdmin nonReentrant {
         uint256 len = _ids.length;
         require((len > 0), "Array is empty");
         for (uint256 i = 0; i < len; ++i) {
@@ -268,34 +256,16 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         uint256[] memory _ids,
         string[] memory _uri
     ) external whenNotPaused nonReentrant {
-        uint256 len = _ids.length;
-        require((len == _uri.length), "Check Ids and URIs size");
-        require(
-            ((len > 0) && (len < MAX_BOOKING_LIMIT)),
-            "Not in max - min booking limit"
-        );
-        for (uint256 i = 0; i < len; ++i) {
-            require(
-                _bookingDetails[_ids[i]].status == BookingStatus.booked,
-                "Check the Booking status"
-            );
-            require(
-                _bookingDetails[_ids[i]].firstOwner == msg.sender,
-                "Only booking owner can mint"
-            );
-        }
-        for (uint256 i = 0; i < len; ++i) {
-            _bookingDetails[_ids[i]].status = BookingStatus.confirmed;
-            _nftContract.mint(
-                _ids[i],
-                _bookingDetails[_ids[i]].firstOwner,
-                1,
-                "",
-                _uri[i]
-            );
-            _bookingDetails[_ids[i]].tokenId = _ids[i];
-        }
-        emit MintedBookingNFT(_ids, true);
+        _mintBukNFT(_ids, _uri, msg.sender);
+    }
+
+    /// @dev See {IBukProtocol-mintBukNFTOwner}.
+    function mintBukNFTOwner(
+        uint256[] memory _ids,
+        string[] memory _uri,
+        address _user
+    ) external whenNotPaused nonReentrant onlyAdmin {
+        _mintBukNFT(_ids, _uri, _user);
     }
 
     /// @dev See {IBukProtocol-checkin}.
@@ -573,5 +543,99 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
             "Booking payment failed"
         );
         return true;
+    }
+
+    /**
+     * Function to capture booking details.
+     * @param _bookingData It contains the booking details.
+     * @return commissionTotal Total BUK commission.
+     */
+    function _booking(
+        BookingList memory _bookingData
+    ) private returns (uint, uint256) {
+        require(
+            ((_bookingData.total.length == _bookingData.baseRate.length) &&
+                (_bookingData.total.length ==
+                    _bookingData.minSalePrice.length) &&
+                (_bookingData.total.length > 0)),
+            "Array sizes mismatch"
+        );
+        require(
+            _bookingData.total.length <= MAX_BOOKING_LIMIT,
+            "Exceeded max rooms per booking"
+        );
+        require(
+            (_bookingData.checkIn > block.timestamp),
+            "Checkin date must be in the future"
+        );
+        require(
+            (_bookingData.checkOut > _bookingData.checkIn),
+            "Checkout date must be after checkin"
+        );
+        uint256 totalAmount;
+        uint commissionTotal;
+        for (uint256 i = 0; i < _bookingData.total.length; ++i) {
+            ++_bookingIds;
+            _bookingDetails[_bookingIds] = Booking(
+                _bookingIds,
+                0,
+                _bookingData.propertyId,
+                BookingStatus.booked,
+                _bookingData.adult[i],
+                _bookingData.child[i],
+                _bookingData.user,
+                _bookingData.checkIn,
+                _bookingData.checkOut,
+                _bookingData.total[i],
+                _bookingData.baseRate[i],
+                _bookingData.minSalePrice[i],
+                _bookingData.tradeTimeLimit,
+                _bookingData.tradeable
+            );
+            totalAmount += _bookingData.total[i];
+            commissionTotal += (_bookingData.baseRate[i] * commission) / 100;
+            emit BookRoom(
+                _bookingIds,
+                _bookingData.propertyId,
+                _bookingData.checkIn,
+                _bookingData.checkOut,
+                _bookingData.adult[i],
+                _bookingData.child[i]
+            );
+        }
+        return (commissionTotal, totalAmount);
+    }
+
+    /// @dev See {IBukProtocol-mintBukNFT}.
+    function _mintBukNFT(
+        uint256[] memory _ids,
+        string[] memory _uri,
+        address _user
+    ) private {
+        uint256 len = _ids.length;
+        require((len == _uri.length), "Check Ids and URIs size");
+        require(((len > 0) && (len < 11)), "Not in max - min booking limit");
+        for (uint256 i = 0; i < len; ++i) {
+            require(
+                _bookingDetails[_ids[i]].status == BookingStatus.booked,
+                "Check the Booking status"
+            );
+            require(
+                _bookingDetails[_ids[i]].firstOwner == _user,
+                "Only booking owner can mint"
+            );
+        }
+        for (uint256 i = 0; i < len; ++i) {
+            _bookingDetails[_ids[i]].status = BookingStatus.confirmed;
+            _nftContract.mint(
+                _ids[i],
+                _bookingDetails[_ids[i]].firstOwner,
+                1,
+                "",
+                _uri[i]
+            );
+            _bookingDetails[_ids[i]].tokenId = _ids[i];
+        }
+        emit MintedBookingNFT(_ids, true);
     }
 }

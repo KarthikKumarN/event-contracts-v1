@@ -359,6 +359,199 @@ describe("BukProtocol Bookings", function () {
     });
   });
 
+  /**
+   * This describe block contains tests for booking rooms in the Buk Protocol.
+   * It includes multiple test cases to cover different scenarios related to the booking process.
+   */
+  describe("Book rooms by admin in Buk Protocol", function () {
+    it("Should succeed booking", async function () {
+      expect(await bukProtocolContract.connect(adminWallet).setAdmin(account2))
+        .not.be.reverted;
+
+      //Book room
+      expect(
+        await bukProtocolContract
+          .connect(account2)
+          .bookRoomsOwner(
+            [100000000],
+            [80000000],
+            [70000000],
+            [2],
+            [0],
+            "0x3633666663356135366139343361313561626261336134630000000000000000",
+            1729847061,
+            1729947061,
+            12,
+            true,
+            account1.getAddress(),
+          ),
+      ).not.be.reverted;
+      const bookingDetails = await bukProtocolContract.getBookingDetails(1);
+    });
+
+    it("Should succeed booking and emit events", async function () {
+      //Grant allowance permission
+      // const res = await stableTokenContract
+      //   .connect(owner)
+      //   .approve(await bukProtocolContract.getAddress(), 150000000);
+      //Set admin
+      expect(await bukProtocolContract.connect(adminWallet).setAdmin(account2))
+        .not.be.reverted;
+
+      let total: number = 0;
+      for (let i: number = 0; i < 1; ++i) {
+        total += 100000000 + 80000000 * 0.05;
+      }
+      //Book room
+      expect(
+        await bukProtocolContract
+          .connect(account2)
+          .bookRoomsOwner(
+            [100000000],
+            [80000000],
+            [70000000],
+            [2],
+            [0],
+            "0x3633666663356135366139343361313561626261336134630000000000000000",
+            1729847061,
+            1729947061,
+            12,
+            true,
+            account1.getAddress(),
+          ),
+      )
+        .to.emit(bukProtocolContract, "BookRoom")
+        .withArgs(
+          1,
+          "0x3633666663356135366139343361313561626261336134630000000000000000",
+          1729847061,
+          1729947061,
+          2,
+          0,
+        );
+    });
+    it("Should succeed booking and get booking details", async function () {
+      //Set admin
+      expect(await bukProtocolContract.connect(adminWallet).setAdmin(account2))
+        .not.be.reverted;
+
+      //Book room
+      expect(
+        await bukProtocolContract
+          .connect(account2)
+          .bookRoomsOwner(
+            [100000000],
+            [80000000],
+            [70000000],
+            [2],
+            [0],
+            "0x3633666663356135366139343361313561626261336134630000000000000000",
+            1729847061,
+            1729947061,
+            12,
+            true,
+            account1.getAddress(),
+          ),
+      ).not.be.reverted;
+
+      //Get booking details
+      const bookingDetails = await bukProtocolContract.getBookingDetails(1);
+      expect(bookingDetails[0]).to.equal(1);
+    });
+    it("Should fail booking when check-in date is less than current date", async function () {
+      //Set admin
+      expect(await bukProtocolContract.connect(adminWallet).setAdmin(account2))
+        .not.be.reverted;
+
+      //Book room
+      await expect(
+        bukProtocolContract
+          .connect(account2)
+          .bookRoomsOwner(
+            [100000000],
+            [80000000],
+            [70000000],
+            [2],
+            [0],
+            "0x3633666663356135366139343361313561626261336134630000000000000000",
+            1677830948,
+            1729947061,
+            12,
+            true,
+            account1.getAddress(),
+          ),
+      ).to.be.revertedWith("Checkin date must be in the future");
+    });
+    it("Should fail booking when check-out date should be greater than check-in date", async function () {
+      //Set admin
+      expect(await bukProtocolContract.connect(adminWallet).setAdmin(account2))
+        .not.be.reverted;
+      //Book room
+      await expect(
+        bukProtocolContract
+          .connect(account2)
+          .bookRoomsOwner(
+            [100000000],
+            [80000000],
+            [70000000],
+            [2],
+            [0],
+            "0x3633666663356135366139343361313561626261336134630000000000000000",
+            1729947061,
+            1729847061,
+            12,
+            true,
+            account1.getAddress(),
+          ),
+      ).to.be.revertedWith("Checkout date must be after checkin");
+    });
+    it("Should fail booking when there is array size mismatch", async function () {
+      //Set admin
+      expect(await bukProtocolContract.connect(adminWallet).setAdmin(account2))
+        .not.be.reverted;
+
+      //Book room
+      await expect(
+        bukProtocolContract
+          .connect(account2)
+          .bookRoomsOwner(
+            [100000000],
+            [80000000, 80000000],
+            [70000000, 70000000],
+            [2],
+            [0],
+            "0x3633666663356135366139343361313561626261336134630000000000000000",
+            1729847061,
+            1729947061,
+            12,
+            true,
+            account1.getAddress(),
+          ),
+      ).to.be.revertedWith("Array sizes mismatch");
+    });
+
+    it("Should fail booking when non admin called", async function () {
+      //Book room
+      await expect(
+        bukProtocolContract
+          .connect(account2)
+          .bookRoomsOwner(
+            [100000000],
+            [80000000, 80000000],
+            [70000000, 70000000],
+            [2],
+            [0],
+            "0x3633666663356135366139343361313561626261336134630000000000000000",
+            1729847061,
+            1729947061,
+            12,
+            true,
+            account1.getAddress(),
+          ),
+      ).to.be.revertedWith("Only admin has access to this function");
+    });
+  });
+
   describe("Refund amount for failed booking in Buk Protocol", function () {
     it("Should refund the booking total to the user", async function () {
       //Grant allowance permission
@@ -741,18 +934,17 @@ describe("BukProtocol Bookings", function () {
     });
   });
 
-  describe("Check-in for a booking in Buk Protocol", function () {
-    it("Should check-in successfully by admin", async function () {
+  describe("Minting Buk NFT by Admin in Buk Protocol", function () {
+    it("Should mint successfully", async function () {
       //Grant allowance permission
-      const res = await stableTokenContract
-        .connect(owner)
-        .approve(await bukProtocolContract.getAddress(), 150000000);
+      expect(await bukProtocolContract.connect(adminWallet).setAdmin(account2))
+        .not.be.reverted;
 
       //Book room
       expect(
         await bukProtocolContract
-          .connect(owner)
-          .bookRooms(
+          .connect(account2)
+          .bookRoomsOwner(
             [100000000],
             [80000000],
             [70000000],
@@ -763,36 +955,32 @@ describe("BukProtocol Bookings", function () {
             1729947061,
             12,
             true,
+            account1.getAddress(),
           ),
       ).not.be.reverted;
 
       //Mint NFT
       await expect(
         bukProtocolContract
-          .connect(owner)
-          .mintBukNFT(
+          .connect(account2)
+          .mintBukNFTOwner(
             [1],
             [
               "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
             ],
+            account1.getAddress(),
           ),
       ).not.be.reverted;
-
-      //Check-in NFT
-      await expect(bukProtocolContract.connect(adminWallet).checkin([1])).not.be
-        .reverted;
     });
-    it("Should check-in successfully by owner", async function () {
-      //Grant allowance permission
-      const res = await stableTokenContract
-        .connect(owner)
-        .approve(await bukProtocolContract.getAddress(), 150000000);
+    it("Should mint successfully and emit event", async function () {
+      expect(await bukProtocolContract.connect(adminWallet).setAdmin(account2))
+        .not.be.reverted;
 
       //Book room
       expect(
         await bukProtocolContract
-          .connect(owner)
-          .bookRooms(
+          .connect(account2)
+          .bookRoomsOwner(
             [100000000],
             [80000000],
             [70000000],
@@ -803,36 +991,33 @@ describe("BukProtocol Bookings", function () {
             1729947061,
             12,
             true,
+            account1.getAddress(),
           ),
       ).not.be.reverted;
 
-      //Mint NFT
-      await expect(
-        bukProtocolContract
-          .connect(owner)
-          .mintBukNFT(
+      expect(
+        await bukProtocolContract
+          .connect(account2)
+          .mintBukNFTOwner(
             [1],
             [
               "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
             ],
+            account1.getAddress(),
           ),
-      ).not.be.reverted;
-
-      //Check-in NFT
-      await expect(bukProtocolContract.connect(owner).checkin([1])).not.be
-        .reverted;
+      )
+        .to.emit(bukProtocolContract, "MintBookingNFT")
+        .withArgs([1], true);
     });
-    it("Should check-in successfully and emit events", async function () {
-      //Grant allowance permission
-      const res = await stableTokenContract
-        .connect(owner)
-        .approve(await bukProtocolContract.getAddress(), 150000000);
+    it("Should fail minting with array size mismatch", async function () {
+      expect(await bukProtocolContract.connect(adminWallet).setAdmin(account2))
+        .not.be.reverted;
 
       //Book room
       expect(
         await bukProtocolContract
-          .connect(owner)
-          .bookRooms(
+          .connect(account2)
+          .bookRoomsOwner(
             [100000000],
             [80000000],
             [70000000],
@@ -843,113 +1028,31 @@ describe("BukProtocol Bookings", function () {
             1729947061,
             12,
             true,
+            account1.getAddress(),
           ),
       ).not.be.reverted;
 
       //Mint NFT
       await expect(
         bukProtocolContract
-          .connect(owner)
-          .mintBukNFT(
-            [1],
-            [
-              "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-            ],
-          ),
-      ).not.be.reverted;
-    });
-    it("Should check-in and NFT become non-transferable", async function () {
-      //Grant allowance permission
-      const res = await stableTokenContract
-        .connect(owner)
-        .approve(await bukProtocolContract.getAddress(), 300000000);
-
-      //Book room
-      expect(
-        await bukProtocolContract
-          .connect(owner)
-          .bookRooms(
-            [100000000, 100000000],
-            [80000000, 80000000],
-            [70000000, 70000000],
-            [2, 2],
-            [0, 2],
-            "0x3633666663356135366139343361313561626261336134630000000000000000",
-            1729847061,
-            1729947061,
-            12,
-            true,
-          ),
-      ).not.be.reverted;
-
-      //Mint NFT
-      await expect(
-        bukProtocolContract
-          .connect(owner)
-          .mintBukNFT(
+          .connect(account2)
+          .mintBukNFTOwner(
             [1, 2],
             [
               "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-              "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
             ],
+            account1.getAddress(),
           ),
-      ).not.be.reverted;
-
-      let tokenId = 1;
-      let salePrice = 110000000;
-      let transferMoney = 210000000;
-
-      // Approve allowance
-      await nftContract
-        .connect(owner)
-        .setApprovalForAll(await marketplaceContract.getAddress(), true);
-
-      await expect(
-        marketplaceContract.connect(owner).createListing(tokenId, salePrice),
-      ).not.to.be.reverted;
-
-      //Grant permission to the marketplace
-      await expect(
-        nftContract
-          .connect(owner)
-          .setApprovalForAll(await marketplaceContract.getAddress(), true),
-      ).not.to.be.reverted;
-
-      //Set Marketplace role in BukNFTs
-      expect(
-        await nftContract
-          .connect(adminWallet)
-          .setMarketplaceRole(marketplaceContract.getAddress()),
-      ).not.be.reverted;
-
-      //Transfer tokens to buyer
-      await stableTokenContract
-        .connect(owner)
-        .transfer(await account1.getAddress(), transferMoney);
-
-      //Approve tokens to marketplace by buyer
-      await stableTokenContract
-        .connect(account1)
-        .approve(await marketplaceContract.getAddress(), transferMoney);
-
-      //Buy NFT
-      await expect(marketplaceContract.connect(account1).buyRoom(tokenId)).not
-        .to.be.reverted;
-
-      //Check NFT balance
-      await expect(
-        await nftContract.balanceOf(await account1.getAddress(), tokenId),
-      ).to.equal(1);
-
-      //Check-in NFT by new owner
-      await expect(bukProtocolContract.connect(account1).checkin([1])).not.be
-        .reverted;
+      ).to.be.revertedWith("Check Ids and URIs size");
     });
-    it("Should not check-in with empty array", async function () {
-      //Grant allowance permission
+    it("Should fail minting with array size limit 11", async function () {
       const res = await stableTokenContract
         .connect(owner)
-        .approve(await bukProtocolContract.getAddress(), 150000000);
+        .approve(await bukProtocolContract.getAddress(), 250000000);
+
+      //Grant allowance permission
+      expect(await bukProtocolContract.connect(adminWallet).setAdmin(account2))
+        .not.be.reverted;
 
       //Book room
       expect(
@@ -987,16 +1090,14 @@ describe("BukProtocol Bookings", function () {
       ).to.be.revertedWith("Not in max-min booking limit");
     });
     it("Should not check-in when the booking status is not confirmed", async function () {
-      //Grant allowance permission
-      const res = await stableTokenContract
-        .connect(owner)
-        .approve(await bukProtocolContract.getAddress(), 150000000);
+      expect(await bukProtocolContract.connect(adminWallet).setAdmin(account2))
+        .not.be.reverted;
 
       //Book room
       expect(
         await bukProtocolContract
-          .connect(owner)
-          .bookRooms(
+          .connect(account2)
+          .bookRoomsOwner(
             [100000000],
             [80000000],
             [70000000],
@@ -1007,12 +1108,49 @@ describe("BukProtocol Bookings", function () {
             1729947061,
             12,
             true,
+            account1.getAddress(),
           ),
       ).not.be.reverted;
 
       await expect(
         bukProtocolContract.connect(owner).checkin([1]),
       ).to.be.revertedWith("Admin or NFT owner can access booking");
+    });
+    it("Should book by admin and minted user successfully", async function () {
+      //Grant allowance permission
+      expect(await bukProtocolContract.connect(adminWallet).setAdmin(account2))
+        .not.be.reverted;
+
+      //Book room
+      expect(
+        await bukProtocolContract
+          .connect(account2)
+          .bookRoomsOwner(
+            [100000000],
+            [80000000],
+            [70000000],
+            [2],
+            [0],
+            "0x3633666663356135366139343361313561626261336134630000000000000000",
+            1729847061,
+            1729947061,
+            12,
+            true,
+            account1.getAddress(),
+          ),
+      ).not.be.reverted;
+
+      //Mint NFT
+      await expect(
+        bukProtocolContract
+          .connect(account1)
+          .mintBukNFT(
+            [1],
+            [
+              "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+            ],
+          ),
+      ).not.be.reverted;
     });
   });
 

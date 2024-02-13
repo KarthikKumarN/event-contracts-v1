@@ -61,6 +61,34 @@ interface IBukProtocol {
         bool tradeable;
     }
 
+    /**
+     * @dev Struct for booking details.
+     * @param uint256 total             Total price.
+     * @param uint256 baseRate          Base rate.
+     * @param uint256 minSalePrice      Min Sale Price.
+     * @param uint256 adult[]             Number of adults.
+     * @param uint256 child[]             Number of children.
+     * @param bytes32 propertyId        Property ID.
+     * @param uint256 checkin           Check-in date.
+     * @param uint256 checkout          Check-out date.
+     * @param uint256 tradeTimeLimit    Buy will excecute if tradeLimitTime is not crossed (in hours)
+     * @param bool tradeable            Is the NFT Tradeable.
+     * @param address user             Address of the booking owner.
+     */
+    struct BookingList {
+        uint256[] total;
+        uint256[] baseRate;
+        uint256[] minSalePrice;
+        uint256[] adult;
+        uint256[] child;
+        bytes32 propertyId;
+        uint256 checkIn;
+        uint256 checkOut;
+        uint256 tradeTimeLimit;
+        bool tradeable;
+        address user;
+    }
+
     /// @dev Emitted when the admin wallet is set.
     event SetAdminWallet(address newAdminWallet);
 
@@ -240,6 +268,37 @@ interface IBukProtocol {
     ) external returns (bool);
 
     /**
+     * @dev Function to book rooms.
+     * @param _total Total amount to be paid.
+     * @param _baseRate Base rate of the room.
+     * @param _minSalePrice Minimum sale price for the booking.
+     * @param _adult Number of adults.
+     * @param _child Number of children.
+     * @param _propertyId Property ID.
+     * @param _checkin Checkin date.
+     * @param _checkout Checkout date.
+     * @param _tradeTimeLimit Trade Limit of NFT based on Checkin time.
+     * @param _tradeable Is the booking NFT tradeable.
+     * @param _user Address of user which we are booking.
+     * @return ids IDs of the bookings.
+     * @notice This function can only be called by admin
+     * @notice This function is used to book rooms on behalf of the user.
+     */
+    function bookRoomsOwner(
+        uint256[] memory _total,
+        uint256[] memory _baseRate,
+        uint256[] memory _minSalePrice,
+        uint256[] memory _adult,
+        uint256[] memory _child,
+        bytes32 _propertyId,
+        uint256 _checkin,
+        uint256 _checkout,
+        uint256 _tradeTimeLimit,
+        bool _tradeable,
+        address _user
+    ) external returns (bool);
+
+    /**
      * @dev Allows the admin to refund a booking by canceling it and transferring the amount to the owner.
      * @param _ids An array of booking IDs that need to be refunded.
      * @param _owner The address of the owner of the bookings.
@@ -258,6 +317,23 @@ interface IBukProtocol {
      * @notice The NFTs are minted to the owner of the booking.
      */
     function mintBukNFT(uint256[] memory _ids, string[] memory _uri) external;
+
+    /**
+     * @dev Function to mint new BukNFT tokens based on the provided booking IDs and URIs.
+     * @param _ids An array of booking IDs representing the unique identifier for each BukNFT token.
+     * @param _uri An array of URIs corresponding to each booking ID, which will be associated with the Buk NFTs.
+     * @param _user Address of user which we are minting.
+     * @notice Only the owner of the booking can book the NFTs and confirm the rooms.
+     * @notice The number of bookings and URIs should be same.
+     * @notice The booking status should be booked to confirm it.
+     * @notice The NFTs are minted to the owner of the booking.
+     * @notice This function can only be called by admin
+     */
+    function mintBukNFTOwner(
+        uint256[] memory _ids,
+        string[] memory _uri,
+        address _user
+    ) external;
 
     /**
      * @dev Function to checkin the rooms.
