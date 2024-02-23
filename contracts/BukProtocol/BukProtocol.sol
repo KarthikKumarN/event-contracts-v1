@@ -251,14 +251,6 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         emit BookingRefund(total, _owner);
     }
 
-    /// @dev See {IBukProtocol-mintBukNFT}.
-    function mintBukNFT(
-        uint256[] memory _ids,
-        string[] memory _uri
-    ) external whenNotPaused nonReentrant {
-        _mintBukNFT(_ids, _uri, msg.sender);
-    }
-
     /// @dev See {IBukProtocol-mintBukNFTOwner}.
     function mintBukNFTOwner(
         uint256[] memory _ids,
