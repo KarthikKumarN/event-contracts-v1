@@ -712,227 +712,227 @@ describe("BukProtocol Bookings", function () {
     });
   });
 
-  describe("Minting Buk NFT in Buk Protocol", function () {
-    it("Should mint successfully", async function () {
-      //Grant allowance permission
-      const res = await stableTokenContract
-        .connect(owner)
-        .approve(await bukProtocolContract.getAddress(), 150000000);
+  // describe("Minting Buk NFT in Buk Protocol", function () {
+  //   it("Should mint successfully", async function () {
+  //     //Grant allowance permission
+  //     const res = await stableTokenContract
+  //       .connect(owner)
+  //       .approve(await bukProtocolContract.getAddress(), 150000000);
 
-      //Book room
-      expect(
-        await bukProtocolContract
-          .connect(owner)
-          .bookRooms(
-            [100000000],
-            [80000000],
-            [70000000],
-            [2],
-            [0],
-            "0x3633666663356135366139343361313561626261336134630000000000000000",
-            1729847061,
-            1729947061,
-            12,
-            true,
-          ),
-      ).not.be.reverted;
+  //     //Book room
+  //     expect(
+  //       await bukProtocolContract
+  //         .connect(owner)
+  //         .bookRooms(
+  //           [100000000],
+  //           [80000000],
+  //           [70000000],
+  //           [2],
+  //           [0],
+  //           "0x3633666663356135366139343361313561626261336134630000000000000000",
+  //           1729847061,
+  //           1729947061,
+  //           12,
+  //           true,
+  //         ),
+  //     ).not.be.reverted;
 
-      //Mint NFT
-      await expect(
-        bukProtocolContract
-          .connect(owner)
-          .mintBukNFT(
-            [1],
-            [
-              "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-            ],
-          ),
-      ).not.be.reverted;
-    });
-    it("Should mint successfully and emit event", async function () {
-      //Grant allowance permission
-      const res = await stableTokenContract
-        .connect(owner)
-        .approve(await bukProtocolContract.getAddress(), 150000000);
+  //     //Mint NFT
+  //     await expect(
+  //       bukProtocolContract
+  //         .connect(owner)
+  //         .mintBukNFT(
+  //           [1],
+  //           [
+  //             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+  //           ],
+  //         ),
+  //     ).not.be.reverted;
+  //   });
+  //   it("Should mint successfully and emit event", async function () {
+  //     //Grant allowance permission
+  //     const res = await stableTokenContract
+  //       .connect(owner)
+  //       .approve(await bukProtocolContract.getAddress(), 150000000);
 
-      //Book room
-      expect(
-        await bukProtocolContract
-          .connect(owner)
-          .bookRooms(
-            [100000000],
-            [80000000],
-            [70000000],
-            [2],
-            [0],
-            "0x3633666663356135366139343361313561626261336134630000000000000000",
-            1729847061,
-            1729947061,
-            12,
-            true,
-          ),
-      ).not.be.reverted;
+  //     //Book room
+  //     expect(
+  //       await bukProtocolContract
+  //         .connect(owner)
+  //         .bookRooms(
+  //           [100000000],
+  //           [80000000],
+  //           [70000000],
+  //           [2],
+  //           [0],
+  //           "0x3633666663356135366139343361313561626261336134630000000000000000",
+  //           1729847061,
+  //           1729947061,
+  //           12,
+  //           true,
+  //         ),
+  //     ).not.be.reverted;
 
-      expect(
-        await bukProtocolContract
-          .connect(owner)
-          .mintBukNFT(
-            [1],
-            [
-              "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-            ],
-          ),
-      )
-        .to.emit(bukProtocolContract, "MintBookingNFT")
-        .withArgs([1], true);
-    });
-    it("Should fail minting with array size mismatch", async function () {
-      //Grant allowance permission
-      const res = await stableTokenContract
-        .connect(owner)
-        .approve(await bukProtocolContract.getAddress(), 150000000);
+  //     expect(
+  //       await bukProtocolContract
+  //         .connect(owner)
+  //         .mintBukNFT(
+  //           [1],
+  //           [
+  //             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+  //           ],
+  //         ),
+  //     )
+  //       .to.emit(bukProtocolContract, "MintBookingNFT")
+  //       .withArgs([1], true);
+  //   });
+  //   it("Should fail minting with array size mismatch", async function () {
+  //     //Grant allowance permission
+  //     const res = await stableTokenContract
+  //       .connect(owner)
+  //       .approve(await bukProtocolContract.getAddress(), 150000000);
 
-      //Book room
-      expect(
-        await bukProtocolContract
-          .connect(owner)
-          .bookRooms(
-            [100000000],
-            [80000000],
-            [70000000],
-            [2],
-            [0],
-            "0x3633666663356135366139343361313561626261336134630000000000000000",
-            1729847061,
-            1729947061,
-            12,
-            true,
-          ),
-      ).not.be.reverted;
+  //     //Book room
+  //     expect(
+  //       await bukProtocolContract
+  //         .connect(owner)
+  //         .bookRooms(
+  //           [100000000],
+  //           [80000000],
+  //           [70000000],
+  //           [2],
+  //           [0],
+  //           "0x3633666663356135366139343361313561626261336134630000000000000000",
+  //           1729847061,
+  //           1729947061,
+  //           12,
+  //           true,
+  //         ),
+  //     ).not.be.reverted;
 
-      //Mint NFT
-      await expect(
-        bukProtocolContract
-          .connect(owner)
-          .mintBukNFT(
-            [1, 2],
-            [
-              "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-            ],
-          ),
-      ).to.be.revertedWith("Check Ids and URIs size");
-    });
-    it("Should fail minting with array size limit", async function () {
-      //Grant allowance permission
-      const res = await stableTokenContract
-        .connect(owner)
-        .approve(await bukProtocolContract.getAddress(), 15000000000);
+  //     //Mint NFT
+  //     await expect(
+  //       bukProtocolContract
+  //         .connect(owner)
+  //         .mintBukNFT(
+  //           [1, 2],
+  //           [
+  //             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+  //           ],
+  //         ),
+  //     ).to.be.revertedWith("Check Ids and URIs size");
+  //   });
+  //   it("Should fail minting with array size limit", async function () {
+  //     //Grant allowance permission
+  //     const res = await stableTokenContract
+  //       .connect(owner)
+  //       .approve(await bukProtocolContract.getAddress(), 15000000000);
 
-      //Book room
-      expect(
-        await bukProtocolContract
-          .connect(owner)
-          .bookRooms(
-            [
-              100000000, 100000000, 100000000, 100000000, 100000000, 100000000,
-              100000000, 100000000, 100000000, 100000000, 100000000,
-            ],
-            [
-              80000000, 80000000, 80000000, 80000000, 80000000, 80000000,
-              80000000, 80000000, 80000000, 80000000, 80000000,
-            ],
-            [
-              70000000, 70000000, 70000000, 70000000, 70000000, 70000000,
-              70000000, 70000000, 70000000, 70000000, 70000000,
-            ],
-            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            "0x3633666663356135366139343361313561626261336134630000000000000000",
-            1729847061,
-            1729947061,
-            12,
-            true,
-          ),
-      ).not.be.reverted;
+  //     //Book room
+  //     expect(
+  //       await bukProtocolContract
+  //         .connect(owner)
+  //         .bookRooms(
+  //           [
+  //             100000000, 100000000, 100000000, 100000000, 100000000, 100000000,
+  //             100000000, 100000000, 100000000, 100000000, 100000000,
+  //           ],
+  //           [
+  //             80000000, 80000000, 80000000, 80000000, 80000000, 80000000,
+  //             80000000, 80000000, 80000000, 80000000, 80000000,
+  //           ],
+  //           [
+  //             70000000, 70000000, 70000000, 70000000, 70000000, 70000000,
+  //             70000000, 70000000, 70000000, 70000000, 70000000,
+  //           ],
+  //           [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+  //           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  //           "0x3633666663356135366139343361313561626261336134630000000000000000",
+  //           1729847061,
+  //           1729947061,
+  //           12,
+  //           true,
+  //         ),
+  //     ).not.be.reverted;
 
-      //Mint NFT
-      await expect(
-        bukProtocolContract
-          .connect(owner)
-          .mintBukNFT(
-            [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-            [
-              "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-              "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-              "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-              "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-              "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-              "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-              "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-              "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-              "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-              "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-              "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-              "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-            ],
-          ),
-      ).to.be.revertedWith("Not in max - min booking limit");
-    });
-    it("Should fail minting with booking status", async function () {
-      //Grant allowance permission
-      const res = await stableTokenContract
-        .connect(owner)
-        .approve(await bukProtocolContract.getAddress(), 150000000);
+  //     //Mint NFT
+  //     await expect(
+  //       bukProtocolContract
+  //         .connect(owner)
+  //         .mintBukNFT(
+  //           [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+  //           [
+  //             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+  //             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+  //             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+  //             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+  //             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+  //             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+  //             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+  //             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+  //             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+  //             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+  //             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+  //             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+  //           ],
+  //         ),
+  //     ).to.be.revertedWith("Not in max - min booking limit");
+  //   });
+  //   it("Should fail minting with booking status", async function () {
+  //     //Grant allowance permission
+  //     const res = await stableTokenContract
+  //       .connect(owner)
+  //       .approve(await bukProtocolContract.getAddress(), 150000000);
 
-      //Mint NFT
-      await expect(
-        bukProtocolContract
-          .connect(owner)
-          .mintBukNFT(
-            [1],
-            [
-              "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-            ],
-          ),
-      ).to.be.revertedWith("Check the Booking status");
-    });
-    it("Should fail minting when the sender is not the owner", async function () {
-      //Grant allowance permission
-      const res = await stableTokenContract
-        .connect(owner)
-        .approve(await bukProtocolContract.getAddress(), 150000000);
+  //     //Mint NFT
+  //     await expect(
+  //       bukProtocolContract
+  //         .connect(owner)
+  //         .mintBukNFT(
+  //           [1],
+  //           [
+  //             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+  //           ],
+  //         ),
+  //     ).to.be.revertedWith("Check the Booking status");
+  //   });
+  //   it("Should fail minting when the sender is not the owner", async function () {
+  //     //Grant allowance permission
+  //     const res = await stableTokenContract
+  //       .connect(owner)
+  //       .approve(await bukProtocolContract.getAddress(), 150000000);
 
-      //Book room
-      expect(
-        await bukProtocolContract
-          .connect(owner)
-          .bookRooms(
-            [100000000],
-            [80000000],
-            [70000000],
-            [2],
-            [0],
-            "0x3633666663356135366139343361313561626261336134630000000000000000",
-            1729847061,
-            1729947061,
-            12,
-            true,
-          ),
-      ).not.be.reverted;
+  //     //Book room
+  //     expect(
+  //       await bukProtocolContract
+  //         .connect(owner)
+  //         .bookRooms(
+  //           [100000000],
+  //           [80000000],
+  //           [70000000],
+  //           [2],
+  //           [0],
+  //           "0x3633666663356135366139343361313561626261336134630000000000000000",
+  //           1729847061,
+  //           1729947061,
+  //           12,
+  //           true,
+  //         ),
+  //     ).not.be.reverted;
 
-      //Mint NFT
-      await expect(
-        bukProtocolContract
-          .connect(account1)
-          .mintBukNFT(
-            [1],
-            [
-              "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-            ],
-          ),
-      ).to.be.revertedWith("Only booking owner can mint");
-    });
-  });
+  //     //Mint NFT
+  //     await expect(
+  //       bukProtocolContract
+  //         .connect(account1)
+  //         .mintBukNFT(
+  //           [1],
+  //           [
+  //             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+  //           ],
+  //         ),
+  //     ).to.be.revertedWith("Only booking owner can mint");
+  //   });
+  // });
 
   describe("Minting Buk NFT by Admin in Buk Protocol", function () {
     it("Should mint successfully", async function () {
@@ -1076,11 +1076,12 @@ describe("BukProtocol Bookings", function () {
       await expect(
         bukProtocolContract
           .connect(owner)
-          .mintBukNFT(
+          .mintBukNFTOwner(
             [1],
             [
               "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
             ],
+            account1.getAddress(),
           ),
       ).not.be.reverted;
 
