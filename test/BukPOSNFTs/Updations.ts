@@ -192,14 +192,13 @@ describe("BukPOSNFTs Updations", function () {
 
     //Mint NFT
     await expect(
-      bukProtocolContract
-        .connect(owner)
-        .mintBukNFT(
-          [1],
-          [
-            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-          ],
-        ),
+      bukProtocolContract.mintBukNFTOwner(
+        [1],
+        [
+          "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+        ],
+        owner.address,
+      ),
     ).not.be.reverted;
 
     //Check-in NFT

@@ -311,11 +311,12 @@ describe("Marketplace", function () {
       ).not.be.reverted;
       //Mint
       await expect(
-        bukProtocolContract.mintBukNFT(
+        bukProtocolContract.mintBukNFTOwner(
           [1],
           [
             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
           ],
+          owner.address,
         ),
       ).not.be.reverted;
 
@@ -365,11 +366,12 @@ describe("Marketplace", function () {
       ).not.be.reverted;
       //Mint
       await expect(
-        bukProtocolContract.mintBukNFT(
+        bukProtocolContract.mintBukNFTOwner(
           [tokenId],
           [
             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
           ],
+          owner.address,
         ),
       ).not.be.reverted;
       // Approve allowance
@@ -415,11 +417,12 @@ describe("Marketplace", function () {
       ).not.be.reverted;
       //Mint
       await expect(
-        bukProtocolContract.mintBukNFT(
+        bukProtocolContract.mintBukNFTOwner(
           [tokenId],
           [
             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
           ],
+          owner.address,
         ),
       ).not.be.reverted;
       // Approve allowance
@@ -459,11 +462,12 @@ describe("Marketplace", function () {
       ).not.be.reverted;
       //Mint
       await expect(
-        bukProtocolContract.mintBukNFT(
+        bukProtocolContract.mintBukNFTOwner(
           [tokenId],
           [
             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
           ],
+          owner.address,
         ),
       ).not.be.reverted;
       // Approve allowance
@@ -548,11 +552,12 @@ describe("Marketplace", function () {
       ).not.be.reverted;
       //Mint
       await expect(
-        bukProtocolContract.mintBukNFT(
+        bukProtocolContract.mintBukNFTOwner(
           [tokenId],
           [
             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
           ],
+          owner.address,
         ),
       ).not.be.reverted;
       await expect(
@@ -593,11 +598,12 @@ describe("Marketplace", function () {
 
       //Mint
       await expect(
-        bukProtocolContract.mintBukNFT(
+        bukProtocolContract.mintBukNFTOwner(
           [tokenId],
           [
             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
           ],
+          owner.address,
         ),
       ).not.be.reverted;
       // Approve allowance
@@ -643,11 +649,12 @@ describe("Marketplace", function () {
 
       //Mint
       await expect(
-        bukProtocolContract.mintBukNFT(
+        bukProtocolContract.mintBukNFTOwner(
           [tokenId],
           [
             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
           ],
+          owner.address,
         ),
       ).not.be.reverted;
       // Approve allowance
@@ -695,11 +702,12 @@ describe("Marketplace", function () {
 
       //Mint
       await expect(
-        bukProtocolContract.mintBukNFT(
+        bukProtocolContract.mintBukNFTOwner(
           [tokenId],
           [
             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
           ],
+          owner.address,
         ),
       ).not.be.reverted;
       // Approve allowance
@@ -750,11 +758,12 @@ describe("Marketplace", function () {
 
       //Mint
       await expect(
-        bukProtocolContract.mintBukNFT(
+        bukProtocolContract.mintBukNFTOwner(
           [tokenId],
           [
             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
           ],
+          owner.address,
         ),
       ).not.be.reverted;
       // Approve allowance
@@ -821,11 +830,12 @@ describe("Marketplace", function () {
 
       //Mint
       await expect(
-        bukProtocolContract.mintBukNFT(
+        bukProtocolContract.mintBukNFTOwner(
           [tokenId],
           [
             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
           ],
+          owner.address,
         ),
       ).not.be.reverted;
       // Approve allowance
@@ -886,11 +896,12 @@ describe("Marketplace", function () {
 
       //Mint
       await expect(
-        bukProtocolContract.mintBukNFT(
+        bukProtocolContract.mintBukNFTOwner(
           [tokenId],
           [
             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
           ],
+          owner.address,
         ),
       ).not.be.reverted;
       // Approve allowance
@@ -971,11 +982,12 @@ describe("Marketplace", function () {
 
       //Mint 1
       await expect(
-        bukProtocolContract.mintBukNFT(
+        bukProtocolContract.mintBukNFTOwner(
           [tokenId1],
           [
             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
           ],
+          owner.address,
         ),
       ).not.be.reverted;
       // List 1
@@ -1000,11 +1012,12 @@ describe("Marketplace", function () {
 
       //Mint 2
       await expect(
-        bukProtocolContract.mintBukNFT(
+        bukProtocolContract.mintBukNFTOwner(
           [tokenId2],
           [
             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
           ],
+          owner.address,
         ),
       ).not.be.reverted;
 
@@ -1069,11 +1082,12 @@ describe("Marketplace", function () {
 
       //Mint 1
       await expect(
-        bukProtocolContract.mintBukNFT(
+        bukProtocolContract.mintBukNFTOwner(
           [tokenId1],
           [
             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
           ],
+          owner.address,
         ),
       ).not.be.reverted;
 
@@ -1130,11 +1144,12 @@ describe("Marketplace", function () {
 
       //Mint 1
       await expect(
-        bukProtocolContract.mintBukNFT(
+        bukProtocolContract.mintBukNFTOwner(
           [tokenId1],
           [
             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
           ],
+          owner.address,
         ),
       ).not.be.reverted;
 
@@ -1198,11 +1213,12 @@ describe("Marketplace", function () {
 
       //Mint
       await expect(
-        bukProtocolContract.mintBukNFT(
+        bukProtocolContract.mintBukNFTOwner(
           [tokenId],
           [
             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
           ],
+          owner.address,
         ),
       ).not.be.reverted;
       // Approve allowance
@@ -1254,11 +1270,12 @@ describe("Marketplace", function () {
 
       //Mint
       await expect(
-        bukProtocolContract.mintBukNFT(
+        bukProtocolContract.mintBukNFTOwner(
           [tokenId],
           [
             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
           ],
+          owner.address,
         ),
       ).not.be.reverted;
       // Approve allowance
@@ -1304,11 +1321,12 @@ describe("Marketplace", function () {
 
       //Mint
       await expect(
-        bukProtocolContract.mintBukNFT(
+        bukProtocolContract.mintBukNFTOwner(
           [tokenId],
           [
             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
           ],
+          owner.address,
         ),
       ).not.be.reverted;
       // Approve allowance
@@ -1358,11 +1376,12 @@ describe("Marketplace", function () {
 
       //Mint
       await expect(
-        bukProtocolContract.mintBukNFT(
+        bukProtocolContract.mintBukNFTOwner(
           [tokenId],
           [
             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
           ],
+          owner.address,
         ),
       ).not.be.reverted;
       // Approve allowance
@@ -1415,11 +1434,12 @@ describe("Marketplace", function () {
 
       //Mint
       await expect(
-        bukProtocolContract.mintBukNFT(
+        bukProtocolContract.mintBukNFTOwner(
           [tokenId],
           [
             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
           ],
+          owner.address,
         ),
       ).not.be.reverted;
       // Approve allowance
@@ -1544,11 +1564,12 @@ describe("Marketplace", function () {
 
       //Mint
       await expect(
-        bukProtocolContract.mintBukNFT(
+        bukProtocolContract.mintBukNFTOwner(
           [tokenId],
           [
             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
           ],
+          owner.address,
         ),
       ).not.be.reverted;
       // Approve allowance
@@ -1602,11 +1623,12 @@ describe("Marketplace", function () {
 
       //Mint
       await expect(
-        bukProtocolContract.mintBukNFT(
+        bukProtocolContract.mintBukNFTOwner(
           [tokenId],
           [
             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
           ],
+          owner.address,
         ),
       ).not.be.reverted;
       // Approve allowance
@@ -1656,11 +1678,12 @@ describe("Marketplace", function () {
 
       //Mint
       await expect(
-        bukProtocolContract.mintBukNFT(
+        bukProtocolContract.mintBukNFTOwner(
           [tokenId],
           [
             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
           ],
+          owner.address,
         ),
       ).not.be.reverted;
 
@@ -1709,11 +1732,12 @@ describe("Marketplace", function () {
 
       //Mint
       await expect(
-        bukProtocolContract.mintBukNFT(
+        bukProtocolContract.mintBukNFTOwner(
           [tokenId],
           [
             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
           ],
+          owner.address,
         ),
       ).not.be.reverted;
       // Approve allowance
@@ -1761,11 +1785,12 @@ describe("Marketplace", function () {
 
       //Mint
       await expect(
-        bukProtocolContract.mintBukNFT(
+        bukProtocolContract.mintBukNFTOwner(
           [tokenId],
           [
             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
           ],
+          owner.address,
         ),
       ).not.be.reverted;
       // Approve allowance
@@ -1832,11 +1857,12 @@ describe("Marketplace", function () {
 
       //Mint 1
       await expect(
-        bukProtocolContract.mintBukNFT(
+        bukProtocolContract.mintBukNFTOwner(
           [tokenId1],
           [
             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
           ],
+          owner.address,
         ),
       ).not.be.reverted;
 
@@ -1880,11 +1906,12 @@ describe("Marketplace", function () {
 
       //Mint 2
       await expect(
-        bukProtocolContract.mintBukNFT(
+        bukProtocolContract.mintBukNFTOwner(
           [tokenId2],
           [
             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
           ],
+          owner.address,
         ),
       ).not.be.reverted;
 
@@ -1910,11 +1937,12 @@ describe("Marketplace", function () {
 
       //Mint 3
       await expect(
-        bukProtocolContract.mintBukNFT(
+        bukProtocolContract.mintBukNFTOwner(
           [tokenId3],
           [
             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
           ],
+          owner.address,
         ),
       ).not.be.reverted;
 
@@ -2046,11 +2074,12 @@ describe("Marketplace", function () {
 
       //Mint 1
       await expect(
-        bukProtocolContract.mintBukNFT(
+        bukProtocolContract.mintBukNFTOwner(
           [tokenId1],
           [
             "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
           ],
+          owner.address,
         ),
       ).not.be.reverted;
       await expect(marketplaceContract.createListing(tokenId1, salePrice)).not
