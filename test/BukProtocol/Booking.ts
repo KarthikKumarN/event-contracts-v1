@@ -1075,13 +1075,13 @@ describe("BukProtocol Bookings", function () {
       //Mint NFT
       await expect(
         bukProtocolContract
-          .connect(owner)
+          .connect(account2)
           .mintBukNFTOwner(
             [1],
             [
               "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
             ],
-            account1.getAddress(),
+            owner.getAddress(),
           ),
       ).not.be.reverted;
 
@@ -1144,12 +1144,13 @@ describe("BukProtocol Bookings", function () {
       //Mint NFT
       await expect(
         bukProtocolContract
-          .connect(account1)
-          .mintBukNFT(
+          .connect(account2)
+          .mintBukNFTOwner(
             [1],
             [
               "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
             ],
+            account1.getAddress(),
           ),
       ).not.be.reverted;
     });
@@ -1236,12 +1237,13 @@ describe("BukProtocol Bookings", function () {
       //Mint NFT
       await expect(
         bukProtocolContract
-          .connect(owner)
-          .mintBukNFT(
+          .connect(adminWallet)
+          .mintBukNFTOwner(
             [1],
             [
               "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
             ],
+            owner.getAddress(),
           ),
       ).not.be.reverted;
 
@@ -1282,12 +1284,13 @@ describe("BukProtocol Bookings", function () {
       //Mint NFT
       await expect(
         bukProtocolContract
-          .connect(owner)
-          .mintBukNFT(
+          .connect(adminWallet)
+          .mintBukNFTOwner(
             [1],
             [
               "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
             ],
+            owner.getAddress(),
           ),
       ).not.be.reverted;
 
@@ -1329,12 +1332,13 @@ describe("BukProtocol Bookings", function () {
       //Mint NFT
       await expect(
         bukProtocolContract
-          .connect(owner)
-          .mintBukNFT(
+          .connect(adminWallet)
+          .mintBukNFTOwner(
             [1],
             [
               "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
             ],
+            owner.getAddress(),
           ),
       ).not.be.reverted;
 
@@ -1385,12 +1389,13 @@ describe("BukProtocol Bookings", function () {
       //Mint NFT
       await expect(
         bukProtocolContract
-          .connect(owner)
-          .mintBukNFT(
+          .connect(adminWallet)
+          .mintBukNFTOwner(
             [1],
             [
               "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
             ],
+            owner.getAddress(),
           ),
       ).not.be.reverted;
 
@@ -1432,12 +1437,13 @@ describe("BukProtocol Bookings", function () {
       //Mint NFT
       await expect(
         bukProtocolContract
-          .connect(owner)
-          .mintBukNFT(
+          .connect(adminWallet)
+          .mintBukNFTOwner(
             [1],
             [
               "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
             ],
+            owner.getAddress(),
           ),
       ).not.be.reverted;
 
@@ -1477,12 +1483,13 @@ describe("BukProtocol Bookings", function () {
       //Mint NFT
       await expect(
         bukProtocolContract
-          .connect(owner)
-          .mintBukNFT(
+          .connect(adminWallet)
+          .mintBukNFTOwner(
             [1],
             [
               "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
             ],
+            owner.getAddress(),
           ),
       ).not.be.reverted;
 
@@ -1518,12 +1525,13 @@ describe("BukProtocol Bookings", function () {
       //Mint NFT
       await expect(
         bukProtocolContract
-          .connect(owner)
-          .mintBukNFT(
+          .connect(adminWallet)
+          .mintBukNFTOwner(
             [1],
             [
               "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
             ],
+            owner.getAddress(),
           ),
       ).not.be.reverted;
 
@@ -1562,12 +1570,13 @@ describe("BukProtocol Bookings", function () {
       //Mint NFT
       await expect(
         bukProtocolContract
-          .connect(owner)
-          .mintBukNFT(
+          .connect(adminWallet)
+          .mintBukNFTOwner(
             [1],
             [
               "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
             ],
+            owner.getAddress(),
           ),
       ).not.be.reverted;
 
@@ -1622,12 +1631,13 @@ describe("BukProtocol Bookings", function () {
       //Mint NFT
       await expect(
         bukProtocolContract
-          .connect(owner)
-          .mintBukNFT(
+          .connect(adminWallet)
+          .mintBukNFTOwner(
             [1],
             [
               "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
             ],
+            owner.getAddress(),
           ),
       ).not.be.reverted;
 
@@ -1686,12 +1696,13 @@ describe("BukProtocol Bookings", function () {
       //Mint NFT
       await expect(
         bukProtocolContract
-          .connect(owner)
-          .mintBukNFT(
+          .connect(adminWallet)
+          .mintBukNFTOwner(
             [1],
             [
               "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
             ],
+            owner.getAddress(),
           ),
       ).not.be.reverted;
 
@@ -1752,12 +1763,13 @@ describe("BukProtocol Bookings", function () {
       //Mint NFT
       await expect(
         bukProtocolContract
-          .connect(owner)
-          .mintBukNFT(
+          .connect(adminWallet)
+          .mintBukNFTOwner(
             [1],
             [
               "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
             ],
+            owner.getAddress(),
           ),
       ).not.be.reverted;
 
@@ -1870,12 +1882,13 @@ describe("BukProtocol Bookings", function () {
       //Mint NFT
       await expect(
         bukProtocolContract
-          .connect(owner)
-          .mintBukNFT(
+          .connect(adminWallet)
+          .mintBukNFTOwner(
             [1],
             [
               "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
             ],
+            owner.getAddress(),
           ),
       ).not.be.reverted;
 
@@ -1933,12 +1946,13 @@ describe("BukProtocol Bookings", function () {
       //Mint NFT
       await expect(
         bukProtocolContract
-          .connect(owner)
-          .mintBukNFT(
+          .connect(adminWallet)
+          .mintBukNFTOwner(
             [1],
             [
               "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
             ],
+            owner.getAddress(),
           ),
       ).not.be.reverted;
 
@@ -1981,12 +1995,13 @@ describe("BukProtocol Bookings", function () {
       //Mint NFT
       await expect(
         bukProtocolContract
-          .connect(owner)
-          .mintBukNFT(
+          .connect(adminWallet)
+          .mintBukNFTOwner(
             [1],
             [
               "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
             ],
+            owner.getAddress(),
           ),
       ).not.be.reverted;
 
@@ -2033,12 +2048,13 @@ describe("BukProtocol Bookings", function () {
       //Mint NFT
       await expect(
         bukProtocolContract
-          .connect(owner)
-          .mintBukNFT(
+          .connect(adminWallet)
+          .mintBukNFTOwner(
             [1],
             [
               "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
             ],
+            owner.getAddress(),
           ),
       ).not.be.reverted;
 
@@ -2087,12 +2103,13 @@ describe("BukProtocol Bookings", function () {
       //Mint NFT
       await expect(
         bukProtocolContract
-          .connect(owner)
-          .mintBukNFT(
+          .connect(adminWallet)
+          .mintBukNFTOwner(
             [1],
             [
               "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
             ],
+            owner.getAddress(),
           ),
       ).not.be.reverted;
 
@@ -2181,12 +2198,13 @@ describe("BukProtocol Bookings", function () {
       //Mint NFT
       await expect(
         bukProtocolContract
-          .connect(owner)
-          .mintBukNFT(
+          .connect(adminWallet)
+          .mintBukNFTOwner(
             [1],
             [
               "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
             ],
+            owner.getAddress(),
           ),
       ).not.be.reverted;
 
