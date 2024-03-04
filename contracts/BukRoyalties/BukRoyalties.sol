@@ -50,8 +50,8 @@ contract BukRoyalties is AccessControl, IBukRoyalties {
      * This constructor assigns the DEFAULT_ADMIN_ROLE and ADMIN_ROLE to the contract deployer.
      */
     constructor() {
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _setupRole(ADMIN_ROLE, msg.sender);
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(ADMIN_ROLE, msg.sender);
     }
 
     /// @dev See {IBukRoyalties-setBukProtocolContract}.

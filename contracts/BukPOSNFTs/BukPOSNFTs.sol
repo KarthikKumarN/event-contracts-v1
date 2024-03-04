@@ -58,7 +58,7 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
         _setNFTContractName(_contractName);
         _setBukTreasury(_bukTreasuryContract);
         _setBukProtocol(_bukProtocolContract);
-        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
+        _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(ADMIN_ROLE, _msgSender());
     }
 

@@ -40,7 +40,7 @@ contract BukTreasury is AccessControl, IBukTreasury, Pausable {
         _setStableToken(_tokenAddress);
 
         // Updating permissions
-        _setupRole(ADMIN_ROLE, _msgSender());
+        _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(ADMIN_ROLE, _msgSender());
     }
 
