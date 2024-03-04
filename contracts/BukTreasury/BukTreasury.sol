@@ -2,6 +2,7 @@
 pragma solidity =0.8.19;
 
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
+import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { IBukTreasury } from "contracts/BukTreasury/IBukTreasury.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
@@ -11,6 +12,9 @@ import "@openzeppelin/contracts/security/Pausable.sol";
  * @author BUK Technology Inc
  */
 contract BukTreasury is AccessControl, IBukTreasury, Pausable {
+    // Using safeERC20
+    using SafeERC20 for IERC20;
+
     /// @dev Token used for transaction
     IERC20 private _stableToken;
 
@@ -104,7 +108,7 @@ contract BukTreasury is AccessControl, IBukTreasury, Pausable {
     ) external onlyRole(ADMIN_ROLE) whenNotPaused {
         require(_account != address(0), "Invalid address");
 
-        _stableToken.transfer(_account, _amount);
+        _stableToken.safeTransfer(_account, _amount);
         emit WithdrawnToken(_account, _amount, address(_stableToken));
     }
 
@@ -124,7 +128,7 @@ contract BukTreasury is AccessControl, IBukTreasury, Pausable {
         require(_token != address(0), "Invalid token address");
         require(_account != address(0), "Invalid address");
 
-        IERC20(_token).transfer(_account, _amount);
+        IERC20(_token).safeTransfer(_account, _amount);
         emit WithdrawnToken(_account, _amount, _token);
     }
 
@@ -135,7 +139,7 @@ contract BukTreasury is AccessControl, IBukTreasury, Pausable {
     ) external onlyRole(BUK_PROTOCOL_ROLE) whenNotPaused {
         require(_account != address(0), "Invalid address");
 
-        _stableToken.transfer(_account, _amount);
+        _stableToken.safeTransfer(_account, _amount);
         emit Refund(_account, _amount, address(_stableToken));
     }
 
@@ -148,7 +152,7 @@ contract BukTreasury is AccessControl, IBukTreasury, Pausable {
         require(_token != address(0), "Invalid token address");
         require(_account != address(0), "Invalid address");
 
-        IERC20(_token).transfer(_account, _amount);
+        IERC20(_token).safeTransfer(_account, _amount);
         emit Refund(_account, _amount, _token);
     }
 

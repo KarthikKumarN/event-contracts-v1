@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.19;
 
+import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
@@ -17,6 +18,8 @@ import { IBukProtocol } from "../BukProtocol/IBukProtocol.sol";
  * @dev Contract to manage operations of the BUK protocol to manage BukNFTs tokens and underlying sub-contracts.
  */
 contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
+    // Using safeERC20
+    using SafeERC20 for IERC20;
     /**
      * @dev address _bukWallet        Address of the Buk wallet.
      * @dev address _stableToken          Address of the stable token.
@@ -528,17 +531,12 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
             _stableToken.balanceOf(msg.sender) >= _total + _commission,
             "Insufficient balance for booking"
         );
-        require(
-            _stableToken.transferFrom(msg.sender, _bukWallet, _commission),
-            "Commission transfer failed"
-        );
-        require(
-            _stableToken.transferFrom(
-                msg.sender,
-                address(_bukTreasury),
-                _total
-            ),
-            "Booking payment failed"
+
+        _stableToken.safeTransferFrom(msg.sender, _bukWallet, _commission);
+        _stableToken.safeTransferFrom(
+            msg.sender,
+            address(_bukTreasury),
+            _total
         );
         return true;
     }
