@@ -379,6 +379,7 @@ interface IBukProtocol {
      * @param _charges The charges associated with the cancellation(if any).
      * @param _bookingOwner The address of the booking owner.
      * @notice This function can only be called by admin
+     * @notice Total refund amount and charges should be less than or equal to the total amount (Total = total booking amount + buk commission).
      */
     function emergencyCancellation(
         uint256 _id,
