@@ -1254,8 +1254,11 @@ describe("BukProtocol Bookings", function () {
       await fastForwardTo(1730039516);
 
       //Check-out NFT
-      await expect(bukProtocolContract.connect(adminWallet).checkout([1])).not
-        .be.reverted;
+      await expect(
+        bukProtocolContract
+          .connect(adminWallet)
+          .checkout([1], [owner.getAddress()]),
+      ).not.be.reverted;
     });
     it("Should check-out successfully and emit events", async function () {
       //Grant allowance permission
@@ -1301,7 +1304,11 @@ describe("BukProtocol Bookings", function () {
       await fastForwardTo(1730039516);
 
       //Check-out NFT
-      expect(await bukProtocolContract.connect(adminWallet).checkout([1]))
+      expect(
+        await bukProtocolContract
+          .connect(adminWallet)
+          .checkout([1], [owner.getAddress()]),
+      )
         .to.emit(bukProtocolContract, "CheckoutRooms")
         .withArgs([1], true);
     });
@@ -1350,7 +1357,7 @@ describe("BukProtocol Bookings", function () {
 
       //Check-out NFT
       await expect(
-        bukProtocolContract.connect(adminWallet).checkout([]),
+        bukProtocolContract.connect(adminWallet).checkout([], []),
       ).to.be.revertedWith("Not in max-min booking limit");
     });
     it("Should not check-out with array size limit", async function () {
@@ -1407,7 +1414,7 @@ describe("BukProtocol Bookings", function () {
 
       //Check-out NFT
       await expect(
-        bukProtocolContract.connect(adminWallet).checkout([]),
+        bukProtocolContract.connect(adminWallet).checkout([], []),
       ).to.be.revertedWith("Not in max-min booking limit");
     });
     it("Should not check-out if checkout date is less than current date", async function () {
@@ -1453,7 +1460,9 @@ describe("BukProtocol Bookings", function () {
 
       //Check-out NFT
       await expect(
-        bukProtocolContract.connect(adminWallet).checkout([1]),
+        bukProtocolContract
+          .connect(adminWallet)
+          .checkout([1], [owner.getAddress()]),
       ).to.be.revertedWith("Checkout date must be before today");
     });
     it("Should not check-out when the booking status is not checkedin", async function () {
@@ -1495,7 +1504,9 @@ describe("BukProtocol Bookings", function () {
 
       //Check-out NFT
       await expect(
-        bukProtocolContract.connect(adminWallet).checkout([1]),
+        bukProtocolContract
+          .connect(adminWallet)
+          .checkout([1], [owner.getAddress()]),
       ).to.be.revertedWith("Check the Booking status");
     });
     it("Should not check-out when the booking status if not admin", async function () {
@@ -1536,8 +1547,106 @@ describe("BukProtocol Bookings", function () {
       ).not.be.reverted;
 
       //Check-out NFT
-      await expect(bukProtocolContract.connect(account1).checkout([1])).to.be
+      await expect(
+        bukProtocolContract
+          .connect(account1)
+          .checkout([1], [owner.getAddress()]),
+      ).to.be.reverted;
+    });
+    it("Should not check-out when the booking id and recipients length different", async function () {
+      //Grant allowance permission
+      const res = await stableTokenContract
+        .connect(owner)
+        .approve(await bukProtocolContract.getAddress(), 150000000);
+
+      //Book room
+      expect(
+        await bukProtocolContract
+          .connect(owner)
+          .bookRooms(
+            [100000000],
+            [80000000],
+            [70000000],
+            [2],
+            [0],
+            "0x3633666663356135366139343361313561626261336134630000000000000000",
+            1729847061,
+            1729947061,
+            12,
+            true,
+          ),
+      ).not.be.reverted;
+
+      //Mint NFT
+      await expect(
+        bukProtocolContract
+          .connect(adminWallet)
+          .mintBukNFTOwner(
+            [1],
+            [
+              "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+            ],
+            owner.getAddress(),
+          ),
+      ).not.be.reverted;
+
+      //Check-in NFT
+      await expect(bukProtocolContract.connect(owner).checkin([1])).not.be
         .reverted;
+
+      //Check-out NFT
+      await expect(
+        bukProtocolContract.connect(adminWallet).checkout([1], []),
+      ).to.be.revertedWith("Not in max-min booking limit");
+    });
+    it("Should not check-out when the booking id and recipients address different", async function () {
+      //Grant allowance permission
+      const res = await stableTokenContract
+        .connect(owner)
+        .approve(await bukProtocolContract.getAddress(), 150000000);
+
+      //Book room
+      expect(
+        await bukProtocolContract
+          .connect(owner)
+          .bookRooms(
+            [100000000],
+            [80000000],
+            [70000000],
+            [2],
+            [0],
+            "0x3633666663356135366139343361313561626261336134630000000000000000",
+            1729847061,
+            1729947061,
+            12,
+            true,
+          ),
+      ).not.be.reverted;
+
+      //Mint NFT
+      await expect(
+        bukProtocolContract
+          .connect(adminWallet)
+          .mintBukNFTOwner(
+            [1],
+            [
+              "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+            ],
+            owner.getAddress(),
+          ),
+      ).not.be.reverted;
+
+      //Check-in NFT
+      await expect(bukProtocolContract.connect(owner).checkin([1])).not.be
+        .reverted;
+      await fastForwardTo(1730039516);
+
+      //Check-out NFT
+      await expect(
+        bukProtocolContract
+          .connect(adminWallet)
+          .checkout([1], [account1.getAddress()]),
+      ).to.be.revertedWith("Check NFT owner balance");
     });
   });
 
