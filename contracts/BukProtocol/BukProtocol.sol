@@ -243,8 +243,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
             _bookingDetails[_ids[i]].status = BookingStatus.cancelled;
             total +=
                 _bookingDetails[_ids[i]].total +
-                (_bookingDetails[_ids[i]].baseRate * commission) /
-                100;
+                _bookingDetails[_ids[i]].commission;
         }
         _bukTreasury.stableRefund(total, _owner);
         (total, _owner);
@@ -403,7 +402,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         );
         _bookingDetails[_id].status = BookingStatus.cancelled;
         _bukTreasury.stableRefund(_refund, _bookingOwner);
-        _bukTreasury.stableRefund(_charges, address(_bukTreasury));
+        _bukTreasury.stableRefund(_charges, _bukWallet);
         _nftContract.burn(_bookingOwner, _id, 1, false);
         emit EmergencyCancellation(_id, true);
     }
@@ -568,6 +567,8 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         uint commissionTotal;
         for (uint256 i = 0; i < _bookingData.total.length; ++i) {
             ++_bookingIds;
+            uint256 bukCommission = (_bookingData.baseRate[i] * commission) /
+                100;
             _bookingDetails[_bookingIds] = Booking(
                 _bookingIds,
                 0,
@@ -580,12 +581,13 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
                 _bookingData.checkOut,
                 _bookingData.total[i],
                 _bookingData.baseRate[i],
+                bukCommission,
                 _bookingData.minSalePrice[i],
                 _bookingData.tradeTimeLimit,
                 _bookingData.tradeable
             );
             totalAmount += _bookingData.total[i];
-            commissionTotal += (_bookingData.baseRate[i] * commission) / 100;
+            commissionTotal += bukCommission;
             emit BookRoom(
                 _bookingIds,
                 _bookingData.propertyId,
