@@ -361,6 +361,7 @@ interface IBukProtocol {
      * @notice Only the admin can cancel the rooms.
      * @notice The booking status should be confirmed to cancel it.
      * @notice The Active Booking NFTs are burnt from the owner's account.
+     * @notice Buk commission is non-refundable.
      * @notice This function can only be called by admin
      */
     function cancelRooms(

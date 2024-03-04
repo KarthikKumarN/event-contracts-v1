@@ -401,7 +401,10 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
             "Check the booking owner"
         );
         require(
-            ((_refund + _charges) < (_bookingDetails[_id].total + 1)),
+            ((_refund + _charges) <
+                (_bookingDetails[_id].total +
+                    _bookingDetails[_id].commission +
+                    1)),
             "Transfer amount exceeds total"
         );
         _bookingDetails[_id].status = BookingStatus.cancelled;
