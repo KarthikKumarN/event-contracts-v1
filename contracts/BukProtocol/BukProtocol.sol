@@ -285,10 +285,15 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
     }
 
     /// @dev See {IBukProtocol-checkout}.
-    function checkout(uint256[] memory _ids) external onlyAdmin whenNotPaused {
+    function checkout(
+        uint256[] memory _ids,
+        address[] memory _recipients
+    ) external onlyAdmin whenNotPaused {
         uint256 len = _ids.length;
         require(
-            ((len > 0) && (len < MAX_BOOKING_LIMIT)),
+            ((len > 0 && _recipients.length > 0) &&
+                (len == _recipients.length) &&
+                (len < MAX_BOOKING_LIMIT)),
             "Not in max-min booking limit"
         );
         for (uint256 i = 0; i < len; ++i) {
@@ -300,16 +305,15 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
                 (_bookingDetails[_ids[i]].checkout < block.timestamp),
                 "Checkout date must be before today"
             );
+            require(
+                (_nftContract.balanceOf(_recipients[i], _ids[i]) > 0),
+                "Check NFT owner balance"
+            );
         }
         for (uint256 i = 0; i < len; ++i) {
             _bookingDetails[_ids[i]].status = BookingStatus.checkedout;
             _bookingDetails[_ids[i]].tradeable = false;
-            _nftContract.burn(
-                _bookingDetails[_ids[i]].firstOwner,
-                _ids[i],
-                1,
-                true
-            );
+            _nftContract.burn(_recipients[i], _ids[i], 1, true);
         }
         emit CheckoutRooms(_ids, true);
     }

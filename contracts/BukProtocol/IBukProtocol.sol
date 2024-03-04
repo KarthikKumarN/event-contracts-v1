@@ -338,13 +338,18 @@ interface IBukProtocol {
     /**
      * @dev Function to checkout the rooms.
      * @param _ids IDs of the bookings.
+     * @param _recipients Owner address of tokens of the bookings.
      * @notice Only the admin can checkout the rooms.
      * @notice The booking status should be checkedin to checkout it.
      * @notice The Active Booking NFTs are burnt from the owner's account.
      * @notice The Utility NFTs are minted to the owner of the booking.
      * @notice This function can only be called by admin
+     * @notice POSR NFT will be minted to recipients address.
      */
-    function checkout(uint256[] memory _ids) external;
+    function checkout(
+        uint256[] memory _ids,
+        address[] memory _recipients
+    ) external;
 
     /**
      * @dev Function to cancel the room bookings.
