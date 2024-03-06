@@ -40,6 +40,7 @@ interface IBukProtocol {
      * @param uint256 checkout          Check-out date.
      * @param uint256 total             Total price.
      * @param uint256 baseRate          Base rate.
+     * @param uint256 commission        Buk commission.
      * @param uint256 minSalePrice      Min Sale Price.
      * @param uint256 tradeTimeLimit    Buy will excecute if tradeLimitTime is not crossed (in hours)
      * @param bool tradeable            Is the NFT Tradeable.
@@ -56,6 +57,7 @@ interface IBukProtocol {
         uint256 checkout;
         uint256 total;
         uint256 baseRate;
+        uint256 commission;
         uint256 minSalePrice;
         uint256 tradeTimeLimit;
         bool tradeable;
@@ -336,13 +338,18 @@ interface IBukProtocol {
     /**
      * @dev Function to checkout the rooms.
      * @param _ids IDs of the bookings.
+     * @param _recipients Owner address of tokens of the bookings.
      * @notice Only the admin can checkout the rooms.
      * @notice The booking status should be checkedin to checkout it.
      * @notice The Active Booking NFTs are burnt from the owner's account.
      * @notice The Utility NFTs are minted to the owner of the booking.
      * @notice This function can only be called by admin
+     * @notice POSR NFT will be minted to recipients address.
      */
-    function checkout(uint256[] memory _ids) external;
+    function checkout(
+        uint256[] memory _ids,
+        address[] memory _recipients
+    ) external;
 
     /**
      * @dev Function to cancel the room bookings.
@@ -354,6 +361,7 @@ interface IBukProtocol {
      * @notice Only the admin can cancel the rooms.
      * @notice The booking status should be confirmed to cancel it.
      * @notice The Active Booking NFTs are burnt from the owner's account.
+     * @notice Buk commission is non-refundable.
      * @notice This function can only be called by admin
      */
     function cancelRooms(
@@ -372,6 +380,7 @@ interface IBukProtocol {
      * @param _charges The charges associated with the cancellation(if any).
      * @param _bookingOwner The address of the booking owner.
      * @notice This function can only be called by admin
+     * @notice Total refund amount and charges should be less than or equal to the total amount (Total = total booking amount + buk commission).
      */
     function emergencyCancellation(
         uint256 _id,

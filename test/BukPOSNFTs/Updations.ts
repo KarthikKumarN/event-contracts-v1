@@ -299,8 +299,9 @@ describe("BukPOSNFTs Updations", function () {
       await fastForwardTo(1729997061);
 
       //Check-out NFT
-      await expect(bukProtocolContract.connect(adminWallet).checkout([1])).not
-        .be.reverted;
+      await expect(
+        bukProtocolContract.connect(adminWallet).checkout([1], [owner.address]),
+      ).not.be.reverted;
 
       //Set Token URI
       const newUri =
@@ -314,8 +315,9 @@ describe("BukPOSNFTs Updations", function () {
       await fastForwardTo(1729997061);
 
       //Check-out NFT
-      await expect(bukProtocolContract.connect(adminWallet).checkout([1])).not
-        .be.reverted;
+      await expect(
+        bukProtocolContract.connect(adminWallet).checkout([1], [owner.address]),
+      ).not.be.reverted;
 
       //Set Token URI
       const newUri =
@@ -375,8 +377,9 @@ describe("BukPOSNFTs Updations", function () {
       await fastForwardTo(1729997061);
 
       //Check-out NFT
-      await expect(bukProtocolContract.connect(adminWallet).checkout([1])).not
-        .be.reverted;
+      await expect(
+        bukProtocolContract.connect(adminWallet).checkout([1], [owner.address]),
+      ).not.be.reverted;
 
       //Toggle tradeability
       const toggle = await bukProtocolContract.toggleTradeability(1);
@@ -445,8 +448,9 @@ describe("BukPOSNFTs Updations", function () {
       await fastForwardTo(1729997061);
 
       //Check-out NFT
-      await expect(bukProtocolContract.connect(adminWallet).checkout([1])).not
-        .be.reverted;
+      await expect(
+        bukProtocolContract.connect(adminWallet).checkout([1], [owner.address]),
+      ).not.be.reverted;
 
       //Toggle tradeability
       const toggle = await bukProtocolContract.toggleTradeability(1);

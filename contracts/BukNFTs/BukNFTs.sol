@@ -75,7 +75,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
         _setBukTreasury(_bukTreasuryContract);
         _setBukPOSNFTRole(_bukPOSContract);
         _setBukProtocol(_bukProtocolContract);
-        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
+        _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(ADMIN_ROLE, _msgSender());
         _grantRole(BUK_PROTOCOL_ROLE, _bukProtocolContract);
     }

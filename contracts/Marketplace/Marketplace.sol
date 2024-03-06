@@ -59,8 +59,7 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
         _setBukNFT(_bukNFTAddress);
 
         // Updating permission
-        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
-        _setupRole(ADMIN_ROLE, _msgSender());
+        _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(ADMIN_ROLE, _msgSender());
     }
 

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.19;
 
+import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
@@ -17,6 +18,8 @@ import { IBukProtocol } from "../BukProtocol/IBukProtocol.sol";
  * @dev Contract to manage operations of the BUK protocol to manage BukNFTs tokens and underlying sub-contracts.
  */
 contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
+    // Using safeERC20
+    using SafeERC20 for IERC20;
     /**
      * @dev address _bukWallet        Address of the Buk wallet.
      * @dev address _stableToken          Address of the stable token.
@@ -243,8 +246,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
             _bookingDetails[_ids[i]].status = BookingStatus.cancelled;
             total +=
                 _bookingDetails[_ids[i]].total +
-                (_bookingDetails[_ids[i]].baseRate * commission) /
-                100;
+                _bookingDetails[_ids[i]].commission;
         }
         _bukTreasury.stableRefund(total, _owner);
         (total, _owner);
@@ -286,10 +288,15 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
     }
 
     /// @dev See {IBukProtocol-checkout}.
-    function checkout(uint256[] memory _ids) external onlyAdmin whenNotPaused {
+    function checkout(
+        uint256[] memory _ids,
+        address[] memory _recipients
+    ) external onlyAdmin whenNotPaused {
         uint256 len = _ids.length;
         require(
-            ((len > 0) && (len < MAX_BOOKING_LIMIT)),
+            ((len > 0 && _recipients.length > 0) &&
+                (len == _recipients.length) &&
+                (len < MAX_BOOKING_LIMIT)),
             "Not in max-min booking limit"
         );
         for (uint256 i = 0; i < len; ++i) {
@@ -301,16 +308,15 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
                 (_bookingDetails[_ids[i]].checkout < block.timestamp),
                 "Checkout date must be before today"
             );
+            require(
+                (_nftContract.balanceOf(_recipients[i], _ids[i]) > 0),
+                "Check NFT owner balance"
+            );
         }
         for (uint256 i = 0; i < len; ++i) {
             _bookingDetails[_ids[i]].status = BookingStatus.checkedout;
             _bookingDetails[_ids[i]].tradeable = false;
-            _nftContract.burn(
-                _bookingDetails[_ids[i]].firstOwner,
-                _ids[i],
-                1,
-                true
-            );
+            _nftContract.burn(_recipients[i], _ids[i], 1, true);
         }
         emit CheckoutRooms(_ids, true);
     }
@@ -398,12 +404,15 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
             "Check the booking owner"
         );
         require(
-            ((_refund + _charges) < (_bookingDetails[_id].total + 1)),
+            ((_refund + _charges) <
+                (_bookingDetails[_id].total +
+                    _bookingDetails[_id].commission +
+                    1)),
             "Transfer amount exceeds total"
         );
         _bookingDetails[_id].status = BookingStatus.cancelled;
         _bukTreasury.stableRefund(_refund, _bookingOwner);
-        _bukTreasury.stableRefund(_charges, address(_bukTreasury));
+        _bukTreasury.stableRefund(_charges, _bukWallet);
         _nftContract.burn(_bookingOwner, _id, 1, false);
         emit EmergencyCancellation(_id, true);
     }
@@ -522,17 +531,12 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
             _stableToken.balanceOf(msg.sender) >= _total + _commission,
             "Insufficient balance for booking"
         );
-        require(
-            _stableToken.transferFrom(msg.sender, _bukWallet, _commission),
-            "Commission transfer failed"
-        );
-        require(
-            _stableToken.transferFrom(
-                msg.sender,
-                address(_bukTreasury),
-                _total
-            ),
-            "Booking payment failed"
+
+        _stableToken.safeTransferFrom(msg.sender, _bukWallet, _commission);
+        _stableToken.safeTransferFrom(
+            msg.sender,
+            address(_bukTreasury),
+            _total
         );
         return true;
     }
@@ -568,6 +572,8 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         uint commissionTotal;
         for (uint256 i = 0; i < _bookingData.total.length; ++i) {
             ++_bookingIds;
+            uint256 bukCommission = (_bookingData.baseRate[i] * commission) /
+                100;
             _bookingDetails[_bookingIds] = Booking(
                 _bookingIds,
                 0,
@@ -580,12 +586,13 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
                 _bookingData.checkOut,
                 _bookingData.total[i],
                 _bookingData.baseRate[i],
+                bukCommission,
                 _bookingData.minSalePrice[i],
                 _bookingData.tradeTimeLimit,
                 _bookingData.tradeable
             );
             totalAmount += _bookingData.total[i];
-            commissionTotal += (_bookingData.baseRate[i] * commission) / 100;
+            commissionTotal += bukCommission;
             emit BookRoom(
                 _bookingIds,
                 _bookingData.propertyId,
