@@ -304,8 +304,6 @@ describe("Marketplace", function () {
           [100000000],
           [80000000],
           [70000000],
-          [2],
-          [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -325,7 +323,7 @@ describe("Marketplace", function () {
       ).not.be.reverted;
 
       let bookingDetails = await bukProtocolContract.getBookingDetails(1);
-      await expect(bookingDetails[8]).to.equal(checkout);
+      await expect(bookingDetails[6]).to.equal(checkout);
     });
 
     it("Should book list for sale", async function () {
@@ -359,8 +357,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [minSalePrice],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -410,8 +407,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [70000000],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -455,8 +451,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [70000000],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -505,8 +500,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -545,8 +539,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -590,8 +583,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -641,8 +633,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -694,8 +685,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -750,8 +740,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -822,8 +811,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -888,8 +876,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -974,8 +961,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -1004,8 +990,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -1074,8 +1059,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -1136,8 +1120,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -1205,8 +1188,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -1262,8 +1244,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -1313,8 +1294,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -1368,8 +1348,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -1426,8 +1405,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -1556,8 +1534,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -1615,8 +1592,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -1670,8 +1646,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -1724,8 +1699,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -1777,8 +1751,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -1849,8 +1822,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -1898,8 +1870,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -1929,8 +1900,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -2066,8 +2036,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,

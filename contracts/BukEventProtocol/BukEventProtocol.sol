@@ -587,7 +587,7 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
                 _bookingIds,
                 _bookingData.referenceId,
                 _bookingData.checkIn,
-                _bookingData.checkOut,
+                _bookingData.checkOut
             );
         }
         return (commissionTotal, totalAmount);
