@@ -287,7 +287,7 @@ describe("Marketplace", function () {
       let tokenId = 1;
       let price = 100;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = date.setDate(date.getDate() + 2);
       let checkout = date.setDate(date.getDate() + 3);
@@ -334,7 +334,7 @@ describe("Marketplace", function () {
       let minSalePrice = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = date.setDate(date.getDate() + 2);
       let checkout = date.setDate(date.getDate() + 3);
@@ -488,7 +488,7 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = date.setDate(date.getDate() + 2);
       let checkout = date.setDate(date.getDate() + 3);
@@ -528,7 +528,7 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = date.setDate(date.getDate() + 2);
       let checkout = date.setDate(date.getDate() + 3);
@@ -573,7 +573,7 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 1) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 1) / 1000);
@@ -624,7 +624,7 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -677,7 +677,7 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -733,7 +733,7 @@ describe("Marketplace", function () {
       let salePrice = 110000000;
       let transferMoney = 210000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -805,7 +805,7 @@ describe("Marketplace", function () {
       let salePrice = 110000000;
       let transferMoney = 210000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -871,7 +871,7 @@ describe("Marketplace", function () {
       let salePrice = 110000000;
       let transferMoney = 210000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -945,7 +945,7 @@ describe("Marketplace", function () {
       let salePrice = 110000000;
       let transferMoney = 410000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -1052,7 +1052,7 @@ describe("Marketplace", function () {
       let salePrice = 110000000;
       let transferMoney = 410000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -1114,7 +1114,7 @@ describe("Marketplace", function () {
       let salePrice = 110000000;
       let transferMoney = 410000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -1188,7 +1188,7 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -1245,7 +1245,7 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -1296,7 +1296,7 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -1351,7 +1351,7 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -1409,7 +1409,7 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -1539,7 +1539,7 @@ describe("Marketplace", function () {
       let newPrice = 120000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -1598,7 +1598,7 @@ describe("Marketplace", function () {
       let newPrice = 120000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -1653,7 +1653,7 @@ describe("Marketplace", function () {
       let newPrice = 120000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -1707,7 +1707,7 @@ describe("Marketplace", function () {
       let newPrice = 90000000;
       let salePrice = 100000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -1760,7 +1760,7 @@ describe("Marketplace", function () {
       let newPrice = 120000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -1820,7 +1820,7 @@ describe("Marketplace", function () {
       let newPrice = 150000000;
       let transferMoney = 410000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -2037,7 +2037,7 @@ describe("Marketplace", function () {
       let salePrice = 110000000;
       let transferMoney = 410000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);

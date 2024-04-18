@@ -31,7 +31,7 @@ interface IBukEventProtocol {
      * @dev Struct for booking details.
      * @param uint256 id                Booking ID.
      * @param uint256 tokenId           Token ID.
-     * @param bytes32 propertyId        Property ID.
+     * @param bytes32 referenceId       Reference ID.
      * @param BookingStatus status      Booking status.
      * @param uint256 adult[]             Number of adults.
      * @param uint256 child[]             Number of children.
@@ -48,7 +48,7 @@ interface IBukEventProtocol {
     struct Booking {
         uint256 id;
         uint256 tokenId;
-        bytes32 propertyId;
+        bytes32 referenceId;
         BookingStatus status;
         uint256 adult;
         uint256 child;
@@ -70,7 +70,7 @@ interface IBukEventProtocol {
      * @param uint256 minSalePrice      Min Sale Price.
      * @param uint256 adult[]             Number of adults.
      * @param uint256 child[]             Number of children.
-     * @param bytes32 propertyId        Property ID.
+     * @param bytes32 referenceId        Reference  ID.
      * @param uint256 checkin           Check-in date.
      * @param uint256 checkout          Check-out date.
      * @param uint256 tradeTimeLimit    Buy will excecute if tradeLimitTime is not crossed (in hours)
@@ -83,7 +83,7 @@ interface IBukEventProtocol {
         uint256[] minSalePrice;
         uint256[] adult;
         uint256[] child;
-        bytes32 propertyId;
+        bytes32 referenceId;
         uint256 checkIn;
         uint256 checkOut;
         uint256 tradeTimeLimit;
@@ -128,7 +128,7 @@ interface IBukEventProtocol {
     /// @dev Emitted when single room is booked.
     event BookRoom(
         uint256 indexed booking,
-        bytes32 indexed propertyId,
+        bytes32 indexed referenceId,
         uint256 checkin,
         uint256 checkout,
         uint256 adult,
@@ -249,7 +249,7 @@ interface IBukEventProtocol {
      * @param _minSalePrice Minimum sale price for the booking.
      * @param _adult Number of adults.
      * @param _child Number of children.
-     * @param _propertyId Property ID.
+     * @param _referenceId Reference  ID.
      * @param _checkin Checkin date.
      * @param _checkout Checkout date.
      * @param _tradeTimeLimit Trade Limit of NFT based on Checkin time.
@@ -262,7 +262,7 @@ interface IBukEventProtocol {
         uint256[] memory _minSalePrice,
         uint256[] memory _adult,
         uint256[] memory _child,
-        bytes32 _propertyId,
+        bytes32 _referenceId,
         uint256 _checkin,
         uint256 _checkout,
         uint256 _tradeTimeLimit,
@@ -276,7 +276,7 @@ interface IBukEventProtocol {
      * @param _minSalePrice Minimum sale price for the booking.
      * @param _adult Number of adults.
      * @param _child Number of children.
-     * @param _propertyId Property ID.
+     * @param _referenceId Reference  ID.
      * @param _checkin Checkin date.
      * @param _checkout Checkout date.
      * @param _tradeTimeLimit Trade Limit of NFT based on Checkin time.
@@ -292,7 +292,7 @@ interface IBukEventProtocol {
         uint256[] memory _minSalePrice,
         uint256[] memory _adult,
         uint256[] memory _child,
-        bytes32 _propertyId,
+        bytes32 _referenceId,
         uint256 _checkin,
         uint256 _checkout,
         uint256 _tradeTimeLimit,
