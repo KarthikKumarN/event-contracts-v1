@@ -168,8 +168,6 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
         uint256[] memory _total,
         uint256[] memory _baseRate,
         uint256[] memory _minSalePrice,
-        uint256[] memory _adult,
-        uint256[] memory _child,
         bytes32 _referenceId,
         uint256 _checkin,
         uint256 _checkout,
@@ -180,8 +178,6 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
             _total,
             _baseRate,
             _minSalePrice,
-            _adult,
-            _child,
             _referenceId,
             _checkin,
             _checkout,
@@ -198,8 +194,6 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
         uint256[] memory _total,
         uint256[] memory _baseRate,
         uint256[] memory _minSalePrice,
-        uint256[] memory _adult,
-        uint256[] memory _child,
         bytes32 _referenceId,
         uint256 _checkin,
         uint256 _checkout,
@@ -211,8 +205,6 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
             _total,
             _baseRate,
             _minSalePrice,
-            _adult,
-            _child,
             _referenceId,
             _checkin,
             _checkout,
@@ -579,8 +571,6 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
                 0,
                 _bookingData.referenceId,
                 BookingStatus.booked,
-                _bookingData.adult[i],
-                _bookingData.child[i],
                 _bookingData.user,
                 _bookingData.checkIn,
                 _bookingData.checkOut,
@@ -598,8 +588,6 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
                 _bookingData.referenceId,
                 _bookingData.checkIn,
                 _bookingData.checkOut,
-                _bookingData.adult[i],
-                _bookingData.child[i]
             );
         }
         return (commissionTotal, totalAmount);

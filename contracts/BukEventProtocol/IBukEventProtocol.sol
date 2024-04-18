@@ -33,8 +33,6 @@ interface IBukEventProtocol {
      * @param uint256 tokenId           Token ID.
      * @param bytes32 referenceId       Reference ID.
      * @param BookingStatus status      Booking status.
-     * @param uint256 adult[]             Number of adults.
-     * @param uint256 child[]             Number of children.
      * @param address owner             Address of the booking owner.
      * @param uint256 checkin           Check-in date.
      * @param uint256 checkout          Check-out date.
@@ -50,8 +48,6 @@ interface IBukEventProtocol {
         uint256 tokenId;
         bytes32 referenceId;
         BookingStatus status;
-        uint256 adult;
-        uint256 child;
         address firstOwner;
         uint256 checkin;
         uint256 checkout;
@@ -68,8 +64,6 @@ interface IBukEventProtocol {
      * @param uint256 total             Total price.
      * @param uint256 baseRate          Base rate.
      * @param uint256 minSalePrice      Min Sale Price.
-     * @param uint256 adult[]             Number of adults.
-     * @param uint256 child[]             Number of children.
      * @param bytes32 referenceId        Reference  ID.
      * @param uint256 checkin           Check-in date.
      * @param uint256 checkout          Check-out date.
@@ -81,8 +75,6 @@ interface IBukEventProtocol {
         uint256[] total;
         uint256[] baseRate;
         uint256[] minSalePrice;
-        uint256[] adult;
-        uint256[] child;
         bytes32 referenceId;
         uint256 checkIn;
         uint256 checkOut;
@@ -130,9 +122,7 @@ interface IBukEventProtocol {
         uint256 indexed booking,
         bytes32 indexed referenceId,
         uint256 checkin,
-        uint256 checkout,
-        uint256 adult,
-        uint256 child
+        uint256 checkout
     );
 
     /// @dev Emitted when booking refund is done.
@@ -247,8 +237,6 @@ interface IBukEventProtocol {
      * @param _total Total amount to be paid.
      * @param _baseRate Base rate of the room.
      * @param _minSalePrice Minimum sale price for the booking.
-     * @param _adult Number of adults.
-     * @param _child Number of children.
      * @param _referenceId Reference  ID.
      * @param _checkin Checkin date.
      * @param _checkout Checkout date.
@@ -260,8 +248,6 @@ interface IBukEventProtocol {
         uint256[] memory _total,
         uint256[] memory _baseRate,
         uint256[] memory _minSalePrice,
-        uint256[] memory _adult,
-        uint256[] memory _child,
         bytes32 _referenceId,
         uint256 _checkin,
         uint256 _checkout,
@@ -274,8 +260,6 @@ interface IBukEventProtocol {
      * @param _total Total amount to be paid.
      * @param _baseRate Base rate of the room.
      * @param _minSalePrice Minimum sale price for the booking.
-     * @param _adult Number of adults.
-     * @param _child Number of children.
      * @param _referenceId Reference  ID.
      * @param _checkin Checkin date.
      * @param _checkout Checkout date.
@@ -290,8 +274,6 @@ interface IBukEventProtocol {
         uint256[] memory _total,
         uint256[] memory _baseRate,
         uint256[] memory _minSalePrice,
-        uint256[] memory _adult,
-        uint256[] memory _child,
         bytes32 _referenceId,
         uint256 _checkin,
         uint256 _checkout,
