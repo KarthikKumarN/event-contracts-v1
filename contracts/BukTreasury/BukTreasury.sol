@@ -82,7 +82,7 @@ contract BukTreasury is AccessControl, IBukTreasury, Pausable {
      * @dev Function sets the address of the Buk Protocol contract.
      * @notice It can be executed only by the administrator.
      */
-    function setBukProtocol(
+    function setBukEventProtocol(
         address _bukProtocol
     ) external onlyRole(ADMIN_ROLE) {
         require(_bukProtocol != address(0), "Invalid address");
@@ -92,7 +92,7 @@ contract BukTreasury is AccessControl, IBukTreasury, Pausable {
         _grantRole(BUK_PROTOCOL_ROLE, address(_bukProtocol));
         _revokeRole(BUK_PROTOCOL_ROLE, address(oldAddress));
 
-        emit BukProtocolSet(oldAddress, _bukProtocol);
+        emit BukEventProtocolSet(oldAddress, _bukProtocol);
     }
 
     /**

@@ -9,7 +9,7 @@ import {
   recoverAddress,
 } from "ethers";
 
-describe("BukProtocol Bookings", function () {
+describe("BukEventProtocol Bookings", function () {
   let stableTokenContract;
   let bukProtocolContract;
   let marketplaceContract;
@@ -62,9 +62,11 @@ describe("BukProtocol Bookings", function () {
     const BukRoyalties = await ethers.getContractFactory("BukRoyalties");
     royaltiesContract = await BukRoyalties.deploy();
 
-    //BukProtocol
-    const BukProtocol = await ethers.getContractFactory("BukProtocol");
-    bukProtocolContract = await BukProtocol.deploy(
+    //BukEventProtocol
+    const BukEventProtocol = await ethers.getContractFactory(
+      "BukEventProtocol",
+    );
+    bukProtocolContract = await BukEventProtocol.deploy(
       bukTreasuryContract.getAddress(),
       stableTokenContract.getAddress(),
       bukWallet.getAddress(),
@@ -111,13 +113,13 @@ describe("BukProtocol Bookings", function () {
     );
 
     //Set Buk Protocol in Treasury
-    const setBukProtocol = await bukTreasuryContract.setBukProtocol(
+    const setBukEventProtocol = await bukTreasuryContract.setBukEventProtocol(
       bukProtocolContract.getAddress(),
     );
 
     //Set Buk Protocol in BukRoyalties
-    const setBukProtocolRoyalties =
-      await royaltiesContract.setBukProtocolContract(
+    const setBukEventProtocolRoyalties =
+      await royaltiesContract.setBukEventProtocolContract(
         bukProtocolContract.getAddress(),
       );
 

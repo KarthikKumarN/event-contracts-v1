@@ -7,7 +7,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { ContractTransactionResponse } from "ethers";
 import { Marketplace } from "../../typechain-types";
-import { BukProtocol } from "../../typechain-types";
+import { BukEventProtocol } from "../../typechain-types";
 import { bukNfTs } from "../../typechain-types/contracts";
 import { keccak256, toUtf8Bytes } from "ethers";
 
@@ -66,9 +66,11 @@ describe("Marketplace", function () {
     const BukRoyalties = await ethers.getContractFactory("BukRoyalties");
     royaltiesContract = await BukRoyalties.deploy();
 
-    //BukProtocol
-    const BukProtocol = await ethers.getContractFactory("BukProtocol");
-    bukProtocolContract = await BukProtocol.deploy(
+    //BukEventProtocol
+    const BukEventProtocol = await ethers.getContractFactory(
+      "BukEventProtocol",
+    );
+    bukProtocolContract = await BukEventProtocol.deploy(
       bukTreasuryContract.getAddress(),
       stableTokenContract.getAddress(),
       bukWallet.getAddress(),
@@ -122,13 +124,13 @@ describe("Marketplace", function () {
     );
 
     //Set Buk Protocol in Treasury
-    const setBukProtocol = await bukTreasuryContract.setBukProtocol(
+    const setBukEventProtocol = await bukTreasuryContract.setBukEventProtocol(
       bukProtocolContract.getAddress(),
     );
 
     //Set Buk Protocol in BukRoyalties
-    const setBukProtocolRoyalties =
-      await royaltiesContract.setBukProtocolContract(
+    const setBukEventProtocolRoyalties =
+      await royaltiesContract.setBukEventProtocolContract(
         bukProtocolContract.getAddress(),
       );
 
@@ -143,7 +145,7 @@ describe("Marketplace", function () {
 
   describe("Deployment marketplace", function () {
     it("Should set the BUK protocol address", async function () {
-      expect(await marketplaceContract.getBukProtocol()).to.equal(
+      expect(await marketplaceContract.getBukEventProtocol()).to.equal(
         await bukProtocolContract.getAddress(),
       );
     });
@@ -161,7 +163,7 @@ describe("Marketplace", function () {
     });
 
     it("Should set the buk protocol contract", async function () {
-      expect(await marketplaceContract.getBukProtocol()).to.equal(
+      expect(await marketplaceContract.getBukEventProtocol()).to.equal(
         await bukProtocolContract.getAddress(),
       );
     });
@@ -177,28 +179,30 @@ describe("Marketplace", function () {
   describe("Set Buk protocol contract for marketplace", function () {
     it("Should set the BUK protocol", async function () {
       let newContract = "0xa9a1C7be37Cb72811A6C4C278cA7C403D6459b78";
-      await expect(await marketplaceContract.setBukProtocol(newContract)).to.not
-        .be.reverted;
-      expect(await marketplaceContract.getBukProtocol()).to.equal(newContract);
+      await expect(await marketplaceContract.setBukEventProtocol(newContract))
+        .to.not.be.reverted;
+      expect(await marketplaceContract.getBukEventProtocol()).to.equal(
+        newContract,
+      );
     });
     it("Should reverted with error Buk protocol contract", async function () {
       let newContract = "0x0000000000000000000000000000000000000000";
       await expect(
-        marketplaceContract.setBukProtocol(newContract),
+        marketplaceContract.setBukEventProtocol(newContract),
       ).to.be.revertedWith("Invalid address");
     });
 
     it("Should set the Buk protocol contract and emit event", async function () {
       let newAddress = "0xa9a1C7be37Cb72811A6C4C278cA7C403D6459b78";
-      await expect(await marketplaceContract.setBukProtocol(newAddress))
-        .to.emit(marketplaceContract, "BukProtocolSet")
+      await expect(await marketplaceContract.setBukEventProtocol(newAddress))
+        .to.emit(marketplaceContract, "BukEventProtocolSet")
         .withArgs(newAddress);
     });
 
     it("Should reverted with admin error Buk protocol contract", async function () {
       let newAddress = "0xa9a1C7be37Cb72811A6C4C278cA7C403D6459b78";
       await expect(
-        marketplaceContract.connect(account1).setBukProtocol(newAddress),
+        marketplaceContract.connect(account1).setBukEventProtocol(newAddress),
       ).to.be.revertedWith(
         `AccessControl: account ${account1.address.toLowerCase()} is missing role ${await marketplaceContract.ADMIN_ROLE()}`,
       );
@@ -1521,7 +1525,7 @@ describe("Marketplace", function () {
       expect(
         await marketplaceContract
           .connect(account1)
-          .setBukProtocol(await bukProtocolContract.getAddress()),
+          .setBukEventProtocol(await bukProtocolContract.getAddress()),
       ).not.be.reverted;
     });
   });

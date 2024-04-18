@@ -3,7 +3,7 @@ pragma solidity =0.8.19;
 
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
 import { IBukRoyalties } from "../BukRoyalties/IBukRoyalties.sol";
-import { IBukProtocol } from "../BukProtocol/IBukProtocol.sol";
+import { IBukEventProtocol } from "../BukEventProtocol/IBukEventProtocol.sol";
 
 /**
  * @title BukRoyalties contract
@@ -19,7 +19,7 @@ contract BukRoyalties is AccessControl, IBukRoyalties {
         0xa49807205ce4d355092ef5a8a18f56e8913cf4a201fbe287825b095693c21775;
 
     /// @dev Address of the Buk Protocol contract
-    IBukProtocol public bukProtocolContract;
+    IBukEventProtocol public bukProtocolContract;
 
     /**
      * @dev Public variable representing the Buk POS NFT collection contract.
@@ -54,14 +54,17 @@ contract BukRoyalties is AccessControl, IBukRoyalties {
         _grantRole(ADMIN_ROLE, msg.sender);
     }
 
-    /// @dev See {IBukRoyalties-setBukProtocolContract}.
-    function setBukProtocolContract(
+    /// @dev See {IBukRoyalties-setBukEventProtocolContract}.
+    function setBukEventProtocolContract(
         address _bukProtocolContract
     ) external onlyRole(ADMIN_ROLE) {
         require(_bukProtocolContract != address(0), "Invalid address");
-        address oldBukProtocolContract = address(bukProtocolContract);
-        bukProtocolContract = IBukProtocol(_bukProtocolContract);
-        emit SetBukProtocol(oldBukProtocolContract, _bukProtocolContract);
+        address oldBukEventProtocolContract = address(bukProtocolContract);
+        bukProtocolContract = IBukEventProtocol(_bukProtocolContract);
+        emit SetBukEventProtocol(
+            oldBukEventProtocolContract,
+            _bukProtocolContract
+        );
     }
 
     /// @dev See {IBukRoyalties-setBukRoyaltyInfo}.
@@ -135,7 +138,7 @@ contract BukRoyalties is AccessControl, IBukRoyalties {
     function getRoyaltyInfo(
         uint256 _tokenId
     ) external view returns (Royalty[] memory) {
-        IBukProtocol.Booking memory bookingDetails_ = bukProtocolContract
+        IBukEventProtocol.Booking memory bookingDetails_ = bukProtocolContract
             .getBookingDetails(_tokenId);
         Royalty[] memory royalties = new Royalty[](otherRoyalties.length + 3);
         royalties[0] = bukRoyalty;

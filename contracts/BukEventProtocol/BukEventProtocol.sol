@@ -10,14 +10,14 @@ import { IBukNFTs } from "../BukNFTs/IBukNFTs.sol";
 import { IBukTreasury } from "../BukTreasury/IBukTreasury.sol";
 import { ISignatureVerifier } from "../SignatureVerifier/ISignatureVerifier.sol";
 import { IBukRoyalties } from "../BukRoyalties/IBukRoyalties.sol";
-import { IBukProtocol } from "../BukProtocol/IBukProtocol.sol";
+import { IBukEventProtocol } from "../BukEventProtocol/IBukEventProtocol.sol";
 
 /**
  * @title BUK Protocol Contract
  * @author BUK Technology Inc
  * @dev Contract to manage operations of the BUK protocol to manage BukNFTs tokens and underlying sub-contracts.
  */
-contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
+contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
     // Using safeERC20
     using SafeERC20 for IERC20;
     /**
@@ -87,53 +87,53 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         _setSignatureVerifier(_signVerifierContract);
     }
 
-    /// @dev See {IBukProtocol-setAdmin}.
+    /// @dev See {IBukEventProtocol-setAdmin}.
     function setAdmin(address _adminAddr) external onlyAdmin {
         _setAdmin(_adminAddr);
     }
 
-    /// @dev See {IBukProtocol-setSignatureVerifier}.
+    /// @dev See {IBukEventProtocol-setSignatureVerifier}.
     function setSignatureVerifier(
         address __signatureVerifier
     ) external onlyAdmin {
         _setSignatureVerifier(__signatureVerifier);
     }
 
-    /// @dev See {IBukProtocol-setBukTreasury}.
+    /// @dev See {IBukEventProtocol-setBukTreasury}.
     function setBukTreasury(address _bukTreasuryContract) external onlyAdmin {
         _setBukTreasury(_bukTreasuryContract);
     }
 
-    /// @dev See {IBukProtocol-setBukWallet}.
+    /// @dev See {IBukEventProtocol-setBukWallet}.
     function setBukWallet(address _bukWalletAddr) external onlyAdmin {
         _setBukWallet(_bukWalletAddr);
     }
 
-    /// @dev See {IBukProtocol-setStableToken}.
+    /// @dev See {IBukEventProtocol-setStableToken}.
     function setStableToken(address _stableTokenAddress) external onlyAdmin {
         _setStableToken(_stableTokenAddress);
     }
 
-    /// @dev See {IBukProtocol-setBukNFTs}.
+    /// @dev See {IBukEventProtocol-setBukNFTs}.
     function setBukNFTs(address _nftContractAddr) external onlyAdmin {
         _nftContract = IBukNFTs(_nftContractAddr);
         emit SetBukNFTs(_nftContractAddr);
     }
 
-    /// @dev See {IBukProtocol-setBukPosNFTs}.
+    /// @dev See {IBukEventProtocol-setBukPosNFTs}.
     function setBukPOSNFTs(address _nftPOSContractAddr) external onlyAdmin {
         _nftPOSContract = IBukPOSNFTs(_nftPOSContractAddr);
         emit SetBukPOSNFTs(_nftPOSContractAddr);
     }
 
-    /// @dev See {IBukProtocol-setRoyalties}.
+    /// @dev See {IBukEventProtocol-setRoyalties}.
     function setRoyaltiesContract(
         address _royaltiesContractAddr
     ) external onlyAdmin {
         _setRoyaltiesContract(_royaltiesContractAddr);
     }
 
-    /// @dev See {IBukProtocol-setCommission}.
+    /// @dev See {IBukEventProtocol-setCommission}.
     function setCommission(
         uint256 _newCommission
     ) external onlyAdmin whenNotPaused {
@@ -142,7 +142,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         emit SetCommission(_newCommission);
     }
 
-    /// @dev See {IBukProtocol-toggleTradeability}.
+    /// @dev See {IBukEventProtocol-toggleTradeability}.
     function toggleTradeability(uint256 _tokenId) external onlyAdmin {
         require(
             _bookingDetails[_tokenId].status != BookingStatus.nil,
@@ -153,17 +153,17 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         emit ToggleTradeability(_tokenId, _bookingDetails[_tokenId].tradeable);
     }
 
-    /// @dev See {IBukProtocol-pause}.
+    /// @dev See {IBukEventProtocol-pause}.
     function pause() external onlyAdmin {
         _pause();
     }
 
-    /// @dev See {IBukProtocol-unpause}.
+    /// @dev See {IBukEventProtocol-unpause}.
     function unpause() external onlyAdmin {
         _unpause();
     }
 
-    /// @dev See {IBukProtocol-bookRooms}.
+    /// @dev See {IBukEventProtocol-bookRooms}.
     function bookRooms(
         uint256[] memory _total,
         uint256[] memory _baseRate,
@@ -193,7 +193,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         return _bookingPayment(commissionTotal, total);
     }
 
-    /// @dev See {IBukProtocol-bookRoomsOwner}.
+    /// @dev See {IBukEventProtocol-bookRoomsOwner}.
     function bookRoomsOwner(
         uint256[] memory _total,
         uint256[] memory _baseRate,
@@ -224,7 +224,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         return true;
     }
 
-    /// @dev See {IBukProtocol-bookingRefund}.
+    /// @dev See {IBukEventProtocol-bookingRefund}.
     function bookingRefund(
         uint256[] memory _ids,
         address _owner
@@ -253,7 +253,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         emit BookingRefund(total, _owner);
     }
 
-    /// @dev See {IBukProtocol-mintBukNFTOwner}.
+    /// @dev See {IBukEventProtocol-mintBukNFTOwner}.
     function mintBukNFTOwner(
         uint256[] memory _ids,
         string[] memory _uri,
@@ -262,7 +262,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         _mintBukNFT(_ids, _uri, _user);
     }
 
-    /// @dev See {IBukProtocol-checkin}.
+    /// @dev See {IBukEventProtocol-checkin}.
     function checkin(uint256[] memory _ids) external {
         uint256 len = _ids.length;
         for (uint256 i = 0; i < len; ++i) {
@@ -287,7 +287,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         emit CheckinRooms(_ids, true);
     }
 
-    /// @dev See {IBukProtocol-checkout}.
+    /// @dev See {IBukEventProtocol-checkout}.
     function checkout(
         uint256[] memory _ids,
         address[] memory _recipients
@@ -321,7 +321,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         emit CheckoutRooms(_ids, true);
     }
 
-    /// @dev See {IBukProtocol-cancelRooms}.
+    /// @dev See {IBukEventProtocol-cancelRooms}.
     function cancelRooms(
         uint256[] memory _ids,
         uint256[] memory _penalties,
@@ -383,7 +383,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         emit CancelRoom(_ids, totalRefund, true);
     }
 
-    /// @dev See {IBukProtocol-emergencyCancellation}.
+    /// @dev See {IBukEventProtocol-emergencyCancellation}.
     function emergencyCancellation(
         uint256 _id,
         uint256 _refund,
@@ -417,14 +417,14 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         emit EmergencyCancellation(_id, true);
     }
 
-    /// @dev See {IBukProtocol-getBookingDetails}.
+    /// @dev See {IBukEventProtocol-getBookingDetails}.
     function getBookingDetails(
         uint256 _tokenId
     ) external view returns (Booking memory) {
         return _bookingDetails[_tokenId];
     }
 
-    /// @dev See {IBukProtocol-getRoyaltyInfo}.
+    /// @dev See {IBukEventProtocol-getRoyaltyInfo}.
     function getRoyaltyInfo(
         uint256 _tokenId
     ) external view returns (IBukRoyalties.Royalty[] memory) {
@@ -433,7 +433,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         return royalties;
     }
 
-    /// @dev See {IBukProtocol-getWallets}.
+    /// @dev See {IBukEventProtocol-getWallets}.
     function getWallets()
         external
         view
@@ -605,7 +605,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         return (commissionTotal, totalAmount);
     }
 
-    /// @dev See {IBukProtocol-mintBukNFT}.
+    /// @dev See {IBukEventProtocol-mintBukNFT}.
     function _mintBukNFT(
         uint256[] memory _ids,
         string[] memory _uri,

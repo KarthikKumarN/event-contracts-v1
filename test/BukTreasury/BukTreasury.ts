@@ -54,9 +54,11 @@ describe("BukTreasury", () => {
     const BukRoyalties = await ethers.getContractFactory("BukRoyalties");
     royaltiesContract = await BukRoyalties.deploy();
 
-    //BukProtocol
-    const BukProtocol = await ethers.getContractFactory("BukProtocol");
-    bukProtocolContract = await BukProtocol.deploy(
+    //BukEventProtocol
+    const BukEventProtocol = await ethers.getContractFactory(
+      "BukEventProtocol",
+    );
+    bukProtocolContract = await BukEventProtocol.deploy(
       bukTreasuryContract.getAddress(),
       stableTokenContract.getAddress(),
       bukWallet.getAddress(),
@@ -65,8 +67,10 @@ describe("BukTreasury", () => {
     );
     // await bukProtocolContract.deployed();
 
-    // Set BukProtocol in BukTreasury
-    await bukTreasuryContract.setBukProtocol(bukProtocolContract.getAddress());
+    // Set BukEventProtocol in BukTreasury
+    await bukTreasuryContract.setBukEventProtocol(
+      bukProtocolContract.getAddress(),
+    );
   });
 
   // Add all possible testcase for the BukTreasury pause and unpause function
@@ -131,16 +135,18 @@ describe("BukTreasury", () => {
     });
   });
 
-  // Add all possible testcase for the BukTreasury setBukProtocol function
-  describe("setBukProtocol", () => {
-    it("Should set the BukProtocol address", async () => {
-      expect(await bukTreasuryContract.setBukProtocol(account1.address)).to.not
-        .be.reverted;
+  // Add all possible testcase for the BukTreasury setBukEventProtocol function
+  describe("setBukEventProtocol", () => {
+    it("Should set the BukEventProtocol address", async () => {
+      expect(await bukTreasuryContract.setBukEventProtocol(account1.address)).to
+        .not.be.reverted;
     });
 
     it("Should revert if not called by the owner", async () => {
       await expect(
-        bukTreasuryContract.connect(account1).setBukProtocol(account1.address),
+        bukTreasuryContract
+          .connect(account1)
+          .setBukEventProtocol(account1.address),
       ).to.be.revertedWith(
         `AccessControl: account ${account1.address.toLowerCase()} is missing role ${await bukTreasuryContract.ADMIN_ROLE()}`,
       );
@@ -148,15 +154,15 @@ describe("BukTreasury", () => {
     it("Should revert if the address is 0", async () => {
       let newContract = "0x0000000000000000000000000000000000000000";
       await expect(
-        bukTreasuryContract.setBukProtocol(newContract),
+        bukTreasuryContract.setBukEventProtocol(newContract),
       ).to.be.revertedWith("Invalid address");
     });
 
-    it("Should emit event when BukProtocol address is set", async () => {
-      await bukTreasuryContract.setBukProtocol(account1.address);
+    it("Should emit event when BukEventProtocol address is set", async () => {
+      await bukTreasuryContract.setBukEventProtocol(account1.address);
       let oldAddress = await bukTreasuryContract.bukProtocolContract();
-      await expect(bukTreasuryContract.setBukProtocol(account2.address))
-        .to.emit(bukTreasuryContract, "BukProtocolSet")
+      await expect(bukTreasuryContract.setBukEventProtocol(account2.address))
+        .to.emit(bukTreasuryContract, "BukEventProtocolSet")
         .withArgs(oldAddress, account2.address);
     });
   });
@@ -279,7 +285,7 @@ describe("BukTreasury", () => {
         await bukTreasuryContract.getAddress(),
         100000000000,
       );
-      await bukTreasuryContract.setBukProtocol(
+      await bukTreasuryContract.setBukEventProtocol(
         bukProtocolContract1.getAddress(),
       );
       await bukTreasuryContract
@@ -309,7 +315,7 @@ describe("BukTreasury", () => {
         await bukProtocolContract1.getAddress(),
         100000000000,
       );
-      await bukTreasuryContract.setBukProtocol(
+      await bukTreasuryContract.setBukEventProtocol(
         bukProtocolContract1.getAddress(),
       );
       let newContract = "0x0000000000000000000000000000000000000000";
@@ -321,7 +327,7 @@ describe("BukTreasury", () => {
     });
     // Test when paused
     it("Should revert if the contract is paused", async () => {
-      await bukTreasuryContract.setBukProtocol(
+      await bukTreasuryContract.setBukEventProtocol(
         await bukProtocolContract1.getAddress(),
       );
       await bukTreasuryContract.pause();
@@ -340,7 +346,7 @@ describe("BukTreasury", () => {
         await bukTreasuryContract.getAddress(),
         10000000000,
       );
-      await bukTreasuryContract.setBukProtocol(
+      await bukTreasuryContract.setBukEventProtocol(
         bukProtocolContract1.getAddress(),
       );
       await bukTreasuryContract
@@ -374,7 +380,7 @@ describe("BukTreasury", () => {
     });
     // Add more test cases to test whenNotPaused modifier
     it("Should revert if the contract is paused", async () => {
-      await bukTreasuryContract.setBukProtocol(
+      await bukTreasuryContract.setBukEventProtocol(
         await bukProtocolContract1.getAddress(),
       );
       await bukTreasuryContract.pause();
@@ -393,7 +399,7 @@ describe("BukTreasury", () => {
         await bukProtocolContract1.getAddress(),
         100000000000,
       );
-      await bukTreasuryContract.setBukProtocol(
+      await bukTreasuryContract.setBukEventProtocol(
         bukProtocolContract1.getAddress(),
       );
       let newContract = "0x0000000000000000000000000000000000000000";
@@ -412,7 +418,7 @@ describe("BukTreasury", () => {
         await bukProtocolContract1.getAddress(),
         100000000000,
       );
-      await bukTreasuryContract.setBukProtocol(
+      await bukTreasuryContract.setBukEventProtocol(
         bukProtocolContract1.getAddress(),
       );
       let newContract = "0x0000000000000000000000000000000000000000";

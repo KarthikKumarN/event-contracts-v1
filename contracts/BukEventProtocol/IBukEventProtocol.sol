@@ -6,9 +6,9 @@ import { IBukRoyalties } from "../BukRoyalties/IBukRoyalties.sol";
  * @title Interface to define the BUK protocol
  * @author BUK Technology Inc
  * @dev Collection of all procedures related to the BUK protocol
- * @dev This interface is used by the other child contract to interact with the BukProtocol contract.
+ * @dev This interface is used by the other child contract to interact with the BukEventProtocol contract.
  */
-interface IBukProtocol {
+interface IBukEventProtocol {
     /**
      * @dev Enum for booking statuses.
      * @var BookingStatus.nil         Booking has not yet been initiated.

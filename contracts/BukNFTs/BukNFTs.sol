@@ -6,7 +6,7 @@ import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol"
 import "@openzeppelin/contracts/security/Pausable.sol";
 import { IBukNFTs } from "../BukNFTs/IBukNFTs.sol";
 import { IBukPOSNFTs } from "../BukPOSNFTs/IBukPOSNFTs.sol";
-import { IBukProtocol, IBukRoyalties } from "../BukProtocol/IBukProtocol.sol";
+import { IBukEventProtocol, IBukRoyalties } from "../BukEventProtocol/IBukEventProtocol.sol";
 import { IBukTreasury } from "../BukTreasury/IBukTreasury.sol";
 
 /**
@@ -29,7 +29,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
     IBukPOSNFTs public nftPOSContract;
 
     /// @dev Address of the Buk Protocol contract
-    IBukProtocol public bukProtocolContract;
+    IBukEventProtocol public bukProtocolContract;
 
     /// @dev Address of the Buk treasury contract.
     IBukTreasury private _bukTreasury;
@@ -74,7 +74,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
         name = _contractName;
         _setBukTreasury(_bukTreasuryContract);
         _setBukPOSNFTRole(_bukPOSContract);
-        _setBukProtocol(_bukProtocolContract);
+        _setBukEventProtocol(_bukProtocolContract);
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(ADMIN_ROLE, _msgSender());
         _grantRole(BUK_PROTOCOL_ROLE, _bukProtocolContract);
@@ -96,11 +96,11 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
         _unpause();
     }
 
-    /// @dev See {IBukNFTs-setBukProtocol}.
-    function setBukProtocol(
+    /// @dev See {IBukNFTs-setBukEventProtocol}.
+    function setBukEventProtocol(
         address _bukProtocolContract
     ) external onlyRole(ADMIN_ROLE) {
-        _setBukProtocol(_bukProtocolContract);
+        _setBukEventProtocol(_bukProtocolContract);
     }
 
     /// @dev See {IBukNFTs-setBukTreasury}.
@@ -195,7 +195,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
         onlyRole(MARKETPLACE_CONTRACT_ROLE)
         whenNotPaused
     {
-        IBukProtocol.Booking memory details = bukProtocolContract
+        IBukEventProtocol.Booking memory details = bukProtocolContract
             .getBookingDetails(_id);
         require(
             (block.timestamp <
@@ -230,7 +230,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
         );
         uint256 len = _ids.length;
         for (uint i = 0; i < len; ++i) {
-            IBukProtocol.Booking memory details = bukProtocolContract
+            IBukEventProtocol.Booking memory details = bukProtocolContract
                 .getBookingDetails(_ids[i]);
             require(
                 (block.timestamp <
@@ -245,7 +245,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
         super._safeBatchTransferFrom(_from, _to, _ids, _amounts, _data);
     }
 
-    /// @dev See {IBukNFTs-setBukProtocol}.
+    /// @dev See {IBukNFTs-setBukEventProtocol}.
     function uri(
         uint256 _id
     ) public view virtual override(ERC1155, IBukNFTs) returns (string memory) {
@@ -263,12 +263,15 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
      * Private function to set the Buk Protocol Contract address.
      * @param _bukProtocolContract The address of the Buk Protocol contract
      */
-    function _setBukProtocol(address _bukProtocolContract) private {
-        address oldBukProtocolContract_ = address(bukProtocolContract);
-        bukProtocolContract = IBukProtocol(_bukProtocolContract);
+    function _setBukEventProtocol(address _bukProtocolContract) private {
+        address oldBukEventProtocolContract_ = address(bukProtocolContract);
+        bukProtocolContract = IBukEventProtocol(_bukProtocolContract);
         _grantRole(BUK_PROTOCOL_ROLE, _bukProtocolContract);
-        _revokeRole(BUK_PROTOCOL_ROLE, oldBukProtocolContract_);
-        emit SetBukProtocol(oldBukProtocolContract_, _bukProtocolContract);
+        _revokeRole(BUK_PROTOCOL_ROLE, oldBukEventProtocolContract_);
+        emit SetBukEventProtocol(
+            oldBukEventProtocolContract_,
+            _bukProtocolContract
+        );
     }
 
     /**

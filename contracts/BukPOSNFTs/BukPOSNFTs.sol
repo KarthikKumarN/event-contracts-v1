@@ -5,7 +5,7 @@ import { ERC1155, IERC165 } from "@openzeppelin/contracts/token/ERC1155/ERC1155.
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
 import { IBukNFTs } from "../BukNFTs/IBukNFTs.sol";
 import { IBukPOSNFTs } from "../BukPOSNFTs/IBukPOSNFTs.sol";
-import { IBukProtocol, IBukRoyalties } from "../BukProtocol/IBukProtocol.sol";
+import { IBukEventProtocol, IBukRoyalties } from "../BukEventProtocol/IBukEventProtocol.sol";
 import { IBukTreasury } from "../BukTreasury/IBukTreasury.sol";
 
 /**
@@ -24,7 +24,7 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
     IBukNFTs public nftContract;
 
     /// @dev Address of the Buk Protocol contract
-    IBukProtocol public bukProtocolContract;
+    IBukEventProtocol public bukProtocolContract;
 
     /// @dev Mapping for token URI's for Buk POS NFTs
     mapping(uint256 => string) public uriByTokenId; //tokenId -> uri
@@ -57,16 +57,16 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
     ) ERC1155("") {
         _setNFTContractName(_contractName);
         _setBukTreasury(_bukTreasuryContract);
-        _setBukProtocol(_bukProtocolContract);
+        _setBukEventProtocol(_bukProtocolContract);
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(ADMIN_ROLE, _msgSender());
     }
 
-    /// @dev See {IBukPOSNFTs-setBukProtocol}.
-    function setBukProtocol(
+    /// @dev See {IBukPOSNFTs-setBukEventProtocol}.
+    function setBukEventProtocol(
         address _bukProtocolContract
     ) external onlyRole(ADMIN_ROLE) {
-        _setBukProtocol(_bukProtocolContract);
+        _setBukEventProtocol(_bukProtocolContract);
     }
 
     /// @dev See {IBukPOSNFTs-setBukTreasury}.
@@ -180,10 +180,13 @@ contract BukPOSNFTs is AccessControl, ERC1155, IBukPOSNFTs {
      * Private function to set the Buk Protocol Contract address.
      * @param _bukProtocolContract The address of the Buk Protocol contract
      */
-    function _setBukProtocol(address _bukProtocolContract) private {
-        address oldBukProtocolContract_ = address(bukProtocolContract);
-        bukProtocolContract = IBukProtocol(_bukProtocolContract);
-        emit SetBukProtocol(oldBukProtocolContract_, _bukProtocolContract);
+    function _setBukEventProtocol(address _bukProtocolContract) private {
+        address oldBukEventProtocolContract_ = address(bukProtocolContract);
+        bukProtocolContract = IBukEventProtocol(_bukProtocolContract);
+        emit SetBukEventProtocol(
+            oldBukEventProtocolContract_,
+            _bukProtocolContract
+        );
     }
 
     /**

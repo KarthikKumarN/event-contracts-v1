@@ -36,7 +36,7 @@ async function main() {
   console.log("🚀 ~ Deployed Royalties:", royalties.target);
   await royalties.waitForDeployment();
 
-  // Deploy BukProtocol
+  // Deploy BukEventProtocol
   const bukProtocolArgs = [
     treasury.target,
     USDC_CONTRACT,
@@ -45,10 +45,10 @@ async function main() {
     royalties.target,
   ];
   const bukProtocol = await ethers.deployContract(
-    "BukProtocol",
+    "BukEventProtocol",
     bukProtocolArgs,
   );
-  console.log("🚀 ~ Deployed BukProtocol:", bukProtocol.target);
+  console.log("🚀 ~ Deployed BukEventProtocol:", bukProtocol.target);
   await bukProtocol.waitForDeployment();
 
   // Deploy BukPOSNFTs
@@ -95,7 +95,7 @@ async function main() {
   await bukProtocol.setBukPOSNFTs(bukPOSNFTs.target);
 
   //Set Buk Protocol in Treasury
-  await treasury.setBukProtocol(bukProtocol.target);
+  await treasury.setBukEventProtocol(bukProtocol.target);
 
   //Set Buk Treasury in BukNFTs
   await bukNFTs.setBukTreasury(treasury.target);
@@ -104,7 +104,7 @@ async function main() {
   await bukNFTs.setMarketplaceRole(marketplace.target);
 
   //Set Buk Protocol in BukRoyalties
-  await royalties.setBukProtocolContract(bukProtocol.target);
+  await royalties.setBukEventProtocolContract(bukProtocol.target);
 
   //Set Buk Royalty Info in BukRoyalties
   await royalties.setBukRoyaltyInfo(
@@ -144,7 +144,7 @@ async function main() {
     constructorArguments: [],
   });
 
-  //Verify BukProtocol contract
+  //Verify BukEventProtocol contract
   await run("verify:verify", {
     address: bukProtocol.target,
     constructorArguments: bukProtocolArgs,

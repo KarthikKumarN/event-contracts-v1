@@ -10,9 +10,9 @@ import { IERC1155 } from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
  */
 interface IBukNFTs is IERC1155 {
     /// @dev Emitted when Buk Protocol Address is updated.
-    event SetBukProtocol(
-        address oldBukProtocolContract,
-        address newBukProtocolContract
+    event SetBukEventProtocol(
+        address oldBukEventProtocolContract,
+        address newBukEventProtocolContract
     );
 
     /// @dev Emitted when treasury is updated.
@@ -38,7 +38,7 @@ interface IBukNFTs is IERC1155 {
      * @param _bukProtocolContract Address of the Buk Protocol Contract.
      * @notice This function can only be called by addresses with `ADMIN_ROLE`
      */
-    function setBukProtocol(address _bukProtocolContract) external;
+    function setBukEventProtocol(address _bukProtocolContract) external;
 
     /**
      * @dev Function to set the treasury address.

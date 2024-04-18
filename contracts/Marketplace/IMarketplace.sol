@@ -67,10 +67,10 @@ interface IMarketplace {
     event DeletedListing(uint256 indexed tokenId);
 
     /**
-     * @dev Emitted when new BukProtocol address has been updated
+     * @dev Emitted when new BukEventProtocol address has been updated
      * @param newAddress, Address of the new bukProtocol
      */
-    event BukProtocolSet(address newAddress);
+    event BukEventProtocolSet(address newAddress);
 
     /**
      * @dev Emitted when new BukNFT address has been updated
@@ -110,7 +110,7 @@ interface IMarketplace {
 
     /**
      * @dev Function will delete listing
-     * @dev NFT owner or BukProtocol can delete lisitng
+     * @dev NFT owner or BukEventProtocol can delete lisitng
      * @notice When user checkin, Buk protocol can call this function
      * @param _tokenId Unique ID
      */
@@ -152,7 +152,7 @@ interface IMarketplace {
      * @dev Function will set new BUK protocol address
      * @param _bukProtocol address of new BUK protocol
      */
-    function setBukProtocol(address _bukProtocol) external;
+    function setBukEventProtocol(address _bukProtocol) external;
 
     /**
      * @dev Function will set new BUK NFT address
@@ -177,7 +177,7 @@ interface IMarketplace {
      * @dev Gets current BUK protocol address
      * @return address, Address of the BUK protocol contract
      */
-    function getBukProtocol() external view returns (address);
+    function getBukEventProtocol() external view returns (address);
 
     /**
      * @dev Gets current BUK NFT address

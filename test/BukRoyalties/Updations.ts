@@ -99,9 +99,11 @@ describe("BukRoyalties Updations", function () {
     const BukRoyalties = await ethers.getContractFactory("BukRoyalties");
     royaltiesContract = await BukRoyalties.deploy();
 
-    //BukProtocol
-    const BukProtocol = await ethers.getContractFactory("BukProtocol");
-    bukProtocolContract = await BukProtocol.deploy(
+    //BukEventProtocol
+    const BukEventProtocol = await ethers.getContractFactory(
+      "BukEventProtocol",
+    );
+    bukProtocolContract = await BukEventProtocol.deploy(
       bukTreasuryContract.getAddress(),
       stableTokenContract.getAddress(),
       bukWallet.getAddress(),
@@ -148,13 +150,13 @@ describe("BukRoyalties Updations", function () {
     );
 
     //Set Buk Protocol in Treasury
-    const setBukProtocol = await bukTreasuryContract.setBukProtocol(
+    const setBukEventProtocol = await bukTreasuryContract.setBukEventProtocol(
       bukProtocolContract.getAddress(),
     );
 
     //Set Buk Protocol in BukRoyalties
-    const setBukProtocolRoyalties =
-      await royaltiesContract.setBukProtocolContract(
+    const setBukEventProtocolRoyalties =
+      await royaltiesContract.setBukEventProtocolContract(
         bukProtocolContract.getAddress(),
       );
 
@@ -170,7 +172,7 @@ describe("BukRoyalties Updations", function () {
       expect(
         await royaltiesContract
           .connect(adminWallet)
-          .setBukProtocolContract(account1),
+          .setBukEventProtocolContract(account1),
       ).not.be.reverted;
       const addr = await royaltiesContract
         .connect(adminWallet)
@@ -182,7 +184,7 @@ describe("BukRoyalties Updations", function () {
       expect(
         await royaltiesContract
           .connect(adminWallet)
-          .setBukProtocolContract(account1),
+          .setBukEventProtocolContract(account1),
       )
         .to.emit(royaltiesContract, "SetBukTreasury")
         .withArgs(await account1.getAddress());
@@ -190,7 +192,9 @@ describe("BukRoyalties Updations", function () {
     it("Should not set buk protocol if not admin", async function () {
       //Set buk protocol
       await expect(
-        royaltiesContract.connect(account2).setBukProtocolContract(account1),
+        royaltiesContract
+          .connect(account2)
+          .setBukEventProtocolContract(account1),
       ).to.be.reverted;
     });
   });

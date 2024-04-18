@@ -104,9 +104,11 @@ describe("BukNFTs Updations", function () {
     const BukRoyalties = await ethers.getContractFactory("BukRoyalties");
     royaltiesContract = await BukRoyalties.deploy();
 
-    //BukProtocol
-    const BukProtocol = await ethers.getContractFactory("BukProtocol");
-    bukProtocolContract = await BukProtocol.deploy(
+    //BukEventProtocol
+    const BukEventProtocol = await ethers.getContractFactory(
+      "BukEventProtocol",
+    );
+    bukProtocolContract = await BukEventProtocol.deploy(
       bukTreasuryContract.getAddress(),
       stableTokenContract.getAddress(),
       bukWallet.getAddress(),
@@ -150,7 +152,7 @@ describe("BukNFTs Updations", function () {
     );
 
     //Set Buk Protocol in Treasury
-    const setBukProtocol = await bukTreasuryContract.setBukProtocol(
+    const setBukEventProtocol = await bukTreasuryContract.setBukEventProtocol(
       bukProtocolContract.getAddress(),
     );
 
@@ -196,7 +198,7 @@ describe("BukNFTs Updations", function () {
   describe("Set Buk Protocol in BukNFTs", function () {
     it("Should set Buk Protocol in BukNFTs", async function () {
       expect(
-        await nftContract.setBukProtocol(
+        await nftContract.setBukEventProtocol(
           await bukProtocolContract.getAddress(),
         ),
       ).not.be.reverted;
@@ -206,8 +208,10 @@ describe("BukNFTs Updations", function () {
       );
     });
     it("Should set Buk Protocol and emit event", async function () {
-      expect(await nftContract.setBukProtocol(bukProtocolContract.getAddress()))
-        .to.emit(nftContract, "SetBukProtocol")
+      expect(
+        await nftContract.setBukEventProtocol(bukProtocolContract.getAddress()),
+      )
+        .to.emit(nftContract, "SetBukEventProtocol")
         .withArgs(
           bukProtocolContract.getAddress(),
           bukProtocolContract.getAddress(),
@@ -217,7 +221,7 @@ describe("BukNFTs Updations", function () {
       await expect(
         nftContract
           .connect(account1)
-          .setBukProtocol(bukProtocolContract.getAddress()),
+          .setBukEventProtocol(bukProtocolContract.getAddress()),
       ).to.be.reverted;
     });
   });
