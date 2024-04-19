@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.19;
+pragma solidity ^0.8.19;
 import { IBukRoyalties } from "../BukRoyalties/IBukRoyalties.sol";
 
 /**
@@ -9,6 +9,16 @@ import { IBukRoyalties } from "../BukRoyalties/IBukRoyalties.sol";
  * @dev This interface is used by the other child contract to interact with the BukEventProtocol contract.
  */
 interface IBukEventProtocol {
+    /**
+     * @dev Enum for Event type.
+     * @var EventType.free         Event type free.
+     * @var EventType.paid      Event type paid.
+     */
+    enum EventType {
+        free,
+        paid
+    }
+
     /**
      * @dev Enum for booking statuses.
      * @var BookingStatus.nil         Booking has not yet been initiated.
@@ -28,14 +38,42 @@ interface IBukEventProtocol {
     }
 
     /**
+     * @dev Struct for Event details.
+     * @param bytes32 referenceId       Event Reference ID.
+     * @param EventType eventType       Event type.
+     * @param uint256 start             Event start date and time.
+     * @param uint256 end               Event end date and time.
+     * @param uint256 noOfTickets       Total no tickets can be booked.
+     * @param uint256 rate              Ticket rate.
+     // TODO * @param uint256 commission        Buk commission.
+     * @param uint256 tradeTimeLimit    Buy will excecute if tradeLimitTime is not crossed (in hours)
+     * @param bool tradeable            Is the Event Tradeable.
+     * @param address owner             Address of the event owner.
+     * @param address nftAddress        Address of the event NFT.
+     */
+    struct Event {
+        bytes32 referenceId;
+        EventType eventType;
+        uint256 start;
+        uint256 end;
+        uint256 noOfTickets;
+        uint256 rate;
+        uint256 commission;
+        uint256 tradeTimeLimit;
+        bool tradeable;
+        address owner;
+        address nftAddress;
+    }
+
+    /**
      * @dev Struct for booking details.
      * @param uint256 id                Booking ID.
      * @param uint256 tokenId           Token ID.
-     * @param bytes32 referenceId       Reference ID.
+     * @param bytes32 eventId           Event ID.
      * @param BookingStatus status      Booking status.
      * @param address owner             Address of the booking owner.
-     * @param uint256 checkin           Check-in date.
-     * @param uint256 checkout          Check-out date.
+     * @param uint256 start             Event start date.
+     * @param uint256 end          Event end date.
      * @param uint256 total             Total price.
      * @param uint256 baseRate          Base rate.
      * @param uint256 commission        Buk commission.
@@ -46,11 +84,11 @@ interface IBukEventProtocol {
     struct Booking {
         uint256 id;
         uint256 tokenId;
-        bytes32 referenceId;
+        bytes32 eventId;
         BookingStatus status;
         address firstOwner;
-        uint256 checkin;
-        uint256 checkout;
+        uint256 start;
+        uint256 end;
         uint256 total;
         uint256 baseRate;
         uint256 commission;
@@ -64,9 +102,9 @@ interface IBukEventProtocol {
      * @param uint256 total             Total price.
      * @param uint256 baseRate          Base rate.
      * @param uint256 minSalePrice      Min Sale Price.
-     * @param bytes32 referenceId        Reference  ID.
-     * @param uint256 checkin           Check-in date.
-     * @param uint256 checkout          Check-out date.
+     * @param bytes32 eventId           Event ID.
+     * @param uint256 start             Event Start date.
+     * @param uint256 end               Event End date.
      * @param uint256 tradeTimeLimit    Buy will excecute if tradeLimitTime is not crossed (in hours)
      * @param bool tradeable            Is the NFT Tradeable.
      * @param address user             Address of the booking owner.
@@ -75,9 +113,9 @@ interface IBukEventProtocol {
         uint256[] total;
         uint256[] baseRate;
         uint256[] minSalePrice;
-        bytes32 referenceId;
-        uint256 checkIn;
-        uint256 checkOut;
+        bytes32 eventId;
+        uint256 start;
+        uint256 end;
         uint256 tradeTimeLimit;
         bool tradeable;
         address user;
