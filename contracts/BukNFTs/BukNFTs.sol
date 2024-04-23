@@ -25,7 +25,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
     uint16 public constant FEE_DENOMINATOR = 10000;
 
     /// @dev Address of the Buk Protocol contract
-    IBukEventProtocol public bukProtocolContract;
+    IBukEventProtocol public bukEventProtocolContract;
 
     /// @dev Address of the Buk treasury contract.
     IBukTreasury private _bukTreasury;
@@ -57,20 +57,20 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
     /**
      * @dev Constructor to initialize the contract
      * @param _contractName NFT contract name
-     * @param _bukProtocolContract Address of the buk protocol contract
+     * @param _bukEventProtocolContract Address of the buk protocol contract
      * @param _bukTreasuryContract Address of the Buk treasury contract.
      */
     constructor(
         string memory _contractName,
-        address _bukProtocolContract,
+        address _bukEventProtocolContract,
         address _bukTreasuryContract
     ) ERC1155("") {
         name = _contractName;
         _setBukTreasury(_bukTreasuryContract);
-        _setBukEventProtocol(_bukProtocolContract);
+        _setBukEventProtocol(_bukEventProtocolContract);
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(ADMIN_ROLE, _msgSender());
-        _grantRole(BUK_PROTOCOL_ROLE, _bukProtocolContract);
+        _grantRole(BUK_PROTOCOL_ROLE, _bukEventProtocolContract);
     }
 
     /**
@@ -91,9 +91,9 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
 
     /// @dev See {IBukNFTs-setBukEventProtocol}.
     function setBukEventProtocol(
-        address _bukProtocolContract
+        address _bukEventProtocolContract
     ) external onlyRole(ADMIN_ROLE) {
-        _setBukEventProtocol(_bukProtocolContract);
+        _setBukEventProtocol(_bukEventProtocolContract);
     }
 
     /// @dev See {IBukNFTs-setBukTreasury}.
@@ -152,7 +152,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
         uint256 _tokenId,
         uint256 _salePrice
     ) external view returns (address receiver, uint256 royaltyAmount) {
-        IBukRoyalties.Royalty[] memory royaltyArray = bukProtocolContract
+        IBukRoyalties.Royalty[] memory royaltyArray = bukEventProtocolContract
             .getRoyaltyInfo(_tokenId);
         uint256 royaltyAmount_;
         for (uint i = 0; i < royaltyArray.length; i++) {
@@ -176,7 +176,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
         onlyRole(MARKETPLACE_CONTRACT_ROLE)
         whenNotPaused
     {
-        IBukEventProtocol.Booking memory details = bukProtocolContract
+        IBukEventProtocol.Booking memory details = bukEventProtocolContract
             .getBookingDetails(_id);
         require(
             (block.timestamp <
@@ -211,12 +211,12 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
         );
         uint256 len = _ids.length;
         for (uint i = 0; i < len; ++i) {
-            IBukEventProtocol.Booking memory details = bukProtocolContract
+            IBukEventProtocol.Booking memory details = bukEventProtocolContract
                 .getBookingDetails(_ids[i]);
             require(
                 (block.timestamp <
                     (details.checkin -
-                        (bukProtocolContract
+                        (bukEventProtocolContract
                             .getBookingDetails(_ids[i])
                             .tradeTimeLimit * 3600)) &&
                     details.tradeable),
@@ -242,16 +242,18 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
 
     /**
      * Private function to set the Buk Protocol Contract address.
-     * @param _bukProtocolContract The address of the Buk Protocol contract
+     * @param _bukEventProtocolContract The address of the Buk Protocol contract
      */
-    function _setBukEventProtocol(address _bukProtocolContract) private {
-        address oldBukEventProtocolContract_ = address(bukProtocolContract);
-        bukProtocolContract = IBukEventProtocol(_bukProtocolContract);
-        _grantRole(BUK_PROTOCOL_ROLE, _bukProtocolContract);
+    function _setBukEventProtocol(address _bukEventProtocolContract) private {
+        address oldBukEventProtocolContract_ = address(
+            bukEventProtocolContract
+        );
+        bukEventProtocolContract = IBukEventProtocol(_bukEventProtocolContract);
+        _grantRole(BUK_PROTOCOL_ROLE, _bukEventProtocolContract);
         _revokeRole(BUK_PROTOCOL_ROLE, oldBukEventProtocolContract_);
         emit SetBukEventProtocol(
             oldBukEventProtocolContract_,
-            _bukProtocolContract
+            _bukEventProtocolContract
         );
     }
 

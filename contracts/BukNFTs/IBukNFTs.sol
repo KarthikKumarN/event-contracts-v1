@@ -29,10 +29,10 @@ interface IBukNFTs is IERC1155 {
 
     /**
      * @dev Function to set the Buk Protocol Contract address.
-     * @param _bukProtocolContract Address of the Buk Protocol Contract.
+     * @param _bukEventProtocolContract Address of the Buk Protocol Contract.
      * @notice This function can only be called by addresses with `ADMIN_ROLE`
      */
-    function setBukEventProtocol(address _bukProtocolContract) external;
+    function setBukEventProtocol(address _bukEventProtocolContract) external;
 
     /**
      * @dev Function to set the treasury address.
