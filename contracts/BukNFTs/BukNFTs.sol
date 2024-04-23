@@ -5,7 +5,6 @@ import { ERC1155, IERC165 } from "@openzeppelin/contracts/token/ERC1155/ERC1155.
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import { IBukNFTs } from "../BukNFTs/IBukNFTs.sol";
-import { IBukPOSNFTs } from "../BukPOSNFTs/IBukPOSNFTs.sol";
 import { IBukEventProtocol, IBukRoyalties } from "../BukEventProtocol/IBukEventProtocol.sol";
 import { IBukTreasury } from "../BukTreasury/IBukTreasury.sol";
 
@@ -15,7 +14,7 @@ import { IBukTreasury } from "../BukTreasury/IBukTreasury.sol";
  * @dev Contract for managing hotel room-night inventory and ERC1155 token management for room-night NFTs
  */
 contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
-    /// @dev Name of the Buk POS NFT collection contract
+    /// @dev Name of the Buk Event NFT collection contract
     string public name;
 
     /**
@@ -24,9 +23,6 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
      * override.
      */
     uint16 public constant FEE_DENOMINATOR = 10000;
-
-    /// @dev Address of the Buk POS NFT collection contract
-    IBukPOSNFTs public nftPOSContract;
 
     /// @dev Address of the Buk Protocol contract
     IBukEventProtocol public bukProtocolContract;
@@ -61,19 +57,16 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
     /**
      * @dev Constructor to initialize the contract
      * @param _contractName NFT contract name
-     * @param _bukPOSContract Address of the Buk POS NFTs contract
      * @param _bukProtocolContract Address of the buk protocol contract
      * @param _bukTreasuryContract Address of the Buk treasury contract.
      */
     constructor(
         string memory _contractName,
-        address _bukPOSContract,
         address _bukProtocolContract,
         address _bukTreasuryContract
     ) ERC1155("") {
         name = _contractName;
         _setBukTreasury(_bukTreasuryContract);
-        _setBukPOSNFTRole(_bukPOSContract);
         _setBukEventProtocol(_bukProtocolContract);
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(ADMIN_ROLE, _msgSender());
@@ -118,13 +111,6 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
         emit SetMarketplace(_marketplaceContract);
     }
 
-    /// @dev See {IBukNFTs-setBukPOSNFTRole}.
-    function setBukPOSNFTRole(
-        address _nftPOSContract
-    ) external onlyRole(ADMIN_ROLE) {
-        _setBukPOSNFTRole(_nftPOSContract);
-    }
-
     /// @dev See {IBukNFTs-setURI}.
     function setURI(
         uint256 _id,
@@ -154,13 +140,8 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
     function burn(
         address _account,
         uint256 _id,
-        uint256 _amount,
-        bool _mintPOS
+        uint256 _amount
     ) external onlyRole(BUK_PROTOCOL_ROLE) {
-        if (_mintPOS) {
-            string memory uri_ = uriByTokenId[_id];
-            nftPOSContract.mint(_account, _id, _amount, uri_, "");
-        }
         delete uriByTokenId[_id];
 
         _burn(_account, _id, _amount);
@@ -282,16 +263,6 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
         address oldBukTreasuryContract_ = address(_bukTreasury);
         _bukTreasury = IBukTreasury(_bukTreasuryContract);
         emit SetBukTreasury(oldBukTreasuryContract_, _bukTreasuryContract);
-    }
-
-    /**
-     * Private function to set the role to a BukPOSNFT contract
-     * @param _nftPOSContract The address of the BukPOSNFT contract to grant the role to
-     */
-    function _setBukPOSNFTRole(address _nftPOSContract) private {
-        address oldNFTPOSContract_ = address(nftPOSContract);
-        nftPOSContract = IBukPOSNFTs(_nftPOSContract);
-        emit SetNFTPOSContractRole(oldNFTPOSContract_, _nftPOSContract);
     }
 
     /**
