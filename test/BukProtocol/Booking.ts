@@ -22,7 +22,6 @@ describe("BukEventProtocol Bookings", function () {
   let bukWallet;
   let bukTreasuryContract;
   let nftContract;
-  let nftPosContract;
   let sellerWallet;
   let buyerWallet;
   let initialTime;
@@ -74,25 +73,13 @@ describe("BukEventProtocol Bookings", function () {
       royaltiesContract.getAddress(),
     );
 
-    // BukPOSNFT
-    const BukPOSNFT = await ethers.getContractFactory("BukPOSNFTs");
-    nftPosContract = await BukPOSNFT.deploy(
-      "BUK_POS",
-      bukProtocolContract.getAddress(),
-      bukTreasuryContract.getAddress(),
-    );
-
     // BukNFT
     const BukNFT = await ethers.getContractFactory("BukNFTs");
     nftContract = await BukNFT.deploy(
       "BUK_NFT",
-      nftPosContract.getAddress(),
       bukProtocolContract.getAddress(),
       bukTreasuryContract.getAddress(),
     );
-
-    //Set BukNFTs address in BukPOSNFTs
-    await nftPosContract.setBukNFTRole(nftContract.getAddress());
 
     //Marketplace
     const Marketplace = await ethers.getContractFactory("Marketplace");
@@ -105,11 +92,6 @@ describe("BukEventProtocol Bookings", function () {
     //Set BukNFTs address in Buk Protocol
     const setBukNFTs = await bukProtocolContract.setBukNFTs(
       nftContract.getAddress(),
-    );
-
-    //Set BukPOSNFTs address in Buk Protocol
-    const setBukPOSNFTs = await bukProtocolContract.setBukPOSNFTs(
-      nftPosContract.getAddress(),
     );
 
     //Set Buk Protocol in Treasury
@@ -1761,75 +1743,7 @@ describe("BukEventProtocol Bookings", function () {
         .to.emit(bukProtocolContract, "CancelRoom")
         .withArgs([1], 30000000, true);
     });
-    it("Should cancel successfully and check the BukNFTs and BukPOSNFTs status", async function () {
-      //Grant allowance permission
-      const res = await stableTokenContract
-        .connect(owner)
-        .approve(await bukProtocolContract.getAddress(), 150000000);
 
-      //Book room
-      expect(
-        await bukProtocolContract
-          .connect(owner)
-          .bookRooms(
-            [100000000],
-            [80000000],
-            [70000000],
-            "0x3633666663356135366139343361313561626261336134630000000000000000",
-            1729847061,
-            1729947061,
-            12,
-            true,
-          ),
-      ).not.be.reverted;
-
-      //Mint NFT
-      await expect(
-        bukProtocolContract
-          .connect(adminWallet)
-          .mintBukNFTOwner(
-            [1],
-            [
-              "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-            ],
-            owner.getAddress(),
-          ),
-      ).not.be.reverted;
-
-      //Check the balance of NFT
-      expect(await nftContract.balanceOf(owner.getAddress(), 1)).to.equal(1);
-      //Check the balance of POS NFT
-      expect(await nftPosContract.balanceOf(owner.getAddress(), 1)).to.equal(0);
-
-      const _id = [1];
-      const _penalty = [50000000]; // Example values, use your actual logic
-      const _refund = [30000000];
-      const _charges = [20000000];
-      const _bookingOwner = await owner.getAddress();
-
-      // Formulate the message for signing
-      const message = `Cancellation Details:\nTotal Penalty: ${_penalty[0]}\nTotal Refund: ${_refund[0]}\nTotal Charges: ${_charges[0]}`;
-      const signature = await owner.signMessage(message);
-
-      //Cancel Room
-      await expect(
-        bukProtocolContract
-          .connect(adminWallet)
-          .cancelRooms(
-            _id,
-            _penalty,
-            _refund,
-            _charges,
-            _bookingOwner,
-            signature,
-          ),
-      ).not.be.reverted;
-
-      //Check the balance of NFT
-      expect(await nftContract.balanceOf(owner.getAddress(), 1)).to.equal(0);
-      //Check the balance of POS NFT
-      expect(await nftPosContract.balanceOf(owner.getAddress(), 1)).to.equal(0);
-    });
     it("Should not cancel when the booking status is not confirmed or checkedin", async function () {
       //Grant allowance permission
       const res = await stableTokenContract
@@ -2089,7 +2003,7 @@ describe("BukEventProtocol Bookings", function () {
         .to.emit(bukProtocolContract, "EmergencyCancellation")
         .withArgs(1, true);
     });
-    it("Should cancel successfully and check the BukNFTs and BukPOSNFTs status", async function () {
+    it("Should cancel successfully and check the BukNFTs status", async function () {
       //Grant allowance permission
       const res = await stableTokenContract
         .connect(owner)
@@ -2126,8 +2040,6 @@ describe("BukEventProtocol Bookings", function () {
 
       //Check the balance of NFT
       expect(await nftContract.balanceOf(owner.getAddress(), 1)).to.equal(1);
-      //Check the balance of POS NFT
-      expect(await nftPosContract.balanceOf(owner.getAddress(), 1)).to.equal(0);
 
       const _id = 1;
       const _refund = 30000000;
@@ -2143,8 +2055,6 @@ describe("BukEventProtocol Bookings", function () {
 
       //Check the balance of NFT
       expect(await nftContract.balanceOf(owner.getAddress(), 1)).to.equal(0);
-      //Check the balance of POS NFT
-      expect(await nftPosContract.balanceOf(owner.getAddress(), 1)).to.equal(0);
     });
     it("Should not cancel when the booking status is not confirmed or checkedin", async function () {
       //Grant allowance permission

@@ -63,7 +63,6 @@ describe("BukEventProtocol Updations", function () {
   let bukWallet;
   let bukTreasuryContract;
   let nftContract;
-  let nftPosContract;
   let sellerWallet;
   let buyerWallet;
   let zeroAddress = "0x0000000000000000000000000000000000000000";
@@ -116,25 +115,13 @@ describe("BukEventProtocol Updations", function () {
       royaltiesContract.getAddress(),
     );
 
-    // BukPOSNFT
-    const BukPOSNFT = await ethers.getContractFactory("BukPOSNFTs");
-    nftPosContract = await BukPOSNFT.deploy(
-      "BUK_POS",
-      bukProtocolContract.getAddress(),
-      bukTreasuryContract.getAddress(),
-    );
-
     // BukNFT
     const BukNFT = await ethers.getContractFactory("BukNFTs");
     nftContract = await BukNFT.deploy(
       "BUK_NFT",
-      nftPosContract.getAddress(),
       bukProtocolContract.getAddress(),
       bukTreasuryContract.getAddress(),
     );
-
-    //Set BukNFTs address in BukPOSNFTs
-    await nftPosContract.setBukNFTRole(nftContract.getAddress());
 
     //Marketplace
     const Marketplace = await ethers.getContractFactory("Marketplace");
@@ -147,11 +134,6 @@ describe("BukEventProtocol Updations", function () {
     //Set BukNFTs address in Buk Protocol
     const setBukNFTs = await bukProtocolContract.setBukNFTs(
       nftContract.getAddress(),
-    );
-
-    //Set BukPOSNFTs address in Buk Protocol
-    const setBukPOSNFTs = await bukProtocolContract.setBukPOSNFTs(
-      nftPosContract.getAddress(),
     );
 
     //Set Buk Protocol in Treasury
@@ -391,40 +373,6 @@ describe("BukEventProtocol Updations", function () {
         bukProtocolContract
           .connect(account1)
           .setBukNFTs(await nftContract.getAddress()),
-      ).to.be.reverted;
-    });
-  });
-
-  describe("Set BukPOSNFTs in BukEventProtocol", function () {
-    it("Should set BukPOSNFTs contract address by admin", async function () {
-      // Set BukPOSNFTs
-      expect(
-        await bukProtocolContract
-          .connect(adminWallet)
-          .setBukPOSNFTs(await nftPosContract.getAddress()),
-      ).not.be.reverted;
-      const addresses = await bukProtocolContract
-        .connect(account1)
-        .getWallets();
-      const addr2: string = await nftPosContract.getAddress();
-      expect(addresses[1]).to.be.equal(addr2);
-    });
-    it("Should set BukPOSNFTs contract address and emit events", async function () {
-      // Set BukPOSNFTs
-      expect(
-        await bukProtocolContract
-          .connect(adminWallet)
-          .setBukPOSNFTs(await nftPosContract.getAddress()),
-      )
-        .to.emit(bukProtocolContract, "SetBukPOSNFTs")
-        .withArgs(await nftPosContract.getAddress());
-    });
-    it("Should not set BukPOSNFTs contract address if not admin", async function () {
-      // Set BukPOSNFTs
-      await expect(
-        bukProtocolContract
-          .connect(account1)
-          .setBukPOSNFTs(await nftPosContract.getAddress()),
       ).to.be.reverted;
     });
   });
