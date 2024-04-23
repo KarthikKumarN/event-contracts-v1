@@ -180,7 +180,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
             .getBookingDetails(_id);
         require(
             (block.timestamp <
-                (details.checkin - (details.tradeTimeLimit * 3600)) &&
+                (details.start - (details.tradeTimeLimit * 3600)) &&
                 details.tradeable),
             "Trade limit time crossed"
         );
@@ -215,7 +215,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
                 .getBookingDetails(_ids[i]);
             require(
                 (block.timestamp <
-                    (details.checkin -
+                    (details.start -
                         (bukEventProtocolContract
                             .getBookingDetails(_ids[i])
                             .tradeTimeLimit * 3600)) &&

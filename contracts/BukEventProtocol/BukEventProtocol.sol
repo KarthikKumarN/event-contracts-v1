@@ -288,7 +288,7 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
                 "Check the Booking status"
             );
             require(
-                (_bookingDetails[_ids[i]].checkout < block.timestamp),
+                (_bookingDetails[_ids[i]].end < block.timestamp),
                 "Checkout date must be before today"
             );
             require(
@@ -299,7 +299,7 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
         for (uint256 i = 0; i < len; ++i) {
             _bookingDetails[_ids[i]].status = BookingStatus.checkedout;
             _bookingDetails[_ids[i]].tradeable = false;
-            _nftContract.burn(_recipients[i], _ids[i], 1, true);
+            _nftContract.burn(_recipients[i], _ids[i], 1);
         }
         emit CheckoutRooms(_ids, true);
     }
@@ -329,7 +329,7 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
                 "Not a confirmed or checkedin Booking"
             );
             require(
-                (_bookingDetails[_ids[i]].checkin > block.timestamp),
+                (_bookingDetails[_ids[i]].start > block.timestamp),
                 "Checkin date must be in the future"
             );
             require(
@@ -355,7 +355,7 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
         require(signer == _bookingOwner, "Invalid owner signature");
         for (uint256 i = 0; i < len; ++i) {
             _bookingDetails[_ids[i]].status = BookingStatus.cancelled;
-            _nftContract.burn(_bookingOwner, _ids[i], 1, false);
+            _nftContract.burn(_bookingOwner, _ids[i], 1);
         }
         if (totalPenalty > 0)
             _bukTreasury.stableRefund(totalPenalty, _bukWallet);
@@ -379,7 +379,7 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
             "Not a confirmed or checkedin Booking"
         );
         require(
-            (_bookingDetails[_id].checkin > block.timestamp),
+            (_bookingDetails[_id].start > block.timestamp),
             "Checkin date must be in the future"
         );
         require(
@@ -396,7 +396,7 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
         _bookingDetails[_id].status = BookingStatus.cancelled;
         _bukTreasury.stableRefund(_refund, _bookingOwner);
         _bukTreasury.stableRefund(_charges, _bukWallet);
-        _nftContract.burn(_bookingOwner, _id, 1, false);
+        _nftContract.burn(_bookingOwner, _id, 1);
         emit EmergencyCancellation(_id, true);
     }
 
@@ -542,11 +542,11 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
             "Exceeded max rooms per booking"
         );
         require(
-            (_bookingData.checkIn > block.timestamp),
+            (_bookingData.start > block.timestamp),
             "Checkin date must be in the future"
         );
         require(
-            (_bookingData.checkOut > _bookingData.checkIn),
+            (_bookingData.end > _bookingData.start),
             "Checkout date must be after checkin"
         );
         uint256 totalAmount;
@@ -558,11 +558,11 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
             _bookingDetails[_bookingIds] = Booking(
                 _bookingIds,
                 0,
-                _bookingData.referenceId,
+                _bookingData.eventId,
                 BookingStatus.booked,
                 _bookingData.user,
-                _bookingData.checkIn,
-                _bookingData.checkOut,
+                _bookingData.start,
+                _bookingData.end,
                 _bookingData.total[i],
                 _bookingData.baseRate[i],
                 bukCommission,
@@ -574,9 +574,9 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
             commissionTotal += bukCommission;
             emit BookRoom(
                 _bookingIds,
-                _bookingData.referenceId,
-                _bookingData.checkIn,
-                _bookingData.checkOut
+                _bookingData.eventId,
+                _bookingData.start,
+                _bookingData.end
             );
         }
         return (commissionTotal, totalAmount);

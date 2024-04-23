@@ -101,8 +101,7 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
         );
         require(
             block.timestamp <
-                (bookingDetails.checkin -
-                    (bookingDetails.tradeTimeLimit * 3600)),
+                (bookingDetails.start - (bookingDetails.tradeTimeLimit * 3600)),
             "Trade limit time crossed"
         );
         _listedNFT[_tokenId] = ListingDetails(
@@ -273,8 +272,7 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
         );
         require(
             block.timestamp <
-                (bookingDetails.checkin -
-                    (bookingDetails.tradeTimeLimit * 3600)),
+                (bookingDetails.start - (bookingDetails.tradeTimeLimit * 3600)),
             "Trade limit time crossed"
         );
         require(

@@ -17,11 +17,7 @@ contract BukEventDeployer is IBukEventDeployer, AccessControl {
      * @dev Constructor to initialize the contract
      * @param _bukEventProtocolAddress address of Buk protocol
      */
-    constructor(
-        address _bukEventProtocolAddress,
-        address _bukNFTAddress,
-        address _tokenAddress
-    ) {
+    constructor(address _bukEventProtocolAddress) {
         _setBukEventProtocol(_bukEventProtocolAddress);
         // Updating permission
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
