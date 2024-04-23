@@ -64,7 +64,6 @@ describe("BukNFTs Updations", function () {
   let bukWallet;
   let bukTreasuryContract;
   let nftContract;
-  let nftPosContract;
   let testMarketplace1;
   let testMarketplace2;
 
@@ -116,19 +115,10 @@ describe("BukNFTs Updations", function () {
       royaltiesContract.getAddress(),
     );
 
-    // BukPOSNFT
-    const BukPOSNFT = await ethers.getContractFactory("BukPOSNFTs");
-    nftPosContract = await BukPOSNFT.deploy(
-      "BUK_POS",
-      bukProtocolContract.getAddress(),
-      bukTreasuryContract.getAddress(),
-    );
-
     // BukNFT
     const BukNFT = await ethers.getContractFactory("BukNFTs");
     nftContract = await BukNFT.deploy(
       "BUK_NFT",
-      await nftPosContract.getAddress(),
       await bukProtocolContract.getAddress(),
       await bukTreasuryContract.getAddress(),
     );
@@ -144,11 +134,6 @@ describe("BukNFTs Updations", function () {
     //Set BukNFTs address in Buk Protocol
     const setBukNFTs = await bukProtocolContract.setBukNFTs(
       nftContract.getAddress(),
-    );
-
-    //Set BukPOSNFTs address in Buk Protocol
-    const setBukPOSNFTs = await bukProtocolContract.setBukPOSNFTs(
-      nftPosContract.getAddress(),
     );
 
     //Set Buk Protocol in Treasury
@@ -284,35 +269,6 @@ describe("BukNFTs Updations", function () {
     });
   });
 
-  describe("Set BukPOSNFTs Role in BukNFTs", function () {
-    it("Should set BukPOSNFTs role in BukNFTs", async function () {
-      expect(
-        await nftContract.setBukPOSNFTRole(await nftPosContract.getAddress()),
-      ).not.be.reverted;
-      //Check if BukPOSNFTs is set
-      expect(await nftContract.nftPOSContract()).to.equal(
-        await nftPosContract.getAddress(),
-      );
-    });
-    it("Should set BukPOSNFTs role and emit event", async function () {
-      expect(
-        await nftContract.setBukPOSNFTRole(await nftPosContract.getAddress()),
-      )
-        .to.emit(nftContract, "SetNFTPOSContractRole")
-        .withArgs(
-          await nftPosContract.getAddress(),
-          await nftPosContract.getAddress(),
-        );
-    });
-    it("Should revert if not called by admin", async function () {
-      await expect(
-        nftContract
-          .connect(account1)
-          .setBukPOSNFTRole(await nftPosContract.getAddress()),
-      ).to.be.reverted;
-    });
-  });
-
   describe("Set Token URIs for NFTS in BukNFTs", function () {
     it("Should set Token URIs for BukNFTs by admin", async function () {
       //Check-in NFT
@@ -355,205 +311,6 @@ describe("BukNFTs Updations", function () {
         .reverted;
       const uri = await nftContract.uri(1);
       expect(uri).not.equal(newUri);
-    });
-  });
-
-  describe("Safe transfer of Buk POS NFTs", function () {
-    it("Should safe transfer Buk POS NFTs", async function () {
-      //Approve marketplace
-      await expect(
-        nftContract
-          .connect(owner)
-          .setApprovalForAll(await testMarketplace1.getAddress(), 1),
-      ).not.be.reverted;
-
-      //Check the allowance
-      const allowance = await nftContract
-        .connect(owner)
-        .isApprovedForAll(owner.address, await testMarketplace1.getAddress());
-
-      expect(
-        await nftContract.setMarketplaceRole(testMarketplace1.getAddress()),
-      ).not.be.reverted;
-      expect(
-        await nftContract
-          .connect(testMarketplace1)
-          .safeTransferFrom(
-            await owner.getAddress(),
-            await account1.getAddress(),
-            1,
-            1,
-            "0x",
-          ),
-      ).not.be.reverted;
-    });
-
-    it("Should safe transfer Buk POS NFTs and emit event", async function () {
-      //Approve marketplace
-      await expect(
-        nftContract
-          .connect(owner)
-          .setApprovalForAll(await testMarketplace1.getAddress(), 1),
-      ).not.be.reverted;
-
-      //Check the allowance
-      const allowance = await nftContract
-        .connect(owner)
-        .isApprovedForAll(owner.address, await testMarketplace1.getAddress());
-
-      expect(
-        await nftContract.setMarketplaceRole(testMarketplace1.getAddress()),
-      ).not.be.reverted;
-      expect(
-        await nftContract
-          .connect(testMarketplace1)
-          .safeTransferFrom(
-            await owner.getAddress(),
-            await account1.getAddress(),
-            1,
-            1,
-            "0x",
-          ),
-      )
-        .to.emit(nftContract, "TransferSingle")
-        .withArgs(
-          await testMarketplace1.getAddress(),
-          owner.getAddress(),
-          account1.getAddress(),
-          1,
-          1,
-        );
-    });
-
-    it("Should revert if not called by marketplace", async function () {
-      //Approve marketplace
-      await expect(
-        nftContract
-          .connect(owner)
-          .setApprovalForAll(await testMarketplace1.getAddress(), 1),
-      ).not.be.reverted;
-
-      //Check the allowance
-      const allowance = await nftContract
-        .connect(owner)
-        .isApprovedForAll(owner.address, await testMarketplace1.getAddress());
-
-      expect(
-        await nftContract.setMarketplaceRole(testMarketplace1.getAddress()),
-      ).not.be.reverted;
-      await expect(
-        nftContract
-          .connect(account1)
-          .safeTransferFrom(
-            await owner.getAddress(),
-            await account1.getAddress(),
-            1,
-            1,
-            "0x",
-          ),
-      ).to.be.reverted;
-    });
-  });
-
-  describe("Safe batch transfer of Buk POS NFTs", function () {
-    it("Should safe batch transfer Buk POS NFTs", async function () {
-      //Approve marketplace
-      await expect(
-        nftContract
-          .connect(owner)
-          .setApprovalForAll(await testMarketplace1.getAddress(), 1),
-      ).not.be.reverted;
-
-      //Check the allowance
-      const allowance = await nftContract
-        .connect(owner)
-        .isApprovedForAll(owner.address, await testMarketplace1.getAddress());
-
-      expect(
-        await nftContract.setMarketplaceRole(testMarketplace1.getAddress()),
-      ).not.be.reverted;
-      expect(
-        await nftContract
-          .connect(testMarketplace1)
-          .safeBatchTransferFrom(
-            await owner.getAddress(),
-            await account1.getAddress(),
-            [1],
-            [1],
-            "0x",
-          ),
-      ).not.be.reverted;
-    });
-
-    it("Should safe batch transfer Buk POS NFTs and emit event", async function () {
-      //Approve marketplace
-      await expect(
-        nftContract
-          .connect(owner)
-          .setApprovalForAll(await testMarketplace1.getAddress(), 1),
-      ).not.be.reverted;
-
-      //Check the allowance
-      const allowance = await nftContract
-        .connect(owner)
-        .isApprovedForAll(owner.address, await testMarketplace1.getAddress());
-
-      //Set Marketplace
-      expect(
-        await nftContract.setMarketplaceRole(testMarketplace1.getAddress()),
-      ).not.be.reverted;
-
-      //Safe batch transfer
-      expect(
-        await nftContract
-          .connect(testMarketplace1)
-          .safeBatchTransferFrom(
-            await owner.getAddress(),
-            await account1.getAddress(),
-            [1],
-            [1],
-            "0x",
-          ),
-      )
-        .to.emit(nftContract, "TransferBatch")
-        .withArgs(
-          await testMarketplace1.getAddress(),
-          owner.getAddress(),
-          account1.getAddress(),
-          [1],
-          [1],
-        );
-    });
-
-    it("Should revert if not called by marketplace", async function () {
-      //Approve marketplace
-      await expect(
-        nftContract
-          .connect(owner)
-          .setApprovalForAll(await testMarketplace1.getAddress(), 1),
-      ).not.be.reverted;
-
-      //Check the allowance
-      const allowance = await nftContract
-        .connect(owner)
-        .isApprovedForAll(owner.address, await testMarketplace1.getAddress());
-
-      //Set Marketplace role in BukNFTs
-      expect(
-        await nftContract.setMarketplaceRole(testMarketplace1.getAddress()),
-      ).not.be.reverted;
-
-      await expect(
-        nftContract
-          .connect(account1)
-          .safeBatchTransferFrom(
-            await owner.getAddress(),
-            await account1.getAddress(),
-            [1],
-            [1],
-            "0x",
-          ),
-      ).to.be.reverted;
     });
   });
 
