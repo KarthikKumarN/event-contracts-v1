@@ -5,7 +5,6 @@ import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.s
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
-import { IBukPOSNFTs } from "../BukPOSNFTs/IBukPOSNFTs.sol";
 import { IBukNFTs } from "../BukNFTs/IBukNFTs.sol";
 import { IBukTreasury } from "../BukTreasury/IBukTreasury.sol";
 import { ISignatureVerifier } from "../SignatureVerifier/ISignatureVerifier.sol";
@@ -25,7 +24,6 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
      * @dev address _stableToken          Address of the stable token.
      * @dev address _bukTreasury          Address of the Buk treasury contract.
      * @dev address nftContract Address of the Buk NFT contract.
-     * @dev address nftPOSContract  Address of the Buk NFT POS Contract.
      * @dev address royaltiesContract  Address of the Buk Royalties Contract.
      */
     address private _admin;
@@ -33,8 +31,7 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
     IERC20 private _stableToken;
     IBukTreasury private _bukTreasury;
     ISignatureVerifier private _signatureVerifier;
-    IBukNFTs private _nftContract;
-    IBukPOSNFTs private _nftPOSContract;
+    IBukNFTs private _nftContract; // FIXME : We might not need this
     IBukRoyalties private _royaltiesContract;
 
     /// @dev Commission charged on bookings.
@@ -118,12 +115,6 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
     function setBukNFTs(address _nftContractAddr) external onlyAdmin {
         _nftContract = IBukNFTs(_nftContractAddr);
         emit SetBukNFTs(_nftContractAddr);
-    }
-
-    /// @dev See {IBukEventProtocol-setBukPosNFTs}.
-    function setBukPOSNFTs(address _nftPOSContractAddr) external onlyAdmin {
-        _nftPOSContract = IBukPOSNFTs(_nftPOSContractAddr);
-        emit SetBukPOSNFTs(_nftPOSContractAddr);
     }
 
     /// @dev See {IBukEventProtocol-setRoyalties}.
@@ -431,7 +422,6 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
         view
         returns (
             address nftContract,
-            address nftPOSContract,
             address royaltiesContract,
             address signatureVerifier,
             address bukTreasury,
@@ -442,7 +432,6 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
     {
         return (
             address(_nftContract),
-            address(_nftPOSContract),
             address(_royaltiesContract),
             address(_signatureVerifier),
             address(_bukTreasury),

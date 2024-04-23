@@ -130,9 +130,6 @@ interface IBukEventProtocol {
     /// @dev Emitted when BukNFTs contract address is updated.
     event SetBukNFTs(address newNFTContract);
 
-    /// @dev Emitted when BukPOSNFTs contract address is updated.
-    event SetBukPOSNFTs(address newNFTPOSContract);
-
     /// @dev Emitted when BukRoyalties contract address is updated.
     event SetRoyaltiesContract(address newRoyaltiesContract);
 
@@ -226,13 +223,6 @@ interface IBukEventProtocol {
      * @notice This function can only be called by admin
      */
     function setBukNFTs(address _nftContractAddr) external;
-
-    /**
-     * @dev Function to update the BukPOSNFTs contract address.
-     * @param _nftPOSContractAddr Address of the BukPOSNFTs contract.
-     * @notice This function can only be called by admin
-     */
-    function setBukPOSNFTs(address _nftPOSContractAddr) external;
 
     /**
      * @dev Sets the Buk royalties contract address.
@@ -364,7 +354,6 @@ interface IBukEventProtocol {
      * @notice The Active Booking NFTs are burnt from the owner's account.
      * @notice The Utility NFTs are minted to the owner of the booking.
      * @notice This function can only be called by admin
-     * @notice POSR NFT will be minted to recipients address.
      */
     function checkout(
         uint256[] memory _ids,
@@ -412,7 +401,6 @@ interface IBukEventProtocol {
     /**
      * Function to get wallet addresses
      * @return nftContract The address of the nft contract
-     * @return nftPOSContract The address of the nftPOS contract
      * @return royaltiesContract The address of the royalties contract
      * @return signatureVerifier The address of the signature verifier contract
      * @return bukTreasury The address of the bukTreasury contract
@@ -425,7 +413,6 @@ interface IBukEventProtocol {
         view
         returns (
             address nftContract,
-            address nftPOSContract,
             address royaltiesContract,
             address signatureVerifier,
             address bukTreasury,
