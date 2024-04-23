@@ -59,7 +59,6 @@ describe("BukRoyalties Updations", function () {
   let bukWallet;
   let bukTreasuryContract;
   let nftContract;
-  let nftPosContract;
   let sellerWallet;
   let buyerWallet;
 
@@ -111,25 +110,13 @@ describe("BukRoyalties Updations", function () {
       royaltiesContract.getAddress(),
     );
 
-    // BukPOSNFT
-    const BukPOSNFT = await ethers.getContractFactory("BukPOSNFTs");
-    nftPosContract = await BukPOSNFT.deploy(
-      "BUK_POS",
-      bukProtocolContract.getAddress(),
-      bukTreasuryContract.getAddress(),
-    );
-
     // BukNFT
     const BukNFT = await ethers.getContractFactory("BukNFTs");
     nftContract = await BukNFT.deploy(
       "BUK_NFT",
-      nftPosContract.getAddress(),
       bukProtocolContract.getAddress(),
       bukTreasuryContract.getAddress(),
     );
-
-    //Set BukNFTs address in BukPOSNFTs
-    await nftPosContract.setBukNFTRole(nftContract.getAddress());
 
     //Marketplace
     const Marketplace = await ethers.getContractFactory("Marketplace");
@@ -142,11 +129,6 @@ describe("BukRoyalties Updations", function () {
     //Set BukNFTs address in Buk Protocol
     const setBukNFTs = await bukProtocolContract.setBukNFTs(
       nftContract.getAddress(),
-    );
-
-    //Set BukPOSNFTs address in Buk Protocol
-    const setBukPOSNFTs = await bukProtocolContract.setBukPOSNFTs(
-      nftPosContract.getAddress(),
     );
 
     //Set Buk Protocol in Treasury
