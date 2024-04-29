@@ -24,13 +24,7 @@ contract BukEventDeployer is IBukEventDeployer, AccessControl {
         _grantRole(ADMIN_ROLE, _msgSender());
     }
 
-    /// @dev Refer {IMarketplace-setBukEventProtocol}.
-    function setBukEventProtocol(
-        address _bukEventProtocol
-    ) external onlyRole(ADMIN_ROLE) {
-        _setBukEventProtocol(_bukEventProtocol);
-    }
-
+    /// @dev Refer {IBukEventDeployer-deployEventNFT}.
     function deployEventNFT(
         string calldata _name,
         address _bukEventProtocol,
@@ -39,6 +33,13 @@ contract BukEventDeployer is IBukEventDeployer, AccessControl {
         BukNFTs eventNFT = new BukNFTs(_name, _bukEventProtocol, _bukTreasury);
         emit DeployedEventNFT(address(eventNFT), msg.sender);
         return address(eventNFT);
+    }
+
+    /// @dev Refer {IBukEventDeployer-setBukEventProtocol}.
+    function setBukEventProtocol(
+        address _bukEventProtocol
+    ) external onlyRole(ADMIN_ROLE) {
+        _setBukEventProtocol(_bukEventProtocol);
     }
 
     /**
