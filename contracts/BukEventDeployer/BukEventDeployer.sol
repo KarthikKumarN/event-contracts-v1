@@ -31,7 +31,7 @@ contract BukEventDeployer is IBukEventDeployer, AccessControl {
         address _bukTreasury
     ) external onlyRole(BUK_EVENT_PROTOCOL_ROLE) returns (address) {
         BukNFTs eventNFT = new BukNFTs(_name, _bukEventProtocol, _bukTreasury);
-        emit DeployedEventNFT(address(eventNFT), msg.sender);
+        emit DeployedEventNFT(_name);
         return address(eventNFT);
     }
 

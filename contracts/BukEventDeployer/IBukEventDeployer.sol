@@ -2,10 +2,7 @@
 pragma solidity =0.8.19;
 
 interface IBukEventDeployer {
-    event DeployedEventNFT(
-        address indexed eventNFT,
-        address indexed eventDeployer
-    );
+    event DeployedEventNFT(string name);
 
     /**
      * @dev Emitted when new BukEventProtocol address has been updated
