@@ -1,6 +1,6 @@
 {
-  "name": "buk-smart-contract-v2",
-  "version": "2.0.0",
+  "name": "buk-event-contract-v1",
+  "version": "1.0.0",
   "description": "",
   "scripts": {
     "test": "npx hardhat test",
@@ -19,22 +19,22 @@
   "license": "ISC",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^3.0.0",
-    "@nomicfoundation/hardhat-verify": "^2.0.4",
-    "dotenv": "^16.3.1",
-    "eslint": "^8.45.0",
-    "eslint-config-prettier": "^8.8.0",
+    "@nomicfoundation/hardhat-verify": "^2.0.6",
+    "dotenv": "^16.4.5",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^8.10.0",
     "eslint-config-standard": "^17.1.0",
-    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-prettier": "^5.0.0",
+    "eslint-plugin-prettier": "^5.1.3",
     "eslint-plugin-promise": "^6.1.1",
-    "hardhat": "^2.17.0",
+    "hardhat": "^2.22.3",
     "husky": "^8.0.3",
-    "prettier": "^3.0.0",
-    "prettier-plugin-solidity": "^1.1.3",
-    "solhint": "^3.4.1"
+    "prettier": "^3.2.5",
+    "prettier-plugin-solidity": "^1.3.1",
+    "solhint": "^3.6.2"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.9.2"
+    "@openzeppelin/contracts": "^4.9.6"
   }
 }
