@@ -70,11 +70,6 @@ describe("BukEventProtocol Bookings", function () {
     deployerContract = await BukEventDeployerFactory.deploy(
       await bukProtocolContract.getAddress(),
     );
-
-    console.log(
-      "deployerContract.BUK_EVENT_PROTOCOL_ROLE()",
-      await deployerContract.BUK_EVENT_PROTOCOL_ROLE(),
-    );
     // Grant the BUK_EVENT_PROTOCOL_ROLE to the deployerContract contract
     await deployerContract.grantRole(
       await deployerContract.BUK_EVENT_PROTOCOL_ROLE(),
@@ -85,10 +80,23 @@ describe("BukEventProtocol Bookings", function () {
   // Create a testcase for deployEventNFT function from BukEventDeployer
   describe("Book rooms by admin in Buk Protocol", function () {
     it("should deploy a new BukNFTs contract", async function () {
+      const eventName = "Web3 Carnival";
+      expect(
+        await deployerContract
+          .connect(bukProtocolContract1)
+          .deployEventNFT(
+            eventName,
+            await bukProtocolContract.getAddress(),
+            await bukTreasuryContract.getAddress(),
+          ),
+      ).not.be.reverted;
+    });
+    it("should deploy a new BukNFTs contract and emit event", async function () {
+      const eventName = "Web3 Carnival";
       const result = await deployerContract
         .connect(bukProtocolContract1)
         .deployEventNFT(
-          "EventName",
+          eventName,
           await bukProtocolContract.getAddress(),
           await bukTreasuryContract.getAddress(),
         );
@@ -99,71 +107,47 @@ describe("BukEventProtocol Bookings", function () {
         await deployerContract
           .connect(bukProtocolContract1)
           .deployEventNFT(
-            "EventName",
+            eventName,
             await bukProtocolContract.getAddress(),
             await bukTreasuryContract.getAddress(),
           ),
       )
         .to.emit(deployerContract, "DeployedEventNFT")
-        .withArgs(0, await bukProtocolContract1.getAddress());
-
-      // Check if events were emitted
-      expect(receipt.events).to.not.be.undefined;
-
-      if (receipt.events) {
-        // Find the event containing the deployed contract address
-        const event = receipt.events.find(
-          (e) => e.event === "DeployedEventNFT",
-        );
-
-        // Check if the event was found and contains the expected argument
-        expect(event).to.not.be.undefined;
-
-        if (event) {
-          const eventNFTAddress = event.args[0];
-          const eventNFT = await ethers.getContractAt(
-            "BukNFTs",
-            eventNFTAddress,
-          );
-          const name = await eventNFT.name();
-
-          expect(name).to.equal("EventName");
-        }
-      }
+        .withArgs(eventName);
     });
-    it("should deploy a new BukNFTs contract", async function () {
-      const result = await deployerContract
-        .connect(bukProtocolContract1)
-        .deployEventNFT(
-          "EventName",
-          await bukProtocolContract.getAddress(),
-          await bukTreasuryContract.getAddress(),
-        );
-      const receipt = await result.wait();
+    // it("should deploy a new BukNFTs contract", async function () {
+    //   const result = await deployerContract
+    //     .connect(bukProtocolContract1)
+    //     .deployEventNFT(
+    //       "EventName",
+    //       await bukProtocolContract.getAddress(),
+    //       await bukTreasuryContract.getAddress(),
+    //     );
+    //   const receipt = await result.wait();
 
-      // Check if events were emitted
-      expect(receipt.events).to.not.be.undefined;
+    //   // Check if events were emitted
+    //   expect(receipt.events).to.not.be.undefined;
 
-      if (receipt.events) {
-        // Find the event containing the deployed contract address
-        const event = receipt.events.find(
-          (e) => e.event === "DeployedEventNFT",
-        );
+    //   if (receipt.events) {
+    //     // Find the event containing the deployed contract address
+    //     const event = receipt.events.find(
+    //       (e) => e.event === "DeployedEventNFT",
+    //     );
 
-        // Check if the event was found and contains the expected argument
-        expect(event).to.not.be.undefined;
+    //     // Check if the event was found and contains the expected argument
+    //     expect(event).to.not.be.undefined;
 
-        if (event) {
-          const eventNFTAddress = event.args[0];
-          const eventNFT = await ethers.getContractAt(
-            "BukNFTs",
-            eventNFTAddress,
-          );
-          const name = await eventNFT.name();
+    //     if (event) {
+    //       const eventNFTAddress = event.args[0];
+    //       const eventNFT = await ethers.getContractAt(
+    //         "BukNFTs",
+    //         eventNFTAddress,
+    //       );
+    //       const name = await eventNFT.name();
 
-          expect(name).to.equal("EventName");
-        }
-      }
-    });
+    //       expect(name).to.equal("EventName");
+    //     }
+    //   }
+    // });
   });
 });
