@@ -39,26 +39,28 @@ interface IBukEventProtocol {
 
     /**
      * @dev Struct for Event details.
-     * @param bytes32 referenceId       Event Reference ID.
+     * @param uint256 eventId           Unique Event ID .
+     * @param uint256 referenceId       Event Reference ID.
      * @param EventType eventType       Event type.
      * @param uint256 start             Event start date and time.
      * @param uint256 end               Event end date and time.
      * @param uint256 noOfTickets       Total no tickets can be booked.
-     * @param uint256 rate              Ticket rate.
-     // TODO * @param uint256 commission        Buk commission.
+     * @param uint256 total             Total Ticket rate.
+     * @param uint256 baseRate          Ticket base rate.
      * @param uint256 tradeTimeLimit    Buy will excecute if tradeLimitTime is not crossed (in hours)
      * @param bool tradeable            Is the Event Tradeable.
      * @param address owner             Address of the event owner.
      * @param address nftAddress        Address of the event NFT.
      */
     struct Event {
-        bytes32 referenceId;
+        uint256 eventId;
+        uint256 referenceId;
         EventType eventType;
         uint256 start;
         uint256 end;
         uint256 noOfTickets;
-        uint256 rate;
-        uint256 commission;
+        uint256 total;
+        uint256 baseRate;
         uint256 tradeTimeLimit;
         bool tradeable;
         address owner;
@@ -182,6 +184,9 @@ interface IBukEventProtocol {
     /// @dev Emitted when room bookings are cancelled.
     event EmergencyCancellation(uint256 indexed bookingId, bool indexed status);
 
+    /// @dev Emitted when the Event deployer contract is set.
+    event SetEventDeployerContract(address newEventDeployer);
+
     /**
      * @dev Sets the admin wallet address.
      * @param _adminAddr The new admin wallet address to be set.
@@ -235,6 +240,13 @@ interface IBukEventProtocol {
     function setRoyaltiesContract(address _royaltiesContract) external;
 
     /**
+     * @dev Function to set the Event Deployer contract address.
+     * @param _eventDeployer Address of the Event Deployer contract.
+     * @notice This function can only be called by admin
+     */
+    function setEventDeployerContract(address _eventDeployer) external;
+
+    /**
      * @dev Function to set the Buk commission percentage.
      * @param _commission Commission percentage.
      * @notice This function can only be called by admin
@@ -259,6 +271,32 @@ interface IBukEventProtocol {
      * @notice This function can only be called by admin
      */
     function unpause() external;
+
+    /**
+     * @dev Function for Create Event.
+     * @param  _referenceId       Event Reference ID.
+     * @param  _eventType       Event type.
+     * @param  _start             Event start date and time.
+     * @param  _end               Event end date and time.
+     * @param  _noOfTickets       Total no tickets can be booked.
+     * @param  _total             Total Ticket rate.
+     * @param  _baseRate          Ticket base rate.
+     * @param  _tradeTimeLimit    Buy will excecute if tradeLimitTime is not crossed (in hours)
+     * @param  _tradeable            Is the Event Tradeable.
+     * @param  _owner             Address of the event owner.
+     */
+    function createEvent(
+        uint256 _referenceId,
+        EventType _eventType,
+        uint256 _start,
+        uint256 _end,
+        uint256 _noOfTickets,
+        uint256 _total,
+        uint256 _baseRate,
+        uint256 _tradeTimeLimit,
+        bool _tradeable,
+        address _owner
+    ) external returns (bool);
 
     /**
      * @dev Function to book rooms.
@@ -389,7 +427,7 @@ interface IBukEventProtocol {
      * @param _charges The charges associated with the cancellation(if any).
      * @param _bookingOwner The address of the booking owner.
      * @notice This function can only be called by admin
-     * @notice Total refund amount and charges should be less than or equal to the total amount (Total = total booking amount + buk commission).
+     * @notice Total refund amount and charges should be <= the total amount (total booking amount + buk commission).
      */
     function emergencyCancellation(
         uint256 _id,
