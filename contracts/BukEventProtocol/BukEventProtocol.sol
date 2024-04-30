@@ -10,13 +10,19 @@ import { IBukTreasury } from "../BukTreasury/IBukTreasury.sol";
 import { ISignatureVerifier } from "../SignatureVerifier/ISignatureVerifier.sol";
 import { IBukRoyalties } from "../BukRoyalties/IBukRoyalties.sol";
 import { IBukEventProtocol } from "../BukEventProtocol/IBukEventProtocol.sol";
+import { IBukEventDeployer } from "../BukEventDeployer/IBukEventDeployer.sol";
 
 /**
  * @title BUK Protocol Contract
  * @author BUK Technology Inc
  * @dev Contract to manage operations of the BUK protocol to manage BukNFTs tokens and underlying sub-contracts.
  */
-contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
+contract BukEventProtocol is
+    ReentrancyGuard,
+    IBukEventProtocol,
+    IBukEventDeployer,
+    Pausable
+{
     // Using safeERC20
     using SafeERC20 for IERC20;
     /**
@@ -30,6 +36,7 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
     address private _bukWallet;
     IERC20 private _stableToken;
     IBukTreasury private _bukTreasury;
+    IBukEventDeployer private _bukEventDeployer;
     ISignatureVerifier private _signatureVerifier;
     IBukNFTs private _nftContract; // FIXME : We might not need this
     IBukRoyalties private _royaltiesContract;
@@ -37,11 +44,24 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
     /// @dev Commission charged on bookings.
     uint256 public commission = 5;
 
+    /// @dev Counters.Counter Event Ids    Counter for event IDs.
+    uint256 private _eventIds;
+
     /// @dev Counters.Counter bookingIds    Counter for booking IDs.
     uint256 private _bookingIds;
 
+    /**
+     * @dev mapping(uint256 => uint256) _eventbookingIds  Mapping of Counters.Counter bookingIds    Counter for Each event booking IDs.
+     */
+    mapping(uint256 => uint256) private _eventbookingIds; //bookingID -> Booking Details
+
     /// @dev Max booking limit per transaction.
     uint256 public constant MAX_BOOKING_LIMIT = 11;
+
+    /**
+     * @dev mapping(uint256 => Event) _eventDetails   Mapping of Event IDs to event details.
+     */
+    mapping(uint256 => Event) private _eventDetails; //eventID -> Event Details
 
     /**
      * @dev mapping(uint256 => Booking) _bookingDetails   Mapping of booking IDs to booking details.
@@ -68,13 +88,15 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
      * @param _bukWalletAddr Address of the Buk wallet.
      * @param _signVerifierContract Address of the signature verifier contract.
      * @param _royaltiesContractAddr Address of the Buk royalties contract.
+     * @param _deployerContractAddr Address of the Buk Event NFT deployer contract.
      */
     constructor(
         address _bukTreasuryContract,
         address _stableTokenAddr,
         address _bukWalletAddr,
         address _signVerifierContract,
-        address _royaltiesContractAddr
+        address _royaltiesContractAddr,
+        address _deployerContractAddr
     ) {
         _setRoyaltiesContract(_royaltiesContractAddr);
         _setAdmin(msg.sender);
@@ -82,6 +104,7 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
         _setStableToken(_stableTokenAddr);
         _setBukWallet(_bukWalletAddr);
         _setSignatureVerifier(_signVerifierContract);
+        _setDeployerContract(_deployerContractAddr);
     }
 
     /// @dev See {IBukEventProtocol-setAdmin}.
@@ -112,6 +135,7 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
     }
 
     /// @dev See {IBukEventProtocol-setBukNFTs}.
+    // FIXME
     function setBukNFTs(address _nftContractAddr) external onlyAdmin {
         _nftContract = IBukNFTs(_nftContractAddr);
         emit SetBukNFTs(_nftContractAddr);
@@ -124,6 +148,13 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
         _setRoyaltiesContract(_royaltiesContractAddr);
     }
 
+    /// @dev See {IBukEventProtocol-setEventDeployer}.
+    function setEventDeployerContract(
+        address _deployerContractAddr
+    ) external onlyAdmin {
+        _setDeployerContract(_deployerContractAddr);
+    }
+
     /// @dev See {IBukEventProtocol-setCommission}.
     function setCommission(
         uint256 _newCommission
@@ -134,6 +165,7 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
     }
 
     /// @dev See {IBukEventProtocol-toggleTradeability}.
+    // FIXME
     function toggleTradeability(uint256 _tokenId) external onlyAdmin {
         require(
             _bookingDetails[_tokenId].status != BookingStatus.nil,
@@ -152,6 +184,59 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
     /// @dev See {IBukEventProtocol-unpause}.
     function unpause() external onlyAdmin {
         _unpause();
+    }
+
+    /// @dev See {IBukEventProtocol-unpause}.
+    function createEvent(
+        uint256 _referenceId,
+        EventType _eventType,
+        uint256 _start,
+        uint256 _end,
+        uint256 _noOfTickets,
+        uint256 _total,
+        uint256 _baseRate,
+        uint256 _tradeTimeLimit,
+        bool _tradeable,
+        address _owner
+    ) external onlyAdmin whenNotPaused returns (bool) {
+        require(
+            (_start > block.timestamp && _end > block.timestamp),
+            "Check dates, Must be in the future"
+        );
+        require((_end > _start), "End date must be after checkin");
+        require((_noOfTickets > 0), "Number of tickets must be greater than 0");
+        require(
+            (_total > 0 && _baseRate > 0),
+            "Check price, must be greater than 0"
+        );
+        ++_eventIds;
+        _eventDetails[_eventIds] = Event(
+            _eventIds,
+            _referenceId,
+            _eventType,
+            _start,
+            _end,
+            _noOfTickets,
+            _total,
+            _baseRate,
+            _tradeTimeLimit,
+            _tradeable,
+            _owner
+        );
+        emit CreateEvent(
+            _eventIds,
+            _referenceId,
+            _eventType,
+            _start,
+            _end,
+            _noOfTickets,
+            _total,
+            _baseRate,
+            _tradeTimeLimit,
+            _tradeable,
+            _owner
+        );
+        return true;
     }
 
     /// @dev See {IBukEventProtocol-bookRooms}.
@@ -487,6 +572,16 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
         require(_bukWalletAddr != address(0), "Invalid address");
         _bukWallet = _bukWalletAddr;
         emit SetBukWallet(_bukWalletAddr);
+    }
+
+    /**
+     * Private function to set the Buk Event Deployer contract address
+     * @param _deployerContractAddr The address of the Buk Event Deployer contract
+     */
+    function _setDeployerContract(address _deployerContractAddr) private {
+        require(_deployerContractAddr != address(0), "Invalid address");
+        _bukEventDeployer = IBukEventDeployer(_deployerContractAddr);
+        emit SetEventDeployerContract(_deployerContractAddr);
     }
 
     /**
