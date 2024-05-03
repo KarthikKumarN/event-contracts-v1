@@ -46,8 +46,6 @@ interface IBukEventProtocol {
      * @param uint256 start             Event start date and time.
      * @param uint256 end               Event end date and time.
      * @param uint256 noOfTickets       Total no tickets can be booked.
-     * @param uint256 total             Total Ticket rate.
-     * @param uint256 baseRate          Ticket base rate.
      * @param uint256 tradeTimeLimit    Buy will excecute if tradeLimitTime is not crossed (in hours)
      * @param bool tradeable            Is the Event Tradeable.
      * @param address owner             Address of the event owner.
@@ -61,8 +59,6 @@ interface IBukEventProtocol {
         uint256 start;
         uint256 end;
         uint256 noOfTickets;
-        uint256 total;
-        uint256 baseRate;
         uint256 tradeTimeLimit;
         bool tradeable;
         address owner;
@@ -73,55 +69,51 @@ interface IBukEventProtocol {
      * @dev Struct for booking details.
      * @param uint256 id                Booking ID.
      * @param uint256 tokenId           Token ID.
-     * @param bytes32 eventId           Event ID.
+     * @param uint256 eventId           Event ID.
+     * @param uint256 referenceId       Event reference ID.
+     * @param uint256 total             Total Ticket rate.
+     * @param uint256 baseRate          Ticket base rate.
+     * @param uint256 commission        Ticket commission.
+     * @param uint256 start             Event start date and time.
+     * @param uint256 end               Event end date and time.
      * @param BookingStatus status      Booking status.
-     * @param address owner             Address of the booking owner.
-     * @param uint256 start             Event start date.
-     * @param uint256 end          Event end date.
-     * @param uint256 total             Total price.
-     * @param uint256 baseRate          Base rate.
-     * @param uint256 commission        Buk commission.
-     * @param uint256 minSalePrice      Min Sale Price.
-     * @param uint256 tradeTimeLimit    Buy will excecute if tradeLimitTime is not crossed (in hours)
+     * @param address firstOwner        Address of the booking owner.
      * @param bool tradeable            Is the NFT Tradeable.
      */
     struct Booking {
         uint256 id;
         uint256 tokenId;
-        bytes32 eventId;
-        BookingStatus status;
-        address firstOwner;
-        uint256 start;
-        uint256 end;
+        uint256 eventId;
+        uint256 referenceId;
         uint256 total;
         uint256 baseRate;
         uint256 commission;
-        uint256 minSalePrice;
-        uint256 tradeTimeLimit;
+        uint256 start;
+        uint256 end;
+        BookingStatus status;
+        address firstOwner;
         bool tradeable;
     }
 
     /**
      * @dev Struct for booking details.
+     * @param uint256 eventId           Event ID.
+     * @param uint256 referenceId       Event reference ID.
      * @param uint256 total             Total price.
      * @param uint256 baseRate          Base rate.
-     * @param uint256 minSalePrice      Min Sale Price.
-     * @param bytes32 eventId           Event ID.
      * @param uint256 start             Event Start date.
      * @param uint256 end               Event End date.
-     * @param uint256 tradeTimeLimit    Buy will excecute if tradeLimitTime is not crossed (in hours)
      * @param bool tradeable            Is the NFT Tradeable.
      * @param address user             Address of the booking owner.
      */
     struct BookingList {
+        uint256 eventId;
+        uint256[] referenceId;
         uint256[] total;
         uint256[] baseRate;
-        uint256[] minSalePrice;
-        bytes32 eventId;
-        uint256 start;
-        uint256 end;
-        uint256 tradeTimeLimit;
-        bool tradeable;
+        uint256[] start;
+        uint256[] end;
+        bool[] tradeable;
         address user;
     }
 
@@ -293,8 +285,6 @@ interface IBukEventProtocol {
      * @param  _start           Event start date and time.
      * @param  _end             Event end date and time.
      * @param  _noOfTickets     Total no tickets can be booked.
-     * @param  _total           Total Ticket rate.
-     * @param  _baseRate        Ticket base rate.
      * @param  _tradeTimeLimit  Buy will excecute if tradeLimitTime is not crossed (in hours)
      * @param  _tradeable       Is the Event Tradeable.
      * @param  _owner           Address of the event owner.
@@ -306,8 +296,6 @@ interface IBukEventProtocol {
         uint256 _start,
         uint256 _end,
         uint256 _noOfTickets,
-        uint256 _total,
-        uint256 _baseRate,
         uint256 _tradeTimeLimit,
         bool _tradeable,
         address _owner
@@ -315,25 +303,23 @@ interface IBukEventProtocol {
 
     /**
      * @dev Function to book rooms.
-     * @param _total Total amount to be paid.
-     * @param _baseRate Base rate of the room.
-     * @param _minSalePrice Minimum sale price for the booking.
-     * @param _referenceId Reference  ID.
-     * @param _checkin Checkin date.
-     * @param _checkout Checkout date.
-     * @param _tradeTimeLimit Trade Limit of NFT based on Checkin time.
+     * @param _eventId        Event ID.
+     * @param _referenceId    Event booking reference ID.
+     * @param _total          Total price of the ticket.
+     * @param _baseRate       Base rate of the ticket.
+     * @param _start          Start date.
+     * @param _end            End date.
      * @param _tradeable Is the booking NFT tradeable.
      * @return ids IDs of the bookings.
      */
-    function bookRooms(
+    function bookEvent(
+        uint256 _eventId,
+        uint256[] memory _referenceId,
         uint256[] memory _total,
         uint256[] memory _baseRate,
-        uint256[] memory _minSalePrice,
-        bytes32 _referenceId,
-        uint256 _checkin,
-        uint256 _checkout,
-        uint256 _tradeTimeLimit,
-        bool _tradeable
+        uint256[] memory _start,
+        uint256[] memory _end,
+        bool[] memory _tradeable
     ) external returns (bool);
 
     /**
@@ -351,14 +337,10 @@ interface IBukEventProtocol {
      * @notice This function can only be called by admin
      * @notice This function is used to book rooms on behalf of the user.
      */
-    function bookRoomsOwner(
-        uint256[] memory _total,
-        uint256[] memory _baseRate,
-        uint256[] memory _minSalePrice,
-        bytes32 _referenceId,
-        uint256 _checkin,
-        uint256 _checkout,
-        uint256 _tradeTimeLimit,
+    function bookEventOwner(
+        uint256[] memory _referenceId,
+        uint256[] memory total,
+        uint256[] memory baseRate,
         bool _tradeable,
         address _user
     ) external returns (bool);

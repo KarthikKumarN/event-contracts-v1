@@ -185,22 +185,16 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
         uint256 _start,
         uint256 _end,
         uint256 _noOfTickets,
-        uint256 _total,
-        uint256 _baseRate,
         uint256 _tradeTimeLimit,
         bool _tradeable,
         address _owner
     ) external onlyAdmin whenNotPaused returns (uint256) {
         require(
             (_start > block.timestamp && _end > block.timestamp),
-            "Check dates, Must be in the future"
+            "Dates, Must be in the future"
         );
-        require((_end > _start), "End date must be after checkin");
+        require((_end > _start), "End date must be after start date");
         require((_noOfTickets > 0), "Number of tickets must be greater than 0");
-        require(
-            (_total > 0 && _baseRate > 0),
-            "Check price, must be greater than 0"
-        );
         address eventAddress = _bukEventDeployer.deployEventNFT(
             _name,
             address(this),
@@ -215,8 +209,6 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
             _start,
             _end,
             _noOfTickets,
-            _total,
-            _baseRate,
             _tradeTimeLimit,
             _tradeable,
             _owner,
@@ -234,25 +226,23 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
         return _eventIds;
     }
 
-    /// @dev See {IBukEventProtocol-bookRooms}.
-    function bookRooms(
+    /// @dev See {IBukEventProtocol-bookEvent}.
+    function bookEvent(
+        uint256 _eventId,
+        uint256[] memory _referenceId,
         uint256[] memory _total,
         uint256[] memory _baseRate,
-        uint256[] memory _minSalePrice,
-        bytes32 _referenceId,
-        uint256 _checkin,
-        uint256 _checkout,
-        uint256 _tradeTimeLimit,
-        bool _tradeable
+        uint256[] memory _start,
+        uint256[] memory _end,
+        bool[] memory _tradeable
     ) external nonReentrant whenNotPaused returns (bool) {
         BookingList memory _params = BookingList(
+            _eventId,
+            _referenceId,
             _total,
             _baseRate,
-            _minSalePrice,
-            _referenceId,
-            _checkin,
-            _checkout,
-            _tradeTimeLimit,
+            _start,
+            _end,
             _tradeable,
             msg.sender
         );
@@ -260,8 +250,8 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
         return _bookingPayment(commissionTotal, total);
     }
 
-    /// @dev See {IBukEventProtocol-bookRoomsOwner}.
-    function bookRoomsOwner(
+    /// @dev See {IBukEventProtocol-bookEventOwner}.
+    function bookEventOwner(
         uint256[] memory _total,
         uint256[] memory _baseRate,
         uint256[] memory _minSalePrice,
@@ -627,25 +617,28 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
     function _booking(
         BookingList memory _bookingData
     ) private returns (uint, uint256) {
+        uint totalLen = _bookingData.total.length;
         require(
-            ((_bookingData.total.length == _bookingData.baseRate.length) &&
-                (_bookingData.total.length ==
-                    _bookingData.minSalePrice.length) &&
-                (_bookingData.total.length > 0)),
+            ((totalLen == _bookingData.baseRate.length) &&
+                (totalLen == _bookingData.referenceId.length) &&
+                (totalLen == _bookingData.start.length) &&
+                (totalLen == _bookingData.end.length) &&
+                (totalLen > 0)),
             "Array sizes mismatch"
         );
         require(
             _bookingData.total.length <= MAX_BOOKING_LIMIT,
-            "Exceeded max rooms per booking"
+            "Exceeded max ticket per booking"
         );
-        require(
-            (_bookingData.start > block.timestamp),
-            "Checkin date must be in the future"
-        );
-        require(
-            (_bookingData.end > _bookingData.start),
-            "Checkout date must be after checkin"
-        );
+        //FIXME - Check the booking date in loop
+        // require(
+        //     (_bookingData.start > block.timestamp),
+        //     "Checkin date must be in the future"
+        // );
+        // require(
+        //     (_bookingData.end > _bookingData.start),
+        //     "Checkout date must be after checkin"
+        // );
         uint256 totalAmount;
         uint commissionTotal;
         for (uint256 i = 0; i < _bookingData.total.length; ++i) {
