@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.19;
-
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
@@ -479,6 +478,13 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
         _bukTreasury.stableRefund(_charges, _bukWallet);
         _nftContract.burn(_bookingOwner, _id, 1);
         emit EmergencyCancellation(_id, true);
+    }
+
+    /// @dev See {IBukEventProtocol-getEventDetails}.
+    function getEventDetails(
+        uint256 _eventId
+    ) external view returns (Event memory) {
+        return _eventDetails[_eventId];
     }
 
     /// @dev See {IBukEventProtocol-getBookingDetails}.

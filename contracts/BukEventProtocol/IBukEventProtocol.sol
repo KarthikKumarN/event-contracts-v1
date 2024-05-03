@@ -452,6 +452,15 @@ interface IBukEventProtocol {
     ) external;
 
     /**
+     * @dev Function to get the event details.
+     * @param _eventId ID of the event.
+     * @return Event details.
+     */
+    function getEventDetails(
+        uint256 _eventId
+    ) external view returns (Event memory);
+
+    /**
      * Function to get wallet addresses
      * @return nftContract The address of the nft contract
      * @return royaltiesContract The address of the royalties contract
