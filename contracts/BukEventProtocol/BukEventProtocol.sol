@@ -188,6 +188,7 @@ contract BukEventProtocol is
 
     /// @dev See {IBukEventProtocol-unpause}.
     function createEvent(
+        string calldata _name,
         uint256 _referenceId,
         EventType _eventType,
         uint256 _start,
@@ -209,9 +210,15 @@ contract BukEventProtocol is
             (_total > 0 && _baseRate > 0),
             "Check price, must be greater than 0"
         );
+        address eventAddress = _bukEventDeployer.deployEventNFT(
+            _name,
+            address(this),
+            address(_bukTreasury)
+        );
         ++_eventIds;
         _eventDetails[_eventIds] = Event(
             _eventIds,
+            _name,
             _referenceId,
             _eventType,
             _start,
@@ -221,20 +228,17 @@ contract BukEventProtocol is
             _baseRate,
             _tradeTimeLimit,
             _tradeable,
-            _owner
+            _owner,
+            address(eventAddress)
         );
         emit CreateEvent(
-            _eventIds,
-            _referenceId,
+            _name,
             _eventType,
             _start,
             _end,
             _noOfTickets,
-            _total,
-            _baseRate,
-            _tradeTimeLimit,
             _tradeable,
-            _owner
+            address(eventAddress)
         );
         return true;
     }

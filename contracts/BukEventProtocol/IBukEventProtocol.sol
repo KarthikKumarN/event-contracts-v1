@@ -40,6 +40,7 @@ interface IBukEventProtocol {
     /**
      * @dev Struct for Event details.
      * @param uint256 eventId           Unique Event ID .
+     * @param string name               Event name .
      * @param uint256 referenceId       Event Reference ID.
      * @param EventType eventType       Event type.
      * @param uint256 start             Event start date and time.
@@ -54,6 +55,7 @@ interface IBukEventProtocol {
      */
     struct Event {
         uint256 eventId;
+        string name;
         uint256 referenceId;
         EventType eventType;
         uint256 start;
@@ -122,6 +124,17 @@ interface IBukEventProtocol {
         bool tradeable;
         address user;
     }
+
+    /// @dev Emitted when event created.
+    event CreateEvent(
+        string name,
+        EventType eventType,
+        uint256 start,
+        uint256 end,
+        uint256 noOfTickets,
+        bool tradeable,
+        address eventAddress
+    );
 
     /// @dev Emitted when the admin wallet is set.
     event SetAdminWallet(address newAdminWallet);
@@ -274,18 +287,20 @@ interface IBukEventProtocol {
 
     /**
      * @dev Function for Create Event.
-     * @param  _referenceId       Event Reference ID.
+     * @param  _name            Event Name.
+     * @param  _referenceId     Event Reference ID.
      * @param  _eventType       Event type.
-     * @param  _start             Event start date and time.
-     * @param  _end               Event end date and time.
-     * @param  _noOfTickets       Total no tickets can be booked.
-     * @param  _total             Total Ticket rate.
-     * @param  _baseRate          Ticket base rate.
-     * @param  _tradeTimeLimit    Buy will excecute if tradeLimitTime is not crossed (in hours)
-     * @param  _tradeable            Is the Event Tradeable.
-     * @param  _owner             Address of the event owner.
+     * @param  _start           Event start date and time.
+     * @param  _end             Event end date and time.
+     * @param  _noOfTickets     Total no tickets can be booked.
+     * @param  _total           Total Ticket rate.
+     * @param  _baseRate        Ticket base rate.
+     * @param  _tradeTimeLimit  Buy will excecute if tradeLimitTime is not crossed (in hours)
+     * @param  _tradeable       Is the Event Tradeable.
+     * @param  _owner           Address of the event owner.
      */
     function createEvent(
+        string calldata _name,
         uint256 _referenceId,
         EventType _eventType,
         uint256 _start,
