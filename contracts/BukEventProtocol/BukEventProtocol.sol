@@ -17,12 +17,7 @@ import { IBukEventDeployer } from "../BukEventDeployer/IBukEventDeployer.sol";
  * @author BUK Technology Inc
  * @dev Contract to manage operations of the BUK protocol to manage BukNFTs tokens and underlying sub-contracts.
  */
-contract BukEventProtocol is
-    ReentrancyGuard,
-    IBukEventProtocol,
-    IBukEventDeployer,
-    Pausable
-{
+contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
     // Using safeERC20
     using SafeERC20 for IERC20;
     /**
@@ -88,15 +83,13 @@ contract BukEventProtocol is
      * @param _bukWalletAddr Address of the Buk wallet.
      * @param _signVerifierContract Address of the signature verifier contract.
      * @param _royaltiesContractAddr Address of the Buk royalties contract.
-     * @param _deployerContractAddr Address of the Buk Event NFT deployer contract.
      */
     constructor(
         address _bukTreasuryContract,
         address _stableTokenAddr,
         address _bukWalletAddr,
         address _signVerifierContract,
-        address _royaltiesContractAddr,
-        address _deployerContractAddr
+        address _royaltiesContractAddr
     ) {
         _setRoyaltiesContract(_royaltiesContractAddr);
         _setAdmin(msg.sender);
@@ -104,7 +97,6 @@ contract BukEventProtocol is
         _setStableToken(_stableTokenAddr);
         _setBukWallet(_bukWalletAddr);
         _setSignatureVerifier(_signVerifierContract);
-        _setDeployerContract(_deployerContractAddr);
     }
 
     /// @dev See {IBukEventProtocol-setAdmin}.
@@ -199,7 +191,7 @@ contract BukEventProtocol is
         uint256 _tradeTimeLimit,
         bool _tradeable,
         address _owner
-    ) external onlyAdmin whenNotPaused returns (bool) {
+    ) external onlyAdmin whenNotPaused returns (uint256) {
         require(
             (_start > block.timestamp && _end > block.timestamp),
             "Check dates, Must be in the future"
@@ -240,7 +232,7 @@ contract BukEventProtocol is
             _tradeable,
             address(eventAddress)
         );
-        return true;
+        return _eventIds;
     }
 
     /// @dev See {IBukEventProtocol-bookRooms}.

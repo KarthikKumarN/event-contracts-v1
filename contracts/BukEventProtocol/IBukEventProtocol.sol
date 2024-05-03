@@ -311,7 +311,7 @@ interface IBukEventProtocol {
         uint256 _tradeTimeLimit,
         bool _tradeable,
         address _owner
-    ) external returns (bool);
+    ) external returns (uint256);
 
     /**
      * @dev Function to book rooms.

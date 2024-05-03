@@ -43,9 +43,8 @@ describe("BukEventProtocol Bookings", function () {
     );
 
     //Deploy SignatureVerifier contract
-    const SignatureVerifier = await ethers.getContractFactory(
-      "SignatureVerifier",
-    );
+    const SignatureVerifier =
+      await ethers.getContractFactory("SignatureVerifier");
     signatureVerifierContract = await SignatureVerifier.deploy();
 
     //Deploy BukRoyalties contract
@@ -53,9 +52,8 @@ describe("BukEventProtocol Bookings", function () {
     royaltiesContract = await BukRoyalties.deploy();
 
     //BukEventProtocol
-    const BukEventProtocol = await ethers.getContractFactory(
-      "BukEventProtocol",
-    );
+    const BukEventProtocol =
+      await ethers.getContractFactory("BukEventProtocol");
     bukProtocolContract = await BukEventProtocol.deploy(
       bukTreasuryContract.getAddress(),
       stableTokenContract.getAddress(),
@@ -64,9 +62,8 @@ describe("BukEventProtocol Bookings", function () {
       royaltiesContract.getAddress(),
     );
 
-    const BukEventDeployerFactory = await ethers.getContractFactory(
-      "BukEventDeployer",
-    );
+    const BukEventDeployerFactory =
+      await ethers.getContractFactory("BukEventDeployer");
     deployerContract = await BukEventDeployerFactory.deploy(
       await bukProtocolContract.getAddress(),
     );
@@ -74,6 +71,10 @@ describe("BukEventProtocol Bookings", function () {
     await deployerContract.grantRole(
       await deployerContract.BUK_EVENT_PROTOCOL_ROLE(),
       await bukProtocolContract1.getAddress(),
+    );
+
+    await bukProtocolContract.setEventDeployerContract(
+      await deployerContract.getAddress(),
     );
   });
 

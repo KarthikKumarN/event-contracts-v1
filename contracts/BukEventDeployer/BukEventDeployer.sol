@@ -54,6 +54,6 @@ contract BukEventDeployer is IBukEventDeployer, AccessControl {
         _grantRole(BUK_EVENT_PROTOCOL_ROLE, address(_bukEventProtocol));
         _revokeRole(BUK_EVENT_PROTOCOL_ROLE, address(oldAddress));
 
-        emit SetBukEventProtocol(_bukEventProtocol);
+        emit SetBukEventProtocol(address(_bukEventProtocol));
     }
 }
