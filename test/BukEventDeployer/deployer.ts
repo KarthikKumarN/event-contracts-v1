@@ -103,7 +103,6 @@ describe("BukEventProtocol Bookings", function () {
         );
       const receipt = await result.wait();
 
-      console.debug("🚀 ~ file: deployer.ts:55 ~ receipt:", receipt);
       await expect(
         await deployerContract
           .connect(bukProtocolContract1)

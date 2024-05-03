@@ -123,7 +123,6 @@ describe("BukEventProtocol Bookings", function () {
     const _baseRate = 80000000;
     const _tradeTimeLimit = 12;
     const _tradeable = true;
-    const _owner = account1.address;
 
     it("should create a new event", async function () {
       expect(
@@ -138,9 +137,29 @@ describe("BukEventProtocol Bookings", function () {
           _baseRate,
           _tradeTimeLimit,
           _tradeable,
-          _owner,
+          account1.address,
         ),
       ).not.be.reverted;
+    });
+
+    it("should create a new event and verify details", async function () {
+      let eventResult = await bukEventProtocolContract.createEvent(
+        eventName,
+        refId,
+        _eventType,
+        _start,
+        _end,
+        _noOfTickets,
+        _total,
+        _baseRate,
+        _tradeTimeLimit,
+        _tradeable,
+        account1.address,
+      );
+
+      const eventDetails = await bukEventProtocolContract.getEventDetails(1);
+      expect(eventDetails[0]).to.equal(1);
+      expect(eventDetails[1]).to.equal(eventName);
     });
   });
 });
