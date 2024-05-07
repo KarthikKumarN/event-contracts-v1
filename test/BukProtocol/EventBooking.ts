@@ -107,6 +107,11 @@ describe("BukEventProtocol Bookings", function () {
       await deployerContract.getAddress(),
     );
 
+    //Grant allowance permission
+    const res = await stableTokenContract
+      .connect(owner)
+      .approve(await bukEventProtocolContract.getAddress(), 150000000);
+
     // Create event
     const now = Math.floor(Date.now() / 1000);
     const tenDays = 10 * 24 * 60 * 60;
@@ -132,10 +137,7 @@ describe("BukEventProtocol Bookings", function () {
       _tradeable,
       account1.address,
     );
-    //Grant allowance permission
-    const res = await stableTokenContract
-      .connect(owner)
-      .approve(await bukEventProtocolContract.getAddress(), 150000000);
+    const eventDetails = await bukEventProtocolContract.getEventDetails(1);
   });
 
   describe("Test Book Event function", function () {
@@ -181,6 +183,31 @@ describe("BukEventProtocol Bookings", function () {
           baseRate,
           tradeable,
         );
+    });
+
+    it("should book event and verify with booking details", async function () {
+      let eventId = 1;
+      let refId = [123];
+      let total = [100000000];
+      let baseRate = [80000000];
+      let start = [startFromNow];
+      let end = [endFromNow];
+      let tradeable = [true];
+
+      const eventDetails = await bukEventProtocolContract.getEventDetails(1);
+
+      expect(
+        await bukEventProtocolContract
+          .connect(owner)
+          .bookEvent(eventId, refId, total, baseRate, start, end, tradeable),
+      ).not.be.reverted;
+
+      const bookingDetails =
+        await bukEventProtocolContract.getEventBookingDetails(
+          eventDetails[10],
+          1,
+        );
+      expect(bookingDetails[4]).to.equal(total[0]);
     });
   });
 });
