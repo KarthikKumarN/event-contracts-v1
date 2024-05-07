@@ -176,14 +176,15 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
         onlyRole(MARKETPLACE_CONTRACT_ROLE)
         whenNotPaused
     {
-        IBukEventProtocol.Booking memory details = bukEventProtocolContract
-            .getBookingDetails(_id);
-        require(
-            (block.timestamp <
-                (details.start - (details.tradeTimeLimit * 3600)) &&
-                details.tradeable),
-            "Trade limit time crossed"
-        );
+        // FIXME Update this validation
+        // IBukEventProtocol.Booking memory details = bukEventProtocolContract
+        //     .getBookingDetails(eventId,_id);
+        // require(
+        //     (block.timestamp <
+        //         (details.start - (details.tradeTimeLimit * 3600)) &&
+        //         details.tradeable),
+        //     "Trade limit time crossed"
+        // );
         require(
             isApprovedForAll(_from, _msgSender()),
             "Not a token owner or approved"
@@ -211,17 +212,18 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
         );
         uint256 len = _ids.length;
         for (uint i = 0; i < len; ++i) {
-            IBukEventProtocol.Booking memory details = bukEventProtocolContract
-                .getBookingDetails(_ids[i]);
-            require(
-                (block.timestamp <
-                    (details.start -
-                        (bukEventProtocolContract
-                            .getBookingDetails(_ids[i])
-                            .tradeTimeLimit * 3600)) &&
-                    details.tradeable),
-                "Trade limit time crossed"
-            );
+            // FIXME Update this validation
+            // IBukEventProtocol.Booking memory details = bukEventProtocolContract
+            //     .getBookingDetails(_ids[i]);
+            // require(
+            //     (block.timestamp <
+            //         (details.start -
+            //             (bukEventProtocolContract
+            //                 .getBookingDetails(_ids[i])
+            //                 .tradeTimeLimit * 3600)) &&
+            //         details.tradeable),
+            //     "Trade limit time crossed"
+            // );
         }
         super._safeBatchTransferFrom(_from, _to, _ids, _amounts, _data);
     }

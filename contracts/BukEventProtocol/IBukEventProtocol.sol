@@ -49,7 +49,7 @@ interface IBukEventProtocol {
      * @param uint256 tradeTimeLimit    Buy will excecute if tradeLimitTime is not crossed (in hours)
      * @param bool tradeable            Is the Event Tradeable.
      * @param address owner             Address of the event owner.
-     * @param address nftAddress        Address of the event NFT.
+     * @param address eventAddress        Address of the event NFT.
      */
     struct Event {
         uint256 eventId;
@@ -62,7 +62,7 @@ interface IBukEventProtocol {
         uint256 tradeTimeLimit;
         bool tradeable; // FIXME remove on event level
         address owner;
-        address nftAddress;
+        address eventAddress;
     }
 
     /**
