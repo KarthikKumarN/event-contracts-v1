@@ -60,7 +60,7 @@ interface IBukEventProtocol {
         uint256 end;
         uint256 noOfTickets;
         uint256 tradeTimeLimit;
-        bool tradeable;
+        bool tradeable; // FIXME remove on event level
         address owner;
         address nftAddress;
     }
@@ -114,7 +114,7 @@ interface IBukEventProtocol {
         uint256[] start;
         uint256[] end;
         bool[] tradeable;
-        address user;
+        address[] user;
     }
 
     /// @dev Emitted when event created.
@@ -163,7 +163,8 @@ interface IBukEventProtocol {
     event EventBooked(
         uint256 indexed eventId,
         uint256 indexed bookingId,
-        uint256 indexed referenceId,
+        address indexed userAddress,
+        uint256 referenceId,
         uint256 start,
         uint256 end
     );
@@ -303,7 +304,7 @@ interface IBukEventProtocol {
     ) external returns (uint256);
 
     /**
-     * @dev Function to book rooms.
+     * @dev Function to book event.
      * @param _eventId        Event ID.
      * @param _referenceId    Event booking reference ID.
      * @param _total          Total price of the ticket.
@@ -324,26 +325,28 @@ interface IBukEventProtocol {
     ) external returns (bool);
 
     /**
-     * @dev Function to book rooms.
-     * @param _total Total amount to be paid.
-     * @param _baseRate Base rate of the room.
-     * @param _minSalePrice Minimum sale price for the booking.
-     * @param _referenceId Reference  ID.
-     * @param _checkin Checkin date.
-     * @param _checkout Checkout date.
-     * @param _tradeTimeLimit Trade Limit of NFT based on Checkin time.
+     * @dev Function to book event.
+     * @param _eventId        Event ID.
+     * @param _referenceId    Event booking reference ID.
+     * @param _total          Total price of the ticket.
+     * @param _baseRate       Base rate of the ticket.
+     * @param _start          Start date.
+     * @param _end            End date.
      * @param _tradeable Is the booking NFT tradeable.
      * @param _user Address of user which we are booking.
      * @return ids IDs of the bookings.
      * @notice This function can only be called by admin
-     * @notice This function is used to book rooms on behalf of the user.
+     * @notice This function is used to book event on behalf of the user.
      */
     function bookEventOwner(
+        uint256 _eventId,
         uint256[] memory _referenceId,
-        uint256[] memory total,
-        uint256[] memory baseRate,
-        bool _tradeable,
-        address _user
+        uint256[] memory _total,
+        uint256[] memory _baseRate,
+        uint256[] memory _start,
+        uint256[] memory _end,
+        bool[] memory _tradeable,
+        address[] memory _user
     ) external returns (bool);
 
     /**

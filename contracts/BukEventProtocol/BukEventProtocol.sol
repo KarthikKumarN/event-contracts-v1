@@ -242,6 +242,8 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
         uint256[] memory _end,
         bool[] memory _tradeable
     ) external nonReentrant whenNotPaused returns (bool) {
+        address[] memory users = new address[](1);
+        users[0] = msg.sender;
         BookingList memory _params = BookingList(
             _eventId,
             _referenceId,
@@ -250,7 +252,7 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
             _start,
             _end,
             _tradeable,
-            msg.sender
+            users
         );
         (uint commissionTotal, uint256 total) = _booking(_params);
         return _bookingPayment(commissionTotal, total);
@@ -258,24 +260,22 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
 
     /// @dev See {IBukEventProtocol-bookEventOwner}.
     function bookEventOwner(
+        uint256 _eventId,
+        uint256[] memory _referenceId,
         uint256[] memory _total,
         uint256[] memory _baseRate,
-        uint256[] memory _minSalePrice,
-        bytes32 _referenceId,
-        uint256 _checkin,
-        uint256 _checkout,
-        uint256 _tradeTimeLimit,
-        bool _tradeable,
-        address _user
+        uint256[] memory _start,
+        uint256[] memory _end,
+        bool[] memory _tradeable,
+        address[] memory _user
     ) external onlyAdmin nonReentrant whenNotPaused returns (bool) {
         BookingList memory _params = BookingList(
+            _eventId,
+            _referenceId,
             _total,
             _baseRate,
-            _minSalePrice,
-            _referenceId,
-            _checkin,
-            _checkout,
-            _tradeTimeLimit,
+            _start,
+            _end,
             _tradeable,
             _user
         );
@@ -634,6 +634,7 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
             ((totalLen == _bookingData.baseRate.length) &&
                 (totalLen == _bookingData.referenceId.length) &&
                 (totalLen == _bookingData.start.length) &&
+                (totalLen == _bookingData.user.length) &&
                 (totalLen == _bookingData.end.length) &&
                 (totalLen > 0)),
             "Array sizes mismatch"
@@ -673,7 +674,7 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
                 _bookingData.start[i],
                 _bookingData.end[i],
                 BookingStatus.booked,
-                _bookingData.user,
+                _bookingData.user[i],
                 _bookingData.tradeable[i]
             );
             totalAmount += _bookingData.total[i];
@@ -681,6 +682,7 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
             emit EventBooked(
                 eventId,
                 _eventbookingIds[eventId],
+                _bookingData.user[i],
                 _bookingData.referenceId[i],
                 _bookingData.start[i],
                 _bookingData.end[i]
