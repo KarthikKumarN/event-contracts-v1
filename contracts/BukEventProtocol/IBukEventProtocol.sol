@@ -470,6 +470,16 @@ interface IBukEventProtocol {
         );
 
     /**
+     * @dev To get Event booking details
+     * @param _eventAddress Contract address of the Event.
+     * @param _tokenId ID of the booking.
+     */
+    function getEventBookingDetails(
+        address _eventAddress,
+        uint256 _tokenId
+    ) external view returns (Booking memory);
+
+    /**
      * @dev To get the booking details
      * @param _tokenId ID of the booking.
      */

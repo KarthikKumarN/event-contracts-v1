@@ -485,14 +485,13 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
         return _eventDetails[_eventId];
     }
 
-    // TODO - enable it again
-    /// @dev See {IBukEventProtocol-getBookingDetails}.
-    // function getEventBookingDetails(
-    //     uint256 _eventId,
-    //     uint256 _tokenId
-    // ) external view returns (Booking memory) {
-    //     return _eventBookings[_eventId][_tokenId];
-    // }
+    /// @dev See {IBukEventProtocol-getEventBookingDetails}.
+    function getEventBookingDetails(
+        address _eventaddr,
+        uint256 _tokenId
+    ) external view returns (Booking memory) {
+        return _eventBookings[_eventaddr][_tokenId];
+    }
 
     /// @dev See {IBukEventProtocol-getBookingDetails}.
     function getBookingDetails(
