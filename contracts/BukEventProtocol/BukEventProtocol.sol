@@ -51,7 +51,7 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
     mapping(uint256 => uint256) private _eventbookingIds; //bookingID -> Booking Details
 
     /// @dev Max booking limit per transaction.
-    uint256 public constant MAX_BOOKING_LIMIT = 11;
+    uint256 public constant MAX_BOOKING_LIMIT = 25;
 
     /**
      * @dev mapping(uint256 => Event) _eventDetails   Mapping of Event IDs to event details.
@@ -64,9 +64,10 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
     mapping(uint256 => Booking) private _bookingDetails; //bookingID -> Booking Details
 
     /**
-     * @dev Mapping of event IDs to booking. Each event ID maps to another mapping, which maps booking IDs to booking.
+     * @dev Mapping of event contract address to booking.
+     * @dev Each event address maps to another mapping, which maps booking IDs to booking.
      */
-    mapping(uint256 => mapping(uint256 => Booking)) private _eventBookings; // eventID -> (bookingID -> Booking)
+    mapping(address => mapping(uint256 => Booking)) private _eventBookings; // eventID -> (bookingID -> Booking)
 
     /**
      * @dev Modifier onlyAdmin
@@ -201,12 +202,13 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
         );
         require((_end > _start), "End date must be after start date");
         require((_noOfTickets > 0), "Number of tickets must be greater than 0");
+
+        ++_eventIds;
         address eventAddress = _bukEventDeployer.deployEventNFT(
             _name,
             address(this),
             address(_bukTreasury)
         );
-        ++_eventIds;
         _eventDetails[_eventIds] = Event(
             _eventIds,
             _name,
@@ -483,6 +485,15 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
         return _eventDetails[_eventId];
     }
 
+    // TODO - enable it again
+    /// @dev See {IBukEventProtocol-getBookingDetails}.
+    // function getEventBookingDetails(
+    //     uint256 _eventId,
+    //     uint256 _tokenId
+    // ) external view returns (Booking memory) {
+    //     return _eventBookings[_eventId][_tokenId];
+    // }
+
     /// @dev See {IBukEventProtocol-getBookingDetails}.
     function getBookingDetails(
         uint256 _tokenId
@@ -663,7 +674,9 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
             uint256 bukCommission = (_bookingData.baseRate[i] * commission) /
                 100;
 
-            _eventBookings[eventId][_eventbookingIds[eventId]] = Booking(
+            address eventAddr = _eventDetails[_bookingData.eventId]
+                .eventAddress;
+            _eventBookings[eventAddr][_eventbookingIds[eventId]] = Booking(
                 _eventbookingIds[eventId],
                 0,
                 eventId,
