@@ -159,12 +159,13 @@ interface IBukEventProtocol {
      */
     event ToggleTradeability(uint256 indexed tokenId, bool indexed tradeable);
 
-    /// @dev Emitted when single room is booked.
-    event BookRoom(
-        uint256 indexed booking,
-        bytes32 indexed referenceId,
-        uint256 checkin,
-        uint256 checkout
+    /// @dev Emitted when single event is booked.
+    event EventBooked(
+        uint256 indexed eventId,
+        uint256 indexed bookingId,
+        uint256 indexed referenceId,
+        uint256 start,
+        uint256 end
     );
 
     /// @dev Emitted when booking refund is done.

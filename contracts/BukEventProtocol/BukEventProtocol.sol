@@ -10,6 +10,7 @@ import { ISignatureVerifier } from "../SignatureVerifier/ISignatureVerifier.sol"
 import { IBukRoyalties } from "../BukRoyalties/IBukRoyalties.sol";
 import { IBukEventProtocol } from "../BukEventProtocol/IBukEventProtocol.sol";
 import { IBukEventDeployer } from "../BukEventDeployer/IBukEventDeployer.sol";
+import "hardhat/console.sol";
 
 /**
  * @title BUK Protocol Contract
@@ -61,6 +62,11 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
      * @dev mapping(uint256 => Booking) _bookingDetails   Mapping of booking IDs to booking details.
      */
     mapping(uint256 => Booking) private _bookingDetails; //bookingID -> Booking Details
+
+    /**
+     * @dev Mapping of event IDs to booking. Each event ID maps to another mapping, which maps booking IDs to booking.
+     */
+    mapping(uint256 => mapping(uint256 => Booking)) private _eventBookings; // eventID -> (bookingID -> Booking)
 
     /**
      * @dev Modifier onlyAdmin
@@ -617,6 +623,12 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
     function _booking(
         BookingList memory _bookingData
     ) private returns (uint, uint256) {
+        // add validation to check event exists
+        uint256 eventId = _bookingData.eventId;
+        require(
+            _eventDetails[eventId].eventId == eventId,
+            "Event does not exist"
+        );
         uint totalLen = _bookingData.total.length;
         require(
             ((totalLen == _bookingData.baseRate.length) &&
@@ -630,43 +642,48 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
             _bookingData.total.length <= MAX_BOOKING_LIMIT,
             "Exceeded max ticket per booking"
         );
-        //FIXME - Check the booking date in loop
-        // require(
-        //     (_bookingData.start > block.timestamp),
-        //     "Checkin date must be in the future"
-        // );
-        // require(
-        //     (_bookingData.end > _bookingData.start),
-        //     "Checkout date must be after checkin"
-        // );
+
         uint256 totalAmount;
         uint commissionTotal;
         for (uint256 i = 0; i < _bookingData.total.length; ++i) {
-            ++_bookingIds;
+            require(
+                (_bookingData.start[i] > block.timestamp),
+                "Start date must be in the future"
+            );
+            require(
+                (_bookingData.end[i] > _bookingData.start[i]),
+                "End date must be after start"
+            );
+            console.log(
+                "Booking current event id: ",
+                _eventbookingIds[eventId]
+            );
+            _eventbookingIds[eventId] = _eventbookingIds[eventId] + 1;
             uint256 bukCommission = (_bookingData.baseRate[i] * commission) /
                 100;
-            _bookingDetails[_bookingIds] = Booking(
-                _bookingIds,
+
+            _eventBookings[eventId][_eventbookingIds[eventId]] = Booking(
+                _eventbookingIds[eventId],
                 0,
-                _bookingData.eventId,
-                BookingStatus.booked,
-                _bookingData.user,
-                _bookingData.start,
-                _bookingData.end,
+                eventId,
+                _bookingData.referenceId[i],
                 _bookingData.total[i],
                 _bookingData.baseRate[i],
                 bukCommission,
-                _bookingData.minSalePrice[i],
-                _bookingData.tradeTimeLimit,
-                _bookingData.tradeable
+                _bookingData.start[i],
+                _bookingData.end[i],
+                BookingStatus.booked,
+                _bookingData.user,
+                _bookingData.tradeable[i]
             );
             totalAmount += _bookingData.total[i];
             commissionTotal += bukCommission;
-            emit BookRoom(
-                _bookingIds,
-                _bookingData.eventId,
-                _bookingData.start,
-                _bookingData.end
+            emit EventBooked(
+                eventId,
+                _eventbookingIds[eventId],
+                _bookingData.referenceId[i],
+                _bookingData.start[i],
+                _bookingData.end[i]
             );
         }
         return (commissionTotal, totalAmount);
