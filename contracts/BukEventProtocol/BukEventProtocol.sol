@@ -666,11 +666,12 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
                 (_bookingData.end[i] > _bookingData.start[i]),
                 "End date must be after start"
             );
+
+            _eventbookingIds[eventId] = _eventbookingIds[eventId] + 1;
             console.log(
                 "Booking current event id: ",
                 _eventbookingIds[eventId]
             );
-            _eventbookingIds[eventId] = _eventbookingIds[eventId] + 1;
             uint256 bukCommission = (_bookingData.baseRate[i] * commission) /
                 100;
 
