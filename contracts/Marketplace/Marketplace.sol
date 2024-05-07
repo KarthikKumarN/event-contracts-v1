@@ -81,10 +81,11 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
         require(!isBookingListed(_tokenId), "NFT already listed");
         IBukEventProtocol.Booking memory bookingDetails = _bukProtocolContract
             .getBookingDetails(_tokenId);
-        require(
-            _price >= bookingDetails.minSalePrice,
-            "Minimum price requirement not met"
-        );
+        // FIXME - Check this condition later
+        // require(
+        //     _price >= bookingDetails.minSalePrice,
+        //     "Minimum price requirement not met"
+        // );
         require(
             bookingDetails.status ==
                 IBukEventProtocol.BookingStatus.confirmed &&
@@ -99,11 +100,12 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
             _bukNFTContract.isApprovedForAll(_msgSender(), address(this)),
             "Approve marketplace for trade"
         );
-        require(
-            block.timestamp <
-                (bookingDetails.start - (bookingDetails.tradeTimeLimit * 3600)),
-            "Trade limit time crossed"
-        );
+        // FIXME - Update this later
+        // require(
+        //     block.timestamp <
+        //         (bookingDetails.start - (bookingDetails.tradeTimeLimit * 3600)),
+        //     "Trade limit time crossed"
+        // );
         _listedNFT[_tokenId] = ListingDetails(
             _price,
             _msgSender(),
@@ -144,10 +146,11 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
             bookingDetails.status == IBukEventProtocol.BookingStatus.confirmed,
             "Tradeable if available"
         );
-        require(
-            _newPrice >= bookingDetails.minSalePrice,
-            "Minimum price requirement not met"
-        );
+        // FIXME - Update this later
+        // require(
+        //     _newPrice >= bookingDetails.minSalePrice,
+        //     "Minimum price requirement not met"
+        // );
         uint256 oldPrice = _listedNFT[_tokenId].price;
         _listedNFT[_tokenId].status = ListingStatus.active;
         _listedNFT[_tokenId].price = _newPrice;
@@ -262,19 +265,20 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
      * @param _tokenId, NFT/Booking ID
      */
     function _buy(uint256 _tokenId) private {
-        IBukEventProtocol.Booking memory bookingDetails = _bukProtocolContract
-            .getBookingDetails(_tokenId);
-        require(
-            bookingDetails.status ==
-                IBukEventProtocol.BookingStatus.confirmed &&
-                bookingDetails.tradeable,
-            "Tradeable if available"
-        );
-        require(
-            block.timestamp <
-                (bookingDetails.start - (bookingDetails.tradeTimeLimit * 3600)),
-            "Trade limit time crossed"
-        );
+        // FIXME - Update this later
+        // IBukEventProtocol.Booking memory bookingDetails = _bukProtocolContract
+        //     .getBookingDetails(_tokenId);
+        // require(
+        //     bookingDetails.status ==
+        //         IBukEventProtocol.BookingStatus.confirmed &&
+        //         bookingDetails.tradeable,
+        //     "Tradeable if available"
+        // );
+        // require(
+        //     block.timestamp <
+        //         (bookingDetails.start - (bookingDetails.tradeTimeLimit * 3600)),
+        //     "Trade limit time crossed"
+        // );
         require(
             (_stableToken.allowance(_msgSender(), address(this)) >=
                 _listedNFT[_tokenId].price),
