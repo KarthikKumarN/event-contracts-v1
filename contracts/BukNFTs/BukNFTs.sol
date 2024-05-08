@@ -153,7 +153,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
         uint256 _salePrice
     ) external view returns (address receiver, uint256 royaltyAmount) {
         IBukRoyalties.Royalty[] memory royaltyArray = bukEventProtocolContract
-            .getRoyaltyInfo(_tokenId);
+            .getRoyaltyInfo(address(this), _tokenId);
         uint256 royaltyAmount_;
         for (uint i = 0; i < royaltyArray.length; i++) {
             royaltyAmount_ += ((_salePrice * royaltyArray[i].royaltyFraction) /

@@ -493,13 +493,6 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
         return _eventBookings[_eventaddr][_tokenId];
     }
 
-    /// @dev See {IBukEventProtocol-getBookingDetails}.
-    function getBookingDetails(
-        uint256 _tokenId
-    ) external view returns (Booking memory) {
-        return _bookingDetails[_tokenId];
-    }
-
     /// @dev See {IBukEventProtocol-isBookingTradeable}.
     function isBookingTradeable(
         address _eventAddress,
@@ -517,10 +510,11 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
 
     /// @dev See {IBukEventProtocol-getRoyaltyInfo}.
     function getRoyaltyInfo(
+        address _eventAddress,
         uint256 _tokenId
     ) external view returns (IBukRoyalties.Royalty[] memory) {
         IBukRoyalties.Royalty[] memory royalties = _royaltiesContract
-            .getRoyaltyInfo(_tokenId);
+            .getRoyaltyInfo(_eventAddress, _tokenId);
         return royalties;
     }
 
