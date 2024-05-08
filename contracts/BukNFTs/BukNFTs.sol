@@ -176,15 +176,11 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
         onlyRole(MARKETPLACE_CONTRACT_ROLE)
         whenNotPaused
     {
-        // FIXME Update this validation
-        // IBukEventProtocol.Booking memory details = bukEventProtocolContract
-        //     .getBookingDetails(eventId,_id);
-        // require(
-        //     (block.timestamp <
-        //         (details.start - (details.tradeTimeLimit * 3600)) &&
-        //         details.tradeable),
-        //     "Trade limit time crossed"
-        // );
+        bool isTradeable = bukEventProtocolContract.isBookingTradeable(
+            address(this),
+            _id
+        );
+        require(isTradeable, "Trade limit time crossed");
         require(
             isApprovedForAll(_from, _msgSender()),
             "Not a token owner or approved"
@@ -212,18 +208,11 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
         );
         uint256 len = _ids.length;
         for (uint i = 0; i < len; ++i) {
-            // FIXME Update this validation
-            // IBukEventProtocol.Booking memory details = bukEventProtocolContract
-            //     .getBookingDetails(_ids[i]);
-            // require(
-            //     (block.timestamp <
-            //         (details.start -
-            //             (bukEventProtocolContract
-            //                 .getBookingDetails(_ids[i])
-            //                 .tradeTimeLimit * 3600)) &&
-            //         details.tradeable),
-            //     "Trade limit time crossed"
-            // );
+            bool isTradeable = bukEventProtocolContract.isBookingTradeable(
+                address(this),
+                _ids[i]
+            );
+            require(isTradeable, "Trade limit time crossed");
         }
         super._safeBatchTransferFrom(_from, _to, _ids, _amounts, _data);
     }
