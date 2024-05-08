@@ -173,7 +173,11 @@ interface IBukEventProtocol {
     event BookingRefund(uint256 total, address owner);
 
     /// @dev Emitted when room bookings are confirmed.
-    event MintedBookingNFT(uint256[] bookings, bool status);
+    event MintedBookingNFT(
+        address indexed eventAddress,
+        uint256[] bookings,
+        bool status
+    );
 
     /// @dev Emitted when room bookings are checked in.
     event CheckinRooms(uint256[] bookings, bool status);

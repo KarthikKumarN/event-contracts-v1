@@ -318,7 +318,7 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
     function mintBukNFTOwner(
         uint256 _eventId,
         uint256[] memory _ids,
-        string[] memory _uri,
+        string[] memory _uri
     ) external whenNotPaused nonReentrant onlyAdmin {
         _mintBukNFT(_eventId, _ids, _uri);
     }
@@ -683,10 +683,6 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
             );
 
             _eventbookingIds[eventId] = _eventbookingIds[eventId] + 1;
-            console.log(
-                "Booking current event id: ",
-                _eventbookingIds[eventId]
-            );
             uint256 bukCommission = (_bookingData.baseRate[i] * commission) /
                 100;
 
@@ -724,7 +720,7 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
     function _mintBukNFT(
         uint256 _eventId,
         uint256[] memory _ids,
-        string[] memory _uri,
+        string[] memory _uri
     ) private {
         uint256 len = _ids.length;
         require((len == _uri.length), "Check Ids and URIs size");
@@ -732,24 +728,26 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
             ((len > 0) && (len < MAX_BOOKING_LIMIT)),
             "Not in max - min booking limit"
         );
+        address eventAddr = _eventDetails[_eventId].eventAddress;
         for (uint256 i = 0; i < len; ++i) {
             require(
-                _eventBookings[_eventId][_ids[i]].status ==
+                _eventBookings[eventAddr][_ids[i]].status ==
                     BookingStatus.booked,
                 "Check the Booking status"
             );
         }
+        IBukNFTs nftContract = IBukNFTs(eventAddr);
         for (uint256 i = 0; i < len; ++i) {
-            _eventBookings[_eventId][_ids[i]].status = BookingStatus.confirmed;
-            _nftContract.mint(
+            _eventBookings[eventAddr][_ids[i]].status = BookingStatus.confirmed;
+            nftContract.mint(
                 _ids[i],
-                _eventBookings[_eventId][_ids[i]].firstOwner,
+                _eventBookings[eventAddr][_ids[i]].firstOwner,
                 1,
                 "",
                 _uri[i]
             );
-            _eventBookings[_eventId][_ids[i]].tokenId = _ids[i];
+            _eventBookings[eventAddr][_ids[i]].tokenId = _ids[i];
         }
-        emit MintedBookingNFT(_ids, true);
+        emit MintedBookingNFT(eventAddr, _ids, true);
     }
 }
