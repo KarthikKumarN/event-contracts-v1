@@ -111,10 +111,12 @@ interface IBukRoyalties {
 
     /**
      * @dev Function to retrieve royalty information.
+     * @param _eventAddress Contract address of the Event.
      * @param _tokenId ID of the token
      * @notice Token ID and Booking ID are same.
      */
     function getRoyaltyInfo(
+        address _eventAddress,
         uint256 _tokenId
     ) external view returns (Royalty[] memory);
 }
