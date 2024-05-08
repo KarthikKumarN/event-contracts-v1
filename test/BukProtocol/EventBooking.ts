@@ -209,5 +209,115 @@ describe("BukEventProtocol Bookings", function () {
         );
       expect(bookingDetails[4]).to.equal(total[0]);
     });
+
+    it("should book event and verify with booking details", async function () {
+      let eventId = 1;
+      let refId = [123];
+      let total = [100000000];
+      let baseRate = [80000000];
+      let start = [startFromNow];
+      let end = [endFromNow];
+      let tradeable = [true];
+
+      const eventDetails = await bukEventProtocolContract.getEventDetails(1);
+
+      expect(
+        await bukEventProtocolContract
+          .connect(owner)
+          .bookEvent(eventId, refId, total, baseRate, start, end, tradeable),
+      ).not.be.reverted;
+
+      const bookingDetails =
+        await bukEventProtocolContract.getEventBookingDetails(
+          eventDetails[10],
+          1,
+        );
+      expect(bookingDetails[4]).to.equal(total[0]);
+    });
+  });
+
+  describe("Test admin booking", function () {
+    it("should book event by admin", async function () {
+      let eventId = 1;
+      let refId = [123];
+      let total = [100000000];
+      let baseRate = [80000000];
+      let start = [startFromNow];
+      let end = [endFromNow];
+      let tradeable = [true];
+      let users = [account1.address];
+
+      const eventDetails = await bukEventProtocolContract.getEventDetails(1);
+
+      expect(
+        await bukEventProtocolContract.bookEventOwner(
+          eventId,
+          refId,
+          total,
+          baseRate,
+          start,
+          end,
+          tradeable,
+          users,
+        ),
+      ).not.be.reverted;
+    });
+    it("should book event by admin and verify details", async function () {
+      let eventId = 1;
+      let refId = [123];
+      let total = [100000000];
+      let baseRate = [80000000];
+      let start = [startFromNow];
+      let end = [endFromNow];
+      let tradeable = [true];
+      let users = [account1.address];
+
+      const eventDetails = await bukEventProtocolContract.getEventDetails(1);
+
+      expect(
+        await bukEventProtocolContract.bookEventOwner(
+          eventId,
+          refId,
+          total,
+          baseRate,
+          start,
+          end,
+          tradeable,
+          users,
+        ),
+      ).not.be.reverted;
+
+      const bookingDetails =
+        await bukEventProtocolContract.getEventBookingDetails(
+          eventDetails[10],
+          1,
+        );
+      expect(bookingDetails[10]).to.equal(users[0]);
+    });
+    it("should fail, book event only by admin", async function () {
+      let eventId = 1;
+      let refId = [123];
+      let total = [100000000];
+      let baseRate = [80000000];
+      let start = [startFromNow];
+      let end = [endFromNow];
+      let tradeable = [true];
+      let users = [account1.address];
+
+      await expect(
+        bukEventProtocolContract
+          .connect(account1)
+          .bookEventOwner(
+            eventId,
+            refId,
+            total,
+            baseRate,
+            start,
+            end,
+            tradeable,
+            users,
+          ),
+      ).to.be.revertedWith("Only admin has access to this function");
+    });
   });
 });

@@ -633,6 +633,7 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
     function _booking(
         BookingList memory _bookingData
     ) private returns (uint, uint256) {
+        // FIXME start and end with in event dates
         // add validation to check event exists
         uint256 eventId = _bookingData.eventId;
         require(
