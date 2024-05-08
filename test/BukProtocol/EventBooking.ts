@@ -456,4 +456,136 @@ describe("BukEventProtocol Bookings", function () {
       expect(isTradeable).to.equal(false);
     });
   });
+
+  // Test cases for minting NFT
+  describe("Booking and Mint", function () {
+    it("should book event and mint by admin success", async function () {
+      let eventId = 1;
+      let refId = [123];
+      let total = [100000000];
+      let baseRate = [80000000];
+      let start = [startFromNow];
+      let end = [endFromNow];
+      let tradeable = [true];
+      let users = [account1.address];
+      let nftIds = [1];
+      let urls = [
+        "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+      ];
+
+      expect(
+        await bukEventProtocolContract.bookEventOwner(
+          eventId,
+          refId,
+          total,
+          baseRate,
+          start,
+          end,
+          tradeable,
+          users,
+        ),
+      ).not.be.reverted;
+
+      expect(
+        await bukEventProtocolContract.mintBukNFTOwner(eventId, nftIds, urls),
+      ).not.be.reverted;
+    });
+    it("should mint event by admin and verify details", async function () {
+      let eventId = 1;
+      let refId = [123];
+      let total = [100000000];
+      let baseRate = [80000000];
+      let start = [startFromNow];
+      let end = [endFromNow];
+      let tradeable = [true];
+      let users = [account1.address];
+      let nftIds = [1];
+      let urls = [
+        "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+      ];
+
+      const eventDetails = await bukEventProtocolContract.getEventDetails(1);
+
+      expect(
+        await bukEventProtocolContract.bookEventOwner(
+          eventId,
+          refId,
+          total,
+          baseRate,
+          start,
+          end,
+          tradeable,
+          users,
+        ),
+      ).not.be.reverted;
+
+      expect(
+        await bukEventProtocolContract.mintBukNFTOwner(eventId, nftIds, urls),
+      ).not.be.reverted;
+
+      const bookingDetails =
+        await bukEventProtocolContract.getEventBookingDetails(
+          eventDetails[10],
+          1,
+        );
+
+      expect(bookingDetails[9]).to.equal(2); // 2 status confirmed
+    });
+
+    it("should fail, mint event only by admin", async function () {
+      let eventId = 1;
+      let refId = [123];
+      let total = [100000000];
+      let baseRate = [80000000];
+      let start = [startFromNow];
+      let end = [endFromNow];
+      let tradeable = [true];
+      let users = [account1.address];
+      let nftIds = [1];
+      let urls = [
+        "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+      ];
+
+      const eventDetails = await bukEventProtocolContract.getEventDetails(1);
+
+      expect(
+        await bukEventProtocolContract.bookEventOwner(
+          eventId,
+          refId,
+          total,
+          baseRate,
+          start,
+          end,
+          tradeable,
+          users,
+        ),
+      ).not.be.reverted;
+
+      await expect(
+        bukEventProtocolContract
+          .connect(account1)
+          .mintBukNFTOwner(eventId, nftIds, urls),
+      ).to.be.revertedWith("Only admin has access to this function");
+    });
+    it("should fail, mint event only booked", async function () {
+      let eventId = 1;
+      let refId = [123];
+      let total = [100000000];
+      let baseRate = [80000000];
+      let start = [startFromNow];
+      let end = [endFromNow];
+      let tradeable = [true];
+      let users = [account1.address];
+      let nftIds = [1];
+      let urls = [
+        "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+      ];
+
+      const eventDetails = await bukEventProtocolContract.getEventDetails(1);
+
+      await expect(
+        bukEventProtocolContract.mintBukNFTOwner(eventId, nftIds, urls),
+      ).to.be.revertedWith("Check the Booking status");
+    });
+  });
 });
