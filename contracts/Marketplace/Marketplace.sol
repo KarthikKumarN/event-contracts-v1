@@ -41,6 +41,7 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
     /**
      * @dev mapping(uint256 => ListingDetails) _listedNFT  Captures listed bookings for sale
      */
+    // FIXME - Update capture each contract listing
     mapping(uint256 => ListingDetails) private _listedNFT;
 
     /**
@@ -75,47 +76,57 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
 
     /// @dev Refer {IMarketplace-createListing}.
     function createListing(
+        address _eventAddress,
         uint256 _tokenId,
         uint256 _price
     ) external whenNotPaused {
+        // FIXME - Update this later
         require(!isBookingListed(_tokenId), "NFT already listed");
         IBukEventProtocol.Booking
-            memory bookingDetails = _bukEventProtocolContract.getBookingDetails(
-                _tokenId
-            );
+            memory bookingDetails = _bukEventProtocolContract
+                .getEventBookingDetails(_eventAddress, _tokenId);
         require(
             bookingDetails.status ==
                 IBukEventProtocol.BookingStatus.confirmed &&
                 bookingDetails.tradeable,
             "Only tradable if available"
         );
+        // FIXME - Validate NFT owner or Buk protocol
         require(
             _bukNFTContract.balanceOf(_msgSender(), _tokenId) == 1,
             "Only owner can list"
         );
+        // FIXME - Validate NFT owner or Buk protocol
         require(
             _bukNFTContract.isApprovedForAll(_msgSender(), address(this)),
             "Approve marketplace for trade"
         );
+        bool isTradeable = bukEventProtocolContract.isBookingTradeable(
+            _eventAddress,
+            _tokenId
+        );
+        require(isTradeable, "Trade limit time crossed");
         // FIXME - Update this later
-        // require(
-        //     block.timestamp <
-        //         (bookingDetails.start - (bookingDetails.tradeTimeLimit * 3600)),
-        //     "Trade limit time crossed"
-        // );
         _listedNFT[_tokenId] = ListingDetails(
+            _eventAddress,
             _price,
             _msgSender(),
             _listedNFT[_tokenId].index + 1,
             ListingStatus.active
         );
 
-        emit ListingCreated(_msgSender(), _tokenId, _price);
+        emit ListingCreated(_eventAddress, _msgSender(), _tokenId, _price);
     }
 
     /// @dev Refer {IMarketplace-deleteListing}.
-    function deleteListing(uint256 _tokenId) external whenNotPaused {
+    function deleteListing(
+        address _eventAddress,
+        uint256 _tokenId
+    ) external whenNotPaused {
+        // FIXME - Update this later
         require(isBookingListed(_tokenId), "NFT not listed");
+
+        // FIXME - Validate NFT owner or Buk protocol
         require(
             _bukNFTContract.balanceOf(_msgSender(), _tokenId) == 1 ||
                 hasRole(BUK_PROTOCOL_ROLE, _msgSender()),
@@ -124,19 +135,21 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
         uint256 listingIndex = _listedNFT[_tokenId].index;
         delete _listedNFT[_tokenId];
         _listedNFT[_tokenId].index = listingIndex + 1;
-        emit DeletedListing(_tokenId);
+        emit DeletedListing(_eventAddress, _tokenId);
     }
 
     /// @dev Refer {IMarketplace-relist}.
     function relist(
+        address _eventAddress,
         uint256 _tokenId,
         uint256 _newPrice
     ) external whenNotPaused {
+        // FIXME - Update this later
         require(isBookingListed(_tokenId), "NFT not listed");
         IBukEventProtocol.Booking
-            memory bookingDetails = _bukEventProtocolContract.getBookingDetails(
-                _tokenId
-            );
+            memory bookingDetails = _bukEventProtocolContract
+                .getEventBookingDetails(_eventAddress, _tokenId);
+        // FIXME - Validate NFT owner or Buk protocol
         require(
             _bukNFTContract.balanceOf(_msgSender(), _tokenId) == 1,
             "Only owner can relist"
@@ -145,29 +158,30 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
             bookingDetails.status == IBukEventProtocol.BookingStatus.confirmed,
             "Tradeable if available"
         );
-        // FIXME - Update this later
-        // require(
-        //     _newPrice >= bookingDetails.minSalePrice,
-        //     "Minimum price requirement not met"
-        // );
         uint256 oldPrice = _listedNFT[_tokenId].price;
         _listedNFT[_tokenId].status = ListingStatus.active;
         _listedNFT[_tokenId].price = _newPrice;
         _listedNFT[_tokenId].index = _listedNFT[_tokenId].index + 1;
-        emit Relisted(_tokenId, oldPrice, _newPrice);
+        emit Relisted(_eventAddress, _tokenId, oldPrice, _newPrice);
     }
 
-    /// @dev Refer {IMarketplace-buyRoom}.
-    function buyRoom(uint256 _tokenId) external whenNotPaused {
+    /// @dev Refer {IMarketplace-buy}.
+    function buy(
+        address _eventAddress,
+        uint256 _tokenId
+    ) external whenNotPaused {
         require(
             _listedNFT[_tokenId].status == ListingStatus.active,
             "NFT not listed"
         );
-        _buy(_tokenId);
+        _buy(_eventAddress, _tokenId);
     }
 
-    /// @dev Refer {IMarketplace-buyRoomBatch}.
-    function buyRoomBatch(uint256[] calldata _tokenIds) external whenNotPaused {
+    /// @dev Refer {IMarketplace-buyBatch}.
+    function buyBatch(
+        address _eventAddress,
+        uint256[] calldata _tokenIds
+    ) external whenNotPaused {
         uint256 len = _tokenIds.length;
         for (uint256 i = 0; i < len; ) {
             require(
@@ -266,7 +280,7 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
     function _buy(uint256 _tokenId) private {
         // FIXME - Update this later
         // IBukEventProtocol.Booking memory bookingDetails = _bukEventProtocolContract
-        //     .getBookingDetails(_tokenId);
+        //     .getEventBookingDetails(_tokenId);
         // require(
         //     bookingDetails.status ==
         //         IBukEventProtocol.BookingStatus.confirmed &&
