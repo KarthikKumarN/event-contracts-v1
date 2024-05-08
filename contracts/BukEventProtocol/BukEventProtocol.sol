@@ -500,6 +500,21 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
         return _bookingDetails[_tokenId];
     }
 
+    /// @dev See {IBukEventProtocol-isBookingTradeable}.
+    function isBookingTradeable(
+        address _eventAddress,
+        uint256 _tokenId
+    ) external view returns (bool) {
+        Booking memory booking = _eventBookings[_eventAddress][_tokenId];
+        // console.log(booking[1]);
+        Event memory eventDetails = _eventDetails[booking.eventId];
+        // console.log(eventDetails[2]);
+        return
+            block.timestamp <
+            (booking.start - (eventDetails.tradeTimeLimit * 3600)) &&
+            booking.tradeable;
+    }
+
     /// @dev See {IBukEventProtocol-getRoyaltyInfo}.
     function getRoyaltyInfo(
         uint256 _tokenId

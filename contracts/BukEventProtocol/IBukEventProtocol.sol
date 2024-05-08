@@ -488,6 +488,16 @@ interface IBukEventProtocol {
     ) external view returns (Booking memory);
 
     /**
+     * @dev To get the is booking/ticket/NFT eligible for trade/exchange
+     * @param _eventAddress Contract address of the Event.
+     * @param _tokenId ID of the event booking.
+     */
+    function isBookingTradeable(
+        address _eventAddress,
+        uint256 _tokenId
+    ) external view returns (bool);
+
+    /**
      * @dev Function to retrieve royalty information.
      * @param _tokenId ID of the token
      * @notice Token ID and Booking ID are same.
