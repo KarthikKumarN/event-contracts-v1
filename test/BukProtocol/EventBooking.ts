@@ -124,7 +124,7 @@ describe("BukEventProtocol Bookings", function () {
     const _noOfTickets = 10000;
     const _total = 100000000;
     const _baseRate = 80000000;
-    const _tradeTimeLimit = 12;
+    const _tradeTimeLimit = 24;
     const _tradeable = true;
     await bukEventProtocolContract.createEvent(
       eventName,
@@ -318,6 +318,142 @@ describe("BukEventProtocol Bookings", function () {
             users,
           ),
       ).to.be.revertedWith("Only admin has access to this function");
+    });
+  });
+
+  // add test cases to test isBookingTradeable function
+  describe("Test isBookingTradeable function", function () {
+    it("should return true if booking is tradeable", async function () {
+      let eventId = 1;
+      let refId = [123];
+      let total = [100000000];
+      let baseRate = [80000000];
+      let start = [startFromNow];
+      let end = [endFromNow];
+      let tradeable = [true];
+
+      expect(
+        await bukEventProtocolContract
+          .connect(owner)
+          .bookEvent(eventId, refId, total, baseRate, start, end, tradeable),
+      ).not.be.reverted;
+      const eventDetails = await bukEventProtocolContract.getEventDetails(1);
+
+      const isTradeable = await bukEventProtocolContract.isBookingTradeable(
+        eventDetails[10],
+        1,
+      );
+      expect(isTradeable).to.equal(true);
+    });
+
+    it("should return false if booking is not tradeable", async function () {
+      let eventId = 1;
+      let refId = [123];
+      let total = [100000000];
+      let baseRate = [80000000];
+      let start = [startFromNow];
+      let end = [endFromNow];
+      let tradeable = [false];
+
+      expect(
+        await bukEventProtocolContract
+          .connect(owner)
+          .bookEvent(eventId, refId, total, baseRate, start, end, tradeable),
+      ).not.be.reverted;
+      const eventDetails = await bukEventProtocolContract.getEventDetails(1);
+
+      const isTradeable = await bukEventProtocolContract.isBookingTradeable(
+        eventDetails[10],
+        1,
+      );
+      expect(isTradeable).to.equal(false);
+    });
+
+    it("should return false if booking is crossed trade block time", async function () {
+      let eventId = 1;
+      let refId = [123];
+      let total = [100000000];
+      let baseRate = [80000000];
+
+      const now = Math.floor(Date.now() / 1000);
+      const fiveDays = 1 * 24 * 60 * 60;
+      const startFromNow = now + fiveDays;
+      const endFromNow = startFromNow + fiveDays;
+
+      let start = [startFromNow];
+      let end = [endFromNow];
+      let tradeable = [true];
+
+      expect(
+        await bukEventProtocolContract
+          .connect(owner)
+          .bookEvent(eventId, refId, total, baseRate, start, end, tradeable),
+      ).not.be.reverted;
+      const eventDetails = await bukEventProtocolContract.getEventDetails(1);
+
+      const isTradeable = await bukEventProtocolContract.isBookingTradeable(
+        eventDetails[10],
+        1,
+      );
+      expect(isTradeable).to.equal(false);
+    });
+    it("should return true if booking is not crossed trade block time", async function () {
+      let eventId = 1;
+      let refId = [123];
+      let total = [100000000];
+      let baseRate = [80000000];
+
+      const now = Math.floor(Date.now() / 1000);
+      const fiveDays = 2 * 24 * 60 * 60;
+      const startFromNow = now + fiveDays;
+      const endFromNow = startFromNow + fiveDays;
+
+      let start = [startFromNow];
+      let end = [endFromNow];
+      let tradeable = [true];
+
+      expect(
+        await bukEventProtocolContract
+          .connect(owner)
+          .bookEvent(eventId, refId, total, baseRate, start, end, tradeable),
+      ).not.be.reverted;
+      const eventDetails = await bukEventProtocolContract.getEventDetails(1);
+
+      const isTradeable = await bukEventProtocolContract.isBookingTradeable(
+        eventDetails[10],
+        1,
+      );
+
+      expect(isTradeable).to.equal(true);
+    });
+
+    it("should return false, booking is not crossed trade block but tradeable is false", async function () {
+      let eventId = 1;
+      let refId = [123];
+      let total = [100000000];
+      let baseRate = [80000000];
+
+      const now = Math.floor(Date.now() / 1000);
+      const fiveDays = 2 * 24 * 60 * 60;
+      const startFromNow = now + fiveDays;
+      const endFromNow = startFromNow + fiveDays;
+
+      let start = [startFromNow];
+      let end = [endFromNow];
+      let tradeable = [false];
+
+      expect(
+        await bukEventProtocolContract
+          .connect(owner)
+          .bookEvent(eventId, refId, total, baseRate, start, end, tradeable),
+      ).not.be.reverted;
+      const eventDetails = await bukEventProtocolContract.getEventDetails(1);
+
+      const isTradeable = await bukEventProtocolContract.isBookingTradeable(
+        eventDetails[10],
+        1,
+      );
+      expect(isTradeable).to.equal(false);
     });
   });
 });
