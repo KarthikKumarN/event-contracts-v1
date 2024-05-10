@@ -35,6 +35,13 @@ const config: HardhatUserConfig = {
           ? [process.env.WALLET_PRIVATE_KEY]
           : [],
     },
+    bscTestnet: {
+      url: `https://data-seed-prebsc-1-s1.bnbchain.org:8545`,
+      accounts:
+        process.env.WALLET_PRIVATE_KEY !== undefined
+          ? [process.env.WALLET_PRIVATE_KEY]
+          : [],
+    },
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,
@@ -45,6 +52,7 @@ const config: HardhatUserConfig = {
       plum_test: "test",
       polygonMumbai: process.env.POLYGONSCAN_API_KEY || "",
       polygon_mainnet: process.env.POLYGONSCAN_API_KEY || "",
+      bscTestnet: process.env.BNB_API_KEY || "",
     },
     customChains: [
       {
