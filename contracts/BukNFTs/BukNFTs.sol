@@ -27,6 +27,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
     /// @dev Address of the Buk Protocol contract
     IBukEventProtocol public bukEventProtocolContract;
 
+    // FIXME - Not required
     /// @dev Address of the Buk treasury contract.
     IBukTreasury private _bukTreasury;
 
