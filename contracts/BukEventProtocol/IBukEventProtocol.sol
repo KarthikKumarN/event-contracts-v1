@@ -452,6 +452,7 @@ interface IBukEventProtocol {
 
     /**
      * Function to get wallet addresses
+     * @return deployerContract The address of the nft deployer contract
      * @return nftContract The address of the nft contract
      * @return royaltiesContract The address of the royalties contract
      * @return signatureVerifier The address of the signature verifier contract
@@ -464,6 +465,7 @@ interface IBukEventProtocol {
         external
         view
         returns (
+            address deployerContract,
             address nftContract,
             address royaltiesContract,
             address signatureVerifier,

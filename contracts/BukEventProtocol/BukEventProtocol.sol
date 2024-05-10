@@ -523,6 +523,7 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
         external
         view
         returns (
+            address bukEventDeployer,
             address nftContract,
             address royaltiesContract,
             address signatureVerifier,
@@ -533,6 +534,7 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
         )
     {
         return (
+            address(_bukEventDeployer),
             address(_nftContract),
             address(_royaltiesContract),
             address(_signatureVerifier),
