@@ -81,7 +81,10 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
         uint256 _price
     ) external whenNotPaused {
         // FIXME - Update this later
-        require(!isBookingListed(_tokenId), "NFT already listed");
+        require(
+            !isBookingListed(_eventAddress, _tokenId),
+            "NFT already listed"
+        );
         IBukEventProtocol.Booking
             memory bookingDetails = _bukEventProtocolContract
                 .getEventBookingDetails(_eventAddress, _tokenId);
@@ -101,7 +104,7 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
             _bukNFTContract.isApprovedForAll(_msgSender(), address(this)),
             "Approve marketplace for trade"
         );
-        bool isTradeable = bukEventProtocolContract.isBookingTradeable(
+        bool isTradeable = _bukEventProtocolContract.isBookingTradeable(
             _eventAddress,
             _tokenId
         );
@@ -124,7 +127,7 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
         uint256 _tokenId
     ) external whenNotPaused {
         // FIXME - Update this later
-        require(isBookingListed(_tokenId), "NFT not listed");
+        require(isBookingListed(_eventAddress, _tokenId), "NFT not listed");
 
         // FIXME - Validate NFT owner or Buk protocol
         require(
@@ -145,7 +148,7 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
         uint256 _newPrice
     ) external whenNotPaused {
         // FIXME - Update this later
-        require(isBookingListed(_tokenId), "NFT not listed");
+        require(isBookingListed(_eventAddress, _tokenId), "NFT not listed");
         IBukEventProtocol.Booking
             memory bookingDetails = _bukEventProtocolContract
                 .getEventBookingDetails(_eventAddress, _tokenId);
@@ -188,7 +191,7 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
                 _listedNFT[_tokenIds[i]].status == ListingStatus.active,
                 "NFT not listed"
             );
-            _buy(_tokenIds[i]);
+            _buy(_eventAddress, _tokenIds[i]);
             unchecked {
                 i += 1;
             }
@@ -231,13 +234,17 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
 
     /// @dev Refer {IMarketplace-getListingDetails}.
     function getListingDetails(
+        address _eventAddress,
         uint256 _tokenId
     ) external view returns (ListingDetails memory) {
         return _listedNFT[_tokenId];
     }
 
     /// @dev Refer {IMarketplace-isBookingListed}.
-    function isBookingListed(uint256 _tokenId) public view returns (bool) {
+    function isBookingListed(
+        address _eventAddress,
+        uint256 _tokenId
+    ) public view returns (bool) {
         return _listedNFT[_tokenId].price > 0 ? true : false;
     }
 
@@ -277,7 +284,7 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
      * @dev Transfer sale price and royalties
      * @param _tokenId, NFT/Booking ID
      */
-    function _buy(uint256 _tokenId) private {
+    function _buy(address _eventAddress, uint256 _tokenId) private {
         // FIXME - Update this later
         // IBukEventProtocol.Booking memory bookingDetails = _bukEventProtocolContract
         //     .getEventBookingDetails(_tokenId);
@@ -326,6 +333,12 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
         uint256 listingIndex = _listedNFT[_tokenId].index;
         delete _listedNFT[_tokenId];
         _listedNFT[_tokenId].index = listingIndex + 1;
-        emit RoomBought(_tokenId, nftOwner, _msgSender(), totalPrice);
+        emit ListingBought(
+            _eventAddress,
+            _tokenId,
+            nftOwner,
+            _msgSender(),
+            totalPrice
+        );
     }
 }
