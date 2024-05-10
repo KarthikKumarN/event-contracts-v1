@@ -117,10 +117,14 @@ describe("BukEventProtocol Bookings", function () {
     const refId = 1234;
     const _eventType = 1;
     const _start = startFromNow;
+
+    console.debug("🚀 ~ file: Event.ts:121 ~ _start:", _start);
+
     const _end = endFromNow;
+
+    console.debug("🚀 ~ file: Event.ts:125 ~ _end:", _end);
+
     const _noOfTickets = 10000;
-    const _total = 100000000;
-    const _baseRate = 80000000;
     const _tradeTimeLimit = 12;
     const _tradeable = true;
 
@@ -156,6 +160,30 @@ describe("BukEventProtocol Bookings", function () {
       const eventDetails = await bukEventProtocolContract.getEventDetails(1);
       expect(eventDetails[0]).to.equal(1);
       expect(eventDetails[1]).to.equal(eventName);
+    });
+    it("should create a new event and verify NFT", async function () {
+      let eventResult = await bukEventProtocolContract.createEvent(
+        eventName,
+        refId,
+        _eventType,
+        _start,
+        _end,
+        _noOfTickets,
+        _tradeTimeLimit,
+        _tradeable,
+        account1.address,
+      );
+
+      const eventDetails = await bukEventProtocolContract.getEventDetails(1);
+
+      console.debug("🚀 ~ file: Event.ts:181 ~ eventDetails:", eventDetails);
+
+      const eventNFTContract = await ethers.getContractAt(
+        "BukNFTs",
+        eventDetails[10],
+      );
+      const contractName = await eventNFTContract.name();
+      expect(contractName).to.equal(eventName);
     });
   });
 });
