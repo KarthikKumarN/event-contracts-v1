@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-describe("BukEventProtocol Bookings", function () {
+describe("EventProtocol Bookings", function () {
   // get current epoch time and add 10 days to it
   const now = Math.floor(Date.now() / 1000);
   const fiveDays = 5 * 24 * 60 * 60;
@@ -138,7 +138,6 @@ describe("BukEventProtocol Bookings", function () {
           _end,
           _noOfTickets,
           _tradeTimeLimit,
-          _tradeable,
           account1.address,
         ),
       ).not.be.reverted;
@@ -153,7 +152,6 @@ describe("BukEventProtocol Bookings", function () {
         _end,
         _noOfTickets,
         _tradeTimeLimit,
-        _tradeable,
         account1.address,
       );
 
@@ -170,7 +168,6 @@ describe("BukEventProtocol Bookings", function () {
         _end,
         _noOfTickets,
         _tradeTimeLimit,
-        _tradeable,
         account1.address,
       );
 
@@ -180,7 +177,7 @@ describe("BukEventProtocol Bookings", function () {
 
       const eventNFTContract = await ethers.getContractAt(
         "BukNFTs",
-        eventDetails[10],
+        eventDetails[9],
       );
       const contractName = await eventNFTContract.name();
       expect(contractName).to.equal(eventName);

@@ -46,7 +46,7 @@ async function main() {
   await bukEventProtocol.waitForDeployment();
 
   // Deploy BukEventDeployer
-  const bukEventDeployerArgs = ["0x7cB3D276cCBD8DF74D0d7ef550f3201de0C1bF1C"];
+  const bukEventDeployerArgs = [bukEventProtocol.target];
   const bukEventDeployer = await ethers.deployContract(
     "BukEventDeployer",
     bukEventDeployerArgs,

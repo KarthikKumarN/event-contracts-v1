@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-describe("BukEventProtocol Bookings", function () {
+describe("EventProtocol Bookings", function () {
   // get current epoch time and add 10 days to it
   const now = Math.floor(Date.now() / 1000);
   const fiveDays = 5 * 24 * 60 * 60;
@@ -59,10 +59,9 @@ describe("BukEventProtocol Bookings", function () {
     const BukRoyalties = await ethers.getContractFactory("BukRoyalties");
     royaltiesContract = await BukRoyalties.deploy();
 
-    //BukEventProtocol
-    const BukEventProtocol =
-      await ethers.getContractFactory("BukEventProtocol");
-    bukEventProtocolContract = await BukEventProtocol.deploy(
+    //EventProtocol
+    const EventProtocol = await ethers.getContractFactory("EventProtocol");
+    bukEventProtocolContract = await EventProtocol.deploy(
       bukTreasuryContract.getAddress(),
       stableTokenContract.getAddress(),
       bukWallet.getAddress(),
