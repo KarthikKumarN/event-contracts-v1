@@ -99,6 +99,18 @@ async function main() {
   console.log("🚀 All contracts have been deployed and configured");
   console.log("🚀 ~ 🚀 ~ Verifying contracts");
 
+  // Verify BukEventProtocol contract
+  await run("verify:verify", {
+    address: bukEventProtocol.target,
+    constructorArguments: bukEventProtocolArgs,
+  });
+
+  // Verify BukEventDeployer contract
+  await run("verify:verify", {
+    address: bukEventDeployer.target,
+    constructorArguments: bukEventDeployerArgs,
+  });
+
   // Verify Treasury contract
   await run("verify:verify", {
     address: treasury.target,
@@ -115,18 +127,6 @@ async function main() {
   await run("verify:verify", {
     address: royalties.target,
     constructorArguments: [],
-  });
-
-  // Verify BukEventProtocol contract
-  await run("verify:verify", {
-    address: bukEventProtocol.target,
-    constructorArguments: bukEventProtocolArgs,
-  });
-
-  // Verify BukEventDeployer contract
-  await run("verify:verify", {
-    address: bukEventDeployer.target,
-    constructorArguments: bukEventDeployerArgs,
   });
 
   //Verify Marketplace contract
