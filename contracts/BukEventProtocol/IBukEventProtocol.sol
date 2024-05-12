@@ -47,7 +47,6 @@ interface IBukEventProtocol {
      * @param uint256 end               Event end date and time.
      * @param uint256 noOfTickets       Total no tickets can be booked.
      * @param uint256 tradeTimeLimit    Buy will excecute if tradeLimitTime is not crossed (in hours)
-     * @param bool tradeable            Is the Event Tradeable.
      * @param address owner             Address of the event owner.
      * @param address eventAddress        Address of the event NFT.
      */
@@ -60,7 +59,6 @@ interface IBukEventProtocol {
         uint256 end;
         uint256 noOfTickets;
         uint256 tradeTimeLimit;
-        bool tradeable; // FIXME remove on event level
         address owner;
         address eventAddress;
     }
@@ -124,7 +122,6 @@ interface IBukEventProtocol {
         uint256 start,
         uint256 end,
         uint256 noOfTickets,
-        bool tradeable,
         address eventAddress
     );
 
@@ -292,7 +289,6 @@ interface IBukEventProtocol {
      * @param  _end             Event end date and time.
      * @param  _noOfTickets     Total no tickets can be booked.
      * @param  _tradeTimeLimit  Buy will excecute if tradeLimitTime is not crossed (in hours)
-     * @param  _tradeable       Is the Event Tradeable.
      * @param  _owner           Address of the event owner.
      */
     function createEvent(
@@ -303,7 +299,6 @@ interface IBukEventProtocol {
         uint256 _end,
         uint256 _noOfTickets,
         uint256 _tradeTimeLimit,
-        bool _tradeable,
         address _owner
     ) external returns (uint256);
 

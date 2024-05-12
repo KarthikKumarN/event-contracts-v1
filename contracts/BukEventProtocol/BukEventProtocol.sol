@@ -193,7 +193,6 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
         uint256 _end,
         uint256 _noOfTickets,
         uint256 _tradeTimeLimit,
-        bool _tradeable,
         address _owner
     ) external onlyAdmin whenNotPaused returns (uint256) {
         require(
@@ -218,7 +217,6 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
             _end,
             _noOfTickets,
             _tradeTimeLimit,
-            _tradeable,
             _owner,
             address(eventAddress)
         );
@@ -228,7 +226,6 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
             _start,
             _end,
             _noOfTickets,
-            _tradeable,
             address(eventAddress)
         );
         return _eventIds;
