@@ -226,13 +226,6 @@ interface IBukEventProtocol {
     function setStableToken(address _stableToken) external;
 
     /**
-     * @dev Function to update the BukNFTs contract address.
-     * @param _nftContractAddr Address of the BukNFTs contract.
-     * @notice This function can only be called by admin
-     */
-    function setBukNFTs(address _nftContractAddr) external;
-
-    /**
      * @dev Sets the Buk royalties contract address.
      * Can only be called by accounts with the ADMIN_ROLE.
      * @param _royaltiesContract The new royaltiesContract address to set.
@@ -443,7 +436,6 @@ interface IBukEventProtocol {
     /**
      * Function to get wallet addresses
      * @return deployerContract The address of the nft deployer contract
-     * @return nftContract The address of the nft contract
      * @return royaltiesContract The address of the royalties contract
      * @return signatureVerifier The address of the signature verifier contract
      * @return bukTreasury The address of the bukTreasury contract
@@ -456,7 +448,6 @@ interface IBukEventProtocol {
         view
         returns (
             address deployerContract,
-            address nftContract,
             address royaltiesContract,
             address signatureVerifier,
             address bukTreasury,

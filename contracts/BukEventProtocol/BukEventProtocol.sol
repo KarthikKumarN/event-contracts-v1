@@ -132,13 +132,6 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
         _setStableToken(_stableTokenAddress);
     }
 
-    /// @dev See {IBukEventProtocol-setBukNFTs}.
-    // FIXME
-    function setBukNFTs(address _nftContractAddr) external onlyAdmin {
-        _nftContract = IBukNFTs(_nftContractAddr);
-        emit SetBukNFTs(_nftContractAddr);
-    }
-
     /// @dev See {IBukEventProtocol-setRoyalties}.
     function setRoyaltiesContract(
         address _royaltiesContractAddr
@@ -514,7 +507,6 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
         view
         returns (
             address bukEventDeployer,
-            address nftContract,
             address royaltiesContract,
             address signatureVerifier,
             address bukTreasury,
@@ -525,7 +517,6 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
     {
         return (
             address(_bukEventDeployer),
-            address(_nftContract),
             address(_royaltiesContract),
             address(_signatureVerifier),
             address(_bukTreasury),
