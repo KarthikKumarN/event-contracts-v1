@@ -41,7 +41,7 @@ interface IBukEventProtocol {
      * @dev Struct for Event details.
      * @param uint256 eventId           Unique Event ID .
      * @param string name               Event name .
-     * @param uint256 referenceId       Event Reference ID.
+     * @param bytes32 referenceId       Event Reference ID.
      * @param EventType eventType       Event type.
      * @param uint256 start             Event start date and time.
      * @param uint256 end               Event end date and time.
@@ -53,7 +53,7 @@ interface IBukEventProtocol {
     struct Event {
         uint256 eventId;
         string name;
-        uint256 referenceId;
+        bytes32 referenceId;
         EventType eventType;
         uint256 start;
         uint256 end;
@@ -68,7 +68,7 @@ interface IBukEventProtocol {
      * @param uint256 id                Booking ID.
      * @param uint256 tokenId           Token ID.
      * @param uint256 eventId           Event ID.
-     * @param uint256 referenceId       Event reference ID.
+     * @param bytes32 referenceId       Event reference ID.
      * @param uint256 total             Total Ticket rate.
      * @param uint256 baseRate          Ticket base rate.
      * @param uint256 commission        Ticket commission.
@@ -82,7 +82,7 @@ interface IBukEventProtocol {
         uint256 id;
         uint256 tokenId;
         uint256 eventId;
-        uint256 referenceId;
+        bytes32 referenceId;
         uint256 total;
         uint256 baseRate;
         uint256 commission;
@@ -96,7 +96,7 @@ interface IBukEventProtocol {
     /**
      * @dev Struct for booking details.
      * @param uint256 eventId           Event ID.
-     * @param uint256 referenceId       Event reference ID.
+     * @param bytes32 referenceId       Event reference ID.
      * @param uint256 total             Total price.
      * @param uint256 baseRate          Base rate.
      * @param uint256 start             Event Start date.
@@ -106,7 +106,7 @@ interface IBukEventProtocol {
      */
     struct BookingList {
         uint256 eventId;
-        uint256[] referenceId;
+        bytes32[] referenceId;
         uint256[] total;
         uint256[] baseRate;
         uint256[] start;
@@ -117,11 +117,8 @@ interface IBukEventProtocol {
 
     /// @dev Emitted when event created.
     event CreateEvent(
-        string name,
-        EventType eventType,
-        uint256 start,
-        uint256 end,
-        uint256 noOfTickets,
+        bytes32 referenceId,
+        uint256 eventId,
         address eventAddress
     );
 
@@ -159,11 +156,9 @@ interface IBukEventProtocol {
     /// @dev Emitted when single event is booked.
     event EventBooked(
         uint256 indexed eventId,
-        uint256 indexed bookingId,
-        address indexed userAddress,
-        uint256 referenceId,
-        uint256 start,
-        uint256 end
+        uint256 indexed eventBookingId,
+        address userAddress,
+        bytes32 indexed referenceId
     );
 
     /// @dev Emitted when booking refund is done.
@@ -293,7 +288,7 @@ interface IBukEventProtocol {
      */
     function createEvent(
         string calldata _name,
-        uint256 _referenceId,
+        bytes32 _referenceId,
         EventType _eventType,
         uint256 _start,
         uint256 _end,
@@ -315,7 +310,7 @@ interface IBukEventProtocol {
      */
     function bookEvent(
         uint256 _eventId,
-        uint256[] memory _referenceId,
+        bytes32[] memory _referenceId,
         uint256[] memory _total,
         uint256[] memory _baseRate,
         uint256[] memory _start,
@@ -339,7 +334,7 @@ interface IBukEventProtocol {
      */
     function bookEventOwner(
         uint256 _eventId,
-        uint256[] memory _referenceId,
+        bytes32[] memory _referenceId,
         uint256[] memory _total,
         uint256[] memory _baseRate,
         uint256[] memory _start,

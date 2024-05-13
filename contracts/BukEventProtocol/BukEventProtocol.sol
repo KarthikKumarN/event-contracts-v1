@@ -187,7 +187,7 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
     /// @dev See {IBukEventProtocol-unpause}.
     function createEvent(
         string calldata _name,
-        uint256 _referenceId,
+        bytes32 _referenceId,
         EventType _eventType,
         uint256 _start,
         uint256 _end,
@@ -220,21 +220,14 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
             _owner,
             address(eventAddress)
         );
-        emit CreateEvent(
-            _name,
-            _eventType,
-            _start,
-            _end,
-            _noOfTickets,
-            address(eventAddress)
-        );
+        emit CreateEvent(_referenceId, _eventIds, address(eventAddress));
         return _eventIds;
     }
 
     /// @dev See {IBukEventProtocol-bookEvent}.
     function bookEvent(
         uint256 _eventId,
-        uint256[] memory _referenceId,
+        bytes32[] memory _referenceId,
         uint256[] memory _total,
         uint256[] memory _baseRate,
         uint256[] memory _start,
@@ -260,7 +253,7 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
     /// @dev See {IBukEventProtocol-bookEventOwner}.
     function bookEventOwner(
         uint256 _eventId,
-        uint256[] memory _referenceId,
+        bytes32[] memory _referenceId,
         uint256[] memory _total,
         uint256[] memory _baseRate,
         uint256[] memory _start,
@@ -701,9 +694,7 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
                 eventId,
                 _eventbookingIds[eventId],
                 _bookingData.user[i],
-                _bookingData.referenceId[i],
-                _bookingData.start[i],
-                _bookingData.end[i]
+                _bookingData.referenceId[i]
             );
         }
         return (commissionTotal, totalAmount);
