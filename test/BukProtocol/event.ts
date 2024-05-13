@@ -114,7 +114,8 @@ describe("EventProtocol Bookings", function () {
     const tenDays = 10 * 24 * 60 * 60;
     const tenDaysFromNow = now + tenDays;
     const eventName = "Web3 Carnival";
-    const refId = 1234;
+    const refId =
+      "0x3633666663356135366139343361313561626261336134630000000000000000";
     const _eventType = 1;
     const _start = startFromNow;
 

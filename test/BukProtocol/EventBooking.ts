@@ -60,7 +60,7 @@ describe("EventProtocol Bookings", function () {
     royaltiesContract = await BukRoyalties.deploy();
 
     //EventProtocol
-    const EventProtocol = await ethers.getContractFactory("EventProtocol");
+    const EventProtocol = await ethers.getContractFactory("BukEventProtocol");
     bukEventProtocolContract = await EventProtocol.deploy(
       bukTreasuryContract.getAddress(),
       stableTokenContract.getAddress(),
@@ -116,7 +116,8 @@ describe("EventProtocol Bookings", function () {
     const tenDays = 10 * 24 * 60 * 60;
     const tenDaysFromNow = now + tenDays;
     const eventName = "Web3 Carnival";
-    const refId = 1234;
+    const refId =
+      "0x3633666663356135366139343361313561626261336134630000000000000000";
     const _eventType = 1;
     const _start = startFromNow;
     const _end = endFromNow;
@@ -125,6 +126,7 @@ describe("EventProtocol Bookings", function () {
     const _baseRate = 80000000;
     const _tradeTimeLimit = 24;
     const _tradeable = true;
+
     await bukEventProtocolContract.createEvent(
       eventName,
       refId,
@@ -133,7 +135,6 @@ describe("EventProtocol Bookings", function () {
       _end,
       _noOfTickets,
       _tradeTimeLimit,
-      _tradeable,
       account1.address,
     );
     const eventDetails = await bukEventProtocolContract.getEventDetails(1);
@@ -142,7 +143,9 @@ describe("EventProtocol Bookings", function () {
   describe("Test Book Event function", function () {
     it("should book a event", async function () {
       let eventId = 1;
-      let refId = [123];
+      let refId = [
+        "0x3633666663356135366139343361313561626261336134630000000000000000",
+      ];
       let total = [100000000];
       let baseRate = [80000000];
       let start = [startFromNow];
@@ -158,7 +161,9 @@ describe("EventProtocol Bookings", function () {
 
     it("should book event and emit", async function () {
       let eventId = 1;
-      let refId = [123];
+      let refId = [
+        "0x3633666663356135366139343361313561626261336134630000000000000000",
+      ];
       let total = [100000000];
       let baseRate = [80000000];
       let start = [startFromNow];
@@ -186,7 +191,9 @@ describe("EventProtocol Bookings", function () {
 
     it("should book event and verify with booking details", async function () {
       let eventId = 1;
-      let refId = [123];
+      let refId = [
+        "0x3633666663356135366139343361313561626261336134630000000000000000",
+      ];
       let total = [100000000];
       let baseRate = [80000000];
       let start = [startFromNow];
@@ -203,7 +210,7 @@ describe("EventProtocol Bookings", function () {
 
       const bookingDetails =
         await bukEventProtocolContract.getEventBookingDetails(
-          eventDetails[10],
+          eventDetails[9],
           1,
         );
       expect(bookingDetails[4]).to.equal(total[0]);
@@ -211,7 +218,9 @@ describe("EventProtocol Bookings", function () {
 
     it("should book event and verify with booking details", async function () {
       let eventId = 1;
-      let refId = [123];
+      let refId = [
+        "0x3633666663356135366139343361313561626261336134630000000000000000",
+      ];
       let total = [100000000];
       let baseRate = [80000000];
       let start = [startFromNow];
@@ -228,7 +237,7 @@ describe("EventProtocol Bookings", function () {
 
       const bookingDetails =
         await bukEventProtocolContract.getEventBookingDetails(
-          eventDetails[10],
+          eventDetails[9],
           1,
         );
       expect(bookingDetails[4]).to.equal(total[0]);
@@ -238,7 +247,9 @@ describe("EventProtocol Bookings", function () {
   describe("Test admin booking", function () {
     it("should book event by admin", async function () {
       let eventId = 1;
-      let refId = [123];
+      let refId = [
+        "0x3633666663356135366139343361313561626261336134630000000000000000",
+      ];
       let total = [100000000];
       let baseRate = [80000000];
       let start = [startFromNow];
@@ -263,7 +274,9 @@ describe("EventProtocol Bookings", function () {
     });
     it("should book event by admin and verify details", async function () {
       let eventId = 1;
-      let refId = [123];
+      let refId = [
+        "0x3633666663356135366139343361313561626261336134630000000000000000",
+      ];
       let total = [100000000];
       let baseRate = [80000000];
       let start = [startFromNow];
@@ -288,14 +301,16 @@ describe("EventProtocol Bookings", function () {
 
       const bookingDetails =
         await bukEventProtocolContract.getEventBookingDetails(
-          eventDetails[10],
+          eventDetails[9],
           1,
         );
       expect(bookingDetails[10]).to.equal(users[0]);
     });
     it("should fail, book event only by admin", async function () {
       let eventId = 1;
-      let refId = [123];
+      let refId = [
+        "0x3633666663356135366139343361313561626261336134630000000000000000",
+      ];
       let total = [100000000];
       let baseRate = [80000000];
       let start = [startFromNow];
@@ -324,7 +339,9 @@ describe("EventProtocol Bookings", function () {
   describe("Test isBookingTradeable function", function () {
     it("should return true if booking is tradeable", async function () {
       let eventId = 1;
-      let refId = [123];
+      let refId = [
+        "0x3633666663356135366139343361313561626261336134630000000000000000",
+      ];
       let total = [100000000];
       let baseRate = [80000000];
       let start = [startFromNow];
@@ -339,7 +356,7 @@ describe("EventProtocol Bookings", function () {
       const eventDetails = await bukEventProtocolContract.getEventDetails(1);
 
       const isTradeable = await bukEventProtocolContract.isBookingTradeable(
-        eventDetails[10],
+        eventDetails[9],
         1,
       );
       expect(isTradeable).to.equal(true);
@@ -347,7 +364,9 @@ describe("EventProtocol Bookings", function () {
 
     it("should return false if booking is not tradeable", async function () {
       let eventId = 1;
-      let refId = [123];
+      let refId = [
+        "0x3633666663356135366139343361313561626261336134630000000000000000",
+      ];
       let total = [100000000];
       let baseRate = [80000000];
       let start = [startFromNow];
@@ -362,7 +381,7 @@ describe("EventProtocol Bookings", function () {
       const eventDetails = await bukEventProtocolContract.getEventDetails(1);
 
       const isTradeable = await bukEventProtocolContract.isBookingTradeable(
-        eventDetails[10],
+        eventDetails[9],
         1,
       );
       expect(isTradeable).to.equal(false);
@@ -370,7 +389,9 @@ describe("EventProtocol Bookings", function () {
 
     it("should return false if booking is crossed trade block time", async function () {
       let eventId = 1;
-      let refId = [123];
+      let refId = [
+        "0x3633666663356135366139343361313561626261336134630000000000000000",
+      ];
       let total = [100000000];
       let baseRate = [80000000];
 
@@ -391,14 +412,16 @@ describe("EventProtocol Bookings", function () {
       const eventDetails = await bukEventProtocolContract.getEventDetails(1);
 
       const isTradeable = await bukEventProtocolContract.isBookingTradeable(
-        eventDetails[10],
+        eventDetails[9],
         1,
       );
       expect(isTradeable).to.equal(false);
     });
     it("should return true if booking is not crossed trade block time", async function () {
       let eventId = 1;
-      let refId = [123];
+      let refId = [
+        "0x3633666663356135366139343361313561626261336134630000000000000000",
+      ];
       let total = [100000000];
       let baseRate = [80000000];
 
@@ -419,7 +442,7 @@ describe("EventProtocol Bookings", function () {
       const eventDetails = await bukEventProtocolContract.getEventDetails(1);
 
       const isTradeable = await bukEventProtocolContract.isBookingTradeable(
-        eventDetails[10],
+        eventDetails[9],
         1,
       );
 
@@ -428,7 +451,9 @@ describe("EventProtocol Bookings", function () {
 
     it("should return false, booking is not crossed trade block but tradeable is false", async function () {
       let eventId = 1;
-      let refId = [123];
+      let refId = [
+        "0x3633666663356135366139343361313561626261336134630000000000000000",
+      ];
       let total = [100000000];
       let baseRate = [80000000];
 
@@ -449,7 +474,7 @@ describe("EventProtocol Bookings", function () {
       const eventDetails = await bukEventProtocolContract.getEventDetails(1);
 
       const isTradeable = await bukEventProtocolContract.isBookingTradeable(
-        eventDetails[10],
+        eventDetails[9],
         1,
       );
       expect(isTradeable).to.equal(false);
@@ -460,7 +485,9 @@ describe("EventProtocol Bookings", function () {
   describe("Booking and Mint", function () {
     it("should book event and mint by admin success", async function () {
       let eventId = 1;
-      let refId = [123];
+      let refId = [
+        "0x3633666663356135366139343361313561626261336134630000000000000000",
+      ];
       let total = [100000000];
       let baseRate = [80000000];
       let start = [startFromNow];
@@ -491,7 +518,9 @@ describe("EventProtocol Bookings", function () {
     });
     it("should mint event by admin and verify details", async function () {
       let eventId = 1;
-      let refId = [123];
+      let refId = [
+        "0x3633666663356135366139343361313561626261336134630000000000000000",
+      ];
       let total = [100000000];
       let baseRate = [80000000];
       let start = [startFromNow];
@@ -524,7 +553,7 @@ describe("EventProtocol Bookings", function () {
 
       const bookingDetails =
         await bukEventProtocolContract.getEventBookingDetails(
-          eventDetails[10],
+          eventDetails[9],
           1,
         );
 
@@ -533,7 +562,9 @@ describe("EventProtocol Bookings", function () {
 
     it("should fail, mint event only by admin", async function () {
       let eventId = 1;
-      let refId = [123];
+      let refId = [
+        "0x3633666663356135366139343361313561626261336134630000000000000000",
+      ];
       let total = [100000000];
       let baseRate = [80000000];
       let start = [startFromNow];
@@ -568,7 +599,9 @@ describe("EventProtocol Bookings", function () {
     });
     it("should fail, mint event only booked", async function () {
       let eventId = 1;
-      let refId = [123];
+      let refId = [
+        "0x3633666663356135366139343361313561626261336134630000000000000000",
+      ];
       let total = [100000000];
       let baseRate = [80000000];
       let start = [startFromNow];
