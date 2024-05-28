@@ -10,9 +10,9 @@ import { IERC1155 } from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
  */
 interface IBukNFTs is IERC1155 {
     /// @dev Emitted when Buk Protocol Address is updated.
-    event SetBukProtocol(
-        address oldBukProtocolContract,
-        address newBukProtocolContract
+    event SetBukEventProtocol(
+        address oldBukEventProtocolContract,
+        address newBukEventProtocolContract
     );
 
     /// @dev Emitted when treasury is updated.
@@ -24,21 +24,15 @@ interface IBukNFTs is IERC1155 {
     /// @dev Emitted when marketplace role is granted.
     event SetMarketplace(address marketplaceContract);
 
-    /// @dev Event to set NFT contract role
-    event SetNFTPOSContractRole(
-        address oldNFTPOSContractAddr,
-        address newNFTPOSContractAddr
-    );
-
     /// @dev Event to set token URI
     event SetURI(uint256 id, string oldUri, string newUri);
 
     /**
      * @dev Function to set the Buk Protocol Contract address.
-     * @param _bukProtocolContract Address of the Buk Protocol Contract.
+     * @param _bukEventProtocolContract Address of the Buk Protocol Contract.
      * @notice This function can only be called by addresses with `ADMIN_ROLE`
      */
-    function setBukProtocol(address _bukProtocolContract) external;
+    function setBukEventProtocol(address _bukEventProtocolContract) external;
 
     /**
      * @dev Function to set the treasury address.
@@ -53,13 +47,6 @@ interface IBukNFTs is IERC1155 {
      * @notice This function can only be called by addresses with `ADMIN_ROLE`
      */
     function setMarketplaceRole(address _marketplaceContract) external;
-
-    /**
-     * @dev Function to set the BukPOSNFT to the contract
-     * @param _nftPOSContract address: The address of the NFT contract
-     * @notice This function can only be called by a contract with `ADMIN_ROLE`
-     */
-    function setBukPOSNFTRole(address _nftPOSContract) external;
 
     /**
      * @dev Sets the URI for a specific token ID.
@@ -92,15 +79,9 @@ interface IBukNFTs is IERC1155 {
      * @param _account - The account to burn the NFT from.
      * @param _id - The token ID of the NFT to burn.
      * @param _amount - The amount of NFTs to burn.
-     * @param _mintPOS - Whether or not to call the Buk POS NFTs contract to burn the NFT.
      * @notice This function can only be called by a contract with `BUK_PROTOCOL_ROLE`
      */
-    function burn(
-        address _account,
-        uint256 _id,
-        uint256 _amount,
-        bool _mintPOS
-    ) external;
+    function burn(address _account, uint256 _id, uint256 _amount) external;
 
     /**
      * @dev Transfers ownership of an NFT token from one address to another.

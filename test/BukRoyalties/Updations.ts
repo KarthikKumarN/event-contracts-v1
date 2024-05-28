@@ -59,7 +59,6 @@ describe("BukRoyalties Updations", function () {
   let bukWallet;
   let bukTreasuryContract;
   let nftContract;
-  let nftPosContract;
   let sellerWallet;
   let buyerWallet;
 
@@ -99,9 +98,11 @@ describe("BukRoyalties Updations", function () {
     const BukRoyalties = await ethers.getContractFactory("BukRoyalties");
     royaltiesContract = await BukRoyalties.deploy();
 
-    //BukProtocol
-    const BukProtocol = await ethers.getContractFactory("BukProtocol");
-    bukProtocolContract = await BukProtocol.deploy(
+    //BukEventProtocol
+    const BukEventProtocol = await ethers.getContractFactory(
+      "BukEventProtocol",
+    );
+    bukProtocolContract = await BukEventProtocol.deploy(
       bukTreasuryContract.getAddress(),
       stableTokenContract.getAddress(),
       bukWallet.getAddress(),
@@ -109,25 +110,13 @@ describe("BukRoyalties Updations", function () {
       royaltiesContract.getAddress(),
     );
 
-    // BukPOSNFT
-    const BukPOSNFT = await ethers.getContractFactory("BukPOSNFTs");
-    nftPosContract = await BukPOSNFT.deploy(
-      "BUK_POS",
-      bukProtocolContract.getAddress(),
-      bukTreasuryContract.getAddress(),
-    );
-
     // BukNFT
     const BukNFT = await ethers.getContractFactory("BukNFTs");
     nftContract = await BukNFT.deploy(
       "BUK_NFT",
-      nftPosContract.getAddress(),
       bukProtocolContract.getAddress(),
       bukTreasuryContract.getAddress(),
     );
-
-    //Set BukNFTs address in BukPOSNFTs
-    await nftPosContract.setBukNFTRole(nftContract.getAddress());
 
     //Marketplace
     const Marketplace = await ethers.getContractFactory("Marketplace");
@@ -142,19 +131,14 @@ describe("BukRoyalties Updations", function () {
       nftContract.getAddress(),
     );
 
-    //Set BukPOSNFTs address in Buk Protocol
-    const setBukPOSNFTs = await bukProtocolContract.setBukPOSNFTs(
-      nftPosContract.getAddress(),
-    );
-
     //Set Buk Protocol in Treasury
-    const setBukProtocol = await bukTreasuryContract.setBukProtocol(
+    const setBukEventProtocol = await bukTreasuryContract.setBukEventProtocol(
       bukProtocolContract.getAddress(),
     );
 
     //Set Buk Protocol in BukRoyalties
-    const setBukProtocolRoyalties =
-      await royaltiesContract.setBukProtocolContract(
+    const setBukEventProtocolRoyalties =
+      await royaltiesContract.setBukEventProtocolContract(
         bukProtocolContract.getAddress(),
       );
 
@@ -170,7 +154,7 @@ describe("BukRoyalties Updations", function () {
       expect(
         await royaltiesContract
           .connect(adminWallet)
-          .setBukProtocolContract(account1),
+          .setBukEventProtocolContract(account1),
       ).not.be.reverted;
       const addr = await royaltiesContract
         .connect(adminWallet)
@@ -182,7 +166,7 @@ describe("BukRoyalties Updations", function () {
       expect(
         await royaltiesContract
           .connect(adminWallet)
-          .setBukProtocolContract(account1),
+          .setBukEventProtocolContract(account1),
       )
         .to.emit(royaltiesContract, "SetBukTreasury")
         .withArgs(await account1.getAddress());
@@ -190,7 +174,9 @@ describe("BukRoyalties Updations", function () {
     it("Should not set buk protocol if not admin", async function () {
       //Set buk protocol
       await expect(
-        royaltiesContract.connect(account2).setBukProtocolContract(account1),
+        royaltiesContract
+          .connect(account2)
+          .setBukEventProtocolContract(account1),
       ).to.be.reverted;
     });
   });
@@ -322,8 +308,6 @@ describe("BukRoyalties Updations", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -390,8 +374,6 @@ describe("BukRoyalties Updations", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,

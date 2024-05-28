@@ -1,11 +1,5 @@
 import { ethers, run } from "hardhat";
-import {
-  USDC_CONTRACT,
-  BUK_WALLET,
-  BUK_POS_NFT_NAME,
-  BUK_NFT_NAME,
-  ROYALTIES,
-} from "../constants";
+import { USDC_CONTRACT, BUK_WALLET, ROYALTIES } from "../constants";
 
 async function main() {
   const [deployer] = await ethers.getSigners();
@@ -36,137 +30,110 @@ async function main() {
   console.log("🚀 ~ Deployed Royalties:", royalties.target);
   await royalties.waitForDeployment();
 
-  // Deploy BukProtocol
-  const bukProtocolArgs = [
+  // Deploy BukEventProtocol
+  const bukEventProtocolArgs = [
     treasury.target,
     USDC_CONTRACT,
     BUK_WALLET,
     signatureVerifier.target,
     royalties.target,
   ];
-  const bukProtocol = await ethers.deployContract(
-    "BukProtocol",
-    bukProtocolArgs,
+  const bukEventProtocol = await ethers.deployContract(
+    "BukEventProtocol",
+    bukEventProtocolArgs,
   );
-  console.log("🚀 ~ Deployed BukProtocol:", bukProtocol.target);
-  await bukProtocol.waitForDeployment();
+  console.log("🚀 ~ Deployed BukEventProtocol:", bukEventProtocol.target);
+  await bukEventProtocol.waitForDeployment();
 
-  // Deploy BukPOSNFTs
-  const bukPOSNFTsArgs = [
-    BUK_POS_NFT_NAME,
-    bukProtocol.target,
-    treasury.target,
-  ];
-  const bukPOSNFTs = await ethers.deployContract("BukPOSNFTs", bukPOSNFTsArgs);
-  console.log("🚀 ~ Deployed BukPOSNFTs:", bukPOSNFTs.target);
-  await bukPOSNFTs.waitForDeployment();
-
-  // Deploy BukNFTs
-  const bukNFTsArgs = [
-    BUK_NFT_NAME,
-    bukPOSNFTs.target,
-    bukProtocol.target,
-    treasury.target,
-  ];
-  const bukNFTs = await ethers.deployContract("BukNFTs", bukNFTsArgs);
-  console.log("🚀 ~ Deployed BukNFTs:", bukNFTs.target);
-  await bukNFTs.waitForDeployment();
+  // Deploy BukEventDeployer
+  const bukEventDeployerArgs = [bukEventProtocol.target];
+  const bukEventDeployer = await ethers.deployContract(
+    "BukEventDeployer",
+    bukEventDeployerArgs,
+  );
+  console.log("🚀 ~ Deployed bukEventDeployer:", bukEventDeployer.target);
+  await bukEventDeployer.waitForDeployment();
 
   // Deploy Marketplace
-  const marketplaceArgs = [bukProtocol.target, bukNFTs.target, USDC_CONTRACT];
-  const marketplace = await ethers.deployContract(
-    "Marketplace",
-    marketplaceArgs,
-  );
-  console.log("🚀 ~ Deployed Marketplace:", marketplace.target);
-  await marketplace.waitForDeployment();
+  // const marketplaceArgs = [
+  //   bukEventProtocol.target,
+  //   bukNFTs.target,
+  //   USDC_CONTRACT,
+  // ];
+  // const marketplace = await ethers.deployContract(
+  //   "Marketplace",
+  //   marketplaceArgs,
+  // );
+  // console.log("🚀 ~ Deployed Marketplace:", marketplace.target);
+  // await marketplace.waitForDeployment();
 
   console.log("🚀 ~ All contracts have been deployed");
-
   console.log("🚀 ~ 🚀 ~ Configuring contracts");
 
-  //Set BukNFTs address in BukPOSNFTs
-  await bukPOSNFTs.setBukNFTRole(bukNFTs.target);
+  // Set Buk Protocol in Treasury
+  await treasury.setBukEventProtocol(bukEventProtocol.target);
 
-  //Set BukNFTs address in Buk Protocol
-  await bukProtocol.setBukNFTs(bukNFTs.target);
+  // Set Buk Protocol in BukRoyalties
+  await royalties.setBukEventProtocolContract(bukEventProtocol.target);
 
-  //Set BukPOSNFTs address in Buk Protocol
-  await bukProtocol.setBukPOSNFTs(bukPOSNFTs.target);
-
-  //Set Buk Protocol in Treasury
-  await treasury.setBukProtocol(bukProtocol.target);
-
-  //Set Buk Treasury in BukNFTs
-  await bukNFTs.setBukTreasury(treasury.target);
-
-  //Set Marketplace in BukNFTs
-  await bukNFTs.setMarketplaceRole(marketplace.target);
-
-  //Set Buk Protocol in BukRoyalties
-  await royalties.setBukProtocolContract(bukProtocol.target);
-
-  //Set Buk Royalty Info in BukRoyalties
+  // Set Buk Royalty Info in BukRoyalties
   await royalties.setBukRoyaltyInfo(
     treasury.target,
     ROYALTIES.BUK_ROYALTY_PERCENTAGE,
   );
 
-  //Set Hotel Royalty Info in BukRoyalties
+  // Set Hotel Royalty Info in BukRoyalties
   await royalties.setHotelRoyaltyInfo(
     treasury.target,
     ROYALTIES.HOTEL_ROYALTY_PERCENTAGE,
   );
 
-  //Set First Owner Royalty Info in BukRoyalties
+  // Set First Owner Royalty Info in BukRoyalties
   await royalties.setFirstOwnerRoyaltyInfo(
     ROYALTIES.FIRST_OWNER_ROYALTY_PERCENTAGE,
   );
 
+  // Set Event deployer in BukProtocol
+  await bukEventProtocol.setEventDeployerContract(bukEventDeployer.target);
+
   console.log("🚀 All contracts have been deployed and configured");
   console.log("🚀 ~ 🚀 ~ Verifying contracts");
 
-  //Verify Treasury contract
+  // Verify BukEventProtocol contract
+  await run("verify:verify", {
+    address: bukEventProtocol.target,
+    constructorArguments: bukEventProtocolArgs,
+  });
+
+  // Verify BukEventDeployer contract
+  await run("verify:verify", {
+    address: bukEventDeployer.target,
+    constructorArguments: bukEventDeployerArgs,
+  });
+
+  // Verify Treasury contract
   await run("verify:verify", {
     address: treasury.target,
     constructorArguments: [USDC_CONTRACT],
   });
 
-  //Verify SignatureVerifier contract
+  // Verify SignatureVerifier contract
   await run("verify:verify", {
     address: signatureVerifier.target,
     constructorArguments: [],
   });
 
-  //Verify BukRoyalties contract
+  // Verify BukRoyalties contract
   await run("verify:verify", {
     address: royalties.target,
     constructorArguments: [],
   });
 
-  //Verify BukProtocol contract
-  await run("verify:verify", {
-    address: bukProtocol.target,
-    constructorArguments: bukProtocolArgs,
-  });
-
-  //Verify BukPOSNFTs contract
-  await run("verify:verify", {
-    address: bukPOSNFTs.target,
-    constructorArguments: bukPOSNFTsArgs,
-  });
-
-  //Verify BukNFTs contract
-  await run("verify:verify", {
-    address: bukNFTs.target,
-    constructorArguments: bukNFTsArgs,
-  });
-
   //Verify Marketplace contract
-  await run("verify:verify", {
-    address: marketplace.target,
-    constructorArguments: marketplaceArgs,
-  });
+  // await run("verify:verify", {
+  //   address: marketplace.target,
+  //   constructorArguments: marketplaceArgs,
+  // });
 
   console.log("Contracts verified!");
 }

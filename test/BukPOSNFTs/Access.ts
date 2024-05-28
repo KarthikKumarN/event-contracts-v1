@@ -55,9 +55,11 @@ describe("BukPOSNFTs Access Control", function () {
     const BukRoyalties = await ethers.getContractFactory("BukRoyalties");
     royaltiesContract = await BukRoyalties.deploy();
 
-    //BukProtocol
-    const BukProtocol = await ethers.getContractFactory("BukProtocol");
-    bukProtocolContract = await BukProtocol.deploy(
+    //BukEventProtocol
+    const BukEventProtocol = await ethers.getContractFactory(
+      "BukEventProtocol",
+    );
+    bukProtocolContract = await BukEventProtocol.deploy(
       bukTreasuryContract.getAddress(),
       stableTokenContract.getAddress(),
       bukWallet.getAddress(),
@@ -101,7 +103,7 @@ describe("BukPOSNFTs Access Control", function () {
     );
 
     //Set Buk Protocol in Treasury
-    const setBukProtocol = await bukTreasuryContract.setBukProtocol(
+    const setBukEventProtocol = await bukTreasuryContract.setBukEventProtocol(
       bukProtocolContract.getAddress(),
     );
   });
@@ -303,7 +305,7 @@ describe("BukPOSNFTs Access Control", function () {
       expect(
         await nftPosContract
           .connect(adminWallet)
-          .setBukProtocol(await bukProtocolContract.getAddress()),
+          .setBukEventProtocol(await bukProtocolContract.getAddress()),
       ).not.be.reverted;
     });
   });
@@ -385,7 +387,7 @@ describe("BukPOSNFTs Access Control", function () {
       expect(
         await nftPosContract
           .connect(adminWallet)
-          .setBukProtocol(await bukProtocolContract.getAddress()),
+          .setBukEventProtocol(await bukProtocolContract.getAddress()),
       ).not.be.reverted;
     });
   });

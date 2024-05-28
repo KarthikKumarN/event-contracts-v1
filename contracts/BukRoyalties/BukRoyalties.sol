@@ -3,7 +3,7 @@ pragma solidity =0.8.19;
 
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
 import { IBukRoyalties } from "../BukRoyalties/IBukRoyalties.sol";
-import { IBukProtocol } from "../BukProtocol/IBukProtocol.sol";
+import { IBukEventProtocol } from "../BukEventProtocol/IBukEventProtocol.sol";
 
 /**
  * @title BukRoyalties contract
@@ -18,8 +18,8 @@ contract BukRoyalties is AccessControl, IBukRoyalties {
     bytes32 public constant ADMIN_ROLE =
         0xa49807205ce4d355092ef5a8a18f56e8913cf4a201fbe287825b095693c21775;
 
-    /// @dev Address of the Buk Protocol contract
-    IBukProtocol public bukProtocolContract;
+    /// @dev Address of the Buk Event Protocol contract
+    IBukEventProtocol public bukEventProtocolContract;
 
     /**
      * @dev Public variable representing the Buk POS NFT collection contract.
@@ -54,14 +54,17 @@ contract BukRoyalties is AccessControl, IBukRoyalties {
         _grantRole(ADMIN_ROLE, msg.sender);
     }
 
-    /// @dev See {IBukRoyalties-setBukProtocolContract}.
-    function setBukProtocolContract(
-        address _bukProtocolContract
+    /// @dev See {IBukRoyalties-setBukEventProtocolContract}.
+    function setBukEventProtocolContract(
+        address _bukEventProtocolContract
     ) external onlyRole(ADMIN_ROLE) {
-        require(_bukProtocolContract != address(0), "Invalid address");
-        address oldBukProtocolContract = address(bukProtocolContract);
-        bukProtocolContract = IBukProtocol(_bukProtocolContract);
-        emit SetBukProtocol(oldBukProtocolContract, _bukProtocolContract);
+        require(_bukEventProtocolContract != address(0), "Invalid address");
+        address oldBukEventProtocolContract = address(bukEventProtocolContract);
+        bukEventProtocolContract = IBukEventProtocol(_bukEventProtocolContract);
+        emit SetBukEventProtocol(
+            oldBukEventProtocolContract,
+            _bukEventProtocolContract
+        );
     }
 
     /// @dev See {IBukRoyalties-setBukRoyaltyInfo}.
@@ -133,10 +136,13 @@ contract BukRoyalties is AccessControl, IBukRoyalties {
 
     /// @dev See {IBukRoyalties-getRoyaltyInfo}.
     function getRoyaltyInfo(
+        address _eventAddress,
         uint256 _tokenId
     ) external view returns (Royalty[] memory) {
-        IBukProtocol.Booking memory bookingDetails_ = bukProtocolContract
-            .getBookingDetails(_tokenId);
+        IBukEventProtocol.Booking
+            memory bookingDetails_ = bukEventProtocolContract
+                .getEventBookingDetails(_eventAddress, _tokenId);
+        (_tokenId);
         Royalty[] memory royalties = new Royalty[](otherRoyalties.length + 3);
         royalties[0] = bukRoyalty;
         royalties[1] = hotelRoyalty;

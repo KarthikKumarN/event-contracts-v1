@@ -50,7 +50,7 @@ const fastForwardTo = async (timestamp: number): Promise<void> => {
   }
 };
 
-describe("BukProtocol Updations", function () {
+describe("BukEventProtocol Updations", function () {
   let stableTokenContract;
   let bukProtocolContract;
   let marketplaceContract;
@@ -63,7 +63,6 @@ describe("BukProtocol Updations", function () {
   let bukWallet;
   let bukTreasuryContract;
   let nftContract;
-  let nftPosContract;
   let sellerWallet;
   let buyerWallet;
   let zeroAddress = "0x0000000000000000000000000000000000000000";
@@ -104,9 +103,11 @@ describe("BukProtocol Updations", function () {
     const BukRoyalties = await ethers.getContractFactory("BukRoyalties");
     royaltiesContract = await BukRoyalties.deploy();
 
-    //BukProtocol
-    const BukProtocol = await ethers.getContractFactory("BukProtocol");
-    bukProtocolContract = await BukProtocol.deploy(
+    //BukEventProtocol
+    const BukEventProtocol = await ethers.getContractFactory(
+      "BukEventProtocol",
+    );
+    bukProtocolContract = await BukEventProtocol.deploy(
       bukTreasuryContract.getAddress(),
       stableTokenContract.getAddress(),
       bukWallet.getAddress(),
@@ -114,25 +115,13 @@ describe("BukProtocol Updations", function () {
       royaltiesContract.getAddress(),
     );
 
-    // BukPOSNFT
-    const BukPOSNFT = await ethers.getContractFactory("BukPOSNFTs");
-    nftPosContract = await BukPOSNFT.deploy(
-      "BUK_POS",
-      bukProtocolContract.getAddress(),
-      bukTreasuryContract.getAddress(),
-    );
-
     // BukNFT
     const BukNFT = await ethers.getContractFactory("BukNFTs");
     nftContract = await BukNFT.deploy(
       "BUK_NFT",
-      nftPosContract.getAddress(),
       bukProtocolContract.getAddress(),
       bukTreasuryContract.getAddress(),
     );
-
-    //Set BukNFTs address in BukPOSNFTs
-    await nftPosContract.setBukNFTRole(nftContract.getAddress());
 
     //Marketplace
     const Marketplace = await ethers.getContractFactory("Marketplace");
@@ -147,13 +136,8 @@ describe("BukProtocol Updations", function () {
       nftContract.getAddress(),
     );
 
-    //Set BukPOSNFTs address in Buk Protocol
-    const setBukPOSNFTs = await bukProtocolContract.setBukPOSNFTs(
-      nftPosContract.getAddress(),
-    );
-
     //Set Buk Protocol in Treasury
-    const setBukProtocol = await bukTreasuryContract.setBukProtocol(
+    const setBukEventProtocol = await bukTreasuryContract.setBukEventProtocol(
       bukProtocolContract.getAddress(),
     );
 
@@ -164,7 +148,7 @@ describe("BukProtocol Updations", function () {
     await restoreInitialSnapshot();
   });
 
-  describe("Set Treasury in BukProtocol", function () {
+  describe("Set Treasury in BukEventProtocol", function () {
     it("Should set treasury by admin", async function () {
       //Set treasury
       expect(
@@ -197,7 +181,7 @@ describe("BukProtocol Updations", function () {
     });
   });
 
-  describe("Set Admin in BukProtocol", function () {
+  describe("Set Admin in BukEventProtocol", function () {
     it("Should set admin by admin", async function () {
       //Set admin
       expect(await bukProtocolContract.connect(adminWallet).setAdmin(account1))
@@ -231,7 +215,7 @@ describe("BukProtocol Updations", function () {
     });
   });
 
-  describe("Set Signature Verifier in BukProtocol", function () {
+  describe("Set Signature Verifier in BukEventProtocol", function () {
     it("Should set signature verifier by admin", async function () {
       //Set signature verifier
       expect(
@@ -262,7 +246,7 @@ describe("BukProtocol Updations", function () {
     });
   });
 
-  describe("Set Royalties Contract in BukProtocol", function () {
+  describe("Set Royalties Contract in BukEventProtocol", function () {
     it("Should set royalties contract by admin", async function () {
       //Set royalties
       expect(
@@ -293,7 +277,7 @@ describe("BukProtocol Updations", function () {
     });
   });
 
-  describe("Set Buk Wallet in BukProtocol", function () {
+  describe("Set Buk Wallet in BukEventProtocol", function () {
     it("Should set Buk Wallet by admin", async function () {
       //Set Buk Wallet
       expect(
@@ -325,7 +309,7 @@ describe("BukProtocol Updations", function () {
     });
   });
 
-  describe("Set stable token in BukProtocol", function () {
+  describe("Set stable token in BukEventProtocol", function () {
     it("Should set stable token by admin", async function () {
       //Set Stable Token
       expect(
@@ -358,7 +342,7 @@ describe("BukProtocol Updations", function () {
     });
   });
 
-  describe("Set BukNFTs in BukProtocol", function () {
+  describe("Set BukNFTs in BukEventProtocol", function () {
     it("Should set BukNFTs contract address by admin", async function () {
       // Set BukNFTs
       expect(
@@ -393,41 +377,7 @@ describe("BukProtocol Updations", function () {
     });
   });
 
-  describe("Set BukPOSNFTs in BukProtocol", function () {
-    it("Should set BukPOSNFTs contract address by admin", async function () {
-      // Set BukPOSNFTs
-      expect(
-        await bukProtocolContract
-          .connect(adminWallet)
-          .setBukPOSNFTs(await nftPosContract.getAddress()),
-      ).not.be.reverted;
-      const addresses = await bukProtocolContract
-        .connect(account1)
-        .getWallets();
-      const addr2: string = await nftPosContract.getAddress();
-      expect(addresses[1]).to.be.equal(addr2);
-    });
-    it("Should set BukPOSNFTs contract address and emit events", async function () {
-      // Set BukPOSNFTs
-      expect(
-        await bukProtocolContract
-          .connect(adminWallet)
-          .setBukPOSNFTs(await nftPosContract.getAddress()),
-      )
-        .to.emit(bukProtocolContract, "SetBukPOSNFTs")
-        .withArgs(await nftPosContract.getAddress());
-    });
-    it("Should not set BukPOSNFTs contract address if not admin", async function () {
-      // Set BukPOSNFTs
-      await expect(
-        bukProtocolContract
-          .connect(account1)
-          .setBukPOSNFTs(await nftPosContract.getAddress()),
-      ).to.be.reverted;
-    });
-  });
-
-  describe("Set Buk Royalties Contract in BukProtocol", function () {
+  describe("Set Buk Royalties Contract in BukEventProtocol", function () {
     it("Should set royaltiesContract by admin", async function () {
       //Set royaltiesContract
       expect(
@@ -460,7 +410,7 @@ describe("BukProtocol Updations", function () {
     });
   });
 
-  describe("Set Buk commission in BukProtocol", function () {
+  describe("Set Buk commission in BukEventProtocol", function () {
     it("Should set Buk commission by admin", async function () {
       //Set Commission
       const COMMISSION: number = 10;

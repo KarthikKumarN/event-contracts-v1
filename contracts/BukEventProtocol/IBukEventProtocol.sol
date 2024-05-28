@@ -1,14 +1,24 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.19;
+pragma solidity ^0.8.19;
 import { IBukRoyalties } from "../BukRoyalties/IBukRoyalties.sol";
 
 /**
  * @title Interface to define the BUK protocol
  * @author BUK Technology Inc
  * @dev Collection of all procedures related to the BUK protocol
- * @dev This interface is used by the other child contract to interact with the BukProtocol contract.
+ * @dev This interface is used by the other child contract to interact with the BukEventProtocol contract.
  */
-interface IBukProtocol {
+interface IBukEventProtocol {
+    /**
+     * @dev Enum for Event type.
+     * @var EventType.free         Event type free.
+     * @var EventType.paid      Event type paid.
+     */
+    enum EventType {
+        free,
+        paid
+    }
+
     /**
      * @dev Enum for booking statuses.
      * @var BookingStatus.nil         Booking has not yet been initiated.
@@ -28,68 +38,89 @@ interface IBukProtocol {
     }
 
     /**
+     * @dev Struct for Event details.
+     * @param uint256 eventId           Unique Event ID .
+     * @param string name               Event name .
+     * @param bytes32 referenceId       Event Reference ID.
+     * @param EventType eventType       Event type.
+     * @param uint256 start             Event start date and time.
+     * @param uint256 end               Event end date and time.
+     * @param uint256 noOfTickets       Total no tickets can be booked.
+     * @param uint256 tradeTimeLimit    Buy will excecute if tradeLimitTime is not crossed (in hours)
+     * @param address owner             Address of the event owner.
+     * @param address eventAddress        Address of the event NFT.
+     */
+    struct Event {
+        uint256 eventId;
+        string name;
+        bytes32 referenceId;
+        EventType eventType;
+        uint256 start;
+        uint256 end;
+        uint256 noOfTickets;
+        uint256 tradeTimeLimit;
+        address owner;
+        address eventAddress;
+    }
+
+    /**
      * @dev Struct for booking details.
      * @param uint256 id                Booking ID.
      * @param uint256 tokenId           Token ID.
-     * @param bytes32 propertyId        Property ID.
+     * @param uint256 eventId           Event ID.
+     * @param bytes32 referenceId       Event reference ID.
+     * @param uint256 total             Total Ticket rate.
+     * @param uint256 baseRate          Ticket base rate.
+     * @param uint256 commission        Ticket commission.
+     * @param uint256 start             Event start date and time.
+     * @param uint256 end               Event end date and time.
      * @param BookingStatus status      Booking status.
-     * @param uint256 adult[]             Number of adults.
-     * @param uint256 child[]             Number of children.
-     * @param address owner             Address of the booking owner.
-     * @param uint256 checkin           Check-in date.
-     * @param uint256 checkout          Check-out date.
-     * @param uint256 total             Total price.
-     * @param uint256 baseRate          Base rate.
-     * @param uint256 commission        Buk commission.
-     * @param uint256 minSalePrice      Min Sale Price.
-     * @param uint256 tradeTimeLimit    Buy will excecute if tradeLimitTime is not crossed (in hours)
+     * @param address firstOwner        Address of the booking owner.
      * @param bool tradeable            Is the NFT Tradeable.
      */
     struct Booking {
         uint256 id;
         uint256 tokenId;
-        bytes32 propertyId;
-        BookingStatus status;
-        uint256 adult;
-        uint256 child;
-        address firstOwner;
-        uint256 checkin;
-        uint256 checkout;
+        uint256 eventId;
+        bytes32 referenceId;
         uint256 total;
         uint256 baseRate;
         uint256 commission;
-        uint256 minSalePrice;
-        uint256 tradeTimeLimit;
+        uint256 start;
+        uint256 end;
+        BookingStatus status;
+        address firstOwner;
         bool tradeable;
     }
 
     /**
      * @dev Struct for booking details.
+     * @param uint256 eventId           Event ID.
+     * @param bytes32 referenceId       Event reference ID.
      * @param uint256 total             Total price.
      * @param uint256 baseRate          Base rate.
-     * @param uint256 minSalePrice      Min Sale Price.
-     * @param uint256 adult[]             Number of adults.
-     * @param uint256 child[]             Number of children.
-     * @param bytes32 propertyId        Property ID.
-     * @param uint256 checkin           Check-in date.
-     * @param uint256 checkout          Check-out date.
-     * @param uint256 tradeTimeLimit    Buy will excecute if tradeLimitTime is not crossed (in hours)
+     * @param uint256 start             Event Start date.
+     * @param uint256 end               Event End date.
      * @param bool tradeable            Is the NFT Tradeable.
      * @param address user             Address of the booking owner.
      */
     struct BookingList {
+        uint256 eventId;
+        bytes32[] referenceId;
         uint256[] total;
         uint256[] baseRate;
-        uint256[] minSalePrice;
-        uint256[] adult;
-        uint256[] child;
-        bytes32 propertyId;
-        uint256 checkIn;
-        uint256 checkOut;
-        uint256 tradeTimeLimit;
-        bool tradeable;
-        address user;
+        uint256[] start;
+        uint256[] end;
+        bool[] tradeable;
+        address[] user;
     }
+
+    /// @dev Emitted when event created.
+    event CreateEvent(
+        bytes32 referenceId,
+        uint256 eventId,
+        address eventAddress
+    );
 
     /// @dev Emitted when the admin wallet is set.
     event SetAdminWallet(address newAdminWallet);
@@ -99,9 +130,6 @@ interface IBukProtocol {
 
     /// @dev Emitted when BukNFTs contract address is updated.
     event SetBukNFTs(address newNFTContract);
-
-    /// @dev Emitted when BukPOSNFTs contract address is updated.
-    event SetBukPOSNFTs(address newNFTPOSContract);
 
     /// @dev Emitted when BukRoyalties contract address is updated.
     event SetRoyaltiesContract(address newRoyaltiesContract);
@@ -125,21 +153,23 @@ interface IBukProtocol {
      */
     event ToggleTradeability(uint256 indexed tokenId, bool indexed tradeable);
 
-    /// @dev Emitted when single room is booked.
-    event BookRoom(
-        uint256 indexed booking,
-        bytes32 indexed propertyId,
-        uint256 checkin,
-        uint256 checkout,
-        uint256 adult,
-        uint256 child
+    /// @dev Emitted when single event is booked.
+    event EventBooked(
+        uint256 indexed eventId,
+        uint256 indexed eventBookingId,
+        address userAddress,
+        bytes32 indexed referenceId
     );
 
     /// @dev Emitted when booking refund is done.
     event BookingRefund(uint256 total, address owner);
 
     /// @dev Emitted when room bookings are confirmed.
-    event MintedBookingNFT(uint256[] bookings, bool status);
+    event MintedBookingNFT(
+        address indexed eventAddress,
+        uint256[] bookings,
+        bool status
+    );
 
     /// @dev Emitted when room bookings are checked in.
     event CheckinRooms(uint256[] bookings, bool status);
@@ -156,6 +186,9 @@ interface IBukProtocol {
 
     /// @dev Emitted when room bookings are cancelled.
     event EmergencyCancellation(uint256 indexed bookingId, bool indexed status);
+
+    /// @dev Emitted when the Event deployer contract is set.
+    event SetEventDeployerContract(address newEventDeployer);
 
     /**
      * @dev Sets the admin wallet address.
@@ -193,20 +226,6 @@ interface IBukProtocol {
     function setStableToken(address _stableToken) external;
 
     /**
-     * @dev Function to update the BukNFTs contract address.
-     * @param _nftContractAddr Address of the BukNFTs contract.
-     * @notice This function can only be called by admin
-     */
-    function setBukNFTs(address _nftContractAddr) external;
-
-    /**
-     * @dev Function to update the BukPOSNFTs contract address.
-     * @param _nftPOSContractAddr Address of the BukPOSNFTs contract.
-     * @notice This function can only be called by admin
-     */
-    function setBukPOSNFTs(address _nftPOSContractAddr) external;
-
-    /**
      * @dev Sets the Buk royalties contract address.
      * Can only be called by accounts with the ADMIN_ROLE.
      * @param _royaltiesContract The new royaltiesContract address to set.
@@ -215,6 +234,13 @@ interface IBukProtocol {
      * @dev Emits a {SetRoyaltiesContract} event with the previous royaltiesContract address and the new address.
      */
     function setRoyaltiesContract(address _royaltiesContract) external;
+
+    /**
+     * @dev Function to set the Event Deployer contract address.
+     * @param _eventDeployer Address of the Event Deployer contract.
+     * @notice This function can only be called by admin
+     */
+    function setEventDeployerContract(address _eventDeployer) external;
 
     /**
      * @dev Function to set the Buk commission percentage.
@@ -243,61 +269,71 @@ interface IBukProtocol {
     function unpause() external;
 
     /**
-     * @dev Function to book rooms.
-     * @param _total Total amount to be paid.
-     * @param _baseRate Base rate of the room.
-     * @param _minSalePrice Minimum sale price for the booking.
-     * @param _adult Number of adults.
-     * @param _child Number of children.
-     * @param _propertyId Property ID.
-     * @param _checkin Checkin date.
-     * @param _checkout Checkout date.
-     * @param _tradeTimeLimit Trade Limit of NFT based on Checkin time.
+     * @dev Function for Create Event.
+     * @param  _name            Event Name.
+     * @param  _referenceId     Event Reference ID.
+     * @param  _eventType       Event type.
+     * @param  _start           Event start date and time.
+     * @param  _end             Event end date and time.
+     * @param  _noOfTickets     Total no tickets can be booked.
+     * @param  _tradeTimeLimit  Buy will excecute if tradeLimitTime is not crossed (in hours)
+     * @param  _owner           Address of the event owner.
+     */
+    function createEvent(
+        string calldata _name,
+        bytes32 _referenceId,
+        EventType _eventType,
+        uint256 _start,
+        uint256 _end,
+        uint256 _noOfTickets,
+        uint256 _tradeTimeLimit,
+        address _owner
+    ) external returns (uint256);
+
+    /**
+     * @dev Function to book event.
+     * @param _eventId        Event ID.
+     * @param _referenceId    Event booking reference ID.
+     * @param _total          Total price of the ticket.
+     * @param _baseRate       Base rate of the ticket.
+     * @param _start          Start date.
+     * @param _end            End date.
      * @param _tradeable Is the booking NFT tradeable.
      * @return ids IDs of the bookings.
      */
-    function bookRooms(
+    function bookEvent(
+        uint256 _eventId,
+        bytes32[] memory _referenceId,
         uint256[] memory _total,
         uint256[] memory _baseRate,
-        uint256[] memory _minSalePrice,
-        uint256[] memory _adult,
-        uint256[] memory _child,
-        bytes32 _propertyId,
-        uint256 _checkin,
-        uint256 _checkout,
-        uint256 _tradeTimeLimit,
-        bool _tradeable
+        uint256[] memory _start,
+        uint256[] memory _end,
+        bool[] memory _tradeable
     ) external returns (bool);
 
     /**
-     * @dev Function to book rooms.
-     * @param _total Total amount to be paid.
-     * @param _baseRate Base rate of the room.
-     * @param _minSalePrice Minimum sale price for the booking.
-     * @param _adult Number of adults.
-     * @param _child Number of children.
-     * @param _propertyId Property ID.
-     * @param _checkin Checkin date.
-     * @param _checkout Checkout date.
-     * @param _tradeTimeLimit Trade Limit of NFT based on Checkin time.
+     * @dev Function to book event.
+     * @param _eventId        Event ID.
+     * @param _referenceId    Event booking reference ID.
+     * @param _total          Total price of the ticket.
+     * @param _baseRate       Base rate of the ticket.
+     * @param _start          Start date.
+     * @param _end            End date.
      * @param _tradeable Is the booking NFT tradeable.
      * @param _user Address of user which we are booking.
      * @return ids IDs of the bookings.
      * @notice This function can only be called by admin
-     * @notice This function is used to book rooms on behalf of the user.
+     * @notice This function is used to book event on behalf of the user.
      */
-    function bookRoomsOwner(
+    function bookEventOwner(
+        uint256 _eventId,
+        bytes32[] memory _referenceId,
         uint256[] memory _total,
         uint256[] memory _baseRate,
-        uint256[] memory _minSalePrice,
-        uint256[] memory _adult,
-        uint256[] memory _child,
-        bytes32 _propertyId,
-        uint256 _checkin,
-        uint256 _checkout,
-        uint256 _tradeTimeLimit,
-        bool _tradeable,
-        address _user
+        uint256[] memory _start,
+        uint256[] memory _end,
+        bool[] memory _tradeable,
+        address[] memory _user
     ) external returns (bool);
 
     /**
@@ -311,19 +347,19 @@ interface IBukProtocol {
 
     /**
      * @dev Function to mint new BukNFT tokens based on the provided booking IDs and URIs.
+     * @param _eventId        Event ID.
      * @param _ids An array of booking IDs representing the unique identifier for each BukNFT token.
      * @param _uri An array of URIs corresponding to each booking ID, which will be associated with the Buk NFTs.
-     * @param _user Address of user which we are minting.
      * @notice Only the owner of the booking can book the NFTs and confirm the rooms.
      * @notice The number of bookings and URIs should be same.
      * @notice The booking status should be booked to confirm it.
-     * @notice The NFTs are minted to the owner of the booking.
+     * @notice The NFTs are minted to the only owner of the booking.
      * @notice This function can only be called by admin
      */
     function mintBukNFTOwner(
+        uint256 _eventId,
         uint256[] memory _ids,
-        string[] memory _uri,
-        address _user
+        string[] memory _uri
     ) external;
 
     /**
@@ -344,7 +380,6 @@ interface IBukProtocol {
      * @notice The Active Booking NFTs are burnt from the owner's account.
      * @notice The Utility NFTs are minted to the owner of the booking.
      * @notice This function can only be called by admin
-     * @notice POSR NFT will be minted to recipients address.
      */
     function checkout(
         uint256[] memory _ids,
@@ -380,7 +415,7 @@ interface IBukProtocol {
      * @param _charges The charges associated with the cancellation(if any).
      * @param _bookingOwner The address of the booking owner.
      * @notice This function can only be called by admin
-     * @notice Total refund amount and charges should be less than or equal to the total amount (Total = total booking amount + buk commission).
+     * @notice Total refund amount and charges should be <= the total amount (total booking amount + buk commission).
      */
     function emergencyCancellation(
         uint256 _id,
@@ -390,9 +425,17 @@ interface IBukProtocol {
     ) external;
 
     /**
+     * @dev Function to get the event details.
+     * @param _eventId ID of the event.
+     * @return Event details.
+     */
+    function getEventDetails(
+        uint256 _eventId
+    ) external view returns (Event memory);
+
+    /**
      * Function to get wallet addresses
-     * @return nftContract The address of the nft contract
-     * @return nftPOSContract The address of the nftPOS contract
+     * @return deployerContract The address of the nft deployer contract
      * @return royaltiesContract The address of the royalties contract
      * @return signatureVerifier The address of the signature verifier contract
      * @return bukTreasury The address of the bukTreasury contract
@@ -404,8 +447,7 @@ interface IBukProtocol {
         external
         view
         returns (
-            address nftContract,
-            address nftPOSContract,
+            address deployerContract,
             address royaltiesContract,
             address signatureVerifier,
             address bukTreasury,
@@ -415,19 +457,33 @@ interface IBukProtocol {
         );
 
     /**
-     * @dev To get the booking details
+     * @dev To get Event booking details
+     * @param _eventAddress Contract address of the Event.
      * @param _tokenId ID of the booking.
      */
-    function getBookingDetails(
+    function getEventBookingDetails(
+        address _eventAddress,
         uint256 _tokenId
     ) external view returns (Booking memory);
 
     /**
+     * @dev To get the is booking/ticket/NFT eligible for trade/exchange
+     * @param _eventAddress Contract address of the Event.
+     * @param _tokenId ID of the event booking.
+     */
+    function isBookingTradeable(
+        address _eventAddress,
+        uint256 _tokenId
+    ) external view returns (bool);
+
+    /**
      * @dev Function to retrieve royalty information.
+     * @param _eventAddress Contract address of the Event.
      * @param _tokenId ID of the token
      * @notice Token ID and Booking ID are same.
      */
     function getRoyaltyInfo(
+        address _eventAddress,
         uint256 _tokenId
     ) external view returns (IBukRoyalties.Royalty[] memory);
 }

@@ -15,7 +15,6 @@ describe("BukNFTs Access Control", function () {
   let bukWallet;
   let bukTreasuryContract;
   let nftContract;
-  let nftPosContract;
   let sellerWallet;
   let buyerWallet;
 
@@ -55,9 +54,11 @@ describe("BukNFTs Access Control", function () {
     const BukRoyalties = await ethers.getContractFactory("BukRoyalties");
     royaltiesContract = await BukRoyalties.deploy();
 
-    //BukProtocol
-    const BukProtocol = await ethers.getContractFactory("BukProtocol");
-    bukProtocolContract = await BukProtocol.deploy(
+    //BukEventProtocol
+    const BukEventProtocol = await ethers.getContractFactory(
+      "BukEventProtocol",
+    );
+    bukProtocolContract = await BukEventProtocol.deploy(
       bukTreasuryContract.getAddress(),
       stableTokenContract.getAddress(),
       bukWallet.getAddress(),
@@ -65,19 +66,10 @@ describe("BukNFTs Access Control", function () {
       royaltiesContract.getAddress(),
     );
 
-    // BukPOSNFT
-    const BukPOSNFT = await ethers.getContractFactory("BukPOSNFTs");
-    nftPosContract = await BukPOSNFT.deploy(
-      "BUK_POS",
-      bukProtocolContract.getAddress(),
-      bukTreasuryContract.getAddress(),
-    );
-
     // BukNFT
     const BukNFT = await ethers.getContractFactory("BukNFTs");
     nftContract = await BukNFT.deploy(
       "BUK_NFT",
-      await nftPosContract.getAddress(),
       await bukProtocolContract.getAddress(),
       await bukTreasuryContract.getAddress(),
     );
@@ -95,13 +87,8 @@ describe("BukNFTs Access Control", function () {
       nftContract.getAddress(),
     );
 
-    //Set BukPOSNFTs address in Buk Protocol
-    const setBukPOSNFTs = await bukProtocolContract.setBukPOSNFTs(
-      nftPosContract.getAddress(),
-    );
-
     //Set Buk Protocol in Treasury
-    const setBukProtocol = await bukTreasuryContract.setBukProtocol(
+    const setBukEventProtocol = await bukTreasuryContract.setBukEventProtocol(
       bukProtocolContract.getAddress(),
     );
   });
@@ -305,7 +292,7 @@ describe("BukNFTs Access Control", function () {
       expect(
         await nftContract
           .connect(adminWallet)
-          .setBukProtocol(await bukProtocolContract.getAddress()),
+          .setBukEventProtocol(await bukProtocolContract.getAddress()),
       ).not.be.reverted;
     });
   });
@@ -387,7 +374,7 @@ describe("BukNFTs Access Control", function () {
       expect(
         await nftContract
           .connect(adminWallet)
-          .setBukProtocol(await bukProtocolContract.getAddress()),
+          .setBukEventProtocol(await bukProtocolContract.getAddress()),
       ).not.be.reverted;
     });
   });

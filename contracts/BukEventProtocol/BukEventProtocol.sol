@@ -1,23 +1,23 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.19;
-
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
-import { IBukPOSNFTs } from "../BukPOSNFTs/IBukPOSNFTs.sol";
 import { IBukNFTs } from "../BukNFTs/IBukNFTs.sol";
 import { IBukTreasury } from "../BukTreasury/IBukTreasury.sol";
 import { ISignatureVerifier } from "../SignatureVerifier/ISignatureVerifier.sol";
 import { IBukRoyalties } from "../BukRoyalties/IBukRoyalties.sol";
-import { IBukProtocol } from "../BukProtocol/IBukProtocol.sol";
+import { IBukEventProtocol } from "../BukEventProtocol/IBukEventProtocol.sol";
+import { IBukEventDeployer } from "../BukEventDeployer/IBukEventDeployer.sol";
+import "hardhat/console.sol";
 
 /**
  * @title BUK Protocol Contract
  * @author BUK Technology Inc
  * @dev Contract to manage operations of the BUK protocol to manage BukNFTs tokens and underlying sub-contracts.
  */
-contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
+contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
     // Using safeERC20
     using SafeERC20 for IERC20;
     /**
@@ -25,31 +25,49 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
      * @dev address _stableToken          Address of the stable token.
      * @dev address _bukTreasury          Address of the Buk treasury contract.
      * @dev address nftContract Address of the Buk NFT contract.
-     * @dev address nftPOSContract  Address of the Buk NFT POS Contract.
      * @dev address royaltiesContract  Address of the Buk Royalties Contract.
      */
     address private _admin;
     address private _bukWallet;
     IERC20 private _stableToken;
     IBukTreasury private _bukTreasury;
+    IBukEventDeployer private _bukEventDeployer;
     ISignatureVerifier private _signatureVerifier;
-    IBukNFTs private _nftContract;
-    IBukPOSNFTs private _nftPOSContract;
+    IBukNFTs private _nftContract; // FIXME : We might not need this
     IBukRoyalties private _royaltiesContract;
 
     /// @dev Commission charged on bookings.
     uint256 public commission = 5;
 
+    /// @dev Counters.Counter Event Ids    Counter for event IDs.
+    uint256 private _eventIds;
+
     /// @dev Counters.Counter bookingIds    Counter for booking IDs.
     uint256 private _bookingIds;
 
+    /**
+     * @dev mapping(uint256 => uint256) _eventbookingIds  Mapping of Counters.Counter bookingIds    Counter for Each event booking IDs.
+     */
+    mapping(uint256 => uint256) private _eventbookingIds; //bookingID -> Booking Details
+
     /// @dev Max booking limit per transaction.
-    uint256 public constant MAX_BOOKING_LIMIT = 11;
+    uint256 public constant MAX_BOOKING_LIMIT = 25;
+
+    /**
+     * @dev mapping(uint256 => Event) _eventDetails   Mapping of Event IDs to event details.
+     */
+    mapping(uint256 => Event) private _eventDetails; //eventID -> Event Details
 
     /**
      * @dev mapping(uint256 => Booking) _bookingDetails   Mapping of booking IDs to booking details.
      */
     mapping(uint256 => Booking) private _bookingDetails; //bookingID -> Booking Details
+
+    /**
+     * @dev Mapping of event contract address to booking.
+     * @dev Each event address maps to another mapping, which maps booking IDs to booking.
+     */
+    mapping(address => mapping(uint256 => Booking)) private _eventBookings; // eventID -> (bookingID -> Booking)
 
     /**
      * @dev Modifier onlyAdmin
@@ -87,53 +105,48 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         _setSignatureVerifier(_signVerifierContract);
     }
 
-    /// @dev See {IBukProtocol-setAdmin}.
+    /// @dev See {IBukEventProtocol-setAdmin}.
     function setAdmin(address _adminAddr) external onlyAdmin {
         _setAdmin(_adminAddr);
     }
 
-    /// @dev See {IBukProtocol-setSignatureVerifier}.
+    /// @dev See {IBukEventProtocol-setSignatureVerifier}.
     function setSignatureVerifier(
         address __signatureVerifier
     ) external onlyAdmin {
         _setSignatureVerifier(__signatureVerifier);
     }
 
-    /// @dev See {IBukProtocol-setBukTreasury}.
+    /// @dev See {IBukEventProtocol-setBukTreasury}.
     function setBukTreasury(address _bukTreasuryContract) external onlyAdmin {
         _setBukTreasury(_bukTreasuryContract);
     }
 
-    /// @dev See {IBukProtocol-setBukWallet}.
+    /// @dev See {IBukEventProtocol-setBukWallet}.
     function setBukWallet(address _bukWalletAddr) external onlyAdmin {
         _setBukWallet(_bukWalletAddr);
     }
 
-    /// @dev See {IBukProtocol-setStableToken}.
+    /// @dev See {IBukEventProtocol-setStableToken}.
     function setStableToken(address _stableTokenAddress) external onlyAdmin {
         _setStableToken(_stableTokenAddress);
     }
 
-    /// @dev See {IBukProtocol-setBukNFTs}.
-    function setBukNFTs(address _nftContractAddr) external onlyAdmin {
-        _nftContract = IBukNFTs(_nftContractAddr);
-        emit SetBukNFTs(_nftContractAddr);
-    }
-
-    /// @dev See {IBukProtocol-setBukPosNFTs}.
-    function setBukPOSNFTs(address _nftPOSContractAddr) external onlyAdmin {
-        _nftPOSContract = IBukPOSNFTs(_nftPOSContractAddr);
-        emit SetBukPOSNFTs(_nftPOSContractAddr);
-    }
-
-    /// @dev See {IBukProtocol-setRoyalties}.
+    /// @dev See {IBukEventProtocol-setRoyalties}.
     function setRoyaltiesContract(
         address _royaltiesContractAddr
     ) external onlyAdmin {
         _setRoyaltiesContract(_royaltiesContractAddr);
     }
 
-    /// @dev See {IBukProtocol-setCommission}.
+    /// @dev See {IBukEventProtocol-setEventDeployer}.
+    function setEventDeployerContract(
+        address _deployerContractAddr
+    ) external onlyAdmin {
+        _setDeployerContract(_deployerContractAddr);
+    }
+
+    /// @dev See {IBukEventProtocol-setCommission}.
     function setCommission(
         uint256 _newCommission
     ) external onlyAdmin whenNotPaused {
@@ -142,7 +155,8 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         emit SetCommission(_newCommission);
     }
 
-    /// @dev See {IBukProtocol-toggleTradeability}.
+    /// @dev See {IBukEventProtocol-toggleTradeability}.
+    // FIXME
     function toggleTradeability(uint256 _tokenId) external onlyAdmin {
         require(
             _bookingDetails[_tokenId].status != BookingStatus.nil,
@@ -153,70 +167,100 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         emit ToggleTradeability(_tokenId, _bookingDetails[_tokenId].tradeable);
     }
 
-    /// @dev See {IBukProtocol-pause}.
+    /// @dev See {IBukEventProtocol-pause}.
     function pause() external onlyAdmin {
         _pause();
     }
 
-    /// @dev See {IBukProtocol-unpause}.
+    /// @dev See {IBukEventProtocol-unpause}.
     function unpause() external onlyAdmin {
         _unpause();
     }
 
-    /// @dev See {IBukProtocol-bookRooms}.
-    function bookRooms(
+    /// @dev See {IBukEventProtocol-unpause}.
+    function createEvent(
+        string calldata _name,
+        bytes32 _referenceId,
+        EventType _eventType,
+        uint256 _start,
+        uint256 _end,
+        uint256 _noOfTickets,
+        uint256 _tradeTimeLimit,
+        address _owner
+    ) external onlyAdmin whenNotPaused returns (uint256) {
+        require(
+            (_start > block.timestamp && _end > block.timestamp),
+            "Dates, Must be in the future"
+        );
+        require((_end > _start), "End date must be after start date");
+        require((_noOfTickets > 0), "Number of tickets must be greater than 0");
+
+        ++_eventIds;
+        address eventAddress = _bukEventDeployer.deployEventNFT(
+            _name,
+            address(this),
+            address(_bukTreasury)
+        );
+        _eventDetails[_eventIds] = Event(
+            _eventIds,
+            _name,
+            _referenceId,
+            _eventType,
+            _start,
+            _end,
+            _noOfTickets,
+            _tradeTimeLimit,
+            _owner,
+            address(eventAddress)
+        );
+        emit CreateEvent(_referenceId, _eventIds, address(eventAddress));
+        return _eventIds;
+    }
+
+    /// @dev See {IBukEventProtocol-bookEvent}.
+    function bookEvent(
+        uint256 _eventId,
+        bytes32[] memory _referenceId,
         uint256[] memory _total,
         uint256[] memory _baseRate,
-        uint256[] memory _minSalePrice,
-        uint256[] memory _adult,
-        uint256[] memory _child,
-        bytes32 _propertyId,
-        uint256 _checkin,
-        uint256 _checkout,
-        uint256 _tradeTimeLimit,
-        bool _tradeable
+        uint256[] memory _start,
+        uint256[] memory _end,
+        bool[] memory _tradeable
     ) external nonReentrant whenNotPaused returns (bool) {
+        address[] memory users = new address[](1);
+        users[0] = msg.sender;
         BookingList memory _params = BookingList(
+            _eventId,
+            _referenceId,
             _total,
             _baseRate,
-            _minSalePrice,
-            _adult,
-            _child,
-            _propertyId,
-            _checkin,
-            _checkout,
-            _tradeTimeLimit,
+            _start,
+            _end,
             _tradeable,
-            msg.sender
+            users
         );
         (uint commissionTotal, uint256 total) = _booking(_params);
         return _bookingPayment(commissionTotal, total);
     }
 
-    /// @dev See {IBukProtocol-bookRoomsOwner}.
-    function bookRoomsOwner(
+    /// @dev See {IBukEventProtocol-bookEventOwner}.
+    function bookEventOwner(
+        uint256 _eventId,
+        bytes32[] memory _referenceId,
         uint256[] memory _total,
         uint256[] memory _baseRate,
-        uint256[] memory _minSalePrice,
-        uint256[] memory _adult,
-        uint256[] memory _child,
-        bytes32 _propertyId,
-        uint256 _checkin,
-        uint256 _checkout,
-        uint256 _tradeTimeLimit,
-        bool _tradeable,
-        address _user
+        uint256[] memory _start,
+        uint256[] memory _end,
+        bool[] memory _tradeable,
+        address[] memory _user
     ) external onlyAdmin nonReentrant whenNotPaused returns (bool) {
         BookingList memory _params = BookingList(
+            _eventId,
+            _referenceId,
             _total,
             _baseRate,
-            _minSalePrice,
-            _adult,
-            _child,
-            _propertyId,
-            _checkin,
-            _checkout,
-            _tradeTimeLimit,
+            _start,
+            _end,
             _tradeable,
             _user
         );
@@ -224,7 +268,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         return true;
     }
 
-    /// @dev See {IBukProtocol-bookingRefund}.
+    /// @dev See {IBukEventProtocol-bookingRefund}.
     function bookingRefund(
         uint256[] memory _ids,
         address _owner
@@ -253,16 +297,16 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         emit BookingRefund(total, _owner);
     }
 
-    /// @dev See {IBukProtocol-mintBukNFTOwner}.
+    /// @dev See {IBukEventProtocol-mintBukNFTOwner}.
     function mintBukNFTOwner(
+        uint256 _eventId,
         uint256[] memory _ids,
-        string[] memory _uri,
-        address _user
+        string[] memory _uri
     ) external whenNotPaused nonReentrant onlyAdmin {
-        _mintBukNFT(_ids, _uri, _user);
+        _mintBukNFT(_eventId, _ids, _uri);
     }
 
-    /// @dev See {IBukProtocol-checkin}.
+    /// @dev See {IBukEventProtocol-checkin}.
     function checkin(uint256[] memory _ids) external {
         uint256 len = _ids.length;
         for (uint256 i = 0; i < len; ++i) {
@@ -287,7 +331,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         emit CheckinRooms(_ids, true);
     }
 
-    /// @dev See {IBukProtocol-checkout}.
+    /// @dev See {IBukEventProtocol-checkout}.
     function checkout(
         uint256[] memory _ids,
         address[] memory _recipients
@@ -305,7 +349,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
                 "Check the Booking status"
             );
             require(
-                (_bookingDetails[_ids[i]].checkout < block.timestamp),
+                (_bookingDetails[_ids[i]].end < block.timestamp),
                 "Checkout date must be before today"
             );
             require(
@@ -316,12 +360,12 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         for (uint256 i = 0; i < len; ++i) {
             _bookingDetails[_ids[i]].status = BookingStatus.checkedout;
             _bookingDetails[_ids[i]].tradeable = false;
-            _nftContract.burn(_recipients[i], _ids[i], 1, true);
+            _nftContract.burn(_recipients[i], _ids[i], 1);
         }
         emit CheckoutRooms(_ids, true);
     }
 
-    /// @dev See {IBukProtocol-cancelRooms}.
+    /// @dev See {IBukEventProtocol-cancelRooms}.
     function cancelRooms(
         uint256[] memory _ids,
         uint256[] memory _penalties,
@@ -346,7 +390,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
                 "Not a confirmed or checkedin Booking"
             );
             require(
-                (_bookingDetails[_ids[i]].checkin > block.timestamp),
+                (_bookingDetails[_ids[i]].start > block.timestamp),
                 "Checkin date must be in the future"
             );
             require(
@@ -372,7 +416,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         require(signer == _bookingOwner, "Invalid owner signature");
         for (uint256 i = 0; i < len; ++i) {
             _bookingDetails[_ids[i]].status = BookingStatus.cancelled;
-            _nftContract.burn(_bookingOwner, _ids[i], 1, false);
+            _nftContract.burn(_bookingOwner, _ids[i], 1);
         }
         if (totalPenalty > 0)
             _bukTreasury.stableRefund(totalPenalty, _bukWallet);
@@ -383,7 +427,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         emit CancelRoom(_ids, totalRefund, true);
     }
 
-    /// @dev See {IBukProtocol-emergencyCancellation}.
+    /// @dev See {IBukEventProtocol-emergencyCancellation}.
     function emergencyCancellation(
         uint256 _id,
         uint256 _refund,
@@ -396,7 +440,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
             "Not a confirmed or checkedin Booking"
         );
         require(
-            (_bookingDetails[_id].checkin > block.timestamp),
+            (_bookingDetails[_id].start > block.timestamp),
             "Checkin date must be in the future"
         );
         require(
@@ -413,33 +457,56 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         _bookingDetails[_id].status = BookingStatus.cancelled;
         _bukTreasury.stableRefund(_refund, _bookingOwner);
         _bukTreasury.stableRefund(_charges, _bukWallet);
-        _nftContract.burn(_bookingOwner, _id, 1, false);
+        _nftContract.burn(_bookingOwner, _id, 1);
         emit EmergencyCancellation(_id, true);
     }
 
-    /// @dev See {IBukProtocol-getBookingDetails}.
-    function getBookingDetails(
-        uint256 _tokenId
-    ) external view returns (Booking memory) {
-        return _bookingDetails[_tokenId];
+    /// @dev See {IBukEventProtocol-getEventDetails}.
+    function getEventDetails(
+        uint256 _eventId
+    ) external view returns (Event memory) {
+        return _eventDetails[_eventId];
     }
 
-    /// @dev See {IBukProtocol-getRoyaltyInfo}.
+    /// @dev See {IBukEventProtocol-getEventBookingDetails}.
+    function getEventBookingDetails(
+        address _eventaddr,
+        uint256 _tokenId
+    ) external view returns (Booking memory) {
+        return _eventBookings[_eventaddr][_tokenId];
+    }
+
+    /// @dev See {IBukEventProtocol-isBookingTradeable}.
+    function isBookingTradeable(
+        address _eventAddress,
+        uint256 _tokenId
+    ) external view returns (bool) {
+        Booking memory booking = _eventBookings[_eventAddress][_tokenId];
+        // console.log(booking[1]);
+        Event memory eventDetails = _eventDetails[booking.eventId];
+        // console.log(eventDetails[2]);
+        return
+            block.timestamp <
+            (booking.start - (eventDetails.tradeTimeLimit * 3600)) &&
+            booking.tradeable;
+    }
+
+    /// @dev See {IBukEventProtocol-getRoyaltyInfo}.
     function getRoyaltyInfo(
+        address _eventAddress,
         uint256 _tokenId
     ) external view returns (IBukRoyalties.Royalty[] memory) {
         IBukRoyalties.Royalty[] memory royalties = _royaltiesContract
-            .getRoyaltyInfo(_tokenId);
+            .getRoyaltyInfo(_eventAddress, _tokenId);
         return royalties;
     }
 
-    /// @dev See {IBukProtocol-getWallets}.
+    /// @dev See {IBukEventProtocol-getWallets}.
     function getWallets()
         external
         view
         returns (
-            address nftContract,
-            address nftPOSContract,
+            address bukEventDeployer,
             address royaltiesContract,
             address signatureVerifier,
             address bukTreasury,
@@ -449,8 +516,7 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
         )
     {
         return (
-            address(_nftContract),
-            address(_nftPOSContract),
+            address(_bukEventDeployer),
             address(_royaltiesContract),
             address(_signatureVerifier),
             address(_bukTreasury),
@@ -509,6 +575,16 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
     }
 
     /**
+     * Private function to set the Buk Event Deployer contract address
+     * @param _deployerContractAddr The address of the Buk Event Deployer contract
+     */
+    function _setDeployerContract(address _deployerContractAddr) private {
+        require(_deployerContractAddr != address(0), "Invalid address");
+        _bukEventDeployer = IBukEventDeployer(_deployerContractAddr);
+        emit SetEventDeployerContract(_deployerContractAddr);
+    }
+
+    /**
      * Private function to set the stable token contract address
      * @param _stableTokenAddress The address of the stable token contract
      */
@@ -549,92 +625,104 @@ contract BukProtocol is ReentrancyGuard, IBukProtocol, Pausable {
     function _booking(
         BookingList memory _bookingData
     ) private returns (uint, uint256) {
+        // FIXME start and end with in event dates
+        // add validation to check event exists
+        uint256 eventId = _bookingData.eventId;
         require(
-            ((_bookingData.total.length == _bookingData.baseRate.length) &&
-                (_bookingData.total.length ==
-                    _bookingData.minSalePrice.length) &&
-                (_bookingData.total.length > 0)),
+            _eventDetails[eventId].eventId == eventId,
+            "Event does not exist"
+        );
+        uint totalLen = _bookingData.total.length;
+        require(
+            ((totalLen == _bookingData.baseRate.length) &&
+                (totalLen == _bookingData.referenceId.length) &&
+                (totalLen == _bookingData.start.length) &&
+                (totalLen == _bookingData.user.length) &&
+                (totalLen == _bookingData.end.length) &&
+                (totalLen > 0)),
             "Array sizes mismatch"
         );
         require(
             _bookingData.total.length <= MAX_BOOKING_LIMIT,
-            "Exceeded max rooms per booking"
+            "Exceeded max ticket per booking"
         );
-        require(
-            (_bookingData.checkIn > block.timestamp),
-            "Checkin date must be in the future"
-        );
-        require(
-            (_bookingData.checkOut > _bookingData.checkIn),
-            "Checkout date must be after checkin"
-        );
+
         uint256 totalAmount;
         uint commissionTotal;
         for (uint256 i = 0; i < _bookingData.total.length; ++i) {
-            ++_bookingIds;
+            require(
+                (_bookingData.start[i] > block.timestamp),
+                "Start date must be in the future"
+            );
+            require(
+                (_bookingData.end[i] > _bookingData.start[i]),
+                "End date must be after start"
+            );
+
+            _eventbookingIds[eventId] = _eventbookingIds[eventId] + 1;
             uint256 bukCommission = (_bookingData.baseRate[i] * commission) /
                 100;
-            _bookingDetails[_bookingIds] = Booking(
-                _bookingIds,
+
+            address eventAddr = _eventDetails[_bookingData.eventId]
+                .eventAddress;
+            _eventBookings[eventAddr][_eventbookingIds[eventId]] = Booking(
+                _eventbookingIds[eventId],
                 0,
-                _bookingData.propertyId,
-                BookingStatus.booked,
-                _bookingData.adult[i],
-                _bookingData.child[i],
-                _bookingData.user,
-                _bookingData.checkIn,
-                _bookingData.checkOut,
+                eventId,
+                _bookingData.referenceId[i],
                 _bookingData.total[i],
                 _bookingData.baseRate[i],
                 bukCommission,
-                _bookingData.minSalePrice[i],
-                _bookingData.tradeTimeLimit,
-                _bookingData.tradeable
+                _bookingData.start[i],
+                _bookingData.end[i],
+                BookingStatus.booked,
+                _bookingData.user[i],
+                _bookingData.tradeable[i]
             );
             totalAmount += _bookingData.total[i];
             commissionTotal += bukCommission;
-            emit BookRoom(
-                _bookingIds,
-                _bookingData.propertyId,
-                _bookingData.checkIn,
-                _bookingData.checkOut,
-                _bookingData.adult[i],
-                _bookingData.child[i]
+            emit EventBooked(
+                eventId,
+                _eventbookingIds[eventId],
+                _bookingData.user[i],
+                _bookingData.referenceId[i]
             );
         }
         return (commissionTotal, totalAmount);
     }
 
-    /// @dev See {IBukProtocol-mintBukNFT}.
+    /// @dev See {IBukEventProtocol-mintBukNFT}.
     function _mintBukNFT(
+        uint256 _eventId,
         uint256[] memory _ids,
-        string[] memory _uri,
-        address _user
+        string[] memory _uri
     ) private {
         uint256 len = _ids.length;
         require((len == _uri.length), "Check Ids and URIs size");
-        require(((len > 0) && (len < 11)), "Not in max - min booking limit");
+        require(
+            ((len > 0) && (len < MAX_BOOKING_LIMIT)),
+            "Not in max - min booking limit"
+        );
+        address eventAddr = _eventDetails[_eventId].eventAddress;
         for (uint256 i = 0; i < len; ++i) {
             require(
-                _bookingDetails[_ids[i]].status == BookingStatus.booked,
+                _eventBookings[eventAddr][_ids[i]].status ==
+                    BookingStatus.booked,
                 "Check the Booking status"
             );
-            require(
-                _bookingDetails[_ids[i]].firstOwner == _user,
-                "Only booking owner can mint"
-            );
         }
+        IBukNFTs nftContract = IBukNFTs(eventAddr);
         for (uint256 i = 0; i < len; ++i) {
-            _bookingDetails[_ids[i]].status = BookingStatus.confirmed;
-            _nftContract.mint(
+            _eventBookings[eventAddr][_ids[i]].status = BookingStatus.confirmed;
+            nftContract.mint(
                 _ids[i],
-                _bookingDetails[_ids[i]].firstOwner,
+                _eventBookings[eventAddr][_ids[i]].firstOwner,
                 1,
                 "",
                 _uri[i]
             );
-            _bookingDetails[_ids[i]].tokenId = _ids[i];
+            _eventBookings[eventAddr][_ids[i]].tokenId = _ids[i];
         }
-        emit MintedBookingNFT(_ids, true);
+        emit MintedBookingNFT(eventAddr, _ids, true);
     }
 }

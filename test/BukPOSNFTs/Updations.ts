@@ -100,9 +100,11 @@ describe("BukPOSNFTs Updations", function () {
     const BukRoyalties = await ethers.getContractFactory("BukRoyalties");
     royaltiesContract = await BukRoyalties.deploy();
 
-    //BukProtocol
-    const BukProtocol = await ethers.getContractFactory("BukProtocol");
-    bukProtocolContract = await BukProtocol.deploy(
+    //BukEventProtocol
+    const BukEventProtocol = await ethers.getContractFactory(
+      "BukEventProtocol",
+    );
+    bukProtocolContract = await BukEventProtocol.deploy(
       bukTreasuryContract.getAddress(),
       stableTokenContract.getAddress(),
       bukWallet.getAddress(),
@@ -146,7 +148,7 @@ describe("BukPOSNFTs Updations", function () {
     );
 
     //Set Buk Protocol in Treasury
-    const setBukProtocol = await bukTreasuryContract.setBukProtocol(
+    const setBukEventProtocol = await bukTreasuryContract.setBukEventProtocol(
       bukProtocolContract.getAddress(),
     );
 
@@ -156,8 +158,8 @@ describe("BukPOSNFTs Updations", function () {
       .setBukNFTRole(await nftContract.getAddress());
 
     //Set Buk Protocol in BukRoyalties
-    const setBukProtocolRoyalties =
-      await royaltiesContract.setBukProtocolContract(
+    const setBukEventProtocolRoyalties =
+      await royaltiesContract.setBukEventProtocolContract(
         bukProtocolContract.getAddress(),
       );
 
@@ -180,8 +182,6 @@ describe("BukPOSNFTs Updations", function () {
           [100000000],
           [80000000],
           [70000000],
-          [2],
-          [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           1729847061,
           1729947061,
@@ -213,7 +213,7 @@ describe("BukPOSNFTs Updations", function () {
   describe("Set Buk Protocol in BukPOSNFTs", function () {
     it("Should set Buk Protocol in BukPOSNFTs", async function () {
       expect(
-        await nftPosContract.setBukProtocol(
+        await nftPosContract.setBukEventProtocol(
           await bukProtocolContract.getAddress(),
         ),
       ).not.be.reverted;
@@ -225,9 +225,11 @@ describe("BukPOSNFTs Updations", function () {
     });
     it("Should set Buk Protocol and emit event", async function () {
       expect(
-        await nftPosContract.setBukProtocol(bukProtocolContract.getAddress()),
+        await nftPosContract.setBukEventProtocol(
+          bukProtocolContract.getAddress(),
+        ),
       )
-        .to.emit(nftPosContract, "SetBukProtocol")
+        .to.emit(nftPosContract, "SetBukEventProtocol")
         .withArgs(
           bukProtocolContract.getAddress(),
           bukProtocolContract.getAddress(),
@@ -237,7 +239,7 @@ describe("BukPOSNFTs Updations", function () {
       await expect(
         nftPosContract
           .connect(account1)
-          .setBukProtocol(bukProtocolContract.getAddress()),
+          .setBukEventProtocol(bukProtocolContract.getAddress()),
       ).to.be.reverted;
     });
   });

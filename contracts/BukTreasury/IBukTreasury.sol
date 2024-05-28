@@ -21,7 +21,7 @@ interface IBukTreasury {
      * @param oldAddress, Address of the old address
      * @param newAddress, Address of the new address
      */
-    event BukProtocolSet(
+    event BukEventProtocolSet(
         address indexed oldAddress,
         address indexed newAddress
     );

@@ -6,7 +6,7 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
 import { Context } from "@openzeppelin/contracts/utils/Context.sol";
 import { IMarketplace } from "contracts/Marketplace/IMarketplace.sol";
-import { IBukProtocol } from "contracts/BukProtocol/IBukProtocol.sol";
+import { IBukEventProtocol } from "contracts/BukEventProtocol/IBukEventProtocol.sol";
 import { IBukNFTs } from "contracts/BukNFTs/IBukNFTs.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { Pausable } from "@openzeppelin/contracts/security/Pausable.sol";
@@ -29,8 +29,8 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
     bytes32 public constant BUK_PROTOCOL_ROLE =
         0xc90056e279113999fe5438fedaf4c98ded59812067ad79dd0c968b1a84dc7c97;
 
-    /// @dev Constant address Buk Protocol contract
-    IBukProtocol private _bukProtocolContract;
+    /// @dev Constant address Buk Event Protocol contract
+    IBukEventProtocol private _bukEventProtocolContract;
 
     /// @dev Constant address Buk NFT contract
     IBukNFTs private _bukNFTContract;
@@ -41,6 +41,7 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
     /**
      * @dev mapping(uint256 => ListingDetails) _listedNFT  Captures listed bookings for sale
      */
+    // FIXME - Update capture each contract listing
     mapping(uint256 => ListingDetails) private _listedNFT;
 
     /**
@@ -55,7 +56,7 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
         address _tokenAddress
     ) {
         _setStableToken(_tokenAddress);
-        _setBukProtocol(_bukProtocolAddress);
+        _setBukEventProtocol(_bukProtocolAddress);
         _setBukNFT(_bukNFTAddress);
 
         // Updating permission
@@ -75,48 +76,60 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
 
     /// @dev Refer {IMarketplace-createListing}.
     function createListing(
+        address _eventAddress,
         uint256 _tokenId,
         uint256 _price
     ) external whenNotPaused {
-        require(!isBookingListed(_tokenId), "NFT already listed");
-        IBukProtocol.Booking memory bookingDetails = _bukProtocolContract
-            .getBookingDetails(_tokenId);
+        // FIXME - Update this later
         require(
-            _price >= bookingDetails.minSalePrice,
-            "Minimum price requirement not met"
+            !isBookingListed(_eventAddress, _tokenId),
+            "NFT already listed"
         );
+        IBukEventProtocol.Booking
+            memory bookingDetails = _bukEventProtocolContract
+                .getEventBookingDetails(_eventAddress, _tokenId);
         require(
-            bookingDetails.status == IBukProtocol.BookingStatus.confirmed &&
+            bookingDetails.status ==
+                IBukEventProtocol.BookingStatus.confirmed &&
                 bookingDetails.tradeable,
             "Only tradable if available"
         );
+        // FIXME - Validate NFT owner or Buk protocol
         require(
             _bukNFTContract.balanceOf(_msgSender(), _tokenId) == 1,
             "Only owner can list"
         );
+        // FIXME - Validate NFT owner or Buk protocol
         require(
             _bukNFTContract.isApprovedForAll(_msgSender(), address(this)),
             "Approve marketplace for trade"
         );
-        require(
-            block.timestamp <
-                (bookingDetails.checkin -
-                    (bookingDetails.tradeTimeLimit * 3600)),
-            "Trade limit time crossed"
+        bool isTradeable = _bukEventProtocolContract.isBookingTradeable(
+            _eventAddress,
+            _tokenId
         );
+        require(isTradeable, "Trade limit time crossed");
+        // FIXME - Update this later
         _listedNFT[_tokenId] = ListingDetails(
+            _eventAddress,
             _price,
             _msgSender(),
             _listedNFT[_tokenId].index + 1,
             ListingStatus.active
         );
 
-        emit ListingCreated(_msgSender(), _tokenId, _price);
+        emit ListingCreated(_eventAddress, _msgSender(), _tokenId, _price);
     }
 
     /// @dev Refer {IMarketplace-deleteListing}.
-    function deleteListing(uint256 _tokenId) external whenNotPaused {
-        require(isBookingListed(_tokenId), "NFT not listed");
+    function deleteListing(
+        address _eventAddress,
+        uint256 _tokenId
+    ) external whenNotPaused {
+        // FIXME - Update this later
+        require(isBookingListed(_eventAddress, _tokenId), "NFT not listed");
+
+        // FIXME - Validate NFT owner or Buk protocol
         require(
             _bukNFTContract.balanceOf(_msgSender(), _tokenId) == 1 ||
                 hasRole(BUK_PROTOCOL_ROLE, _msgSender()),
@@ -125,65 +138,71 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
         uint256 listingIndex = _listedNFT[_tokenId].index;
         delete _listedNFT[_tokenId];
         _listedNFT[_tokenId].index = listingIndex + 1;
-        emit DeletedListing(_tokenId);
+        emit DeletedListing(_eventAddress, _tokenId);
     }
 
     /// @dev Refer {IMarketplace-relist}.
     function relist(
+        address _eventAddress,
         uint256 _tokenId,
         uint256 _newPrice
     ) external whenNotPaused {
-        require(isBookingListed(_tokenId), "NFT not listed");
-        IBukProtocol.Booking memory bookingDetails = _bukProtocolContract
-            .getBookingDetails(_tokenId);
+        // FIXME - Update this later
+        require(isBookingListed(_eventAddress, _tokenId), "NFT not listed");
+        IBukEventProtocol.Booking
+            memory bookingDetails = _bukEventProtocolContract
+                .getEventBookingDetails(_eventAddress, _tokenId);
+        // FIXME - Validate NFT owner or Buk protocol
         require(
             _bukNFTContract.balanceOf(_msgSender(), _tokenId) == 1,
             "Only owner can relist"
         );
         require(
-            bookingDetails.status == IBukProtocol.BookingStatus.confirmed,
+            bookingDetails.status == IBukEventProtocol.BookingStatus.confirmed,
             "Tradeable if available"
-        );
-        require(
-            _newPrice >= bookingDetails.minSalePrice,
-            "Minimum price requirement not met"
         );
         uint256 oldPrice = _listedNFT[_tokenId].price;
         _listedNFT[_tokenId].status = ListingStatus.active;
         _listedNFT[_tokenId].price = _newPrice;
         _listedNFT[_tokenId].index = _listedNFT[_tokenId].index + 1;
-        emit Relisted(_tokenId, oldPrice, _newPrice);
+        emit Relisted(_eventAddress, _tokenId, oldPrice, _newPrice);
     }
 
-    /// @dev Refer {IMarketplace-buyRoom}.
-    function buyRoom(uint256 _tokenId) external whenNotPaused {
+    /// @dev Refer {IMarketplace-buy}.
+    function buy(
+        address _eventAddress,
+        uint256 _tokenId
+    ) external whenNotPaused {
         require(
             _listedNFT[_tokenId].status == ListingStatus.active,
             "NFT not listed"
         );
-        _buy(_tokenId);
+        _buy(_eventAddress, _tokenId);
     }
 
-    /// @dev Refer {IMarketplace-buyRoomBatch}.
-    function buyRoomBatch(uint256[] calldata _tokenIds) external whenNotPaused {
+    /// @dev Refer {IMarketplace-buyBatch}.
+    function buyBatch(
+        address _eventAddress,
+        uint256[] calldata _tokenIds
+    ) external whenNotPaused {
         uint256 len = _tokenIds.length;
         for (uint256 i = 0; i < len; ) {
             require(
                 _listedNFT[_tokenIds[i]].status == ListingStatus.active,
                 "NFT not listed"
             );
-            _buy(_tokenIds[i]);
+            _buy(_eventAddress, _tokenIds[i]);
             unchecked {
                 i += 1;
             }
         }
     }
 
-    /// @dev Refer {IMarketplace-setBukProtocol}.
-    function setBukProtocol(
+    /// @dev Refer {IMarketplace-setBukEventProtocol}.
+    function setBukEventProtocol(
         address _bukProtocol
     ) external onlyRole(ADMIN_ROLE) {
-        _setBukProtocol(_bukProtocol);
+        _setBukEventProtocol(_bukProtocol);
     }
 
     /// @dev Refer {IMarketplace-setBukNFT}.
@@ -203,9 +222,9 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
         return address(_stableToken);
     }
 
-    /// @dev Refer {IMarketplace-getBukProtocol}.
-    function getBukProtocol() external view returns (address) {
-        return address(_bukProtocolContract);
+    /// @dev Refer {IMarketplace-getBukEventProtocol}.
+    function getBukEventProtocol() external view returns (address) {
+        return address(_bukEventProtocolContract);
     }
 
     /// @dev Refer {IMarketplace-getBukNFT}.
@@ -215,13 +234,17 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
 
     /// @dev Refer {IMarketplace-getListingDetails}.
     function getListingDetails(
+        address _eventAddress,
         uint256 _tokenId
     ) external view returns (ListingDetails memory) {
         return _listedNFT[_tokenId];
     }
 
     /// @dev Refer {IMarketplace-isBookingListed}.
-    function isBookingListed(uint256 _tokenId) public view returns (bool) {
+    function isBookingListed(
+        address _eventAddress,
+        uint256 _tokenId
+    ) public view returns (bool) {
         return _listedNFT[_tokenId].price > 0 ? true : false;
     }
 
@@ -237,15 +260,15 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
      * @dev Function sets new Buk protocol address
      * @param _bukProtocol New Buk protocol address
      */
-    function _setBukProtocol(address _bukProtocol) private {
+    function _setBukEventProtocol(address _bukProtocol) private {
         require(_bukProtocol != address(0), "Invalid address");
-        address oldAddress = address(_bukProtocolContract);
-        _bukProtocolContract = IBukProtocol(_bukProtocol);
+        address oldAddress = address(_bukEventProtocolContract);
+        _bukEventProtocolContract = IBukEventProtocol(_bukProtocol);
 
         _grantRole(BUK_PROTOCOL_ROLE, address(_bukProtocol));
         _revokeRole(BUK_PROTOCOL_ROLE, address(oldAddress));
 
-        emit BukProtocolSet(_bukProtocol);
+        emit BukEventProtocolSet(_bukProtocol);
     }
 
     /// @param _tokenAddress New stable token address
@@ -261,20 +284,21 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
      * @dev Transfer sale price and royalties
      * @param _tokenId, NFT/Booking ID
      */
-    function _buy(uint256 _tokenId) private {
-        IBukProtocol.Booking memory bookingDetails = _bukProtocolContract
-            .getBookingDetails(_tokenId);
-        require(
-            bookingDetails.status == IBukProtocol.BookingStatus.confirmed &&
-                bookingDetails.tradeable,
-            "Tradeable if available"
-        );
-        require(
-            block.timestamp <
-                (bookingDetails.checkin -
-                    (bookingDetails.tradeTimeLimit * 3600)),
-            "Trade limit time crossed"
-        );
+    function _buy(address _eventAddress, uint256 _tokenId) private {
+        // FIXME - Update this later
+        // IBukEventProtocol.Booking memory bookingDetails = _bukEventProtocolContract
+        //     .getEventBookingDetails(_tokenId);
+        // require(
+        //     bookingDetails.status ==
+        //         IBukEventProtocol.BookingStatus.confirmed &&
+        //         bookingDetails.tradeable,
+        //     "Tradeable if available"
+        // );
+        // require(
+        //     block.timestamp <
+        //         (bookingDetails.start - (bookingDetails.tradeTimeLimit * 3600)),
+        //     "Trade limit time crossed"
+        // );
         require(
             (_stableToken.allowance(_msgSender(), address(this)) >=
                 _listedNFT[_tokenId].price),
@@ -309,6 +333,12 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
         uint256 listingIndex = _listedNFT[_tokenId].index;
         delete _listedNFT[_tokenId];
         _listedNFT[_tokenId].index = listingIndex + 1;
-        emit RoomBought(_tokenId, nftOwner, _msgSender(), totalPrice);
+        emit ListingBought(
+            _eventAddress,
+            _tokenId,
+            nftOwner,
+            _msgSender(),
+            totalPrice
+        );
     }
 }

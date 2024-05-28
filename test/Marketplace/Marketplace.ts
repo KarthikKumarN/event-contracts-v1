@@ -7,7 +7,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { ContractTransactionResponse } from "ethers";
 import { Marketplace } from "../../typechain-types";
-import { BukProtocol } from "../../typechain-types";
+import { BukEventProtocol } from "../../typechain-types";
 import { bukNfTs } from "../../typechain-types/contracts";
 import { keccak256, toUtf8Bytes } from "ethers";
 
@@ -24,7 +24,6 @@ describe("Marketplace", function () {
   let bukWallet;
   let bukTreasuryContract;
   let nftContract;
-  let nftPosContract;
   let sellerWallet;
   let buyerWallet;
 
@@ -66,9 +65,11 @@ describe("Marketplace", function () {
     const BukRoyalties = await ethers.getContractFactory("BukRoyalties");
     royaltiesContract = await BukRoyalties.deploy();
 
-    //BukProtocol
-    const BukProtocol = await ethers.getContractFactory("BukProtocol");
-    bukProtocolContract = await BukProtocol.deploy(
+    //BukEventProtocol
+    const BukEventProtocol = await ethers.getContractFactory(
+      "BukEventProtocol",
+    );
+    bukProtocolContract = await BukEventProtocol.deploy(
       bukTreasuryContract.getAddress(),
       stableTokenContract.getAddress(),
       bukWallet.getAddress(),
@@ -77,20 +78,10 @@ describe("Marketplace", function () {
     );
     // console.log(await bukProtocolContract.getAddress(), " bukProtocolContract");
 
-    // BukPOSNFT
-    const BukPOSNFT = await ethers.getContractFactory("BukPOSNFTs");
-    nftPosContract = await BukPOSNFT.deploy(
-      "BUK_POS",
-      bukProtocolContract.getAddress(),
-      bukTreasuryContract.getAddress(),
-    );
-    // console.log(await nftPosContract.getAddress(), " nftPosContract");
-
     // BukNFT
     const BukNFT = await ethers.getContractFactory("BukNFTs");
     nftContract = await BukNFT.deploy(
       "BUK_NFT",
-      nftPosContract.getAddress(),
       bukProtocolContract.getAddress(),
       bukTreasuryContract.getAddress(),
     );
@@ -114,25 +105,17 @@ describe("Marketplace", function () {
     await nftContract.setMarketplaceRole(
       await marketplaceContract.getAddress(),
     );
-    // console.log("🚀 ~ file: Marketplace.ts:94 ~ setBukNFTs:");
-
-    //Set BukPOSNFTs address in Buk Protocol
-    const setBukPOSNFTs = await bukProtocolContract.setBukPOSNFTs(
-      nftPosContract.getAddress(),
-    );
 
     //Set Buk Protocol in Treasury
-    const setBukProtocol = await bukTreasuryContract.setBukProtocol(
+    const setBukEventProtocol = await bukTreasuryContract.setBukEventProtocol(
       bukProtocolContract.getAddress(),
     );
 
     //Set Buk Protocol in BukRoyalties
-    const setBukProtocolRoyalties =
-      await royaltiesContract.setBukProtocolContract(
+    const setBukEventProtocolRoyalties =
+      await royaltiesContract.setBukEventProtocolContract(
         bukProtocolContract.getAddress(),
       );
-
-    // console.log("🚀 ~ file: Marketplace.ts:98 ~ setBukPOSNFTs:");
 
     // Set all required
     await royaltiesContract.setBukRoyaltyInfo(bukTreasuryContract, 200);
@@ -143,7 +126,7 @@ describe("Marketplace", function () {
 
   describe("Deployment marketplace", function () {
     it("Should set the BUK protocol address", async function () {
-      expect(await marketplaceContract.getBukProtocol()).to.equal(
+      expect(await marketplaceContract.getBukEventProtocol()).to.equal(
         await bukProtocolContract.getAddress(),
       );
     });
@@ -161,7 +144,7 @@ describe("Marketplace", function () {
     });
 
     it("Should set the buk protocol contract", async function () {
-      expect(await marketplaceContract.getBukProtocol()).to.equal(
+      expect(await marketplaceContract.getBukEventProtocol()).to.equal(
         await bukProtocolContract.getAddress(),
       );
     });
@@ -177,28 +160,30 @@ describe("Marketplace", function () {
   describe("Set Buk protocol contract for marketplace", function () {
     it("Should set the BUK protocol", async function () {
       let newContract = "0xa9a1C7be37Cb72811A6C4C278cA7C403D6459b78";
-      await expect(await marketplaceContract.setBukProtocol(newContract)).to.not
-        .be.reverted;
-      expect(await marketplaceContract.getBukProtocol()).to.equal(newContract);
+      await expect(await marketplaceContract.setBukEventProtocol(newContract))
+        .to.not.be.reverted;
+      expect(await marketplaceContract.getBukEventProtocol()).to.equal(
+        newContract,
+      );
     });
     it("Should reverted with error Buk protocol contract", async function () {
       let newContract = "0x0000000000000000000000000000000000000000";
       await expect(
-        marketplaceContract.setBukProtocol(newContract),
+        marketplaceContract.setBukEventProtocol(newContract),
       ).to.be.revertedWith("Invalid address");
     });
 
     it("Should set the Buk protocol contract and emit event", async function () {
       let newAddress = "0xa9a1C7be37Cb72811A6C4C278cA7C403D6459b78";
-      await expect(await marketplaceContract.setBukProtocol(newAddress))
-        .to.emit(marketplaceContract, "BukProtocolSet")
+      await expect(await marketplaceContract.setBukEventProtocol(newAddress))
+        .to.emit(marketplaceContract, "BukEventProtocolSet")
         .withArgs(newAddress);
     });
 
     it("Should reverted with admin error Buk protocol contract", async function () {
       let newAddress = "0xa9a1C7be37Cb72811A6C4C278cA7C403D6459b78";
       await expect(
-        marketplaceContract.connect(account1).setBukProtocol(newAddress),
+        marketplaceContract.connect(account1).setBukEventProtocol(newAddress),
       ).to.be.revertedWith(
         `AccessControl: account ${account1.address.toLowerCase()} is missing role ${await marketplaceContract.ADMIN_ROLE()}`,
       );
@@ -283,7 +268,7 @@ describe("Marketplace", function () {
       let tokenId = 1;
       let price = 100;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = date.setDate(date.getDate() + 2);
       let checkout = date.setDate(date.getDate() + 3);
@@ -300,8 +285,6 @@ describe("Marketplace", function () {
           [100000000],
           [80000000],
           [70000000],
-          [2],
-          [0],
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -321,7 +304,7 @@ describe("Marketplace", function () {
       ).not.be.reverted;
 
       let bookingDetails = await bukProtocolContract.getBookingDetails(1);
-      await expect(bookingDetails[8]).to.equal(checkout);
+      await expect(bookingDetails[6]).to.equal(checkout);
     });
 
     it("Should book list for sale", async function () {
@@ -330,7 +313,7 @@ describe("Marketplace", function () {
       let minSalePrice = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = date.setDate(date.getDate() + 2);
       let checkout = date.setDate(date.getDate() + 3);
@@ -355,8 +338,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [minSalePrice],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -406,8 +388,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [70000000],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -451,8 +432,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [70000000],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -484,7 +464,7 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = date.setDate(date.getDate() + 2);
       let checkout = date.setDate(date.getDate() + 3);
@@ -501,8 +481,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -524,7 +503,7 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = date.setDate(date.getDate() + 2);
       let checkout = date.setDate(date.getDate() + 3);
@@ -541,8 +520,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -569,7 +547,7 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 1) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 1) / 1000);
@@ -586,8 +564,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -620,7 +597,7 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -637,8 +614,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -673,7 +649,7 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -690,8 +666,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -729,7 +704,7 @@ describe("Marketplace", function () {
       let salePrice = 110000000;
       let transferMoney = 210000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -746,8 +721,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -801,7 +775,7 @@ describe("Marketplace", function () {
       let salePrice = 110000000;
       let transferMoney = 210000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -818,8 +792,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -867,7 +840,7 @@ describe("Marketplace", function () {
       let salePrice = 110000000;
       let transferMoney = 210000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -884,8 +857,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -941,7 +913,7 @@ describe("Marketplace", function () {
       let salePrice = 110000000;
       let transferMoney = 410000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -970,8 +942,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -1000,8 +971,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -1048,7 +1018,7 @@ describe("Marketplace", function () {
       let salePrice = 110000000;
       let transferMoney = 410000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -1070,8 +1040,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -1110,7 +1079,7 @@ describe("Marketplace", function () {
       let salePrice = 110000000;
       let transferMoney = 410000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -1132,8 +1101,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -1184,7 +1152,7 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -1201,8 +1169,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -1241,7 +1208,7 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -1258,8 +1225,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -1292,7 +1258,7 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -1309,8 +1275,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -1347,7 +1312,7 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -1364,8 +1329,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -1405,7 +1369,7 @@ describe("Marketplace", function () {
       let price = 100000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -1422,8 +1386,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -1521,7 +1484,7 @@ describe("Marketplace", function () {
       expect(
         await marketplaceContract
           .connect(account1)
-          .setBukProtocol(await bukProtocolContract.getAddress()),
+          .setBukEventProtocol(await bukProtocolContract.getAddress()),
       ).not.be.reverted;
     });
   });
@@ -1535,7 +1498,7 @@ describe("Marketplace", function () {
       let newPrice = 120000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -1552,8 +1515,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -1594,7 +1556,7 @@ describe("Marketplace", function () {
       let newPrice = 120000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -1611,8 +1573,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -1649,7 +1610,7 @@ describe("Marketplace", function () {
       let newPrice = 120000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -1666,8 +1627,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -1703,7 +1663,7 @@ describe("Marketplace", function () {
       let newPrice = 90000000;
       let salePrice = 100000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -1720,8 +1680,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -1756,7 +1715,7 @@ describe("Marketplace", function () {
       let newPrice = 120000000;
       let salePrice = 150000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -1773,8 +1732,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -1816,7 +1774,7 @@ describe("Marketplace", function () {
       let newPrice = 150000000;
       let transferMoney = 410000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -1845,8 +1803,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -1894,8 +1851,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -1925,8 +1881,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,
@@ -2033,7 +1988,7 @@ describe("Marketplace", function () {
       let salePrice = 110000000;
       let transferMoney = 410000000;
       let date = new Date();
-      let propertyId =
+      let referenceId =
         "0x3633666663356135366139343361313561626261336134630000000000000000";
       let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
       let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
@@ -2062,8 +2017,7 @@ describe("Marketplace", function () {
           [price],
           [price],
           [price],
-          [2],
-          [0],
+
           "0x3633666663356135366139343361313561626261336134630000000000000000",
           checkin,
           checkout,

@@ -35,6 +35,20 @@ const config: HardhatUserConfig = {
           ? [process.env.WALLET_PRIVATE_KEY]
           : [],
     },
+    bscTestnet: {
+      url: `https://data-seed-prebsc-1-s1.bnbchain.org:8545`,
+      accounts:
+        process.env.WALLET_PRIVATE_KEY !== undefined
+          ? [process.env.WALLET_PRIVATE_KEY]
+          : [],
+    },
+    polygonAmoy: {
+      url: `https://rpc-amoy.polygon.technology/`,
+      accounts:
+        process.env.WALLET_PRIVATE_KEY !== undefined
+          ? [process.env.WALLET_PRIVATE_KEY]
+          : [],
+    },
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,
@@ -43,10 +57,23 @@ const config: HardhatUserConfig = {
   etherscan: {
     apiKey: {
       plum_test: "test",
+      polygonAmoy: process.env.POLYGONSCAN_API_KEY || "",
       polygonMumbai: process.env.POLYGONSCAN_API_KEY || "",
       polygon_mainnet: process.env.POLYGONSCAN_API_KEY || "",
+      bscTestnet: process.env.BNB_API_KEY || "",
     },
     customChains: [
+      {
+        network: "polygonAmoy",
+        chainId: 80002,
+        urls: {
+          apiURL: "https://api-amoy.polygonscan.com/api",
+          browserURL: "https://amoy.polygonscan.com",
+          // apiURL:
+          //   "https://www.oklink.com/api/explorer/v1/contract/verify/async/api/polygonAmoy",
+          // browserURL: "https://www.oklink.com/polygonAmoy",
+        },
+      },
       {
         network: "plum_test",
         chainId: 161221135,

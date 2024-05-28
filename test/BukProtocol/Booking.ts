@@ -9,7 +9,7 @@ import {
   recoverAddress,
 } from "ethers";
 
-describe("BukProtocol Bookings", function () {
+describe("BukEventProtocol Bookings", function () {
   let stableTokenContract;
   let bukProtocolContract;
   let marketplaceContract;
@@ -22,7 +22,6 @@ describe("BukProtocol Bookings", function () {
   let bukWallet;
   let bukTreasuryContract;
   let nftContract;
-  let nftPosContract;
   let sellerWallet;
   let buyerWallet;
   let initialTime;
@@ -62,9 +61,11 @@ describe("BukProtocol Bookings", function () {
     const BukRoyalties = await ethers.getContractFactory("BukRoyalties");
     royaltiesContract = await BukRoyalties.deploy();
 
-    //BukProtocol
-    const BukProtocol = await ethers.getContractFactory("BukProtocol");
-    bukProtocolContract = await BukProtocol.deploy(
+    //BukEventProtocol
+    const BukEventProtocol = await ethers.getContractFactory(
+      "BukEventProtocol",
+    );
+    bukProtocolContract = await BukEventProtocol.deploy(
       bukTreasuryContract.getAddress(),
       stableTokenContract.getAddress(),
       bukWallet.getAddress(),
@@ -72,25 +73,13 @@ describe("BukProtocol Bookings", function () {
       royaltiesContract.getAddress(),
     );
 
-    // BukPOSNFT
-    const BukPOSNFT = await ethers.getContractFactory("BukPOSNFTs");
-    nftPosContract = await BukPOSNFT.deploy(
-      "BUK_POS",
-      bukProtocolContract.getAddress(),
-      bukTreasuryContract.getAddress(),
-    );
-
     // BukNFT
     const BukNFT = await ethers.getContractFactory("BukNFTs");
     nftContract = await BukNFT.deploy(
       "BUK_NFT",
-      nftPosContract.getAddress(),
       bukProtocolContract.getAddress(),
       bukTreasuryContract.getAddress(),
     );
-
-    //Set BukNFTs address in BukPOSNFTs
-    await nftPosContract.setBukNFTRole(nftContract.getAddress());
 
     //Marketplace
     const Marketplace = await ethers.getContractFactory("Marketplace");
@@ -105,19 +94,14 @@ describe("BukProtocol Bookings", function () {
       nftContract.getAddress(),
     );
 
-    //Set BukPOSNFTs address in Buk Protocol
-    const setBukPOSNFTs = await bukProtocolContract.setBukPOSNFTs(
-      nftPosContract.getAddress(),
-    );
-
     //Set Buk Protocol in Treasury
-    const setBukProtocol = await bukTreasuryContract.setBukProtocol(
+    const setBukEventProtocol = await bukTreasuryContract.setBukEventProtocol(
       bukProtocolContract.getAddress(),
     );
 
     //Set Buk Protocol in BukRoyalties
-    const setBukProtocolRoyalties =
-      await royaltiesContract.setBukProtocolContract(
+    const setBukEventProtocolRoyalties =
+      await royaltiesContract.setBukEventProtocolContract(
         bukProtocolContract.getAddress(),
       );
 
@@ -150,8 +134,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -180,8 +162,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -213,8 +193,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -241,8 +219,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1677830948,
             1729947061,
@@ -265,8 +241,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729947061,
             1729847061,
@@ -289,8 +263,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -313,8 +285,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000, 80000000],
             [70000000, 70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -347,8 +317,6 @@ describe("BukProtocol Bookings", function () {
               70000000, 70000000, 70000000, 70000000, 70000000, 70000000,
               70000000, 70000000, 70000000, 70000000, 70000000, 70000000,
             ],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -376,8 +344,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -410,8 +376,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -443,8 +407,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -471,8 +433,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1677830948,
             1729947061,
@@ -494,8 +454,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729947061,
             1729847061,
@@ -518,8 +476,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000, 80000000],
             [70000000, 70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -539,8 +495,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000, 80000000],
             [70000000, 70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -567,8 +521,6 @@ describe("BukProtocol Bookings", function () {
             [100000000, 100000000],
             [80000000, 80000000],
             [70000000, 70000000],
-            [2, 2],
-            [0, 0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -598,8 +550,6 @@ describe("BukProtocol Bookings", function () {
             [100000000, 100000000],
             [80000000, 80000000],
             [70000000, 70000000],
-            [2, 2],
-            [0, 0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -631,8 +581,6 @@ describe("BukProtocol Bookings", function () {
             [100000000, 100000000],
             [80000000, 80000000],
             [70000000, 70000000],
-            [2, 2],
-            [0, 0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -662,8 +610,6 @@ describe("BukProtocol Bookings", function () {
             [100000000, 100000000],
             [80000000, 80000000],
             [70000000, 70000000],
-            [2, 2],
-            [0, 0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -693,8 +639,6 @@ describe("BukProtocol Bookings", function () {
             [100000000, 100000000],
             [80000000, 80000000],
             [70000000, 70000000],
-            [2, 2],
-            [0, 0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -727,8 +671,6 @@ describe("BukProtocol Bookings", function () {
   //           [100000000],
   //           [80000000],
   //           [70000000],
-  //           [2],
-  //           [0],
   //           "0x3633666663356135366139343361313561626261336134630000000000000000",
   //           1729847061,
   //           1729947061,
@@ -763,8 +705,6 @@ describe("BukProtocol Bookings", function () {
   //           [100000000],
   //           [80000000],
   //           [70000000],
-  //           [2],
-  //           [0],
   //           "0x3633666663356135366139343361313561626261336134630000000000000000",
   //           1729847061,
   //           1729947061,
@@ -800,8 +740,6 @@ describe("BukProtocol Bookings", function () {
   //           [100000000],
   //           [80000000],
   //           [70000000],
-  //           [2],
-  //           [0],
   //           "0x3633666663356135366139343361313561626261336134630000000000000000",
   //           1729847061,
   //           1729947061,
@@ -845,8 +783,6 @@ describe("BukProtocol Bookings", function () {
   //             70000000, 70000000, 70000000, 70000000, 70000000, 70000000,
   //             70000000, 70000000, 70000000, 70000000, 70000000,
   //           ],
-  //           [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-  //           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   //           "0x3633666663356135366139343361313561626261336134630000000000000000",
   //           1729847061,
   //           1729947061,
@@ -910,8 +846,6 @@ describe("BukProtocol Bookings", function () {
   //           [100000000],
   //           [80000000],
   //           [70000000],
-  //           [2],
-  //           [0],
   //           "0x3633666663356135366139343361313561626261336134630000000000000000",
   //           1729847061,
   //           1729947061,
@@ -948,8 +882,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -984,8 +916,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -1021,8 +951,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -1062,8 +990,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -1102,8 +1028,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -1130,8 +1054,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -1224,8 +1146,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -1274,8 +1194,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -1326,8 +1244,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -1383,8 +1299,6 @@ describe("BukProtocol Bookings", function () {
               70000000, 70000000, 70000000, 70000000, 70000000, 70000000,
               70000000, 70000000, 70000000, 70000000, 70000000,
             ],
-            [2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 4],
-            [0, 2, 1, 2, 0, 2, 0, 2, 0, 2, 2],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -1431,8 +1345,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -1479,8 +1391,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -1523,8 +1433,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -1567,8 +1475,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -1613,8 +1519,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -1666,8 +1570,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -1727,8 +1629,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -1792,8 +1692,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -1845,77 +1743,7 @@ describe("BukProtocol Bookings", function () {
         .to.emit(bukProtocolContract, "CancelRoom")
         .withArgs([1], 30000000, true);
     });
-    it("Should cancel successfully and check the BukNFTs and BukPOSNFTs status", async function () {
-      //Grant allowance permission
-      const res = await stableTokenContract
-        .connect(owner)
-        .approve(await bukProtocolContract.getAddress(), 150000000);
 
-      //Book room
-      expect(
-        await bukProtocolContract
-          .connect(owner)
-          .bookRooms(
-            [100000000],
-            [80000000],
-            [70000000],
-            [2],
-            [0],
-            "0x3633666663356135366139343361313561626261336134630000000000000000",
-            1729847061,
-            1729947061,
-            12,
-            true,
-          ),
-      ).not.be.reverted;
-
-      //Mint NFT
-      await expect(
-        bukProtocolContract
-          .connect(adminWallet)
-          .mintBukNFTOwner(
-            [1],
-            [
-              "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-            ],
-            owner.getAddress(),
-          ),
-      ).not.be.reverted;
-
-      //Check the balance of NFT
-      expect(await nftContract.balanceOf(owner.getAddress(), 1)).to.equal(1);
-      //Check the balance of POS NFT
-      expect(await nftPosContract.balanceOf(owner.getAddress(), 1)).to.equal(0);
-
-      const _id = [1];
-      const _penalty = [50000000]; // Example values, use your actual logic
-      const _refund = [30000000];
-      const _charges = [20000000];
-      const _bookingOwner = await owner.getAddress();
-
-      // Formulate the message for signing
-      const message = `Cancellation Details:\nTotal Penalty: ${_penalty[0]}\nTotal Refund: ${_refund[0]}\nTotal Charges: ${_charges[0]}`;
-      const signature = await owner.signMessage(message);
-
-      //Cancel Room
-      await expect(
-        bukProtocolContract
-          .connect(adminWallet)
-          .cancelRooms(
-            _id,
-            _penalty,
-            _refund,
-            _charges,
-            _bookingOwner,
-            signature,
-          ),
-      ).not.be.reverted;
-
-      //Check the balance of NFT
-      expect(await nftContract.balanceOf(owner.getAddress(), 1)).to.equal(0);
-      //Check the balance of POS NFT
-      expect(await nftPosContract.balanceOf(owner.getAddress(), 1)).to.equal(0);
-    });
     it("Should not cancel when the booking status is not confirmed or checkedin", async function () {
       //Grant allowance permission
       const res = await stableTokenContract
@@ -1930,8 +1758,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -1978,8 +1804,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -2042,8 +1866,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -2091,8 +1913,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -2144,8 +1964,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -2185,7 +2003,7 @@ describe("BukProtocol Bookings", function () {
         .to.emit(bukProtocolContract, "EmergencyCancellation")
         .withArgs(1, true);
     });
-    it("Should cancel successfully and check the BukNFTs and BukPOSNFTs status", async function () {
+    it("Should cancel successfully and check the BukNFTs status", async function () {
       //Grant allowance permission
       const res = await stableTokenContract
         .connect(owner)
@@ -2199,8 +2017,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -2224,8 +2040,6 @@ describe("BukProtocol Bookings", function () {
 
       //Check the balance of NFT
       expect(await nftContract.balanceOf(owner.getAddress(), 1)).to.equal(1);
-      //Check the balance of POS NFT
-      expect(await nftPosContract.balanceOf(owner.getAddress(), 1)).to.equal(0);
 
       const _id = 1;
       const _refund = 30000000;
@@ -2241,8 +2055,6 @@ describe("BukProtocol Bookings", function () {
 
       //Check the balance of NFT
       expect(await nftContract.balanceOf(owner.getAddress(), 1)).to.equal(0);
-      //Check the balance of POS NFT
-      expect(await nftPosContract.balanceOf(owner.getAddress(), 1)).to.equal(0);
     });
     it("Should not cancel when the booking status is not confirmed or checkedin", async function () {
       //Grant allowance permission
@@ -2258,8 +2070,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,
@@ -2294,8 +2104,6 @@ describe("BukProtocol Bookings", function () {
             [100000000],
             [80000000],
             [70000000],
-            [2],
-            [0],
             "0x3633666663356135366139343361313561626261336134630000000000000000",
             1729847061,
             1729947061,

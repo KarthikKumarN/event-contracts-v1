@@ -19,12 +19,12 @@ interface IBukRoyalties {
 
     /**
      * @dev Emitted when new buk protocol address has been updated
-     * @param oldBukProtocol, old buk protocol address
-     * @param newBukProtocol, new buk protocol address
+     * @param oldBukEventProtocol, old buk protocol address
+     * @param newBukEventProtocol, new buk protocol address
      */
-    event SetBukProtocol(
-        address oldBukProtocol,
-        address newBukProtocol
+    event SetBukEventProtocol(
+        address oldBukEventProtocol,
+        address newBukEventProtocol
     );
 
     /**
@@ -63,11 +63,11 @@ interface IBukRoyalties {
      * Can only be called by accounts with the ADMIN_ROLE.
      * @param _bukProtocolContract The new Buk Protocol address to set.
      * @dev If {_bukProtocolContract} is the zero address, the function will revert.
-     * @dev Emits a {SetBukProtocol} event with the previous Buk Protocol address and the new address.
+     * @dev Emits a {SetBukEventProtocol} event with the previous Buk Protocol address and the new address.
      * @notice This function updates the Buk Protocol address and emits an event.
      * @notice This function can only be called by `ADMIN_ROLE`
      */
-    function setBukProtocolContract(address _bukProtocolContract) external;
+    function setBukEventProtocolContract(address _bukProtocolContract) external;
 
     /**
      * @dev Function to define the royalty Fraction for Buk.
@@ -111,10 +111,12 @@ interface IBukRoyalties {
 
     /**
      * @dev Function to retrieve royalty information.
+     * @param _eventAddress Contract address of the Event.
      * @param _tokenId ID of the token
      * @notice Token ID and Booking ID are same.
      */
     function getRoyaltyInfo(
+        address _eventAddress,
         uint256 _tokenId
     ) external view returns (Royalty[] memory);
 }
