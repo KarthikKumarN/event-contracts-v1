@@ -36,10 +36,11 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
     IERC20 private _stableToken;
 
     /**
-     * @dev mapping(uint256 => ListingDetails) _listedNFT  Captures listed bookings for sale
+     * @dev Mapping of event contract address to Listing.
+     * @dev Each event address maps to another mapping, which maps token ID to listing.
+     * @dev mapping(uint256 => ListingDetails) _listedNFT  Captures listed bookings for sale for each event contracts
      */
-    // FIXME - Update capture each contract listing
-    mapping(uint256 => ListingDetails) private _listedNFT;
+    mapping(address => mapping(uint256 => ListingDetails)) private _listedNFT; // eventAddress -> (tokenID -> ListingDetails)
 
     /**
      * @dev Constructor to initialize the contract
@@ -71,7 +72,7 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
         uint256 _tokenId,
         uint256 _price
     ) external whenNotPaused {
-        // FIXME - Update this later
+        require(address(_eventAddress) != address(0), "Invalid event address");
         require(
             !isBookingListed(_eventAddress, _tokenId),
             "NFT already listed"
@@ -79,20 +80,13 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
         IBukEventProtocol.Booking
             memory bookingDetails = _bukEventProtocolContract
                 .getEventBookingDetails(_eventAddress, _tokenId);
+        IBukNFTs nftContract = IBukNFTs(_eventAddress);
         require(
-            bookingDetails.status ==
-                IBukEventProtocol.BookingStatus.confirmed &&
-                bookingDetails.tradeable,
-            "Only tradable if available"
-        );
-        // FIXME - Validate NFT owner or Buk protocol
-        require(
-            _bukNFTContract.balanceOf(_msgSender(), _tokenId) == 1,
+            nftContract.balanceOf(_msgSender(), _tokenId) == 1,
             "Only owner can list"
         );
-        // FIXME - Validate NFT owner or Buk protocol
         require(
-            _bukNFTContract.isApprovedForAll(_msgSender(), address(this)),
+            nftContract.isApprovedForAll(_msgSender(), address(this)),
             "Approve marketplace for trade"
         );
         bool isTradeable = _bukEventProtocolContract.isBookingTradeable(
@@ -100,8 +94,7 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
             _tokenId
         );
         require(isTradeable, "Trade limit time crossed");
-        // FIXME - Update this later
-        _listedNFT[_tokenId] = ListingDetails(
+        _listedNFT[_eventAddress][_tokenId] = ListingDetails(
             _eventAddress,
             _price,
             _msgSender(),
@@ -109,7 +102,7 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
             ListingStatus.active
         );
 
-        emit ListingCreated(_eventAddress, _msgSender(), _tokenId, _price);
+        emit ListingCreated(_eventAddress, _tokenId, _msgSender(), _price);
     }
 
     /// @dev Refer {IMarketplace-deleteListing}.
@@ -165,7 +158,7 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
         uint256 _tokenId
     ) external whenNotPaused {
         require(
-            _listedNFT[_tokenId].status == ListingStatus.active,
+            _listedNFT[_eventAddress][_tokenId].status == ListingStatus.active,
             "NFT not listed"
         );
         _buy(_eventAddress, _tokenId);
@@ -179,7 +172,8 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
         uint256 len = _tokenIds.length;
         for (uint256 i = 0; i < len; ) {
             require(
-                _listedNFT[_tokenIds[i]].status == ListingStatus.active,
+                _listedNFT[_eventAddress][_tokenIds[i]].status ==
+                    ListingStatus.active,
                 "NFT not listed"
             );
             _buy(_eventAddress, _tokenIds[i]);
@@ -218,7 +212,7 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
         address _eventAddress,
         uint256 _tokenId
     ) external view returns (ListingDetails memory) {
-        return _listedNFT[_tokenId];
+        return _listedNFT[_eventAddress][_tokenId];
     }
 
     /// @dev Refer {IMarketplace-isBookingListed}.
@@ -226,7 +220,7 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
         address _eventAddress,
         uint256 _tokenId
     ) public view returns (bool) {
-        return _listedNFT[_tokenId].price > 0 ? true : false;
+        return _listedNFT[_eventAddress][_tokenId].price > 0 ? true : false;
     }
 
     /**
