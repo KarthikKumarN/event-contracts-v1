@@ -23,6 +23,7 @@ describe("EventProtocol Bookings", function () {
   let nftContract;
   let sellerWallet;
   let buyerWallet;
+  let eventDetails;
   beforeEach("deploy the contract instance first", async function () {
     [
       adminWallet,
@@ -136,7 +137,7 @@ describe("EventProtocol Bookings", function () {
       _tradeTimeLimit,
       account1.address,
     );
-    const eventDetails = await bukEventProtocolContract.getEventDetails(1);
+    eventDetails = await bukEventProtocolContract.getEventDetails(1);
 
     let eventId = 1;
     let bookingRefId = [
@@ -257,484 +258,353 @@ describe("EventProtocol Bookings", function () {
     });
   });
 
-  // describe("Create listing function", function () {
-  //   it("Should list booking", async function () {
-  //     let eventId = 1;
-  //     let refId = [
-  //       "0x3633666663356135366139343361313561626261336134630000000000000000",
-  //     ];
-  //     let total = [100000000];
-  //     let baseRate = [80000000];
-  //     let start = [startFromNow];
-  //     let end = [endFromNow];
-  //     let tradeable = [true];
+  // Test cases for getting listed status
+  describe("Listed status marketplace", function () {
+    it("Should get listed status for not listed tokeId", async function () {
+      await expect(await marketplaceContract.isBookingListed(0)).to.equal(
+        false,
+      );
+    });
 
-  //     expect(
-  //       await bukEventProtocolContract
-  //         .connect(owner)
-  //         .bookEvent(eventId, refId, total, baseRate, start, end, tradeable),
-  //     ).not.be.reverted;
-  //   });
+    it("Should book list for sale", async function () {
+      let eventAddress = eventDetails[9];
+      const eventNFT = await ethers.getContractAt("BukNFTs", eventAddress);
+      // Approve allowance
+      await eventNFT.setApprovalForAll(
+        await marketplaceContract.getAddress(),
+        true,
+      );
+      await expect(
+        marketplaceContract.createListing(eventAddress, 1, 100000000),
+      ).not.be.reverted;
+      await expect(await marketplaceContract.isBookingListed(1)).to.equal(true);
+    });
+    // it("Should create list allowance check", async function () {
+    //   let tokenId = 1;
+    //   let price = 100000000;
+    //   let minSalePrice = 70000000;
+    //   let salePrice = 120000000;
+    //   let date = new Date();
+    //   let checkin = date.setDate(date.getDate() + 2);
+    //   let checkout = date.setDate(date.getDate() + 3);
 
-  //   it("should book event and emit", async function () {
-  //     let eventId = 1;
-  //     let refId = [
-  //       "0x3633666663356135366139343361313561626261336134630000000000000000",
-  //     ];
-  //     let total = [100000000];
-  //     let baseRate = [80000000];
-  //     let start = [startFromNow];
-  //     let end = [endFromNow];
-  //     let tradeable = [true];
+    //   //Grant allowance permission
+    //   const res = await stableTokenContract.approve(
+    //     await bukProtocolContract.getAddress(),
+    //     200000000000,
+    //   );
 
-  //     expect(
-  //       await bukEventProtocolContract
-  //         .connect(owner)
-  //         .bookEvent(eventId, refId, total, baseRate, start, end, tradeable),
-  //     )
-  //       .to.emit(bukEventProtocolContract, "EventBooked")
-  //       .withArgs(
-  //         eventId,
-  //         1,
-  //         owner.address,
-  //         refId,
-  //         startFromNow,
-  //         endFromNow,
-  //         total,
-  //         baseRate,
-  //         tradeable,
-  //       );
-  //   });
+    //   // Book room and mint NFT
+    //   expect(
+    //     await bukProtocolContract.bookRooms(
+    //       [price],
+    //       [price],
+    //       [70000000],
 
-  //   it("should book event and verify with booking details", async function () {
-  //     let eventId = 1;
-  //     let refId = [
-  //       "0x3633666663356135366139343361313561626261336134630000000000000000",
-  //     ];
-  //     let total = [100000000];
-  //     let baseRate = [80000000];
-  //     let start = [startFromNow];
-  //     let end = [endFromNow];
-  //     let tradeable = [true];
+    //       "0x3633666663356135366139343361313561626261336134630000000000000000",
+    //       checkin,
+    //       checkout,
+    //       12,
+    //       true,
+    //     ),
+    //   ).not.be.reverted;
+    //   //Mint
+    //   await expect(
+    //     bukProtocolContract.mintBukNFTOwner(
+    //       [tokenId],
+    //       [
+    //         "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+    //       ],
+    //       owner.address,
+    //     ),
+    //   ).not.be.reverted;
+    //   // Approve allowance
+    //   await expect(
+    //     marketplaceContract.createListing(tokenId, salePrice),
+    //   ).to.be.revertedWith("Approve marketplace for trade");
+    // });
+    // it("Should create list minSale check", async function () {
+    //   let tokenId = 1;
+    //   let price = 100000000;
+    //   let minSalePrice = 70000000;
+    //   let salePrice = 50000000;
+    //   let date = new Date();
+    //   let checkin = date.setDate(date.getDate() + 2);
+    //   let checkout = date.setDate(date.getDate() + 3);
 
-  //     const eventDetails = await bukEventProtocolContract.getEventDetails(1);
+    //   //Grant allowance permission
+    //   const res = await stableTokenContract.approve(
+    //     await bukProtocolContract.getAddress(),
+    //     200000000000,
+    //   );
 
-  //     expect(
-  //       await bukEventProtocolContract
-  //         .connect(owner)
-  //         .bookEvent(eventId, refId, total, baseRate, start, end, tradeable),
-  //     ).not.be.reverted;
+    //   // Book room and mint NFT
+    //   expect(
+    //     await bukProtocolContract.bookRooms(
+    //       [price],
+    //       [price],
+    //       [70000000],
 
-  //     const bookingDetails =
-  //       await bukEventProtocolContract.getEventBookingDetails(
-  //         eventDetails[9],
-  //         1,
-  //       );
-  //     expect(bookingDetails[4]).to.equal(total[0]);
-  //   });
+    //       "0x3633666663356135366139343361313561626261336134630000000000000000",
+    //       checkin,
+    //       checkout,
+    //       12,
+    //       true,
+    //     ),
+    //   ).not.be.reverted;
+    //   //Mint
+    //   await expect(
+    //     bukProtocolContract.mintBukNFTOwner(
+    //       [tokenId],
+    //       [
+    //         "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+    //       ],
+    //       owner.address,
+    //     ),
+    //   ).not.be.reverted;
+    //   // Approve allowance
+    //   await nftContract.setApprovalForAll(
+    //     await marketplaceContract.getAddress(),
+    //     true,
+    //   );
+    //   await expect(
+    //     marketplaceContract.createListing(tokenId, salePrice),
+    //   ).to.be.revertedWith("Minimum price requirement not met");
+    // });
+    // it("Create list only confirmed booking check", async function () {
+    //   let tokenId = 1;
+    //   let price = 100000000;
+    //   let salePrice = 150000000;
+    //   let date = new Date();
+    //   let referenceId =
+    //     "0x3633666663356135366139343361313561626261336134630000000000000000";
+    //   let checkin = date.setDate(date.getDate() + 2);
+    //   let checkout = date.setDate(date.getDate() + 3);
 
-  //   it("should book event and verify with booking details", async function () {
-  //     let eventId = 1;
-  //     let refId = [
-  //       "0x3633666663356135366139343361313561626261336134630000000000000000",
-  //     ];
-  //     let total = [100000000];
-  //     let baseRate = [80000000];
-  //     let start = [startFromNow];
-  //     let end = [endFromNow];
-  //     let tradeable = [true];
+    //   //Grant allowance permission
+    //   const res = await stableTokenContract.approve(
+    //     await bukProtocolContract.getAddress(),
+    //     200000000000,
+    //   );
 
-  //     const eventDetails = await bukEventProtocolContract.getEventDetails(1);
+    //   // Book room and mint NFT
+    //   expect(
+    //     await bukProtocolContract.bookRooms(
+    //       [price],
+    //       [price],
+    //       [price],
 
-  //     expect(
-  //       await bukEventProtocolContract
-  //         .connect(owner)
-  //         .bookEvent(eventId, refId, total, baseRate, start, end, tradeable),
-  //     ).not.be.reverted;
+    //       "0x3633666663356135366139343361313561626261336134630000000000000000",
+    //       checkin,
+    //       checkout,
+    //       12,
+    //       true,
+    //     ),
+    //   ).not.be.reverted;
+    //   // Approve allowance
+    //   await nftContract.setApprovalForAll(
+    //     await marketplaceContract.getAddress(),
+    //     true,
+    //   );
+    //   await expect(
+    //     marketplaceContract.createListing(tokenId, salePrice),
+    //   ).to.be.revertedWith("Only tradable if available");
+    // });
+    // it("Create list only owner can list", async function () {
+    //   let tokenId = 1;
+    //   let price = 100000000;
+    //   let salePrice = 150000000;
+    //   let date = new Date();
+    //   let referenceId =
+    //     "0x3633666663356135366139343361313561626261336134630000000000000000";
+    //   let checkin = date.setDate(date.getDate() + 2);
+    //   let checkout = date.setDate(date.getDate() + 3);
 
-  //     const bookingDetails =
-  //       await bukEventProtocolContract.getEventBookingDetails(
-  //         eventDetails[9],
-  //         1,
-  //       );
-  //     expect(bookingDetails[4]).to.equal(total[0]);
-  //   });
-  // });
+    //   //Grant allowance permission
+    //   const res = await stableTokenContract.approve(
+    //     await bukProtocolContract.getAddress(),
+    //     200000000000,
+    //   );
 
-  // describe("Test admin booking", function () {
-  //   it("should book event by admin", async function () {
-  //     let eventId = 1;
-  //     let refId = [
-  //       "0x3633666663356135366139343361313561626261336134630000000000000000",
-  //     ];
-  //     let total = [100000000];
-  //     let baseRate = [80000000];
-  //     let start = [startFromNow];
-  //     let end = [endFromNow];
-  //     let tradeable = [true];
-  //     let users = [account1.address];
+    //   // Book room and mint NFT
+    //   expect(
+    //     await bukProtocolContract.bookRooms(
+    //       [price],
+    //       [price],
+    //       [price],
 
-  //     const eventDetails = await bukEventProtocolContract.getEventDetails(1);
+    //       "0x3633666663356135366139343361313561626261336134630000000000000000",
+    //       checkin,
+    //       checkout,
+    //       12,
+    //       true,
+    //     ),
+    //   ).not.be.reverted;
+    //   //Mint
+    //   await expect(
+    //     bukProtocolContract.mintBukNFTOwner(
+    //       [tokenId],
+    //       [
+    //         "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+    //       ],
+    //       owner.address,
+    //     ),
+    //   ).not.be.reverted;
+    //   await expect(
+    //     marketplaceContract.connect(account1).createListing(tokenId, salePrice),
+    //   ).to.be.revertedWith("Only owner can list");
+    // });
+    // it("Tradable time limit check", async function () {
+    //   let tokenId = 1;
+    //   let price = 100000000;
+    //   let salePrice = 150000000;
+    //   let date = new Date();
+    //   let referenceId =
+    //     "0x3633666663356135366139343361313561626261336134630000000000000000";
+    //   let checkin = Math.floor(date.setDate(date.getDate() + 1) / 1000);
+    //   let checkout = Math.floor(date.setDate(date.getDate() + 1) / 1000);
 
-  //     expect(
-  //       await bukEventProtocolContract.bookEventOwner(
-  //         eventId,
-  //         refId,
-  //         total,
-  //         baseRate,
-  //         start,
-  //         end,
-  //         tradeable,
-  //         users,
-  //       ),
-  //     ).not.be.reverted;
-  //   });
-  //   it("should book event by admin and verify details", async function () {
-  //     let eventId = 1;
-  //     let refId = [
-  //       "0x3633666663356135366139343361313561626261336134630000000000000000",
-  //     ];
-  //     let total = [100000000];
-  //     let baseRate = [80000000];
-  //     let start = [startFromNow];
-  //     let end = [endFromNow];
-  //     let tradeable = [true];
-  //     let users = [account1.address];
+    //   //Grant allowance permission
+    //   const res = await stableTokenContract.approve(
+    //     await bukProtocolContract.getAddress(),
+    //     200000000000,
+    //   );
 
-  //     const eventDetails = await bukEventProtocolContract.getEventDetails(1);
+    //   // Book room and mint NFT
+    //   expect(
+    //     await bukProtocolContract.bookRooms(
+    //       [price],
+    //       [price],
+    //       [price],
 
-  //     expect(
-  //       await bukEventProtocolContract.bookEventOwner(
-  //         eventId,
-  //         refId,
-  //         total,
-  //         baseRate,
-  //         start,
-  //         end,
-  //         tradeable,
-  //         users,
-  //       ),
-  //     ).not.be.reverted;
+    //       "0x3633666663356135366139343361313561626261336134630000000000000000",
+    //       checkin,
+    //       checkout,
+    //       60,
+    //       true,
+    //     ),
+    //   ).not.be.reverted;
 
-  //     const bookingDetails =
-  //       await bukEventProtocolContract.getEventBookingDetails(
-  //         eventDetails[9],
-  //         1,
-  //       );
-  //     expect(bookingDetails[10]).to.equal(users[0]);
-  //   });
-  //   it("should fail, book event only by admin", async function () {
-  //     let eventId = 1;
-  //     let refId = [
-  //       "0x3633666663356135366139343361313561626261336134630000000000000000",
-  //     ];
-  //     let total = [100000000];
-  //     let baseRate = [80000000];
-  //     let start = [startFromNow];
-  //     let end = [endFromNow];
-  //     let tradeable = [true];
-  //     let users = [account1.address];
+    //   //Mint
+    //   await expect(
+    //     bukProtocolContract.mintBukNFTOwner(
+    //       [tokenId],
+    //       [
+    //         "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+    //       ],
+    //       owner.address,
+    //     ),
+    //   ).not.be.reverted;
+    //   // Approve allowance
+    //   await nftContract.setApprovalForAll(
+    //     await marketplaceContract.getAddress(),
+    //     true,
+    //   );
+    //   await expect(
+    //     marketplaceContract.createListing(tokenId, salePrice),
+    //   ).to.be.revertedWith("Trade limit time crossed");
+    // });
+    // it("Check for already listed NFT", async function () {
+    //   let tokenId = 1;
+    //   let price = 100000000;
+    //   let salePrice = 150000000;
+    //   let date = new Date();
+    //   let referenceId =
+    //     "0x3633666663356135366139343361313561626261336134630000000000000000";
+    //   let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
+    //   let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
-  //     await expect(
-  //       bukEventProtocolContract
-  //         .connect(account1)
-  //         .bookEventOwner(
-  //           eventId,
-  //           refId,
-  //           total,
-  //           baseRate,
-  //           start,
-  //           end,
-  //           tradeable,
-  //           users,
-  //         ),
-  //     ).to.be.revertedWith("Only admin has access to this function");
-  //   });
-  // });
+    //   //Grant allowance permission
+    //   const res = await stableTokenContract.approve(
+    //     await bukProtocolContract.getAddress(),
+    //     200000000000,
+    //   );
 
-  // add test cases to test isBookingTradeable function
-  // describe("Test isBookingTradeable function", function () {
-  //   it("should return true if booking is tradeable", async function () {
-  //     let eventId = 1;
-  //     let refId = [
-  //       "0x3633666663356135366139343361313561626261336134630000000000000000",
-  //     ];
-  //     let total = [100000000];
-  //     let baseRate = [80000000];
-  //     let start = [startFromNow];
-  //     let end = [endFromNow];
-  //     let tradeable = [true];
+    //   // Book room and mint NFT
+    //   expect(
+    //     await bukProtocolContract.bookRooms(
+    //       [price],
+    //       [price],
+    //       [price],
 
-  //     expect(
-  //       await bukEventProtocolContract
-  //         .connect(owner)
-  //         .bookEvent(eventId, refId, total, baseRate, start, end, tradeable),
-  //     ).not.be.reverted;
-  //     const eventDetails = await bukEventProtocolContract.getEventDetails(1);
+    //       "0x3633666663356135366139343361313561626261336134630000000000000000",
+    //       checkin,
+    //       checkout,
+    //       24,
+    //       true,
+    //     ),
+    //   ).not.be.reverted;
 
-  //     const isTradeable = await bukEventProtocolContract.isBookingTradeable(
-  //       eventDetails[9],
-  //       1,
-  //     );
-  //     expect(isTradeable).to.equal(true);
-  //   });
+    //   //Mint
+    //   await expect(
+    //     bukProtocolContract.mintBukNFTOwner(
+    //       [tokenId],
+    //       [
+    //         "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+    //       ],
+    //       owner.address,
+    //     ),
+    //   ).not.be.reverted;
+    //   // Approve allowance
+    //   await nftContract.setApprovalForAll(
+    //     await marketplaceContract.getAddress(),
+    //     true,
+    //   );
+    //   await expect(marketplaceContract.createListing(tokenId, salePrice)).not.to
+    //     .be.reverted;
+    //   await expect(
+    //     marketplaceContract.createListing(tokenId, salePrice),
+    //   ).to.be.revertedWith("NFT already listed");
+    // });
+    // it("Create listing should emit event", async function () {
+    //   let tokenId = 1;
+    //   let price = 100000000;
+    //   let salePrice = 150000000;
+    //   let date = new Date();
+    //   let referenceId =
+    //     "0x3633666663356135366139343361313561626261336134630000000000000000";
+    //   let checkin = Math.floor(date.setDate(date.getDate() + 2) / 1000);
+    //   let checkout = Math.floor(date.setDate(date.getDate() + 3) / 1000);
 
-  //   it("should return false if booking is not tradeable", async function () {
-  //     let eventId = 1;
-  //     let refId = [
-  //       "0x3633666663356135366139343361313561626261336134630000000000000000",
-  //     ];
-  //     let total = [100000000];
-  //     let baseRate = [80000000];
-  //     let start = [startFromNow];
-  //     let end = [endFromNow];
-  //     let tradeable = [false];
+    //   //Grant allowance permission
+    //   const res = await stableTokenContract.approve(
+    //     await bukProtocolContract.getAddress(),
+    //     200000000000,
+    //   );
 
-  //     expect(
-  //       await bukEventProtocolContract
-  //         .connect(owner)
-  //         .bookEvent(eventId, refId, total, baseRate, start, end, tradeable),
-  //     ).not.be.reverted;
-  //     const eventDetails = await bukEventProtocolContract.getEventDetails(1);
+    //   // Book room and mint NFT
+    //   expect(
+    //     await bukProtocolContract.bookRooms(
+    //       [price],
+    //       [price],
+    //       [price],
 
-  //     const isTradeable = await bukEventProtocolContract.isBookingTradeable(
-  //       eventDetails[9],
-  //       1,
-  //     );
-  //     expect(isTradeable).to.equal(false);
-  //   });
+    //       "0x3633666663356135366139343361313561626261336134630000000000000000",
+    //       checkin,
+    //       checkout,
+    //       24,
+    //       true,
+    //     ),
+    //   ).not.be.reverted;
 
-  //   it("should return false if booking is crossed trade block time", async function () {
-  //     let eventId = 1;
-  //     let refId = [
-  //       "0x3633666663356135366139343361313561626261336134630000000000000000",
-  //     ];
-  //     let total = [100000000];
-  //     let baseRate = [80000000];
-
-  //     const now = Math.floor(Date.now() / 1000);
-  //     const fiveDays = 1 * 24 * 60 * 60;
-  //     const startFromNow = now + fiveDays;
-  //     const endFromNow = startFromNow + fiveDays;
-
-  //     let start = [startFromNow];
-  //     let end = [endFromNow];
-  //     let tradeable = [true];
-
-  //     expect(
-  //       await bukEventProtocolContract
-  //         .connect(owner)
-  //         .bookEvent(eventId, refId, total, baseRate, start, end, tradeable),
-  //     ).not.be.reverted;
-  //     const eventDetails = await bukEventProtocolContract.getEventDetails(1);
-
-  //     const isTradeable = await bukEventProtocolContract.isBookingTradeable(
-  //       eventDetails[9],
-  //       1,
-  //     );
-  //     expect(isTradeable).to.equal(false);
-  //   });
-  //   it("should return true if booking is not crossed trade block time", async function () {
-  //     let eventId = 1;
-  //     let refId = [
-  //       "0x3633666663356135366139343361313561626261336134630000000000000000",
-  //     ];
-  //     let total = [100000000];
-  //     let baseRate = [80000000];
-
-  //     const now = Math.floor(Date.now() / 1000);
-  //     const fiveDays = 2 * 24 * 60 * 60;
-  //     const startFromNow = now + fiveDays;
-  //     const endFromNow = startFromNow + fiveDays;
-
-  //     let start = [startFromNow];
-  //     let end = [endFromNow];
-  //     let tradeable = [true];
-
-  //     expect(
-  //       await bukEventProtocolContract
-  //         .connect(owner)
-  //         .bookEvent(eventId, refId, total, baseRate, start, end, tradeable),
-  //     ).not.be.reverted;
-  //     const eventDetails = await bukEventProtocolContract.getEventDetails(1);
-
-  //     const isTradeable = await bukEventProtocolContract.isBookingTradeable(
-  //       eventDetails[9],
-  //       1,
-  //     );
-
-  //     expect(isTradeable).to.equal(true);
-  //   });
-
-  //   it("should return false, booking is not crossed trade block but tradeable is false", async function () {
-  //     let eventId = 1;
-  //     let refId = [
-  //       "0x3633666663356135366139343361313561626261336134630000000000000000",
-  //     ];
-  //     let total = [100000000];
-  //     let baseRate = [80000000];
-
-  //     const now = Math.floor(Date.now() / 1000);
-  //     const fiveDays = 2 * 24 * 60 * 60;
-  //     const startFromNow = now + fiveDays;
-  //     const endFromNow = startFromNow + fiveDays;
-
-  //     let start = [startFromNow];
-  //     let end = [endFromNow];
-  //     let tradeable = [false];
-
-  //     expect(
-  //       await bukEventProtocolContract
-  //         .connect(owner)
-  //         .bookEvent(eventId, refId, total, baseRate, start, end, tradeable),
-  //     ).not.be.reverted;
-  //     const eventDetails = await bukEventProtocolContract.getEventDetails(1);
-
-  //     const isTradeable = await bukEventProtocolContract.isBookingTradeable(
-  //       eventDetails[9],
-  //       1,
-  //     );
-  //     expect(isTradeable).to.equal(false);
-  //   });
-  // });
-
-  // Test cases for minting NFT
-  // describe("Booking and Mint", function () {
-  //   it("should book event and mint by admin success", async function () {
-  //     let eventId = 1;
-  //     let refId = [
-  //       "0x3633666663356135366139343361313561626261336134630000000000000000",
-  //     ];
-  //     let total = [100000000];
-  //     let baseRate = [80000000];
-  //     let start = [startFromNow];
-  //     let end = [endFromNow];
-  //     let tradeable = [true];
-  //     let users = [account1.address];
-  //     let nftIds = [1];
-  //     let urls = [
-  //       "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-  //     ];
-
-  //     expect(
-  //       await bukEventProtocolContract.bookEventOwner(
-  //         eventId,
-  //         refId,
-  //         total,
-  //         baseRate,
-  //         start,
-  //         end,
-  //         tradeable,
-  //         users,
-  //       ),
-  //     ).not.be.reverted;
-
-  //     expect(
-  //       await bukEventProtocolContract.mintBukNFTOwner(eventId, nftIds, urls),
-  //     ).not.be.reverted;
-  //   });
-  //   it("should mint event by admin and verify details", async function () {
-  //     let eventId = 1;
-  //     let refId = [
-  //       "0x3633666663356135366139343361313561626261336134630000000000000000",
-  //     ];
-  //     let total = [100000000];
-  //     let baseRate = [80000000];
-  //     let start = [startFromNow];
-  //     let end = [endFromNow];
-  //     let tradeable = [true];
-  //     let users = [account1.address];
-  //     let nftIds = [1];
-  //     let urls = [
-  //       "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-  //     ];
-
-  //     const eventDetails = await bukEventProtocolContract.getEventDetails(1);
-
-  //     expect(
-  //       await bukEventProtocolContract.bookEventOwner(
-  //         eventId,
-  //         refId,
-  //         total,
-  //         baseRate,
-  //         start,
-  //         end,
-  //         tradeable,
-  //         users,
-  //       ),
-  //     ).not.be.reverted;
-
-  //     expect(
-  //       await bukEventProtocolContract.mintBukNFTOwner(eventId, nftIds, urls),
-  //     ).not.be.reverted;
-
-  //     const bookingDetails =
-  //       await bukEventProtocolContract.getEventBookingDetails(
-  //         eventDetails[9],
-  //         1,
-  //       );
-
-  //     expect(bookingDetails[9]).to.equal(2); // 2 status confirmed
-  //   });
-
-  //   it("should fail, mint event only by admin", async function () {
-  //     let eventId = 1;
-  //     let refId = [
-  //       "0x3633666663356135366139343361313561626261336134630000000000000000",
-  //     ];
-  //     let total = [100000000];
-  //     let baseRate = [80000000];
-  //     let start = [startFromNow];
-  //     let end = [endFromNow];
-  //     let tradeable = [true];
-  //     let users = [account1.address];
-  //     let nftIds = [1];
-  //     let urls = [
-  //       "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-  //     ];
-
-  //     const eventDetails = await bukEventProtocolContract.getEventDetails(1);
-
-  //     expect(
-  //       await bukEventProtocolContract.bookEventOwner(
-  //         eventId,
-  //         refId,
-  //         total,
-  //         baseRate,
-  //         start,
-  //         end,
-  //         tradeable,
-  //         users,
-  //       ),
-  //     ).not.be.reverted;
-
-  //     await expect(
-  //       bukEventProtocolContract
-  //         .connect(account1)
-  //         .mintBukNFTOwner(eventId, nftIds, urls),
-  //     ).to.be.revertedWith("Only admin has access to this function");
-  //   });
-  //   it("should fail, mint event only booked", async function () {
-  //     let eventId = 1;
-  //     let refId = [
-  //       "0x3633666663356135366139343361313561626261336134630000000000000000",
-  //     ];
-  //     let total = [100000000];
-  //     let baseRate = [80000000];
-  //     let start = [startFromNow];
-  //     let end = [endFromNow];
-  //     let tradeable = [true];
-  //     let users = [account1.address];
-  //     let nftIds = [1];
-  //     let urls = [
-  //       "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-  //     ];
-
-  //     const eventDetails = await bukEventProtocolContract.getEventDetails(1);
-
-  //     await expect(
-  //       bukEventProtocolContract.mintBukNFTOwner(eventId, nftIds, urls),
-  //     ).to.be.revertedWith("Check the Booking status");
-  //   });
-  // });
+    //   //Mint
+    //   await expect(
+    //     bukProtocolContract.mintBukNFTOwner(
+    //       [tokenId],
+    //       [
+    //         "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+    //       ],
+    //       owner.address,
+    //     ),
+    //   ).not.be.reverted;
+    //   // Approve allowance
+    //   await nftContract.setApprovalForAll(
+    //     await marketplaceContract.getAddress(),
+    //     true,
+    //   );
+    //   await expect(marketplaceContract.createListing(tokenId, salePrice))
+    //     .to.emit(marketplaceContract, "ListingCreated")
+    //     .withArgs(owner.address, tokenId, salePrice);
+    // });
+  });
 });
