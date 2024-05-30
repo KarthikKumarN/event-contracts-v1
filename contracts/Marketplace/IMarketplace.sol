@@ -36,14 +36,12 @@ interface IMarketplace {
      * @dev Emitted when booking NFT bought
      * @param eventAddress Contract address of the Event/NFT.
      * @param tokenId, TokenId of the bought booking
-     * @param previousOwner, Address of the previous owner
      * @param newOwner, Address of the new owner
      * @param price, Price of the bought booking
      */
     event ListingBought(
         address eventAddress,
         uint256 indexed tokenId,
-        address previousOwner,
         address newOwner,
         uint256 price
     );

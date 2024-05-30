@@ -77,9 +77,6 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
             !isBookingListed(_eventAddress, _tokenId),
             "NFT already listed"
         );
-        IBukEventProtocol.Booking
-            memory bookingDetails = _bukEventProtocolContract
-                .getEventBookingDetails(_eventAddress, _tokenId);
         IBukNFTs nftContract = IBukNFTs(_eventAddress);
         require(
             nftContract.balanceOf(_msgSender(), _tokenId) == 1,
@@ -93,12 +90,12 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
             _eventAddress,
             _tokenId
         );
-        require(isTradeable, "Trade limit time crossed");
+        require(isTradeable, "Non tradeable NFT");
         _listedNFT[_eventAddress][_tokenId] = ListingDetails(
             _eventAddress,
             _price,
             _msgSender(),
-            _listedNFT[_tokenId].index + 1,
+            _listedNFT[_eventAddress][_tokenId].index + 1,
             ListingStatus.active
         );
 
@@ -110,18 +107,17 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
         address _eventAddress,
         uint256 _tokenId
     ) external whenNotPaused {
-        // FIXME - Update this later
         require(isBookingListed(_eventAddress, _tokenId), "NFT not listed");
 
-        // FIXME - Validate NFT owner or Buk protocol
+        IBukNFTs nftContract = IBukNFTs(_eventAddress);
         require(
-            _bukNFTContract.balanceOf(_msgSender(), _tokenId) == 1 ||
-                hasRole(BUK_EVENT_PROTOCOL_ROLE, _msgSender()),
-            "Owner or Buk protocol can delete"
+            nftContract.balanceOf(_msgSender(), _tokenId) == 1 ||
+                hasRole(ADMIN_ROLE, _msgSender()),
+            "Owner or Admin can delete"
         );
-        uint256 listingIndex = _listedNFT[_tokenId].index;
-        delete _listedNFT[_tokenId];
-        _listedNFT[_tokenId].index = listingIndex + 1;
+        uint256 listingIndex = _listedNFT[_eventAddress][_tokenId].index;
+        delete _listedNFT[_eventAddress][_tokenId];
+        _listedNFT[_eventAddress][_tokenId].index = listingIndex + 1;
         emit DeletedListing(_eventAddress, _tokenId);
     }
 
@@ -131,25 +127,23 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
         uint256 _tokenId,
         uint256 _newPrice
     ) external whenNotPaused {
-        // FIXME - Update this later
         require(isBookingListed(_eventAddress, _tokenId), "NFT not listed");
-        IBukEventProtocol.Booking
-            memory bookingDetails = _bukEventProtocolContract
-                .getEventBookingDetails(_eventAddress, _tokenId);
-        // FIXME - Validate NFT owner or Buk protocol
+        IBukNFTs nftContract = IBukNFTs(_eventAddress);
         require(
-            _bukNFTContract.balanceOf(_msgSender(), _tokenId) == 1,
+            nftContract.balanceOf(_msgSender(), _tokenId) == 1,
             "Only owner can relist"
         );
-        require(
-            bookingDetails.status == IBukEventProtocol.BookingStatus.confirmed,
-            "Tradeable if available"
+        bool isTradeable = _bukEventProtocolContract.isBookingTradeable(
+            _eventAddress,
+            _tokenId
         );
-        uint256 oldPrice = _listedNFT[_tokenId].price;
-        _listedNFT[_tokenId].status = ListingStatus.active;
-        _listedNFT[_tokenId].price = _newPrice;
-        _listedNFT[_tokenId].index = _listedNFT[_tokenId].index + 1;
-        emit Relisted(_eventAddress, _tokenId, oldPrice, _newPrice);
+        require(isTradeable, "Non tradeable NFT");
+        _listedNFT[_eventAddress][_tokenId].status = ListingStatus.active;
+        _listedNFT[_eventAddress][_tokenId].price = _newPrice;
+        _listedNFT[_eventAddress][_tokenId].index =
+            _listedNFT[_eventAddress][_tokenId].index +
+            1;
+        emit Relisted(_eventAddress, _tokenId, _newPrice);
     }
 
     /// @dev Refer {IMarketplace-buy}.
@@ -252,33 +246,28 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
      * @param _tokenId, NFT/Booking ID
      */
     function _buy(address _eventAddress, uint256 _tokenId) private {
-        // FIXME - Update this later
-        // IBukEventProtocol.Booking memory bookingDetails = _bukEventProtocolContract
-        //     .getEventBookingDetails(_tokenId);
-        // require(
-        //     bookingDetails.status ==
-        //         IBukEventProtocol.BookingStatus.confirmed &&
-        //         bookingDetails.tradeable,
-        //     "Tradeable if available"
-        // );
-        // require(
-        //     block.timestamp <
-        //         (bookingDetails.start - (bookingDetails.tradeTimeLimit * 3600)),
-        //     "Trade limit time crossed"
-        // );
+        IBukNFTs nftContract = IBukNFTs(_eventAddress);
+        bool isTradeable = _bukEventProtocolContract.isBookingTradeable(
+            _eventAddress,
+            _tokenId
+        );
+        require(isTradeable, "Non tradeable NFT");
+
         require(
             (_stableToken.allowance(_msgSender(), address(this)) >=
-                _listedNFT[_tokenId].price),
+                _listedNFT[_eventAddress][_tokenId].price),
             "Check the allowance"
         );
-        address nftOwner = _listedNFT[_tokenId].owner;
-        uint256 totalPrice = _listedNFT[_tokenId].price;
+
+        address nftOwner = _listedNFT[_eventAddress][_tokenId].owner;
+        uint256 totalPrice = _listedNFT[_eventAddress][_tokenId].price;
         require(
-            _bukNFTContract.balanceOf(nftOwner, _tokenId) == 1,
+            nftContract.balanceOf(nftOwner, _tokenId) == 1,
             "NFT owner mismatch"
         );
-        (address royaltyAddress, uint256 royaltyAmount) = _bukNFTContract
-            .royaltyInfo(_tokenId, _listedNFT[_tokenId].price);
+        // FIXME - Verify this details
+        (address royaltyAddress, uint256 royaltyAmount) = nftContract
+            .royaltyInfo(_tokenId, _listedNFT[_eventAddress][_tokenId].price);
 
         _stableToken.safeTransferFrom(
             _msgSender(),
@@ -288,24 +277,18 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
         _stableToken.safeTransferFrom(
             _msgSender(),
             nftOwner,
-            _listedNFT[_tokenId].price - royaltyAmount
+            _listedNFT[_eventAddress][_tokenId].price - royaltyAmount
         );
-        _bukNFTContract.safeTransferFrom(
+        nftContract.safeTransferFrom(
             address(nftOwner),
             _msgSender(),
             _tokenId,
             1,
             ""
         );
-        uint256 listingIndex = _listedNFT[_tokenId].index;
-        delete _listedNFT[_tokenId];
-        _listedNFT[_tokenId].index = listingIndex + 1;
-        emit ListingBought(
-            _eventAddress,
-            _tokenId,
-            nftOwner,
-            _msgSender(),
-            totalPrice
-        );
+        uint256 listingIndex = _listedNFT[_eventAddress][_tokenId].index;
+        delete _listedNFT[_eventAddress][_tokenId];
+        _listedNFT[_eventAddress][_tokenId].index = listingIndex + 1;
+        emit ListingBought(_eventAddress, _tokenId, _msgSender(), totalPrice);
     }
 }
