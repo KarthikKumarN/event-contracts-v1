@@ -24,16 +24,13 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
 
     /**
      * @dev Constant for the role of the Buk Protocol contract
-     * @notice its a hash of keccak256("BUK_PROTOCOL_ROLE")
+     * @notice its a hash of keccak256("BUK_EVENT_PROTOCOL_ROLE")
      */
-    bytes32 public constant BUK_PROTOCOL_ROLE =
-        0xc90056e279113999fe5438fedaf4c98ded59812067ad79dd0c968b1a84dc7c97;
+    bytes32 public constant BUK_EVENT_PROTOCOL_ROLE =
+        0xc90056e279113999fe5438fedaf4c98ded59812067ad79dd0c968b1a84dc7c97; // FIXME - Update this later
 
     /// @dev Constant address Buk Event Protocol contract
     IBukEventProtocol private _bukEventProtocolContract;
-
-    /// @dev Constant address Buk NFT contract
-    IBukNFTs private _bukNFTContract;
 
     /// @dev Currency used for transaction
     IERC20 private _stableToken;
@@ -46,18 +43,12 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
 
     /**
      * @dev Constructor to initialize the contract
-     * @param _bukProtocolAddress address of Buk protocol
-     * @param _bukNFTAddress address of Buk NFT
+     * @param _bukEventProtocolAddress address of Buk protocol
      * @param _tokenAddress address of the stable token
      */
-    constructor(
-        address _bukProtocolAddress,
-        address _bukNFTAddress,
-        address _tokenAddress
-    ) {
+    constructor(address _bukEventProtocolAddress, address _tokenAddress) {
         _setStableToken(_tokenAddress);
-        _setBukEventProtocol(_bukProtocolAddress);
-        _setBukNFT(_bukNFTAddress);
+        _setBukEventProtocol(_bukEventProtocolAddress);
 
         // Updating permission
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
@@ -132,7 +123,7 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
         // FIXME - Validate NFT owner or Buk protocol
         require(
             _bukNFTContract.balanceOf(_msgSender(), _tokenId) == 1 ||
-                hasRole(BUK_PROTOCOL_ROLE, _msgSender()),
+                hasRole(BUK_EVENT_PROTOCOL_ROLE, _msgSender()),
             "Owner or Buk protocol can delete"
         );
         uint256 listingIndex = _listedNFT[_tokenId].index;
@@ -205,11 +196,6 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
         _setBukEventProtocol(_bukProtocol);
     }
 
-    /// @dev Refer {IMarketplace-setBukNFT}.
-    function setBukNFT(address _bukNFT) external onlyRole(ADMIN_ROLE) {
-        _setBukNFT(_bukNFT);
-    }
-
     /// @dev Refer {IMarketplace-setStableToken}.
     function setStableToken(
         address _tokenAddress
@@ -225,11 +211,6 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
     /// @dev Refer {IMarketplace-getBukEventProtocol}.
     function getBukEventProtocol() external view returns (address) {
         return address(_bukEventProtocolContract);
-    }
-
-    /// @dev Refer {IMarketplace-getBukNFT}.
-    function getBukNFT() external view returns (address) {
-        return address(_bukNFTContract);
     }
 
     /// @dev Refer {IMarketplace-getListingDetails}.
@@ -248,14 +229,6 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
         return _listedNFT[_tokenId].price > 0 ? true : false;
     }
 
-    /// @dev Function sets new Buk NFT address
-    function _setBukNFT(address _bukNFT) private {
-        require(_bukNFT != address(0), "Invalid address");
-        _bukNFTContract = IBukNFTs(_bukNFT);
-
-        emit BukNFTSet(_bukNFT);
-    }
-
     /**
      * @dev Function sets new Buk protocol address
      * @param _bukProtocol New Buk protocol address
@@ -265,8 +238,8 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
         address oldAddress = address(_bukEventProtocolContract);
         _bukEventProtocolContract = IBukEventProtocol(_bukProtocol);
 
-        _grantRole(BUK_PROTOCOL_ROLE, address(_bukProtocol));
-        _revokeRole(BUK_PROTOCOL_ROLE, address(oldAddress));
+        _grantRole(BUK_EVENT_PROTOCOL_ROLE, address(_bukProtocol));
+        _revokeRole(BUK_EVENT_PROTOCOL_ROLE, address(oldAddress));
 
         emit BukEventProtocolSet(_bukProtocol);
     }
