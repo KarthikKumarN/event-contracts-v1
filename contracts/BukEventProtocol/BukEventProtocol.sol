@@ -192,7 +192,7 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
             (_start > block.timestamp && _end > block.timestamp),
             "Dates, Must be in the future"
         );
-        require((_end > _start), "End date must be after start date");
+        require((_end >= _start), "End date must be after start date");
         require((_noOfTickets > 0), "Number of tickets must be greater than 0");
 
         ++_eventIds;
@@ -482,13 +482,11 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
         uint256 _tokenId
     ) external view returns (bool) {
         Booking memory booking = _eventBookings[_eventAddress][_tokenId];
-        // console.log(booking[1]);
         Event memory eventDetails = _eventDetails[booking.eventId];
-        // console.log(eventDetails[2]);
         return
-            block.timestamp <
-            (booking.start - (eventDetails.tradeTimeLimit * 3600)) &&
-            booking.tradeable;
+            (block.timestamp <
+                (booking.start - (eventDetails.tradeTimeLimit * 3600))) &&
+            (booking.status == BookingStatus.confirmed && booking.tradeable);
     }
 
     /// @dev See {IBukEventProtocol-getRoyaltyInfo}.
