@@ -370,5 +370,69 @@ describe("EventProtocol Bookings", function () {
         .to.emit(marketplaceContract, "ListingCreated")
         .withArgs(eventAddress, 1, owner.address, 100000000);
     });
+
+    it("Tradable time limit check", async function () {
+      const eventName = "Web3 Carnival 1";
+      const refId =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
+      const _eventType = 1;
+      let date = new Date();
+      const _start = Math.floor(date.setDate(date.getDate() + 1) / 1000);
+      const _end = Math.floor(date.setDate(date.getDate() + 1) / 1000);
+      const _noOfTickets = 10000;
+      const _tradeTimeLimit = 40;
+
+      await bukEventProtocolContract.createEvent(
+        eventName,
+        refId,
+        _eventType,
+        _start,
+        _end,
+        _noOfTickets,
+        _tradeTimeLimit,
+        account1.address,
+      );
+      let eventDetails1 = await bukEventProtocolContract.getEventDetails(2);
+      let eventAddress1 = eventDetails1[9];
+
+      await stableTokenContract
+        .connect(owner)
+        .approve(await bukEventProtocolContract.getAddress(), 200000000000);
+
+      let bookingRefId = [
+        "0x3633666663356135366139343361313561626261336134630000000000000000",
+      ];
+      let total = [200000000];
+      let baseRate = [80000000];
+      let start = [_start];
+      let end = [_end];
+      let tradeable = [true];
+      let nftIds = [1];
+      let urls = [
+        "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+      ];
+
+      await bukEventProtocolContract
+        .connect(owner)
+        .bookEvent(2, bookingRefId, total, baseRate, start, end, tradeable);
+
+      await bukEventProtocolContract.mintBukNFTOwner(2, nftIds, urls);
+
+      let eventNFTContract1 = await ethers.getContractAt(
+        "BukNFTs",
+        eventAddress1,
+      );
+
+      // Approve allowance
+      await eventNFTContract1
+        .connect(owner)
+        .setApprovalForAll(await marketplaceContract.getAddress(), true);
+
+      await expect(
+        marketplaceContract
+          .connect(owner)
+          .createListing(eventAddress1, 1, 100000000),
+      ).to.be.revertedWith("Non tradeable NFT");
+    });
   });
 });
