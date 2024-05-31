@@ -148,10 +148,16 @@ describe("EventProtocol Bookings", function () {
     let start = [startFromNow];
     let end = [endFromNow];
     let tradeable = [true];
+    let nftIds = [1];
+    let urls = [
+      "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+    ];
 
     await bukEventProtocolContract
       .connect(owner)
       .bookEvent(eventId, bookingRefId, total, baseRate, start, end, tradeable);
+
+    await bukEventProtocolContract.mintBukNFTOwner(eventId, nftIds, urls);
   });
 
   describe("Deployment marketplace", function () {
@@ -261,23 +267,26 @@ describe("EventProtocol Bookings", function () {
   // Test cases for getting listed status
   describe("Listed status marketplace", function () {
     it("Should get listed status for not listed tokeId", async function () {
-      await expect(await marketplaceContract.isBookingListed(0)).to.equal(
-        false,
-      );
+      await expect(
+        await marketplaceContract.isBookingListed(eventDetails[9], 0),
+      ).to.equal(false);
     });
 
     it("Should book list for sale", async function () {
       let eventAddress = eventDetails[9];
       const eventNFT = await ethers.getContractAt("BukNFTs", eventAddress);
       // Approve allowance
-      await eventNFT.setApprovalForAll(
-        await marketplaceContract.getAddress(),
-        true,
-      );
+      await eventNFT
+        .connect(owner)
+        .setApprovalForAll(await marketplaceContract.getAddress(), true);
       await expect(
-        marketplaceContract.createListing(eventAddress, 1, 100000000),
+        marketplaceContract
+          .connect(owner)
+          .createListing(eventAddress, 1, 100000000),
       ).not.be.reverted;
-      await expect(await marketplaceContract.isBookingListed(1)).to.equal(true);
+      await expect(
+        await marketplaceContract.isBookingListed(eventAddress, 1),
+      ).to.equal(true);
     });
     // it("Should create list allowance check", async function () {
     //   let tokenId = 1;
