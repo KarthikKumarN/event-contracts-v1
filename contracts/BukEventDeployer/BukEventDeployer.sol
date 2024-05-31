@@ -13,6 +13,9 @@ contract BukEventDeployer is IBukEventDeployer, AccessControl {
     /// @dev Constant address Buk Protocol contract
     address private _bukEventProtocolContract;
 
+    /// @dev Constant address Buk Marketplace contract
+    address private _bukMarketplaceContract;
+
     /**
      * @dev Constructor to initialize the contract
      * @param _bukEventProtocolAddress address of Buk protocol
@@ -40,6 +43,16 @@ contract BukEventDeployer is IBukEventDeployer, AccessControl {
         address _bukEventProtocol
     ) external onlyRole(ADMIN_ROLE) {
         _setBukEventProtocol(_bukEventProtocol);
+    }
+
+    /// @dev Refer {IBukEventDeployer-setBukMarketplace}.
+    function setBukMarketplace(
+        address _bukMarketplace
+    ) external onlyRole(ADMIN_ROLE) {
+        require(_bukMarketplace != address(0), "Invalid address");
+        _bukMarketplaceContract = address(_bukMarketplace);
+
+        emit SetBukMarketplace(address(_bukMarketplace));
     }
 
     /**

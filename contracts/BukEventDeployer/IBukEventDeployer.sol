@@ -8,12 +8,22 @@ interface IBukEventDeployer {
     /// @dev Emitted when new BukEventProtocol address has been updated
     event SetBukEventProtocol(address newAddress);
 
+    /// @dev Emitted when new BukMarketplace address has been updated
+    event SetBukMarketplace(address newAddress);
+
     /**
      * @dev Function will set new BUK protocol address
      * @param _bukProtocol address of new BUK protocol
      * @notice Only admin can set new BUK protocol address
      */
     function setBukEventProtocol(address _bukProtocol) external;
+
+    /**
+     * @dev Function will set new BUK Marketplace address
+     * @param _bukMarketplace address of new BUK marketplace
+     * @notice Only admin can set new BUK marketplace address
+     */
+    function setBukMarketplace(address _bukMarketplace) external;
 
     /**
      * @dev Function will deploy new event NFT
