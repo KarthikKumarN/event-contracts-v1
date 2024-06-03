@@ -91,6 +91,7 @@ describe("EventProtocol Bookings", function () {
       await ethers.getContractFactory("BukEventDeployer");
     deployerContract = await BukEventDeployerFactory.deploy(
       await bukEventProtocolContract.getAddress(),
+      await account1.address,
     );
 
     //Set Buk Royalty Info in BukRoyalties
@@ -173,8 +174,6 @@ describe("EventProtocol Bookings", function () {
       );
 
       const eventDetails = await bukEventProtocolContract.getEventDetails(1);
-
-      console.debug("🚀 ~ file: Event.ts:181 ~ eventDetails:", eventDetails);
 
       const eventNFTContract = await ethers.getContractAt(
         "BukNFTs",

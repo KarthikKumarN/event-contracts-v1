@@ -90,6 +90,7 @@ describe("EventProtocol Bookings", function () {
       await ethers.getContractFactory("BukEventDeployer");
     deployerContract = await BukEventDeployerFactory.deploy(
       await bukEventProtocolContract.getAddress(),
+      account1.address,
     );
 
     //Set Buk Royalty Info in BukRoyalties
@@ -355,10 +356,25 @@ describe("EventProtocol Bookings", function () {
       ).not.be.reverted;
       const eventDetails = await bukEventProtocolContract.getEventDetails(1);
 
+      expect(
+        await bukEventProtocolContract.mintBukNFTOwner(
+          eventId,
+          [1],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
+      ).not.be.reverted;
       const isTradeable = await bukEventProtocolContract.isBookingTradeable(
         eventDetails[9],
         1,
       );
+      const bookingDetails =
+        await bukEventProtocolContract.getEventBookingDetails(
+          eventDetails[9],
+          1,
+        );
+
       expect(isTradeable).to.equal(true);
     });
 
@@ -409,6 +425,16 @@ describe("EventProtocol Bookings", function () {
           .connect(owner)
           .bookEvent(eventId, refId, total, baseRate, start, end, tradeable),
       ).not.be.reverted;
+
+      expect(
+        await bukEventProtocolContract.mintBukNFTOwner(
+          eventId,
+          [1],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
+      ).not.be.reverted;
       const eventDetails = await bukEventProtocolContract.getEventDetails(1);
 
       const isTradeable = await bukEventProtocolContract.isBookingTradeable(
@@ -438,6 +464,15 @@ describe("EventProtocol Bookings", function () {
         await bukEventProtocolContract
           .connect(owner)
           .bookEvent(eventId, refId, total, baseRate, start, end, tradeable),
+      ).not.be.reverted;
+      expect(
+        await bukEventProtocolContract.mintBukNFTOwner(
+          eventId,
+          [1],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
       ).not.be.reverted;
       const eventDetails = await bukEventProtocolContract.getEventDetails(1);
 
