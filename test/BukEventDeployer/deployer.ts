@@ -24,7 +24,7 @@ describe("BukEventProtocol Bookings", function () {
   let bukTreasuryContract;
 
   beforeEach("Deploy the contract instance first", async function () {
-    [owner, bukProtocolContract1, account2, adminWallet, bukWallet] =
+    [owner, bukProtocolContract1, account1, account2, adminWallet, bukWallet] =
       await ethers.getSigners();
     // Token
     const Token = await ethers.getContractFactory("Token");
@@ -66,6 +66,7 @@ describe("BukEventProtocol Bookings", function () {
       await ethers.getContractFactory("BukEventDeployer");
     deployerContract = await BukEventDeployerFactory.deploy(
       await bukProtocolContract.getAddress(),
+      await account1.address,
     );
     // Grant the BUK_EVENT_PROTOCOL_ROLE to the deployerContract contract
     await deployerContract.grantRole(
