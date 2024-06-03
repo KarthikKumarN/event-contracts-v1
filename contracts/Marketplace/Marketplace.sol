@@ -22,13 +22,6 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
     bytes32 public constant ADMIN_ROLE =
         0xa49807205ce4d355092ef5a8a18f56e8913cf4a201fbe287825b095693c21775;
 
-    /**
-     * @dev Constant for the role of the Buk Protocol contract
-     * @notice its a hash of keccak256("BUK_EVENT_PROTOCOL_ROLE")
-     */
-    bytes32 public constant BUK_EVENT_PROTOCOL_ROLE =
-        0xc90056e279113999fe5438fedaf4c98ded59812067ad79dd0c968b1a84dc7c97; // FIXME - Update this later
-
     /// @dev Constant address Buk Event Protocol contract
     IBukEventProtocol private _bukEventProtocolContract;
 
@@ -225,9 +218,6 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
         require(_bukProtocol != address(0), "Invalid address");
         address oldAddress = address(_bukEventProtocolContract);
         _bukEventProtocolContract = IBukEventProtocol(_bukProtocol);
-
-        _grantRole(BUK_EVENT_PROTOCOL_ROLE, address(_bukProtocol));
-        _revokeRole(BUK_EVENT_PROTOCOL_ROLE, address(oldAddress));
 
         emit BukEventProtocolSet(_bukProtocol);
     }

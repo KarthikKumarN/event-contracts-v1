@@ -30,10 +30,10 @@ contract BukTreasury is AccessControl, IBukTreasury, Pausable {
 
     /**
      * @dev Constant for the role of the Buk Protocol contract
-     * @notice its a hash of keccak256("BUK_PROTOCOL_ROLE")
+     * @notice its a hash of keccak256("BUK_EVENT_PROTOCOL_ROLE")
      */
-    bytes32 public constant BUK_PROTOCOL_ROLE =
-        0xc90056e279113999fe5438fedaf4c98ded59812067ad79dd0c968b1a84dc7c97;
+    bytes32 public constant BUK_EVENT_PROTOCOL_ROLE =
+        0xa2aa529b1ac745f732589985ad0e0a21e77f45806945225b02a7ecc719ad2cab;
 
     /**
      * @dev Constructor to initialize the contract
@@ -89,8 +89,8 @@ contract BukTreasury is AccessControl, IBukTreasury, Pausable {
         address oldAddress = address(bukProtocolContract);
         bukProtocolContract = _bukProtocol;
 
-        _grantRole(BUK_PROTOCOL_ROLE, address(_bukProtocol));
-        _revokeRole(BUK_PROTOCOL_ROLE, address(oldAddress));
+        _grantRole(BUK_EVENT_PROTOCOL_ROLE, address(_bukProtocol));
+        _revokeRole(BUK_EVENT_PROTOCOL_ROLE, address(oldAddress));
 
         emit BukEventProtocolSet(oldAddress, _bukProtocol);
     }
@@ -136,7 +136,7 @@ contract BukTreasury is AccessControl, IBukTreasury, Pausable {
     function stableRefund(
         uint256 _amount,
         address _account
-    ) external onlyRole(BUK_PROTOCOL_ROLE) whenNotPaused {
+    ) external onlyRole(BUK_EVENT_PROTOCOL_ROLE) whenNotPaused {
         require(_account != address(0), "Invalid address");
 
         _stableToken.safeTransfer(_account, _amount);
@@ -148,7 +148,7 @@ contract BukTreasury is AccessControl, IBukTreasury, Pausable {
         uint256 _amount,
         address _account,
         address _token
-    ) external onlyRole(BUK_PROTOCOL_ROLE) whenNotPaused {
+    ) external onlyRole(BUK_EVENT_PROTOCOL_ROLE) whenNotPaused {
         require(_token != address(0), "Invalid token address");
         require(_account != address(0), "Invalid address");
 
