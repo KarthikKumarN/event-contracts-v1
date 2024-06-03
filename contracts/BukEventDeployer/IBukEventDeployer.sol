@@ -6,10 +6,10 @@ interface IBukEventDeployer {
     event DeployedEventNFT(string name);
 
     /// @dev Emitted when new BukEventProtocol address has been updated
-    event SetBukEventProtocol(address newAddress);
+    event SetBukEventProtocol(address oldAddress, address newAddress);
 
     /// @dev Emitted when new BukMarketplace address has been updated
-    event SetBukMarketplace(address newAddress);
+    event SetBukMarketplace(address oldAddress, address newAddress);
 
     /**
      * @dev Function will set new BUK protocol address

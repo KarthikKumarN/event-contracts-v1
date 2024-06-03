@@ -7,21 +7,28 @@ import { IBukEventDeployer } from "../BukEventDeployer/IBukEventDeployer.sol";
 
 contract BukEventDeployer is IBukEventDeployer, AccessControl {
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+
     bytes32 public constant BUK_EVENT_PROTOCOL_ROLE =
-        keccak256("BUK_EVENT_PROTOCOL_ROLE");
+        0xa2aa529b1ac745f732589985ad0e0a21e77f45806945225b02a7ecc719ad2cab;
 
     /// @dev Constant address Buk Protocol contract
     address private _bukEventProtocolContract;
 
     /// @dev Constant address Buk Marketplace contract
+    /// @dev Default buk aggregated marketplace contract
     address private _bukMarketplaceContract;
 
     /**
      * @dev Constructor to initialize the contract
      * @param _bukEventProtocolAddress address of Buk protocol
+     * @param _bukMarketplaceAddress address of Buk Marketplace
      */
-    constructor(address _bukEventProtocolAddress) {
+    constructor(
+        address _bukEventProtocolAddress,
+        address _bukMarketplaceAddress
+    ) {
         _setBukEventProtocol(_bukEventProtocolAddress);
+        _setBukMarketplace(_bukMarketplaceAddress);
         // Updating permission
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(ADMIN_ROLE, _msgSender());
@@ -34,6 +41,7 @@ contract BukEventDeployer is IBukEventDeployer, AccessControl {
         address _bukTreasury
     ) external onlyRole(BUK_EVENT_PROTOCOL_ROLE) returns (address) {
         BukNFTs eventNFT = new BukNFTs(_name, _bukEventProtocol, _bukTreasury);
+        //TODO Update Marketplace contract
         emit DeployedEventNFT(_name);
         return address(eventNFT);
     }
@@ -49,10 +57,7 @@ contract BukEventDeployer is IBukEventDeployer, AccessControl {
     function setBukMarketplace(
         address _bukMarketplace
     ) external onlyRole(ADMIN_ROLE) {
-        require(_bukMarketplace != address(0), "Invalid address");
-        _bukMarketplaceContract = address(_bukMarketplace);
-
-        emit SetBukMarketplace(address(_bukMarketplace));
+        _setBukMarketplace(_bukMarketplace);
     }
 
     /**
@@ -67,6 +72,18 @@ contract BukEventDeployer is IBukEventDeployer, AccessControl {
         _grantRole(BUK_EVENT_PROTOCOL_ROLE, address(_bukEventProtocol));
         _revokeRole(BUK_EVENT_PROTOCOL_ROLE, address(oldAddress));
 
-        emit SetBukEventProtocol(address(_bukEventProtocol));
+        emit SetBukEventProtocol(oldAddress, _bukEventProtocol);
+    }
+
+    /**
+     * @dev Function sets new Buk marketplace address
+     * @param _bukMarketplace New Buk marketplace address
+     */
+    function _setBukMarketplace(address _bukMarketplace) private {
+        require(_bukMarketplace != address(0), "Invalid address");
+        address oldAddress = address(_bukMarketplaceContract);
+        _bukMarketplaceContract = address(_bukMarketplace);
+
+        emit SetBukMarketplace(oldAddress, _bukEventProtocol);
     }
 }
