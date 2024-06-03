@@ -84,6 +84,6 @@ contract BukEventDeployer is IBukEventDeployer, AccessControl {
         address oldAddress = address(_bukMarketplaceContract);
         _bukMarketplaceContract = address(_bukMarketplace);
 
-        emit SetBukMarketplace(oldAddress, _bukEventProtocol);
+        emit SetBukMarketplace(oldAddress, _bukMarketplace);
     }
 }
