@@ -6,12 +6,12 @@ import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol"
 import "@openzeppelin/contracts/security/Pausable.sol";
 import { IBukNFTs } from "../BukNFTs/IBukNFTs.sol";
 import { IBukEventProtocol, IBukRoyalties } from "../BukEventProtocol/IBukEventProtocol.sol";
-import { IBukTreasury } from "../BukTreasury/IBukTreasury.sol";
+import "hardhat/console.sol";
 
 /**
- * @title BUK Protocol NFT Contract
+ * @title BUK Event NFT Contract
  * @author BUK Technology Inc
- * @dev Contract for managing hotel room-night inventory and ERC1155 token management for room-night NFTs
+ * @dev Contract for managing event inventory and ERC1155 token management for event NFTs
  */
 contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
     /// @dev Name of the Buk Event NFT collection contract
@@ -27,19 +27,25 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
     /// @dev Address of the Buk Protocol contract
     IBukEventProtocol public bukEventProtocolContract;
 
-    // FIXME - Not required
     /// @dev Address of the Buk treasury contract.
-    IBukTreasury private _bukTreasury;
+    address private _bukTreasury;
 
     /// @dev Mapping for token URI's for booked tickets
     mapping(uint256 => string) public uriByTokenId; //tokenId -> uri
 
     /**
      * @dev Constant for the role of the Buk Protocol contract
-     * @notice its a hash of keccak256("BUK_PROTOCOL_ROLE")
+     * @notice its a hash of keccak256("BUK_EVENT_PROTOCOL_ROLE")
      */
-    bytes32 public constant BUK_PROTOCOL_ROLE =
-        0xc90056e279113999fe5438fedaf4c98ded59812067ad79dd0c968b1a84dc7c97;
+    bytes32 public constant BUK_EVENT_PROTOCOL_ROLE =
+        0xa2aa529b1ac745f732589985ad0e0a21e77f45806945225b02a7ecc719ad2cab;
+
+    /**
+     * @dev Constant for the role of the Buk Deployer contract
+     * @notice its a hash of keccak256("BUK_EVENT_DEPLOYER_ROLE")
+     */
+    bytes32 public constant BUK_EVENT_DEPLOYER_ROLE =
+        0x14018ec94094217d7e7664b03584fe0a4e841f8babbefc3508788ffb5fe4eb0d;
 
     /**
      * @dev Constant for the role of the marketplace contract
@@ -60,18 +66,24 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
      * @param _contractName NFT contract name
      * @param _bukEventProtocolContract Address of the buk protocol contract
      * @param _bukTreasuryContract Address of the Buk treasury contract.
+     * @param _bukMarketplaceContract Address of the Buk Marketplace contract.
      */
     constructor(
         string memory _contractName,
         address _bukEventProtocolContract,
-        address _bukTreasuryContract
+        address _bukTreasuryContract,
+        address _bukMarketplaceContract
     ) ERC1155("") {
         name = _contractName;
         _setBukTreasury(_bukTreasuryContract);
         _setBukEventProtocol(_bukEventProtocolContract);
+        _setMarketplace(_bukMarketplaceContract);
+
+        // Since Event deployer is deploying NFT becomes Admin
+        _grantRole(BUK_EVENT_DEPLOYER_ROLE, _msgSender());
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(ADMIN_ROLE, _msgSender());
-        _grantRole(BUK_PROTOCOL_ROLE, _bukEventProtocolContract);
+        _grantRole(BUK_EVENT_PROTOCOL_ROLE, _bukEventProtocolContract);
     }
 
     /**
@@ -107,9 +119,16 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
     /// @dev See {IBukNFTs-setMarketplaceRole}.
     function setMarketplaceRole(
         address _marketplaceContract
-    ) external onlyRole(ADMIN_ROLE) {
-        _grantRole(MARKETPLACE_CONTRACT_ROLE, _marketplaceContract);
-        emit SetMarketplace(_marketplaceContract);
+    ) external onlyRole(BUK_EVENT_DEPLOYER_ROLE) {
+        _setMarketplace(_marketplaceContract);
+    }
+
+    /// @dev See {IBukNFTs-revokeMarketplaceRole}.
+    function revokeMarketplaceRole(
+        address _marketplaceContract
+    ) external onlyRole(BUK_EVENT_DEPLOYER_ROLE) {
+        _revokeRole(MARKETPLACE_CONTRACT_ROLE, _marketplaceContract);
+        emit RevokeMarketplace(_marketplaceContract);
     }
 
     /// @dev See {IBukNFTs-setURI}.
@@ -131,7 +150,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
         uint256 _amount,
         bytes calldata _data,
         string calldata _uri
-    ) external onlyRole(BUK_PROTOCOL_ROLE) returns (uint256) {
+    ) external onlyRole(BUK_EVENT_PROTOCOL_ROLE) returns (uint256) {
         _mint(_account, _id, _amount, _data);
         _setURI(_id, _uri);
         return (_id);
@@ -142,7 +161,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
         address _account,
         uint256 _id,
         uint256 _amount
-    ) external onlyRole(BUK_PROTOCOL_ROLE) {
+    ) external onlyRole(BUK_EVENT_PROTOCOL_ROLE) {
         delete uriByTokenId[_id];
 
         _burn(_account, _id, _amount);
@@ -241,8 +260,8 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
             bukEventProtocolContract
         );
         bukEventProtocolContract = IBukEventProtocol(_bukEventProtocolContract);
-        _grantRole(BUK_PROTOCOL_ROLE, _bukEventProtocolContract);
-        _revokeRole(BUK_PROTOCOL_ROLE, oldBukEventProtocolContract_);
+        _grantRole(BUK_EVENT_PROTOCOL_ROLE, _bukEventProtocolContract);
+        _revokeRole(BUK_EVENT_PROTOCOL_ROLE, oldBukEventProtocolContract_);
         emit SetBukEventProtocol(
             oldBukEventProtocolContract_,
             _bukEventProtocolContract
@@ -255,8 +274,17 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
      */
     function _setBukTreasury(address _bukTreasuryContract) private {
         address oldBukTreasuryContract_ = address(_bukTreasury);
-        _bukTreasury = IBukTreasury(_bukTreasuryContract);
+        _bukTreasury = address(_bukTreasuryContract);
         emit SetBukTreasury(oldBukTreasuryContract_, _bukTreasuryContract);
+    }
+
+    /**
+     * Private function to set the marketplace Contract address.
+     * @param _marketplaceContract The address of the to whitelist marketplace
+     */
+    function _setMarketplace(address _marketplaceContract) private {
+        _grantRole(MARKETPLACE_CONTRACT_ROLE, _marketplaceContract);
+        emit SetMarketplace(_marketplaceContract);
     }
 
     /**

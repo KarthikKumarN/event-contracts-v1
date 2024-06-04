@@ -24,6 +24,9 @@ interface IBukNFTs is IERC1155 {
     /// @dev Emitted when marketplace role is granted.
     event SetMarketplace(address marketplaceContract);
 
+    /// @dev Emitted when marketplace role is revoked.
+    event RevokeMarketplace(address marketplaceContract);
+
     /// @dev Event to set token URI
     event SetURI(uint256 id, string oldUri, string newUri);
 
@@ -44,9 +47,16 @@ interface IBukNFTs is IERC1155 {
     /**
      * @dev Function to set the marketplace address.
      * @param _marketplaceContract Address of the marketplace.
-     * @notice This function can only be called by addresses with `ADMIN_ROLE`
+     * @notice This function can only be called by addresses with `BUK_EVENT_DEPLOYER_ROLE`
      */
     function setMarketplaceRole(address _marketplaceContract) external;
+
+    /**
+     * @dev Function to revoke the marketplace address.
+     * @param _marketplaceContract Address of the marketplace.
+     * @notice This function can only be called by addresses with `BUK_EVENT_DEPLOYER_ROLE`
+     */
+    function revokeMarketplaceRole(address _marketplaceContract) external;
 
     /**
      * @dev Sets the URI for a specific token ID.
