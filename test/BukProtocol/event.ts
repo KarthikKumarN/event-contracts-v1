@@ -70,14 +70,6 @@ describe("EventProtocol Bookings", function () {
       royaltiesContract.getAddress(),
     );
 
-    // BukNFT
-    // const BukNFT = await ethers.getContractFactory("BukNFTs");
-    // nftContract = await BukNFT.deploy(
-    //   "BUK_NFT",
-    //   bukEventProtocolContract.getAddress(),
-    //   bukTreasuryContract.getAddress(),
-    // );
-
     //Marketplace
     const Marketplace = await ethers.getContractFactory("Marketplace");
     marketplaceContract = await Marketplace.deploy(
@@ -119,13 +111,7 @@ describe("EventProtocol Bookings", function () {
       "0x3633666663356135366139343361313561626261336134630000000000000000";
     const _eventType = 1;
     const _start = startFromNow;
-
-    console.debug("🚀 ~ file: Event.ts:121 ~ _start:", _start);
-
     const _end = endFromNow;
-
-    console.debug("🚀 ~ file: Event.ts:125 ~ _end:", _end);
-
     const _noOfTickets = 10000;
     const _tradeTimeLimit = 12;
     const _tradeable = true;
@@ -181,6 +167,23 @@ describe("EventProtocol Bookings", function () {
       );
       const contractName = await eventNFTContract.name();
       expect(contractName).to.equal(eventName);
+    });
+
+    it("Should fail create a new event, Only admin", async function () {
+      await expect(
+        bukEventProtocolContract
+          .connect(account1)
+          .createEvent(
+            eventName,
+            refId,
+            _eventType,
+            _start,
+            _end,
+            _noOfTickets,
+            _tradeTimeLimit,
+            account1.address,
+          ),
+      ).to.be.revertedWith("Only admin has access to this function");
     });
   });
 });
