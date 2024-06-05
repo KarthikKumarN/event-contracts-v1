@@ -71,18 +71,18 @@ describe("EventProtocol Bookings", function () {
     );
 
     // BukNFT
-    const BukNFT = await ethers.getContractFactory("BukNFTs");
-    nftContract = await BukNFT.deploy(
-      "BUK_NFT",
-      bukEventProtocolContract.getAddress(),
-      bukTreasuryContract.getAddress(),
-    );
+    // const BukNFT = await ethers.getContractFactory("BukNFTs");
+    // nftContract = await BukNFT.deploy(
+    //   "BUK_NFT",
+    //   bukEventProtocolContract.getAddress(),
+    //   bukTreasuryContract.getAddress(),
+    // );
 
     //Marketplace
     const Marketplace = await ethers.getContractFactory("Marketplace");
     marketplaceContract = await Marketplace.deploy(
       bukEventProtocolContract.getAddress(),
-      nftContract.getAddress(),
+      // nftContract.getAddress(),
       stableTokenContract.getAddress(),
     );
 
@@ -101,7 +101,7 @@ describe("EventProtocol Bookings", function () {
     //Set First Owner Royalty Info in BukRoyalties
     await royaltiesContract.setFirstOwnerRoyaltyInfo(200);
     //Set Buk Treasury in BukNFTs
-    await nftContract.setBukTreasury(await bukTreasuryContract.getAddress());
+    // await nftContract.setBukTreasury(await bukTreasuryContract.getAddress());
 
     // Set deployer contract
     await bukEventProtocolContract.setEventDeployerContract(

@@ -216,7 +216,6 @@ contract Marketplace is Context, IMarketplace, AccessControl, Pausable {
      */
     function _setBukEventProtocol(address _bukProtocol) private {
         require(_bukProtocol != address(0), "Invalid address");
-        address oldAddress = address(_bukEventProtocolContract);
         _bukEventProtocolContract = IBukEventProtocol(_bukProtocol);
 
         emit BukEventProtocolSet(_bukProtocol);
