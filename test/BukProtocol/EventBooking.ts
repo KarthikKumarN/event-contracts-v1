@@ -69,19 +69,10 @@ describe("EventProtocol Bookings", function () {
       royaltiesContract.getAddress(),
     );
 
-    // BukNFT
-    // const BukNFT = await ethers.getContractFactory("BukNFTs");
-    // nftContract = await BukNFT.deploy(
-    //   "BUK_NFT",
-    //   bukEventProtocolContract.getAddress(),
-    //   bukTreasuryContract.getAddress(),
-    // );
-
     //Marketplace
     const Marketplace = await ethers.getContractFactory("Marketplace");
     marketplaceContract = await Marketplace.deploy(
       bukEventProtocolContract.getAddress(),
-      // nftContract.getAddress(),
       stableTokenContract.getAddress(),
     );
 
