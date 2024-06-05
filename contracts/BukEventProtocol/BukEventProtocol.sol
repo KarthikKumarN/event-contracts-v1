@@ -33,7 +33,6 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
     IBukTreasury private _bukTreasury;
     IBukEventDeployer private _bukEventDeployer;
     ISignatureVerifier private _signatureVerifier;
-    IBukNFTs private _nftContract; // FIXME : We might not need this
     IBukRoyalties private _royaltiesContract;
 
     /// @dev Commission charged on bookings.
