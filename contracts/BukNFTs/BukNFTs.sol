@@ -127,6 +127,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
     function revokeMarketplaceRole(
         address _marketplaceContract
     ) external onlyRole(BUK_EVENT_DEPLOYER_ROLE) {
+        require(_marketplaceContract != address(0), "Invalid address");
         _revokeRole(MARKETPLACE_CONTRACT_ROLE, _marketplaceContract);
         emit RevokeMarketplace(_marketplaceContract);
     }
@@ -283,6 +284,7 @@ contract BukNFTs is AccessControl, ERC1155, IBukNFTs, Pausable {
      * @param _marketplaceContract The address of the to whitelist marketplace
      */
     function _setMarketplace(address _marketplaceContract) private {
+        require(_marketplaceContract != address(0), "Invalid address");
         _grantRole(MARKETPLACE_CONTRACT_ROLE, _marketplaceContract);
         emit SetMarketplace(_marketplaceContract);
     }
