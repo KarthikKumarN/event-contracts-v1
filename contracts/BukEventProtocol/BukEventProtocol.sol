@@ -426,8 +426,6 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
     function _booking(
         BookingList memory _bookingData
     ) private returns (uint, uint256) {
-        // FIXME start and end with in event dates
-        // add validation to check event exists
         uint256 eventId = _bookingData.eventId;
         require(
             _eventDetails[eventId].eventId == eventId,
@@ -448,6 +446,13 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
             "Exceeded max ticket per booking"
         );
 
+        address eventAddr = _eventDetails[_bookingData.eventId].eventAddress;
+        require(
+            _eventbookingIds[eventId] + totalLen <=
+                _eventDetails[eventId].noOfTickets,
+            "Reached max tickets"
+        );
+
         uint256 totalAmount;
         uint commissionTotal;
         for (uint256 i = 0; i < _bookingData.total.length; ++i) {
@@ -456,7 +461,7 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
                 "Start date must be in the future"
             );
             require(
-                (_bookingData.end[i] > _bookingData.start[i]),
+                (_bookingData.end[i] >= _bookingData.start[i]),
                 "End date must be after start"
             );
 
@@ -464,8 +469,6 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
             uint256 bukCommission = (_bookingData.baseRate[i] * commission) /
                 100;
 
-            address eventAddr = _eventDetails[_bookingData.eventId]
-                .eventAddress;
             _eventBookings[eventAddr][_eventbookingIds[eventId]] = Booking(
                 _eventbookingIds[eventId],
                 0,
