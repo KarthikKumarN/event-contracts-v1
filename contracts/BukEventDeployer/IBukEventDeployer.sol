@@ -22,8 +22,33 @@ interface IBukEventDeployer {
      * @dev Function will set new BUK Marketplace address
      * @param _bukMarketplace address of new BUK marketplace
      * @notice Only admin can set new BUK marketplace address
+     * @notice Buk Marketplace address is default Buk agrregated contract
      */
     function setBukMarketplace(address _bukMarketplace) external;
+
+    /**
+     * @dev Function will set Marketplace role to Event NFT
+     * @param _eventNFTAddress address of Event NFT contract
+     * @param _marketplaceAddress address of marketplace to whitelist
+     * @notice Only admin can set new marketplace address
+     * @notice Marketplace role is to enable tranding permission
+     */
+    function setNFTMarketplaceRole(
+        address _eventNFTAddress,
+        address _marketplaceAddress
+    ) external;
+
+    /**
+     * @dev Function will revoke Marketplace role to Event NFT
+     * @param _eventNFTAddress address of Event NFT contract
+     * @param _marketplaceAddress address of marketplace to whitelist
+     * @notice Only admin can set new marketplace address
+     * @notice Marketplace role is to enable tranding permission
+     */
+    function revokeNFTMarketplaceRole(
+        address _eventNFTAddress,
+        address _marketplaceAddress
+    ) external;
 
     /**
      * @dev Function will deploy new event NFT

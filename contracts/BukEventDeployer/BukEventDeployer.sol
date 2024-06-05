@@ -64,6 +64,29 @@ contract BukEventDeployer is IBukEventDeployer, AccessControl {
         _setBukMarketplace(_bukMarketplace);
     }
 
+    /// @dev Refer {IBukEventDeployer-setNFTMarketplaceRole}.
+    function setNFTMarketplaceRole(
+        address _eventNFTAddress,
+        address _marketplaceAddress
+    ) external onlyRole(ADMIN_ROLE) {
+        require(_eventNFTAddress != address(0), "Invalid address");
+        require(_marketplaceAddress != address(0), "Invalid address");
+
+        BukNFT eventNFT = BukNFTs(_eventNFTAddress);
+        eventNFT.setMarketplaceRole(_marketplaceAddress);
+    }
+
+    /// @dev Refer {IBukEventDeployer-revokeNFTMarketplaceRole}.
+    function revokeNFTMarketplaceRole(
+        address _eventNFTAddress,
+        address _marketplaceAddress
+    ) external onlyRole(ADMIN_ROLE) {
+        require(_eventNFTAddress != address(0), "Invalid address");
+        require(_marketplaceAddress != address(0), "Invalid address");
+
+        BukNFT eventNFT = BukNFTs(_eventNFTAddress);
+        eventNFT.revokeMarketplaceRole(_marketplaceAddress);
+    }
     /**
      * @dev Function sets new Buk protocol address
      * @param _bukEventProtocol New Buk protocol address
