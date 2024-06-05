@@ -20,7 +20,7 @@ describe("EventProtocol Bookings", function () {
   let adminWallet;
   let bukWallet;
   let bukTreasuryContract;
-  let nftContract;
+  // let nftContract;
   let sellerWallet;
   let buyerWallet;
   let eventDetails;
@@ -72,14 +72,6 @@ describe("EventProtocol Bookings", function () {
       royaltiesContract.getAddress(),
     );
 
-    // BukNFT
-    const BukNFT = await ethers.getContractFactory("BukNFTs");
-    nftContract = await BukNFT.deploy(
-      "BUK_NFT",
-      bukEventProtocolContract.getAddress(),
-      bukTreasuryContract.getAddress(),
-    );
-
     //Marketplace
     const Marketplace = await ethers.getContractFactory("Marketplace");
     marketplaceContract = await Marketplace.deploy(
@@ -92,6 +84,7 @@ describe("EventProtocol Bookings", function () {
       await ethers.getContractFactory("BukEventDeployer");
     deployerContract = await BukEventDeployerFactory.deploy(
       await bukEventProtocolContract.getAddress(),
+      await marketplaceContract.getAddress(),
     );
 
     //Set Buk Royalty Info in BukRoyalties
@@ -100,8 +93,12 @@ describe("EventProtocol Bookings", function () {
     await royaltiesContract.setHotelRoyaltyInfo(bukTreasuryContract, 200);
     //Set First Owner Royalty Info in BukRoyalties
     await royaltiesContract.setFirstOwnerRoyaltyInfo(200);
-    //Set Buk Treasury in BukNFTs
-    await nftContract.setBukTreasury(await bukTreasuryContract.getAddress());
+
+    await royaltiesContract.setBukEventProtocolContract(
+      bukEventProtocolContract.getAddress(),
+    );
+    // //Set Buk Treasury in BukNFTs
+    // await nftContract.setBukTreasury(await bukTreasuryContract.getAddress());
 
     // Set deployer contract
     await bukEventProtocolContract.setEventDeployerContract(
@@ -433,6 +430,109 @@ describe("EventProtocol Bookings", function () {
           .connect(owner)
           .createListing(eventAddress1, 1, 100000000),
       ).to.be.revertedWith("Non tradeable NFT");
+    });
+  });
+
+  // Test cases for batch buy
+  describe("Buy listing on marketplace", function () {
+    let transferMoney = 210000000;
+
+    it("Buy booking, Check allowance", async function () {
+      let tokenId = 1;
+      // Approve allowance
+      await eventNFTContract
+        .connect(owner)
+        .setApprovalForAll(await marketplaceContract.getAddress(), true);
+
+      await expect(
+        marketplaceContract
+          .connect(owner)
+          .createListing(eventAddress, 1, 100000000),
+      ).not.be.reverted;
+
+      await expect(
+        await marketplaceContract.isBookingListed(eventAddress, tokenId),
+      ).to.equal(true);
+
+      await expect(
+        marketplaceContract.connect(account1).buy(eventAddress, tokenId),
+      ).to.be.revertedWith("Check the allowance");
+    });
+    it("Buy booking, Non available balance ", async function () {
+      let tokenId = 1;
+      // Approve allowance
+      await eventNFTContract
+        .connect(owner)
+        .setApprovalForAll(await marketplaceContract.getAddress(), true);
+
+      await expect(
+        marketplaceContract
+          .connect(owner)
+          .createListing(eventAddress, 1, 100000000),
+      ).not.be.reverted;
+
+      await expect(
+        await marketplaceContract.isBookingListed(eventAddress, tokenId),
+      ).to.equal(true);
+
+      //Approve and transfer amount for transaction for buyer
+      // await stableTokenContract
+      //   .connect(owner)
+      //   .transfer(await account1.getAddress(), transferMoney);
+
+      await stableTokenContract
+        .connect(account1)
+        .approve(await marketplaceContract.getAddress(), transferMoney);
+
+      await expect(
+        marketplaceContract.connect(account1).buy(eventAddress, tokenId),
+      ).to.be.revertedWith("ERC20: transfer amount exceeds balance");
+
+      // await expect(
+      //   await eventNFTContract.balanceOf(await account1.getAddress(), tokenId),
+      // ).to.equal(1);
+    });
+
+    it("Buy booking,", async function () {
+      let tokenId = 1;
+      // Approve allowance
+      await eventNFTContract
+        .connect(owner)
+        .setApprovalForAll(await marketplaceContract.getAddress(), true);
+
+      await expect(
+        marketplaceContract
+          .connect(owner)
+          .createListing(eventAddress, 1, 100000000),
+      ).not.be.reverted;
+
+      await expect(
+        await marketplaceContract.isBookingListed(eventAddress, tokenId),
+      ).to.equal(true);
+
+      //Approve and transfer amount for transaction for buyer
+      await stableTokenContract
+        .connect(owner)
+        .transfer(await account1.getAddress(), transferMoney);
+
+      await stableTokenContract
+        .connect(account1)
+        .approve(await marketplaceContract.getAddress(), transferMoney);
+
+      await expect(
+        await eventNFTContract.balanceOf(await owner.getAddress(), tokenId),
+      ).to.equal(0);
+
+      await expect(
+        marketplaceContract.connect(account1).buy(eventAddress, tokenId),
+      ).not.be.reverted;
+
+      await expect(
+        await eventNFTContract.balanceOf(await account1.getAddress(), tokenId),
+      ).to.equal(1);
+      await expect(
+        await eventNFTContract.balanceOf(await owner.getAddress(), tokenId),
+      ).to.equal(0);
     });
   });
 });
