@@ -72,7 +72,7 @@ contract BukEventDeployer is IBukEventDeployer, AccessControl {
         require(_eventNFTAddress != address(0), "Invalid address");
         require(_marketplaceAddress != address(0), "Invalid address");
 
-        BukNFT eventNFT = BukNFTs(_eventNFTAddress);
+        BukNFTs eventNFT = BukNFTs(_eventNFTAddress);
         eventNFT.setMarketplaceRole(_marketplaceAddress);
     }
 
@@ -84,7 +84,7 @@ contract BukEventDeployer is IBukEventDeployer, AccessControl {
         require(_eventNFTAddress != address(0), "Invalid address");
         require(_marketplaceAddress != address(0), "Invalid address");
 
-        BukNFT eventNFT = BukNFTs(_eventNFTAddress);
+        BukNFTs eventNFT = BukNFTs(_eventNFTAddress);
         eventNFT.revokeMarketplaceRole(_marketplaceAddress);
     }
     /**
