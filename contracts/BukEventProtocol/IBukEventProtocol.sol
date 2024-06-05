@@ -128,9 +128,6 @@ interface IBukEventProtocol {
     /// @dev Emitted when the commission is set.
     event SetCommission(uint256 newCommission);
 
-    /// @dev Emitted when BukNFTs contract address is updated.
-    event SetBukNFTs(address newNFTContract);
-
     /// @dev Emitted when BukRoyalties contract address is updated.
     event SetRoyaltiesContract(address newRoyaltiesContract);
 
@@ -146,13 +143,6 @@ interface IBukEventProtocol {
     /// @dev Emitted when stable token is updated.
     event SetStableToken(address newStableToken);
 
-    /**
-     * @dev Emitted when the tradeability of a Buk NFT is toggled.
-     * @param tokenId Token Id whose tradeability is being toggled.
-     * @param tradeable Is the NFT tradeable.
-     */
-    event ToggleTradeability(uint256 indexed tokenId, bool indexed tradeable);
-
     /// @dev Emitted when single event is booked.
     event EventBooked(
         uint256 indexed eventId,
@@ -161,31 +151,12 @@ interface IBukEventProtocol {
         bytes32 indexed referenceId
     );
 
-    /// @dev Emitted when booking refund is done.
-    event BookingRefund(uint256 total, address owner);
-
     /// @dev Emitted when room bookings are confirmed.
     event MintedBookingNFT(
         address indexed eventAddress,
         uint256[] bookings,
         bool status
     );
-
-    /// @dev Emitted when room bookings are checked in.
-    event CheckinRooms(uint256[] bookings, bool status);
-
-    /// @dev Emitted when room bookings are checked out.
-    event CheckoutRooms(uint256[] bookings, bool status);
-
-    /// @dev Emitted when room bookings are cancelled.
-    event CancelRoom(
-        uint256[] bookingIds,
-        uint256 indexed total,
-        bool indexed status
-    );
-
-    /// @dev Emitted when room bookings are cancelled.
-    event EmergencyCancellation(uint256 indexed bookingId, bool indexed status);
 
     /// @dev Emitted when the Event deployer contract is set.
     event SetEventDeployerContract(address newEventDeployer);
@@ -248,13 +219,6 @@ interface IBukEventProtocol {
      * @notice This function can only be called by admin
      */
     function setCommission(uint256 _commission) external;
-
-    /**
-     * @dev Function to toggle the tradeability of an asset.
-     * @param _tokenId Token Id whose tradeability is being toggled.
-     * @notice This function can only be called by admin
-     */
-    function toggleTradeability(uint256 _tokenId) external;
 
     /**
      * @dev Function to pause the contract.
@@ -337,15 +301,6 @@ interface IBukEventProtocol {
     ) external returns (bool);
 
     /**
-     * @dev Allows the admin to refund a booking by canceling it and transferring the amount to the owner.
-     * @param _ids An array of booking IDs that need to be refunded.
-     * @param _owner The address of the owner of the bookings.
-     * @notice This function is usually executed when the booking is unsuccessful from the hotel's end.
-     * @notice This function can only be called by admin
-     */
-    function bookingRefund(uint256[] memory _ids, address _owner) external;
-
-    /**
      * @dev Function to mint new BukNFT tokens based on the provided booking IDs and URIs.
      * @param _eventId        Event ID.
      * @param _ids An array of booking IDs representing the unique identifier for each BukNFT token.
@@ -360,68 +315,6 @@ interface IBukEventProtocol {
         uint256 _eventId,
         uint256[] memory _ids,
         string[] memory _uri
-    ) external;
-
-    /**
-     * @dev Function to checkin the rooms.
-     * @param _ids An array of booking IDs representing the unique identifier for each BukNFT token.
-     * @notice The booking status should be confirmed to checkin it.
-     * @notice Once checkedin the NFT becomes non-tradeable.
-     * @notice This function can only be called by admin or the owner of the booking NFT
-     */
-    function checkin(uint256[] memory _ids) external;
-
-    /**
-     * @dev Function to checkout the rooms.
-     * @param _ids IDs of the bookings.
-     * @param _recipients Owner address of tokens of the bookings.
-     * @notice Only the admin can checkout the rooms.
-     * @notice The booking status should be checkedin to checkout it.
-     * @notice The Active Booking NFTs are burnt from the owner's account.
-     * @notice The Utility NFTs are minted to the owner of the booking.
-     * @notice This function can only be called by admin
-     */
-    function checkout(
-        uint256[] memory _ids,
-        address[] memory _recipients
-    ) external;
-
-    /**
-     * @dev Function to cancel the room bookings.
-     * @param _ids Array of booking.
-     * @param _penalties Array of penalty amount to be refunded.
-     * @param _refunds Array of refund amount to be refunded.
-     * @param _charges Array of charges amount to be deducted.
-     * @param _bookingOwner Owner of the booking.
-     * @notice Only the admin can cancel the rooms.
-     * @notice The booking status should be confirmed to cancel it.
-     * @notice The Active Booking NFTs are burnt from the owner's account.
-     * @notice Buk commission is non-refundable.
-     * @notice This function can only be called by admin
-     */
-    function cancelRooms(
-        uint256[] memory _ids,
-        uint256[] memory _penalties,
-        uint256[] memory _refunds,
-        uint256[] memory _charges,
-        address _bookingOwner,
-        bytes memory _signature
-    ) external;
-
-    /**
-     * @dev Function to perform an emergency cancellation of a booking.
-     * @param _id The ID of the booking to be cancelled.
-     * @param _refund The amount to be refunded to the booking owner.
-     * @param _charges The charges associated with the cancellation(if any).
-     * @param _bookingOwner The address of the booking owner.
-     * @notice This function can only be called by admin
-     * @notice Total refund amount and charges should be <= the total amount (total booking amount + buk commission).
-     */
-    function emergencyCancellation(
-        uint256 _id,
-        uint256 _refund,
-        uint256 _charges,
-        address _bookingOwner
     ) external;
 
     /**
