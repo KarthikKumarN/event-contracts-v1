@@ -487,10 +487,6 @@ describe("EventProtocol Bookings", function () {
       await expect(
         marketplaceContract.connect(account1).buy(eventAddress, tokenId),
       ).to.be.revertedWith("ERC20: transfer amount exceeds balance");
-
-      // await expect(
-      //   await eventNFTContract.balanceOf(await account1.getAddress(), tokenId),
-      // ).to.equal(1);
     });
 
     it("Buy booking,", async function () {
