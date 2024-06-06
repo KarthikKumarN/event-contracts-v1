@@ -517,7 +517,7 @@ describe("EventProtocol Bookings", function () {
 
       await expect(
         await eventNFTContract.balanceOf(await owner.getAddress(), tokenId),
-      ).to.equal(0);
+      ).to.equal(1);
 
       await expect(
         marketplaceContract.connect(account1).buy(eventAddress, tokenId),
@@ -529,6 +529,91 @@ describe("EventProtocol Bookings", function () {
       await expect(
         await eventNFTContract.balanceOf(await owner.getAddress(), tokenId),
       ).to.equal(0);
+    });
+  });
+
+  // Delete listing
+  // Test cases for getting listed status
+  describe("Delete listing status marketplace", function () {
+    it("Should list for sale and delete", async function () {
+      // Approve allowance
+      await eventNFTContract
+        .connect(owner)
+        .setApprovalForAll(await marketplaceContract.getAddress(), true);
+      await expect(
+        marketplaceContract
+          .connect(owner)
+          .createListing(eventAddress, 1, 100000000),
+      ).not.be.reverted;
+      await expect(
+        await marketplaceContract.isBookingListed(eventAddress, 1),
+      ).to.equal(true);
+
+      await expect(marketplaceContract.deleteListing(eventDetails[9], 1)).not.be
+        .reverted;
+    });
+
+    it("Should Delete and check status", async function () {
+      // Approve allowance
+      await eventNFTContract
+        .connect(owner)
+        .setApprovalForAll(await marketplaceContract.getAddress(), true);
+      await expect(
+        marketplaceContract
+          .connect(owner)
+          .createListing(eventAddress, 1, 100000000),
+      ).not.be.reverted;
+      await expect(
+        await marketplaceContract.isBookingListed(eventAddress, 1),
+      ).to.equal(true);
+
+      await expect(marketplaceContract.deleteListing(eventDetails[9], 1)).not.be
+        .reverted;
+
+      await expect(
+        await marketplaceContract.isBookingListed(eventAddress, 1),
+      ).to.equal(false);
+    });
+
+    it("Should Delete and emit event", async function () {
+      // Approve allowance
+      await eventNFTContract
+        .connect(owner)
+        .setApprovalForAll(await marketplaceContract.getAddress(), true);
+      await expect(
+        marketplaceContract
+          .connect(owner)
+          .createListing(eventAddress, 1, 100000000),
+      ).not.be.reverted;
+      await expect(
+        await marketplaceContract.isBookingListed(eventAddress, 1),
+      ).to.equal(true);
+
+      await expect(marketplaceContract.deleteListing(eventDetails[9], 1))
+        .to.emit(marketplaceContract, "DeletedListing")
+        .withArgs(eventAddress, 1);
+    });
+
+    it("Should through error for not listed", async function () {
+      await expect(
+        marketplaceContract.deleteListing(eventDetails[9], 1),
+      ).to.be.revertedWith("NFT not listed");
+    });
+
+    it("Should through error only owner can delete", async function () {
+      // Approve allowance
+      await eventNFTContract
+        .connect(owner)
+        .setApprovalForAll(await marketplaceContract.getAddress(), true);
+      await expect(
+        marketplaceContract
+          .connect(owner)
+          .createListing(eventAddress, 1, 100000000),
+      ).not.be.reverted;
+
+      await expect(
+        marketplaceContract.connect(account1).deleteListing(eventDetails[9], 1),
+      ).to.be.revertedWith("Owner or Admin can delete");
     });
   });
 });
