@@ -45,27 +45,23 @@ async function main() {
   console.log("🚀 ~ Deployed BukEventProtocol:", bukEventProtocol.target);
   await bukEventProtocol.waitForDeployment();
 
+  // Deploy Marketplace
+  const marketplaceArgs = [bukEventProtocol.target, USDC_CONTRACT];
+  const marketplace = await ethers.deployContract(
+    "Marketplace",
+    marketplaceArgs,
+  );
+  console.log("🚀 ~ Deployed Marketplace:", marketplace.target);
+  await marketplace.waitForDeployment();
+
   // Deploy BukEventDeployer
-  const bukEventDeployerArgs = [bukEventProtocol.target];
+  const bukEventDeployerArgs = [bukEventProtocol.target, marketplace.target];
   const bukEventDeployer = await ethers.deployContract(
     "BukEventDeployer",
     bukEventDeployerArgs,
   );
   console.log("🚀 ~ Deployed bukEventDeployer:", bukEventDeployer.target);
   await bukEventDeployer.waitForDeployment();
-
-  // Deploy Marketplace
-  // const marketplaceArgs = [
-  //   bukEventProtocol.target,
-  //   bukNFTs.target,
-  //   USDC_CONTRACT,
-  // ];
-  // const marketplace = await ethers.deployContract(
-  //   "Marketplace",
-  //   marketplaceArgs,
-  // );
-  // console.log("🚀 ~ Deployed Marketplace:", marketplace.target);
-  // await marketplace.waitForDeployment();
 
   console.log("🚀 ~ All contracts have been deployed");
   console.log("🚀 ~ 🚀 ~ Configuring contracts");
