@@ -126,10 +126,10 @@ async function main() {
   });
 
   //Verify Marketplace contract
-  // await run("verify:verify", {
-  //   address: marketplace.target,
-  //   constructorArguments: marketplaceArgs,
-  // });
+  await run("verify:verify", {
+    address: marketplace.target,
+    constructorArguments: marketplaceArgs,
+  });
 
   console.log("Contracts verified!");
 }
