@@ -323,7 +323,7 @@ describe("EventProtocol Bookings", function () {
             tradeable,
             users,
           ),
-      ).to.be.revertedWith("Only admin has access to this function");
+      ).to.be.revertedWith("Only admin");
     });
   });
 
@@ -621,7 +621,7 @@ describe("EventProtocol Bookings", function () {
         bukEventProtocolContract
           .connect(account1)
           .mintBukNFTOwner(eventId, nftIds, urls),
-      ).to.be.revertedWith("Only admin has access to this function");
+      ).to.be.revertedWith("Only admin");
     });
     it("should fail, mint event only booked", async function () {
       let eventId = 1;

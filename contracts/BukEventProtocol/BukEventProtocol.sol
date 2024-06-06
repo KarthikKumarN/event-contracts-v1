@@ -74,10 +74,7 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
      * Throws an exception with a custom error message if the calling address is not the admin.
      */
     modifier onlyAdmin() {
-        require(
-            (msg.sender == _admin),
-            "Only admin has access to this function"
-        );
+        require((msg.sender == _admin), "Only admin");
         _;
     }
 
