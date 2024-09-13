@@ -183,7 +183,7 @@ describe("EventProtocol Bookings", function () {
             _tradeTimeLimit,
             account1.address,
           ),
-      ).to.be.revertedWith("Only admin access");
+      ).to.be.revertedWith("Only admin");
     });
   });
 });
