@@ -10,7 +10,7 @@ interface IMarketplace {
     /**
      * @title Struct to define the booking/room listing details
      * @param eventAddress Contract address of the Event/NFT.
-     * @param price, Salling price of booking
+     * @param price, Selling price of booking
      * @param owner, Owner of booking
      * @param status, status of listing
      */
