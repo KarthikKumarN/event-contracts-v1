@@ -186,4 +186,91 @@ describe("EventProtocol Bookings", function () {
       ).to.be.revertedWith("Only admin");
     });
   });
+
+  // Add test cases for setAdmin function
+  describe("Test setAdmin function", function () {
+    it("should set admin", async function () {
+      expect(await bukEventProtocolContract.setAdmin(account1.address)).not.be
+        .reverted;
+    });
+
+    it("should set admin and verify", async function () {
+      await bukEventProtocolContract.setAdmin(account1.address);
+      let wallets = await bukEventProtocolContract.getWallets();
+      expect(wallets[6]).to.equal(account1.address);
+    });
+
+    it("should fail set admin, Only admin", async function () {
+      await expect(
+        bukEventProtocolContract.connect(account1).setAdmin(account1.address),
+      ).to.be.revertedWith("Only admin");
+    });
+  });
+
+  // Add test cases for setAdmin function
+  describe("Test setSignatureVerifier function", function () {
+    it("should setSignatureVerifier", async function () {
+      expect(
+        await bukEventProtocolContract.setSignatureVerifier(account1.address),
+      ).not.be.reverted;
+    });
+
+    it("should set signature and verify", async function () {
+      await bukEventProtocolContract.setSignatureVerifier(account1.address);
+      let wallets = await bukEventProtocolContract.getWallets();
+      expect(wallets[2]).to.equal(account1.address);
+    });
+
+    it("should fail set signature, Only admin", async function () {
+      await expect(
+        bukEventProtocolContract
+          .connect(account1)
+          .setSignatureVerifier(account1.address),
+      ).to.be.revertedWith("Only admin");
+    });
+  });
+
+  // Add test cases for setBukWallet function
+  describe("Test setBukWallet function", function () {
+    it("should setBukWallet", async function () {
+      expect(await bukEventProtocolContract.setBukWallet(account1.address)).not
+        .be.reverted;
+    });
+
+    it("should set setBukWallet and verify", async function () {
+      await bukEventProtocolContract.setBukWallet(account1.address);
+      let wallets = await bukEventProtocolContract.getWallets();
+      expect(wallets[2]).to.equal(account1.address);
+    });
+
+    it("should fail set setBukWallet, Only admin", async function () {
+      await expect(
+        bukEventProtocolContract
+          .connect(account1)
+          .setBukWallet(account1.address),
+      ).to.be.revertedWith("Only admin");
+    });
+  });
+
+  // Add test cases for setBukTreasury function
+  describe("Test setBukTreasury function", function () {
+    it("should setBukTreasury", async function () {
+      expect(await bukEventProtocolContract.setBukTreasury(account1.address))
+        .not.be.reverted;
+    });
+
+    it("should set setBukTreasury and verify", async function () {
+      await bukEventProtocolContract.setBukTreasury(account1.address);
+      let wallets = await bukEventProtocolContract.getWallets();
+      expect(wallets[2]).to.equal(account1.address);
+    });
+
+    it("should fail set setBukTreasury, Only admin", async function () {
+      await expect(
+        bukEventProtocolContract
+          .connect(account1)
+          .setBukTreasury(account1.address),
+      ).to.be.revertedWith("Only admin");
+    });
+  });
 });
