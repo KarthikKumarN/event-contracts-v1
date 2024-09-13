@@ -12,11 +12,11 @@ contract BukEventDeployer is IBukEventDeployer, AccessControl {
         0xa2aa529b1ac745f732589985ad0e0a21e77f45806945225b02a7ecc719ad2cab;
 
     /// @dev Constant address Buk Protocol contract
-    address private _bukEventProtocolContract;
+    address public bukEventProtocolContract;
 
     /// @dev Constant address Buk Marketplace contract
     /// @dev Default buk aggregated marketplace contract
-    address private _bukMarketplaceContract;
+    address public bukMarketplaceContract;
 
     /**
      * @dev Constructor to initialize the contract
@@ -44,7 +44,7 @@ contract BukEventDeployer is IBukEventDeployer, AccessControl {
             _name,
             _bukEventProtocol,
             _bukTreasury,
-            _bukMarketplaceContract
+            bukMarketplaceContract
         );
         emit DeployedEventNFT(_name);
         return address(eventNFT);
@@ -93,8 +93,8 @@ contract BukEventDeployer is IBukEventDeployer, AccessControl {
      */
     function _setBukEventProtocol(address _bukEventProtocol) private {
         require(_bukEventProtocol != address(0), "Invalid address");
-        address oldAddress = address(_bukEventProtocolContract);
-        _bukEventProtocolContract = address(_bukEventProtocol);
+        address oldAddress = address(bukEventProtocolContract);
+        bukEventProtocolContract = address(_bukEventProtocol);
 
         _grantRole(BUK_EVENT_PROTOCOL_ROLE, address(_bukEventProtocol));
         _revokeRole(BUK_EVENT_PROTOCOL_ROLE, address(oldAddress));
@@ -108,8 +108,8 @@ contract BukEventDeployer is IBukEventDeployer, AccessControl {
      */
     function _setBukMarketplace(address _bukMarketplace) private {
         require(_bukMarketplace != address(0), "Invalid address");
-        address oldAddress = address(_bukMarketplaceContract);
-        _bukMarketplaceContract = address(_bukMarketplace);
+        address oldAddress = address(bukMarketplaceContract);
+        bukMarketplaceContract = address(_bukMarketplace);
 
         emit SetBukMarketplace(oldAddress, _bukMarketplace);
     }

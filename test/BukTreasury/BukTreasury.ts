@@ -158,7 +158,7 @@ describe("BukTreasury", () => {
 
     it("Should emit event when BukEventProtocol address is set", async () => {
       await bukTreasuryContract.setBukEventProtocol(account1.address);
-      let oldAddress = await bukTreasuryContract.bukProtocolContract();
+      let oldAddress = await bukTreasuryContract.bukEventProtocolContract();
       await expect(bukTreasuryContract.setBukEventProtocol(account2.address))
         .to.emit(bukTreasuryContract, "BukEventProtocolSet")
         .withArgs(oldAddress, account2.address);

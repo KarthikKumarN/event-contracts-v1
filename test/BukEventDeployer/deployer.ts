@@ -9,7 +9,7 @@ import {
   recoverAddress,
 } from "ethers";
 
-describe("BukEventProtocol Bookings", function () {
+describe("BukEventProtocolDeployer Bookings", function () {
   let stableTokenContract;
   let deployerContract;
   let bukEventProtocolContract;
@@ -164,6 +164,68 @@ describe("BukEventProtocol Bookings", function () {
     //     }
     //   }
     // });
+  });
+
+  // Create a test cases for setBukEventProtocol function from BukEventDeployer
+  describe("Set Buk Event Protocol in Deployer", function () {
+    it("Should set Buk Event Protocol in deployer", async function () {
+      await expect(
+        await deployerContract.setBukEventProtocol(
+          await bukEventProtocolContract.getAddress(),
+        ),
+      ).not.be.reverted;
+    });
+
+    it("Should set Buk Event Protocol in deployer and check", async function () {
+      await expect(
+        await deployerContract.setBukEventProtocol(
+          await bukEventProtocolContract.getAddress(),
+        ),
+      ).not.be.reverted;
+
+      await expect(await deployerContract.bukEventProtocolContract()).to.equal(
+        await bukEventProtocolContract.getAddress(),
+      );
+    });
+    it("Should fail set Buk Protocol in deployer for 0 address", async function () {
+      let newContract = "0x0000000000000000000000000000000000000000";
+      await expect(
+        deployerContract.setBukEventProtocol(newContract),
+      ).to.be.revertedWith("Invalid address");
+    });
+  });
+
+  // Create a test cases for setsBukMarketplace function from BukEventDeployer
+  describe("Set marketplace in Deployer", function () {
+    it("Should set setBukMarketplace in deployer", async function () {
+      await expect(
+        await deployerContract.setBukMarketplace(
+          await marketplaceContract.getAddress(),
+        ),
+      ).not.be.reverted;
+    });
+
+    it("Should set marketplace in deployer and check", async function () {
+      await expect(
+        await deployerContract.setBukMarketplace(
+          await marketplaceContract.getAddress(),
+        ),
+      ).not.be.reverted;
+
+      await expect(await deployerContract.bukMarketplaceContract()).to.equal(
+        await marketplaceContract.getAddress(),
+      );
+    });
+    it("Should fail set marketplace in deployer for 0 address", async function () {
+      let newContract = "0x0000000000000000000000000000000000000000";
+      await expect(
+        deployerContract.setBukMarketplace(newContract),
+      ).to.be.revertedWith("Invalid address");
+
+      await expect(await deployerContract.bukMarketplaceContract()).to.equal(
+        await marketplaceContract.getAddress(),
+      );
+    });
   });
 
   // Add test case to test setNFTMarketplaceRole

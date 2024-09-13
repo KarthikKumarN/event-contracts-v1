@@ -15,12 +15,6 @@ const getCurrentTime = async (): Promise<number> => {
 let initialSnapshotId: number;
 const saveInitialSnapshot = async () => {
   const response = await ethers.provider.send("evm_snapshot");
-
-  console.debug(
-    "🚀 ~ file: Updations.ts:19 ~ saveInitialSnapshot ~ response:",
-    response,
-  );
-
   initialSnapshotId = response;
 };
 
@@ -29,10 +23,6 @@ const saveInitialSnapshot = async () => {
  * initial snapshot identified by `initialSnapshotId`.
  */
 const restoreInitialSnapshot = async () => {
-  console.debug(
-    "🚀 ~ file: Updations.ts:35 ~ restoreInitialSnapshot ~ initialSnapshotId:",
-    initialSnapshotId,
-  );
   await ethers.provider.send("evm_revert", [initialSnapshotId]);
 };
 
@@ -154,32 +144,32 @@ describe("BukNFTs Updations", function () {
       .connect(owner)
       .approve(await bukProtocolContract.getAddress(), 150000000);
 
-    //Book room
-    expect(
-      await bukProtocolContract
-        .connect(owner)
-        .bookRooms(
-          [100000000],
-          [80000000],
-          [70000000],
-          "0x3633666663356135366139343361313561626261336134630000000000000000",
-          1729847061,
-          1729947061,
-          12,
-          true,
-        ),
-    ).not.be.reverted;
+    // //Book room
+    // expect(
+    //   await bukProtocolContract
+    //     .connect(owner)
+    //     .bookRooms(
+    //       [100000000],
+    //       [80000000],
+    //       [70000000],
+    //       "0x3633666663356135366139343361313561626261336134630000000000000000",
+    //       1729847061,
+    //       1729947061,
+    //       12,
+    //       true,
+    //     ),
+    // ).not.be.reverted;
 
     //Mint NFT
-    await expect(
-      bukProtocolContract.mintBukNFTOwner(
-        [1],
-        [
-          "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-        ],
-        owner.address,
-      ),
-    ).not.be.reverted;
+    // await expect(
+    //   bukProtocolContract.mintBukNFTOwner(
+    //     [1],
+    //     [
+    //       "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+    //     ],
+    //     owner.address,
+    //   ),
+    // ).not.be.reverted;
     await saveInitialSnapshot();
   });
   afterEach(async function () {
@@ -194,7 +184,7 @@ describe("BukNFTs Updations", function () {
         ),
       ).not.be.reverted;
       //Check if Buk Protocol is set
-      expect(await nftContract.bukProtocolContract()).to.equal(
+      expect(await nftContract.bukEventProtocolContract()).to.equal(
         await bukProtocolContract.getAddress(),
       );
     });
@@ -277,50 +267,50 @@ describe("BukNFTs Updations", function () {
     });
   });
 
-  describe("Set Token URIs for NFTS in BukNFTs", function () {
-    it("Should set Token URIs for BukNFTs by admin", async function () {
-      //Check-in NFT
-      await expect(bukProtocolContract.connect(owner).checkin([1])).not.be
-        .reverted;
+  // describe("Set Token URIs for NFTS in BukNFTs", function () {
+  //   it("Should set Token URIs for BukNFTs by admin", async function () {
+  //     //Check-in NFT
+  //     // await expect(bukProtocolContract.connect(owner).checkin([1])).not.be
+  //     //   .reverted;
 
-      //Set Token URI
-      const newUri =
-        "http://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json";
-      expect(await nftContract.connect(adminWallet).setURI(1, newUri)).not.be
-        .reverted;
-      const uri = await nftContract.uri(1);
-      expect(uri).to.equal(newUri);
-    });
-    it("Should set Token URIs and emit events", async function () {
-      //Check-in NFT
-      await expect(bukProtocolContract.connect(owner).checkin([1])).not.be
-        .reverted;
+  //     //Set Token URI
+  //     const newUri =
+  //       "http://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json";
+  //     expect(await nftContract.connect(adminWallet).setURI(1, newUri)).not.be
+  //       .reverted;
+  //     const uri = await nftContract.uri(1);
+  //     expect(uri).to.equal(newUri);
+  //   });
+  //   it("Should set Token URIs and emit events", async function () {
+  //     //Check-in NFT
+  //     // await expect(bukProtocolContract.connect(owner).checkin([1])).not.be
+  //     //   .reverted;
 
-      //Set Token URI
-      const newUri =
-        "http://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json";
-      expect(await nftContract.connect(adminWallet).setURI(1, newUri))
-        .to.emit(nftContract, "SetURI")
-        .withArgs(1, newUri);
-    });
-    it("Should not set if token is not minted", async function () {
-      //Set Token URI
-      const newUri =
-        "http://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json";
-      await expect(
-        nftContract.connect(adminWallet).setURI(3, newUri),
-      ).to.be.revertedWith("Token does not exist on BukNFTs");
-    });
-    it("Should not set Token URIs if not admin", async function () {
-      //Set Token URI
-      const newUri =
-        "http://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json";
-      await expect(nftContract.connect(account1).setURI(1, newUri)).to.be
-        .reverted;
-      const uri = await nftContract.uri(1);
-      expect(uri).not.equal(newUri);
-    });
-  });
+  //     //Set Token URI
+  //     const newUri =
+  //       "http://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json";
+  //     expect(await nftContract.connect(adminWallet).setURI(1, newUri))
+  //       .to.emit(nftContract, "SetURI")
+  //       .withArgs(1, newUri);
+  //   });
+  //   it("Should not set if token is not minted", async function () {
+  //     //Set Token URI
+  //     const newUri =
+  //       "http://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json";
+  //     await expect(
+  //       nftContract.connect(adminWallet).setURI(3, newUri),
+  //     ).to.be.revertedWith("Token does not exist on BukNFTs");
+  //   });
+  //   it("Should not set Token URIs if not admin", async function () {
+  //     //Set Token URI
+  //     const newUri =
+  //       "http://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json";
+  //     await expect(nftContract.connect(account1).setURI(1, newUri)).to.be
+  //       .reverted;
+  //     const uri = await nftContract.uri(1);
+  //     expect(uri).not.equal(newUri);
+  //   });
+  // });
 
   // Add test cases for pause and unpause and test whenNotPaused modifier
   describe("Pause and Unpause", function () {

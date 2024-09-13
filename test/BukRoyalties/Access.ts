@@ -45,9 +45,8 @@ describe("BukEventProtocol Access Control", function () {
     );
 
     //Deploy SignatureVerifier contract
-    const SignatureVerifier = await ethers.getContractFactory(
-      "SignatureVerifier",
-    );
+    const SignatureVerifier =
+      await ethers.getContractFactory("SignatureVerifier");
     signatureVerifierContract = await SignatureVerifier.deploy();
 
     //Deploy BukRoyalties contract
@@ -55,9 +54,8 @@ describe("BukEventProtocol Access Control", function () {
     royaltiesContract = await BukRoyalties.deploy();
 
     //BukEventProtocol
-    const BukEventProtocol = await ethers.getContractFactory(
-      "BukEventProtocol",
-    );
+    const BukEventProtocol =
+      await ethers.getContractFactory("BukEventProtocol");
     bukProtocolContract = await BukEventProtocol.deploy(
       bukTreasuryContract.getAddress(),
       stableTokenContract.getAddress(),
@@ -67,24 +65,18 @@ describe("BukEventProtocol Access Control", function () {
     );
 
     // BukNFT
-    const BukNFT = await ethers.getContractFactory("BukNFTs");
-    nftContract = await BukNFT.deploy(
-      "BUK_NFT",
-      await bukProtocolContract.getAddress(),
-      await bukTreasuryContract.getAddress(),
-    );
+    // const BukNFT = await ethers.getContractFactory("BukNFTs");
+    // nftContract = await BukNFT.deploy(
+    //   "BUK_NFT",
+    //   await bukProtocolContract.getAddress(),
+    //   await bukTreasuryContract.getAddress(),
+    // );
 
     //Marketplace
     const Marketplace = await ethers.getContractFactory("Marketplace");
     marketplaceContract = await Marketplace.deploy(
       bukProtocolContract.getAddress(),
-      nftContract.getAddress(),
       stableTokenContract.getAddress(),
-    );
-
-    //Set BukNFTs address in Buk Protocol
-    const setBukNFTs = await bukProtocolContract.setBukNFTs(
-      nftContract.getAddress(),
     );
 
     //Set Buk Protocol in Treasury

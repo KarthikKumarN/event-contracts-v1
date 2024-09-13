@@ -1,5 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
+
+//  FIXME : Update this test cases to event test cases. This is old test cases
 /**
  * The above function is a TypeScript function that retrieves the current timestamp of the latest
  * block in the Ethereum blockchain and saves an initial snapshot of the blockchain state.
@@ -89,9 +91,8 @@ describe("BukRoyalties Updations", function () {
     );
 
     //Deploy SignatureVerifier contract
-    const SignatureVerifier = await ethers.getContractFactory(
-      "SignatureVerifier",
-    );
+    const SignatureVerifier =
+      await ethers.getContractFactory("SignatureVerifier");
     signatureVerifierContract = await SignatureVerifier.deploy();
 
     //Deploy BukRoyalties contract
@@ -99,9 +100,8 @@ describe("BukRoyalties Updations", function () {
     royaltiesContract = await BukRoyalties.deploy();
 
     //BukEventProtocol
-    const BukEventProtocol = await ethers.getContractFactory(
-      "BukEventProtocol",
-    );
+    const BukEventProtocol =
+      await ethers.getContractFactory("BukEventProtocol");
     bukProtocolContract = await BukEventProtocol.deploy(
       bukTreasuryContract.getAddress(),
       stableTokenContract.getAddress(),
@@ -111,24 +111,18 @@ describe("BukRoyalties Updations", function () {
     );
 
     // BukNFT
-    const BukNFT = await ethers.getContractFactory("BukNFTs");
-    nftContract = await BukNFT.deploy(
-      "BUK_NFT",
-      bukProtocolContract.getAddress(),
-      bukTreasuryContract.getAddress(),
-    );
+    // const BukNFT = await ethers.getContractFactory("BukNFTs");
+    // nftContract = await BukNFT.deploy(
+    //   "BUK_NFT",
+    //   bukProtocolContract.getAddress(),
+    //   bukTreasuryContract.getAddress(),
+    // );
 
     //Marketplace
     const Marketplace = await ethers.getContractFactory("Marketplace");
     marketplaceContract = await Marketplace.deploy(
       bukProtocolContract.getAddress(),
-      nftContract.getAddress(),
       stableTokenContract.getAddress(),
-    );
-
-    //Set BukNFTs address in Buk Protocol
-    const setBukNFTs = await bukProtocolContract.setBukNFTs(
-      nftContract.getAddress(),
     );
 
     //Set Buk Protocol in Treasury
