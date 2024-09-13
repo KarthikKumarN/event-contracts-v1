@@ -240,7 +240,7 @@ describe("EventProtocol Bookings", function () {
     it("should set setBukWallet and verify", async function () {
       await bukEventProtocolContract.setBukWallet(account1.address);
       let wallets = await bukEventProtocolContract.getWallets();
-      expect(wallets[2]).to.equal(account1.address);
+      expect(wallets[5]).to.equal(account1.address);
     });
 
     it("should fail set setBukWallet, Only admin", async function () {
@@ -249,6 +249,12 @@ describe("EventProtocol Bookings", function () {
           .connect(account1)
           .setBukWallet(account1.address),
       ).to.be.revertedWith("Only admin");
+    });
+    it("should fail set setBukWallet, Zero address", async function () {
+      let newContract = "0x0000000000000000000000000000000000000000";
+      await expect(
+        bukEventProtocolContract.setBukWallet(newContract),
+      ).to.be.revertedWith("Invalid address");
     });
   });
 
@@ -272,6 +278,12 @@ describe("EventProtocol Bookings", function () {
           .setBukTreasury(account1.address),
       ).to.be.revertedWith("Only admin");
     });
+    it("should fail set setBukTreasury, Zero address", async function () {
+      let newContract = "0x0000000000000000000000000000000000000000";
+      await expect(
+        bukEventProtocolContract.setBukTreasury(newContract),
+      ).to.be.revertedWith("Invalid address");
+    });
   });
 
   // Add test cases for setStableToken function
@@ -292,6 +304,35 @@ describe("EventProtocol Bookings", function () {
         bukEventProtocolContract
           .connect(account1)
           .setStableToken(account1.address),
+      ).to.be.revertedWith("Only admin");
+    });
+    it("should fail set setStableToken, Zero address", async function () {
+      let newContract = "0x0000000000000000000000000000000000000000";
+      await expect(
+        bukEventProtocolContract.setStableToken(newContract),
+      ).to.be.revertedWith("Invalid address");
+    });
+  });
+
+  // Add test cases for setRoyaltiesContract function
+  describe("Test setRoyaltiesContract function", function () {
+    it("should setRoyaltiesContract", async function () {
+      expect(
+        await bukEventProtocolContract.setRoyaltiesContract(account1.address),
+      ).not.be.reverted;
+    });
+
+    it("should set setRoyaltiesContract and verify", async function () {
+      await bukEventProtocolContract.setRoyaltiesContract(account1.address);
+      let wallets = await bukEventProtocolContract.getWallets();
+      expect(wallets[1]).to.equal(account1.address);
+    });
+
+    it("should fail set setRoyaltiesContract, Only admin", async function () {
+      await expect(
+        bukEventProtocolContract
+          .connect(account1)
+          .setRoyaltiesContract(account1.address),
       ).to.be.revertedWith("Only admin");
     });
   });
