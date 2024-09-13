@@ -18,8 +18,8 @@ contract BukTreasury is AccessControl, IBukTreasury, Pausable {
     /// @dev Token used for transaction
     IERC20 private _stableToken;
 
-    /// @dev address bukProtocol       Address of the Buk Protocol contract.
-    address public bukProtocolContract;
+    /// @dev address bukProtocol       Address of the Buk Event Protocol contract.
+    address public bukEventProtocolContract;
 
     /**
      * @dev - Constant variable representing the role of the administrator
@@ -86,8 +86,8 @@ contract BukTreasury is AccessControl, IBukTreasury, Pausable {
         address _bukProtocol
     ) external onlyRole(ADMIN_ROLE) {
         require(_bukProtocol != address(0), "Invalid address");
-        address oldAddress = address(bukProtocolContract);
-        bukProtocolContract = _bukProtocol;
+        address oldAddress = address(bukEventProtocolContract);
+        bukEventProtocolContract = _bukProtocol;
 
         _grantRole(BUK_EVENT_PROTOCOL_ROLE, address(_bukProtocol));
         _revokeRole(BUK_EVENT_PROTOCOL_ROLE, address(oldAddress));
