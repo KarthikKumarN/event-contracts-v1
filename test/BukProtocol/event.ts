@@ -262,7 +262,7 @@ describe("EventProtocol Bookings", function () {
     it("should set setBukTreasury and verify", async function () {
       await bukEventProtocolContract.setBukTreasury(account1.address);
       let wallets = await bukEventProtocolContract.getWallets();
-      expect(wallets[2]).to.equal(account1.address);
+      expect(wallets[3]).to.equal(account1.address);
     });
 
     it("should fail set setBukTreasury, Only admin", async function () {
@@ -270,6 +270,28 @@ describe("EventProtocol Bookings", function () {
         bukEventProtocolContract
           .connect(account1)
           .setBukTreasury(account1.address),
+      ).to.be.revertedWith("Only admin");
+    });
+  });
+
+  // Add test cases for setStableToken function
+  describe("Test setStableToken function", function () {
+    it("should setStableToken", async function () {
+      expect(await bukEventProtocolContract.setStableToken(account1.address))
+        .not.be.reverted;
+    });
+
+    it("should set setStableToken and verify", async function () {
+      await bukEventProtocolContract.setStableToken(account1.address);
+      let wallets = await bukEventProtocolContract.getWallets();
+      expect(wallets[4]).to.equal(account1.address);
+    });
+
+    it("should fail set setStableToken, Only admin", async function () {
+      await expect(
+        bukEventProtocolContract
+          .connect(account1)
+          .setStableToken(account1.address),
       ).to.be.revertedWith("Only admin");
     });
   });
