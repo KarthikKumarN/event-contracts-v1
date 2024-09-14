@@ -110,21 +110,6 @@ describe("BukRoyalties Updations", function () {
       royaltiesContract.getAddress(),
     );
 
-    // BukNFT
-    // const BukNFT = await ethers.getContractFactory("BukNFTs");
-    // nftContract = await BukNFT.deploy(
-    //   "BUK_NFT",
-    //   bukProtocolContract.getAddress(),
-    //   bukTreasuryContract.getAddress(),
-    // );
-
-    //Marketplace
-    const Marketplace = await ethers.getContractFactory("Marketplace");
-    marketplaceContract = await Marketplace.deploy(
-      bukProtocolContract.getAddress(),
-      stableTokenContract.getAddress(),
-    );
-
     //Set Buk Protocol in Treasury
     const setBukEventProtocol = await bukTreasuryContract.setBukEventProtocol(
       bukProtocolContract.getAddress(),
@@ -157,13 +142,15 @@ describe("BukRoyalties Updations", function () {
     });
     it("Should set buk protocol and emit events", async function () {
       //Set buk protocol
+      let currentBukEventContract =
+        await royaltiesContract.bukEventProtocolContract();
       expect(
         await royaltiesContract
           .connect(adminWallet)
           .setBukEventProtocolContract(account1),
       )
-        .to.emit(royaltiesContract, "SetBukTreasury")
-        .withArgs(await account1.getAddress());
+        .to.emit(royaltiesContract, "SetBukEventProtocol")
+        .withArgs(currentBukEventContract, await account1.getAddress());
     });
     it("Should not set buk protocol if not admin", async function () {
       //Set buk protocol
@@ -183,6 +170,7 @@ describe("BukRoyalties Updations", function () {
           .connect(adminWallet)
           .setBukRoyaltyInfo(bukTreasuryContract, 200),
       ).not.be.reverted;
+
       const bukRoyaltyRes = (await royaltiesContract.bukRoyalty())[1];
       expect(200).to.equal(bukRoyaltyRes);
     });
@@ -193,8 +181,8 @@ describe("BukRoyalties Updations", function () {
           .connect(adminWallet)
           .setBukRoyaltyInfo(bukTreasuryContract, 200),
       )
-        .to.emit(royaltiesContract, "SetStableToken")
-        .withArgs(await account1.getAddress());
+        .to.emit(royaltiesContract, "SetBukRoyalty")
+        .withArgs(0, 200);
     });
     it("Should not set Buk Royalty if not admin", async function () {
       //Set Buk Royalty
@@ -232,8 +220,8 @@ describe("BukRoyalties Updations", function () {
           .connect(adminWallet)
           .setHotelRoyaltyInfo(bukTreasuryContract, 200),
       )
-        .to.emit(royaltiesContract, "SetStableToken")
-        .withArgs(await account1.getAddress());
+        .to.emit(royaltiesContract, "SetHotelRoyalty")
+        .withArgs(0, 200);
     });
     it("Should not set Hotel Royalty if not admin", async function () {
       //Set Hotel Royalty
@@ -270,8 +258,8 @@ describe("BukRoyalties Updations", function () {
           .connect(adminWallet)
           .setFirstOwnerRoyaltyInfo(200),
       )
-        .to.emit(royaltiesContract, "SetStableToken")
-        .withArgs(await account1.getAddress());
+        .to.emit(royaltiesContract, "SetFirstOwnerRoyalty")
+        .withArgs(0, 200);
     });
     it("Should not set First Owner Royalty if not admin", async function () {
       //Set First Owner Royalty
