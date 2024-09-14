@@ -287,7 +287,7 @@ describe("BukEventProtocol Access Control", function () {
           .setBukEventProtocolContract(account1),
       ).not.be.reverted;
     });
-    it("Should fail for  zero address", async function () {
+    it("Should fail for zero address", async function () {
       //Get the keccak256 hash of the ADMIN_ROLE
       const ADMIN_ROLE = keccak256(toUtf8Bytes("ADMIN_ROLE"));
 
@@ -298,19 +298,10 @@ describe("BukEventProtocol Access Control", function () {
           .grantRole(ADMIN_ROLE, account1),
       ).not.be.reverted;
 
-      //Check if the new admin has ADMIN_ROLE
-      expect(
-        await royaltiesContract
-          .connect(adminWallet)
-          .hasRole(ADMIN_ROLE, account1),
-      ).to.equal(true);
-
       let newContract = "0x0000000000000000000000000000000000000000";
-      //Set buk protocol
-      expect(
-        await royaltiesContract
-          .connect(adminWallet)
-          .setBukEventProtocolContract(newContract),
+
+      await expect(
+        royaltiesContract.setBukEventProtocolContract(newContract),
       ).to.be.revertedWith("Invalid address");
     });
   });

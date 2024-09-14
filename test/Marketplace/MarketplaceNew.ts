@@ -673,7 +673,6 @@ describe("EventProtocol Bookings", function () {
         eventAddress,
         1,
       );
-      console.log(listing, " listing");
       expect(listing[1]).to.equal(200000000);
     });
 
