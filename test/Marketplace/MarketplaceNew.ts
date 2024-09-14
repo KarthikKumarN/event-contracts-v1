@@ -615,5 +615,158 @@ describe("EventProtocol Bookings", function () {
         marketplaceContract.connect(account1).deleteListing(eventDetails[9], 1),
       ).to.be.revertedWith("Owner or Admin can delete");
     });
+    it("Should through error zero address", async function () {
+      // Approve allowance
+      await eventNFTContract
+        .connect(owner)
+        .setApprovalForAll(await marketplaceContract.getAddress(), true);
+      let newContract = "0x0000000000000000000000000000000000000000";
+      await expect(
+        marketplaceContract
+          .connect(owner)
+          .createListing(newContract, 1, 100000000),
+      ).to.be.revertedWith("Invalid event address");
+    });
+  });
+
+  // Test cases for getting listed status
+  describe("Relist marketplace", function () {
+    it("Should list and relist for sale", async function () {
+      // Approve allowance
+      await eventNFTContract
+        .connect(owner)
+        .setApprovalForAll(await marketplaceContract.getAddress(), true);
+      await expect(
+        marketplaceContract
+          .connect(owner)
+          .createListing(eventAddress, 1, 100000000),
+      ).not.be.reverted;
+
+      await expect(
+        await marketplaceContract.isBookingListed(eventAddress, 1),
+      ).to.equal(true);
+
+      await expect(
+        marketplaceContract.connect(owner).relist(eventAddress, 1, 200000000),
+      ).not.be.reverted;
+    });
+
+    it("Should relist and check status", async function () {
+      // Approve allowance
+      await eventNFTContract
+        .connect(owner)
+        .setApprovalForAll(await marketplaceContract.getAddress(), true);
+      await expect(
+        marketplaceContract
+          .connect(owner)
+          .createListing(eventAddress, 1, 100000000),
+      ).not.be.reverted;
+      await expect(
+        await marketplaceContract.isBookingListed(eventAddress, 1),
+      ).to.equal(true);
+
+      await expect(
+        marketplaceContract.connect(owner).relist(eventAddress, 1, 200000000),
+      ).not.be.reverted;
+
+      let listing = await marketplaceContract.getListingDetails(
+        eventAddress,
+        1,
+      );
+      console.log(listing, " listing");
+      expect(listing[1]).to.equal(200000000);
+    });
+
+    it("Should relist and emit event", async function () {
+      // Approve allowance
+      await eventNFTContract
+        .connect(owner)
+        .setApprovalForAll(await marketplaceContract.getAddress(), true);
+      await expect(
+        marketplaceContract
+          .connect(owner)
+          .createListing(eventAddress, 1, 100000000),
+      ).not.be.reverted;
+      await expect(
+        await marketplaceContract.isBookingListed(eventAddress, 1),
+      ).to.equal(true);
+
+      await expect(
+        marketplaceContract.connect(owner).relist(eventAddress, 1, 200000000),
+      )
+        .to.emit(marketplaceContract, "Relisted")
+        .withArgs(eventAddress, 1, 200000000);
+    });
+
+    it("Should through error for not listed", async function () {
+      await expect(
+        marketplaceContract.relist(eventDetails[9], 1, 200000000),
+      ).to.be.revertedWith("NFT not listed");
+    });
+
+    it("Should through error only owner can relist", async function () {
+      // Approve allowance
+      await eventNFTContract
+        .connect(owner)
+        .setApprovalForAll(await marketplaceContract.getAddress(), true);
+      await expect(
+        marketplaceContract
+          .connect(owner)
+          .createListing(eventAddress, 1, 100000000),
+      ).not.be.reverted;
+
+      await expect(
+        marketplaceContract
+          .connect(account1)
+          .relist(eventAddress, 1, 100000000),
+      ).to.be.revertedWith("Only owner can relist");
+    });
+  });
+
+  describe("Marketplace events, Pause abd Unpause", function () {
+    it("should pause the marketplace", async function () {
+      await marketplaceContract.pause();
+      expect(await marketplaceContract.paused()).to.be.true;
+    });
+
+    it("should unpause the marketplace", async function () {
+      await marketplaceContract.pause();
+      expect(await marketplaceContract.paused()).to.be.true;
+
+      await marketplaceContract.unpause();
+      expect(await marketplaceContract.paused()).to.be.false;
+    });
+
+    it("should revert when trying to pause if not owner", async function () {
+      await expect(
+        marketplaceContract.connect(account1).pause(),
+      ).to.be.revertedWith(
+        `AccessControl: account ${account1.address.toLowerCase()} is missing role ${await marketplaceContract.ADMIN_ROLE()}`,
+      );
+    });
+
+    it("should revert when trying to unpause if not owner", async function () {
+      await marketplaceContract.pause();
+      await expect(
+        marketplaceContract.connect(account1).unpause(),
+      ).to.be.revertedWith(
+        `AccessControl: account ${account1.address.toLowerCase()} is missing role ${await marketplaceContract.ADMIN_ROLE()}`,
+      );
+    });
+
+    it("should revert when trying to create an event while paused", async function () {
+      await marketplaceContract.pause();
+      expect(await marketplaceContract.paused()).to.be.true;
+
+      // Approve allowance
+      await eventNFTContract
+        .connect(owner)
+        .setApprovalForAll(await marketplaceContract.getAddress(), true);
+      await expect(
+        marketplaceContract
+          .connect(owner)
+          .createListing(eventAddress, 1, 100000000),
+      ).to.be.revertedWith("Pausable: paused");
+    });
   });
 });
