@@ -828,4 +828,67 @@ describe("EventProtocol Bookings", function () {
       ).to.be.revertedWith("Reached max tickets");
     });
   });
+
+  describe("BukEventProtocol events, Pause and Unpause", function () {
+    it("should pause the bukEventProtocol", async function () {
+      await bukEventProtocolContract.pause();
+      expect(await bukEventProtocolContract.paused()).to.be.true;
+    });
+
+    it("should unpause the contract", async function () {
+      await bukEventProtocolContract.pause();
+      expect(await bukEventProtocolContract.paused()).to.be.true;
+
+      await bukEventProtocolContract.unpause();
+      expect(await bukEventProtocolContract.paused()).to.be.false;
+    });
+
+    it("should revert when trying to pause if not owner", async function () {
+      await expect(
+        bukEventProtocolContract.connect(account1).pause(),
+      ).to.be.revertedWith(`Only admin`);
+    });
+
+    it("should revert when trying to unpause if not owner", async function () {
+      await bukEventProtocolContract.pause();
+      await expect(
+        bukEventProtocolContract.connect(account1).unpause(),
+      ).to.be.revertedWith(`Only admin`);
+    });
+
+    it("should revert when trying to create an event while paused", async function () {
+      await bukEventProtocolContract.pause();
+      expect(await bukEventProtocolContract.paused()).to.be.true;
+
+      // Create event
+      const eventRef =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
+      const eventName = "Web3 Carnival";
+      const _eventType = 1;
+      const _start = startFromNow;
+      const _end = endFromNow;
+      const _noOfTickets = 2;
+      const _tradeTimeLimit = 24;
+
+      await expect(
+        bukEventProtocolContract.createEvent(
+          eventName,
+          eventRef,
+          _eventType,
+          _start,
+          _end,
+          _noOfTickets,
+          _tradeTimeLimit,
+          account1.address,
+        ),
+      ).to.be.revertedWith("Pausable: paused");
+      // const eventDetails = await bukEventProtocolContract.getEventDetails(1);
+
+      // await expect(
+      //   bukEventProtocolContract
+      //     .connect(owner)
+      //     .createListing(eventAddress, 1, 100000000),
+      // ).to.be.revertedWith("Pausable: paused");
+    });
+  });
 });
