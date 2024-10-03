@@ -45,9 +45,8 @@ describe("BukTreasury", () => {
     // await bukTreasuryContract.deployed();
 
     //Deploy SignatureVerifier contract
-    const SignatureVerifier = await ethers.getContractFactory(
-      "SignatureVerifier",
-    );
+    const SignatureVerifier =
+      await ethers.getContractFactory("SignatureVerifier");
     signatureVerifierContract = await SignatureVerifier.deploy();
 
     //Deploy BukRoyalties contract
@@ -55,9 +54,8 @@ describe("BukTreasury", () => {
     royaltiesContract = await BukRoyalties.deploy();
 
     //BukEventProtocol
-    const BukEventProtocol = await ethers.getContractFactory(
-      "BukEventProtocol",
-    );
+    const BukEventProtocol =
+      await ethers.getContractFactory("BukEventProtocol");
     bukProtocolContract = await BukEventProtocol.deploy(
       bukTreasuryContract.getAddress(),
       stableTokenContract.getAddress(),
@@ -160,7 +158,7 @@ describe("BukTreasury", () => {
 
     it("Should emit event when BukEventProtocol address is set", async () => {
       await bukTreasuryContract.setBukEventProtocol(account1.address);
-      let oldAddress = await bukTreasuryContract.bukProtocolContract();
+      let oldAddress = await bukTreasuryContract.bukEventProtocolContract();
       await expect(bukTreasuryContract.setBukEventProtocol(account2.address))
         .to.emit(bukTreasuryContract, "BukEventProtocolSet")
         .withArgs(oldAddress, account2.address);
@@ -306,7 +304,7 @@ describe("BukTreasury", () => {
           .connect(account1)
           .stableRefund(100000000000, adminWallet.address),
       ).to.be.revertedWith(
-        `AccessControl: account ${account1.address.toLowerCase()} is missing role ${await bukTreasuryContract.BUK_PROTOCOL_ROLE()}`,
+        `AccessControl: account ${account1.address.toLowerCase()} is missing role ${await bukTreasuryContract.BUK_EVENT_PROTOCOL_ROLE()}`,
       );
     });
 
@@ -375,7 +373,7 @@ describe("BukTreasury", () => {
             await otherTokenContract.getAddress(),
           ),
       ).to.be.revertedWith(
-        `AccessControl: account ${account1.address.toLowerCase()} is missing role ${await bukTreasuryContract.BUK_PROTOCOL_ROLE()}`,
+        `AccessControl: account ${account1.address.toLowerCase()} is missing role ${await bukTreasuryContract.BUK_EVENT_PROTOCOL_ROLE()}`,
       );
     });
     // Add more test cases to test whenNotPaused modifier

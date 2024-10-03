@@ -94,9 +94,8 @@ describe("BukNFTs Updations", function () {
     );
 
     //Deploy SignatureVerifier contract
-    const SignatureVerifier = await ethers.getContractFactory(
-      "SignatureVerifier",
-    );
+    const SignatureVerifier =
+      await ethers.getContractFactory("SignatureVerifier");
     signatureVerifierContract = await SignatureVerifier.deploy();
 
     //Deploy BukRoyalties contract
@@ -104,9 +103,8 @@ describe("BukNFTs Updations", function () {
     royaltiesContract = await BukRoyalties.deploy();
 
     //BukEventProtocol
-    const BukEventProtocol = await ethers.getContractFactory(
-      "BukEventProtocol",
-    );
+    const BukEventProtocol =
+      await ethers.getContractFactory("BukEventProtocol");
     bukProtocolContract = await BukEventProtocol.deploy(
       bukTreasuryContract.getAddress(),
       stableTokenContract.getAddress(),
@@ -115,26 +113,26 @@ describe("BukNFTs Updations", function () {
       royaltiesContract.getAddress(),
     );
 
+    //Marketplace
+    const Marketplace = await ethers.getContractFactory("Marketplace");
+    marketplaceContract = await Marketplace.deploy(
+      bukProtocolContract.getAddress(),
+      stableTokenContract.getAddress(),
+    );
+
     // BukNFT
     const BukNFT = await ethers.getContractFactory("BukNFTs");
     nftContract = await BukNFT.deploy(
       "BUK_NFT",
       await bukProtocolContract.getAddress(),
       await bukTreasuryContract.getAddress(),
-    );
-
-    //Marketplace
-    const Marketplace = await ethers.getContractFactory("Marketplace");
-    marketplaceContract = await Marketplace.deploy(
-      bukProtocolContract.getAddress(),
-      nftContract.getAddress(),
-      stableTokenContract.getAddress(),
+      await marketplaceContract.getAddress(),
     );
 
     //Set BukNFTs address in Buk Protocol
-    const setBukNFTs = await bukProtocolContract.setBukNFTs(
-      nftContract.getAddress(),
-    );
+    // const setBukNFTs = await bukProtocolContract.setBukNFTs(
+    //   nftContract.getAddress(),
+    // );
 
     //Set Buk Protocol in Treasury
     const setBukEventProtocol = await bukTreasuryContract.setBukEventProtocol(
@@ -146,32 +144,6 @@ describe("BukNFTs Updations", function () {
       .connect(owner)
       .approve(await bukProtocolContract.getAddress(), 150000000);
 
-    //Book room
-    expect(
-      await bukProtocolContract
-        .connect(owner)
-        .bookRooms(
-          [100000000],
-          [80000000],
-          [70000000],
-          "0x3633666663356135366139343361313561626261336134630000000000000000",
-          1729847061,
-          1729947061,
-          12,
-          true,
-        ),
-    ).not.be.reverted;
-
-    //Mint NFT
-    await expect(
-      bukProtocolContract.mintBukNFTOwner(
-        [1],
-        [
-          "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-        ],
-        owner.address,
-      ),
-    ).not.be.reverted;
     await saveInitialSnapshot();
   });
   afterEach(async function () {
@@ -186,7 +158,7 @@ describe("BukNFTs Updations", function () {
         ),
       ).not.be.reverted;
       //Check if Buk Protocol is set
-      expect(await nftContract.bukProtocolContract()).to.equal(
+      expect(await nftContract.bukEventProtocolContract()).to.equal(
         await bukProtocolContract.getAddress(),
       );
     });
@@ -269,50 +241,208 @@ describe("BukNFTs Updations", function () {
     });
   });
 
-  describe("Set Token URIs for NFTS in BukNFTs", function () {
-    it("Should set Token URIs for BukNFTs by admin", async function () {
-      //Check-in NFT
-      await expect(bukProtocolContract.connect(owner).checkin([1])).not.be
-        .reverted;
+  describe(" Mint test case BukNFTs", function () {
+    it("should mint a new token", async function () {
+      const BUK_EVENT_PROTOCOL_ROLE = keccak256(
+        toUtf8Bytes("BUK_EVENT_PROTOCOL_ROLE"),
+      );
+      await nftContract.grantRole(BUK_EVENT_PROTOCOL_ROLE, owner.address);
 
-      //Set Token URI
-      const newUri =
-        "http://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json";
-      expect(await nftContract.connect(adminWallet).setURI(1, newUri)).not.be
-        .reverted;
-      const uri = await nftContract.uri(1);
-      expect(uri).to.equal(newUri);
-    });
-    it("Should set Token URIs and emit events", async function () {
-      //Check-in NFT
-      await expect(bukProtocolContract.connect(owner).checkin([1])).not.be
-        .reverted;
-
-      //Set Token URI
-      const newUri =
-        "http://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json";
-      expect(await nftContract.connect(adminWallet).setURI(1, newUri))
-        .to.emit(nftContract, "SetURI")
-        .withArgs(1, newUri);
-    });
-    it("Should not set if token is not minted", async function () {
-      //Set Token URI
-      const newUri =
-        "http://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json";
+      const tokenId = 1;
+      const amount = 10;
+      const data = "0x";
+      const uri = "https://example.com/token/1";
+      let newContract = "0x0000000000000000000000000000000000000000";
       await expect(
-        nftContract.connect(adminWallet).setURI(3, newUri),
-      ).to.be.revertedWith("Token does not exist on BukNFTs");
+        nftContract
+          .connect(owner)
+          .mint(tokenId, account1.address, amount, data, uri),
+      )
+        .to.emit(nftContract, "TransferSingle")
+        .withArgs(
+          owner.address,
+          newContract,
+          account1.address,
+          tokenId,
+          amount,
+        );
+
+      // Verify the balance
+      expect(await nftContract.balanceOf(account1.address, tokenId)).to.equal(
+        amount,
+      );
     });
-    it("Should not set Token URIs if not admin", async function () {
-      //Set Token URI
-      const newUri =
-        "http://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json";
-      await expect(nftContract.connect(account1).setURI(1, newUri)).to.be
-        .reverted;
-      const uri = await nftContract.uri(1);
-      expect(uri).not.equal(newUri);
+
+    it("should fail to mint if caller does not have BUK_EVENT_PROTOCOL_ROLE", async function () {
+      const BUK_EVENT_PROTOCOL_ROLE = keccak256(
+        toUtf8Bytes("BUK_EVENT_PROTOCOL_ROLE"),
+      );
+      const tokenId = 1;
+      const amount = 10;
+      const data = "0x";
+      const uri = "https://example.com/token/1";
+
+      await expect(
+        nftContract
+          .connect(account1)
+          .mint(tokenId, account1.address, amount, data, uri),
+      ).to.be.revertedWith(
+        `AccessControl: account ${account1.address.toLowerCase()} is missing role ${await nftContract.BUK_EVENT_PROTOCOL_ROLE()}`,
+      );
+    });
+    it("should mint set new url, admin", async function () {
+      const ADMIN_ROLE = keccak256(toUtf8Bytes("ADMIN_ROLE"));
+
+      const BUK_EVENT_DEPLOYER_ROLE = keccak256(
+        toUtf8Bytes("BUK_EVENT_DEPLOYER_ROLE"),
+      );
+
+      await nftContract.grantRole(BUK_EVENT_DEPLOYER_ROLE, owner.address);
+      await nftContract.grantRole(ADMIN_ROLE, account1.address);
+
+      await nftContract.connect(account1).setBukEventProtocol(owner.address);
+
+      const tokenId = 1;
+      const amount = 10;
+      const data = "0x";
+      const uri = "https://example.com/token/1";
+      const uri2 = "https://example.com/token/2";
+      let newContract = "0x0000000000000000000000000000000000000000";
+      await expect(
+        nftContract
+          .connect(owner)
+          .mint(tokenId, account1.address, amount, data, uri),
+      )
+        .to.emit(nftContract, "TransferSingle")
+        .withArgs(
+          owner.address,
+          newContract,
+          account1.address,
+          tokenId,
+          amount,
+        );
+
+      // // setURI
+      await expect(await nftContract.connect(account1).setURI(tokenId, uri2))
+        .not.be.reverted;
+
+      expect(await nftContract.uri(1)).to.equal(uri2);
     });
   });
+
+  describe("Burn test case BukNFTs", function () {
+    it("should burn a token", async function () {
+      const ADMIN_ROLE = keccak256(toUtf8Bytes("ADMIN_ROLE"));
+
+      const BUK_EVENT_PROTOCOL_ROLE = keccak256(
+        toUtf8Bytes("BUK_EVENT_PROTOCOL_ROLE"),
+      );
+      await nftContract.grantRole(BUK_EVENT_PROTOCOL_ROLE, owner.address);
+
+      const tokenId = 1;
+      const amount = 10;
+      const data = "0x";
+      const uri = "https://example.com/token/1";
+
+      // Mint a token first
+      await nftContract
+        .connect(owner)
+        .mint(tokenId, account1.address, amount, data, uri);
+      let newContract = "0x0000000000000000000000000000000000000000";
+
+      // Burn the token
+      await expect(
+        nftContract.connect(owner).burn(account1.address, tokenId, amount),
+      )
+        .to.emit(nftContract, "TransferSingle")
+        .withArgs(
+          owner.address,
+          account1.address,
+          newContract,
+          tokenId,
+          amount,
+        );
+
+      // Verify the balance
+      expect(await nftContract.balanceOf(account1.address, tokenId)).to.equal(
+        0,
+      );
+
+      // Verify the URI is deleted
+      expect(await nftContract.uri(tokenId)).to.equal("");
+    });
+
+    it("should fail to burn if caller does not have BUK_EVENT_PROTOCOL_ROLE", async function () {
+      const ADMIN_ROLE = keccak256(toUtf8Bytes("ADMIN_ROLE"));
+
+      const BUK_EVENT_PROTOCOL_ROLE = keccak256(
+        toUtf8Bytes("BUK_EVENT_PROTOCOL_ROLE"),
+      );
+      const tokenId = 1;
+      const amount = 10;
+      const data = "0x";
+      const uri = "https://example.com/token/1";
+
+      // Mint a token first
+      await nftContract.grantRole(BUK_EVENT_PROTOCOL_ROLE, owner.address);
+      await nftContract
+        .connect(owner)
+        .mint(tokenId, account1.address, amount, data, uri);
+
+      // Attempt to burn the token without the required role
+      await expect(
+        nftContract.connect(account1).burn(account1.address, tokenId, amount),
+      ).to.be.revertedWith(
+        "AccessControl: account " +
+          account1.address.toLowerCase() +
+          " is missing role " +
+          BUK_EVENT_PROTOCOL_ROLE,
+      );
+    });
+  });
+  //   it("Should set Token URIs for BukNFTs by admin", async function () {
+  //     //Check-in NFT
+  //     // await expect(bukProtocolContract.connect(owner).checkin([1])).not.be
+  //     //   .reverted;
+
+  //     //Set Token URI
+  //     const newUri =
+  //       "http://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json";
+  //     expect(await nftContract.connect(adminWallet).setURI(1, newUri)).not.be
+  //       .reverted;
+  //     const uri = await nftContract.uri(1);
+  //     expect(uri).to.equal(newUri);
+  //   });
+  //   it("Should set Token URIs and emit events", async function () {
+  //     //Check-in NFT
+  //     // await expect(bukProtocolContract.connect(owner).checkin([1])).not.be
+  //     //   .reverted;
+
+  //     //Set Token URI
+  //     const newUri =
+  //       "http://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json";
+  //     expect(await nftContract.connect(adminWallet).setURI(1, newUri))
+  //       .to.emit(nftContract, "SetURI")
+  //       .withArgs(1, newUri);
+  //   });
+  //   it("Should not set if token is not minted", async function () {
+  //     //Set Token URI
+  //     const newUri =
+  //       "http://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json";
+  //     await expect(
+  //       nftContract.connect(adminWallet).setURI(3, newUri),
+  //     ).to.be.revertedWith("Token does not exist on BukNFTs");
+  //   });
+  //   it("Should not set Token URIs if not admin", async function () {
+  //     //Set Token URI
+  //     const newUri =
+  //       "http://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json";
+  //     await expect(nftContract.connect(account1).setURI(1, newUri)).to.be
+  //       .reverted;
+  //     const uri = await nftContract.uri(1);
+  //     expect(uri).not.equal(newUri);
+  //   });
+  // });
 
   // Add test cases for pause and unpause and test whenNotPaused modifier
   describe("Pause and Unpause", function () {

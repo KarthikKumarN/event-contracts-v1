@@ -33,7 +33,6 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
     IBukTreasury private _bukTreasury;
     IBukEventDeployer private _bukEventDeployer;
     ISignatureVerifier private _signatureVerifier;
-    IBukNFTs private _nftContract; // FIXME : We might not need this
     IBukRoyalties private _royaltiesContract;
 
     /// @dev Commission charged on bookings.
@@ -75,10 +74,7 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
      * Throws an exception with a custom error message if the calling address is not the admin.
      */
     modifier onlyAdmin() {
-        require(
-            (msg.sender == _admin),
-            "Only admin has access to this function"
-        );
+        require((msg.sender == _admin), "Only admin");
         _;
     }
 
@@ -155,18 +151,6 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
         emit SetCommission(_newCommission);
     }
 
-    /// @dev See {IBukEventProtocol-toggleTradeability}.
-    // FIXME
-    function toggleTradeability(uint256 _tokenId) external onlyAdmin {
-        require(
-            _bookingDetails[_tokenId].status != BookingStatus.nil,
-            "Check the Booking status"
-        );
-        _bookingDetails[_tokenId].tradeable = !_bookingDetails[_tokenId]
-            .tradeable;
-        emit ToggleTradeability(_tokenId, _bookingDetails[_tokenId].tradeable);
-    }
-
     /// @dev See {IBukEventProtocol-pause}.
     function pause() external onlyAdmin {
         _pause();
@@ -192,7 +176,7 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
             (_start > block.timestamp && _end > block.timestamp),
             "Dates, Must be in the future"
         );
-        require((_end > _start), "End date must be after start date");
+        require((_end >= _start), "End date must be after start date");
         require((_noOfTickets > 0), "Number of tickets must be greater than 0");
 
         ++_eventIds;
@@ -268,35 +252,6 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
         return true;
     }
 
-    /// @dev See {IBukEventProtocol-bookingRefund}.
-    function bookingRefund(
-        uint256[] memory _ids,
-        address _owner
-    ) external whenNotPaused onlyAdmin nonReentrant {
-        uint256 len = _ids.length;
-        require((len > 0), "Array is empty");
-        for (uint256 i = 0; i < len; ++i) {
-            require(
-                _bookingDetails[_ids[i]].firstOwner == _owner,
-                "Check the booking owner"
-            );
-            require(
-                _bookingDetails[_ids[i]].status == BookingStatus.booked,
-                "Check the Booking status"
-            );
-        }
-        uint total;
-        for (uint256 i = 0; i < len; ++i) {
-            _bookingDetails[_ids[i]].status = BookingStatus.cancelled;
-            total +=
-                _bookingDetails[_ids[i]].total +
-                _bookingDetails[_ids[i]].commission;
-        }
-        _bukTreasury.stableRefund(total, _owner);
-        (total, _owner);
-        emit BookingRefund(total, _owner);
-    }
-
     /// @dev See {IBukEventProtocol-mintBukNFTOwner}.
     function mintBukNFTOwner(
         uint256 _eventId,
@@ -304,161 +259,6 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
         string[] memory _uri
     ) external whenNotPaused nonReentrant onlyAdmin {
         _mintBukNFT(_eventId, _ids, _uri);
-    }
-
-    /// @dev See {IBukEventProtocol-checkin}.
-    function checkin(uint256[] memory _ids) external {
-        uint256 len = _ids.length;
-        for (uint256 i = 0; i < len; ++i) {
-            require(
-                (_admin == msg.sender) ||
-                    (_nftContract.balanceOf(msg.sender, _ids[i]) > 0),
-                "Admin or NFT owner can access booking"
-            );
-            require(
-                _bookingDetails[_ids[i]].status == BookingStatus.confirmed,
-                "Check the Booking status"
-            );
-        }
-        require(
-            ((len > 0) && (len < MAX_BOOKING_LIMIT)),
-            "Not in max-min booking limit"
-        );
-        for (uint256 i = 0; i < len; ++i) {
-            _bookingDetails[_ids[i]].status = BookingStatus.checkedin;
-            _bookingDetails[_ids[i]].tradeable = false;
-        }
-        emit CheckinRooms(_ids, true);
-    }
-
-    /// @dev See {IBukEventProtocol-checkout}.
-    function checkout(
-        uint256[] memory _ids,
-        address[] memory _recipients
-    ) external onlyAdmin whenNotPaused {
-        uint256 len = _ids.length;
-        require(
-            ((len > 0 && _recipients.length > 0) &&
-                (len == _recipients.length) &&
-                (len < MAX_BOOKING_LIMIT)),
-            "Not in max-min booking limit"
-        );
-        for (uint256 i = 0; i < len; ++i) {
-            require(
-                _bookingDetails[_ids[i]].status == BookingStatus.checkedin,
-                "Check the Booking status"
-            );
-            require(
-                (_bookingDetails[_ids[i]].end < block.timestamp),
-                "Checkout date must be before today"
-            );
-            require(
-                (_nftContract.balanceOf(_recipients[i], _ids[i]) > 0),
-                "Check NFT owner balance"
-            );
-        }
-        for (uint256 i = 0; i < len; ++i) {
-            _bookingDetails[_ids[i]].status = BookingStatus.checkedout;
-            _bookingDetails[_ids[i]].tradeable = false;
-            _nftContract.burn(_recipients[i], _ids[i], 1);
-        }
-        emit CheckoutRooms(_ids, true);
-    }
-
-    /// @dev See {IBukEventProtocol-cancelRooms}.
-    function cancelRooms(
-        uint256[] memory _ids,
-        uint256[] memory _penalties,
-        uint256[] memory _refunds,
-        uint256[] memory _charges,
-        address _bookingOwner,
-        bytes memory _signature
-    ) external whenNotPaused onlyAdmin nonReentrant {
-        uint256 len = _ids.length;
-        require(
-            (len == _penalties.length) && (len == _refunds.length),
-            "Validate IDs and amounts"
-        );
-        uint totalPenalty;
-        uint totalRefund;
-        uint totalCharges;
-        for (uint256 i = 0; i < len; ++i) {
-            require(
-                ((_bookingDetails[_ids[i]].status == BookingStatus.confirmed) ||
-                    (_bookingDetails[_ids[i]].status ==
-                        BookingStatus.checkedin)),
-                "Not a confirmed or checkedin Booking"
-            );
-            require(
-                (_bookingDetails[_ids[i]].start > block.timestamp),
-                "Checkin date must be in the future"
-            );
-            require(
-                _nftContract.balanceOf(_bookingOwner, _ids[i]) > 0,
-                "Check the booking owner balance"
-            );
-            require(
-                ((_penalties[i] + _refunds[i] + _charges[i]) <
-                    (_bookingDetails[_ids[i]].total + 1)),
-                "Transfer amount exceeds total"
-            );
-            totalPenalty += _penalties[i];
-            totalRefund += _refunds[i];
-            totalCharges += _charges[i];
-        }
-        // Verify the signature using the generateAndVerify function
-        address signer = _signatureVerifier.generateAndVerify(
-            totalPenalty,
-            totalRefund,
-            totalCharges,
-            _signature
-        );
-        require(signer == _bookingOwner, "Invalid owner signature");
-        for (uint256 i = 0; i < len; ++i) {
-            _bookingDetails[_ids[i]].status = BookingStatus.cancelled;
-            _nftContract.burn(_bookingOwner, _ids[i], 1);
-        }
-        if (totalPenalty > 0)
-            _bukTreasury.stableRefund(totalPenalty, _bukWallet);
-        if (totalRefund > 0)
-            _bukTreasury.stableRefund(totalRefund, _bookingOwner);
-        if (totalCharges > 0)
-            _bukTreasury.stableRefund(totalCharges, _bukWallet);
-        emit CancelRoom(_ids, totalRefund, true);
-    }
-
-    /// @dev See {IBukEventProtocol-emergencyCancellation}.
-    function emergencyCancellation(
-        uint256 _id,
-        uint256 _refund,
-        uint256 _charges,
-        address _bookingOwner
-    ) external whenNotPaused onlyAdmin nonReentrant {
-        require(
-            ((_bookingDetails[_id].status == BookingStatus.confirmed) ||
-                (_bookingDetails[_id].status == BookingStatus.checkedin)),
-            "Not a confirmed or checkedin Booking"
-        );
-        require(
-            (_bookingDetails[_id].start > block.timestamp),
-            "Checkin date must be in the future"
-        );
-        require(
-            _nftContract.balanceOf(_bookingOwner, _id) > 0,
-            "Check the booking owner"
-        );
-        require(
-            ((_refund + _charges) <
-                (_bookingDetails[_id].total +
-                    _bookingDetails[_id].commission +
-                    1)),
-            "Transfer amount exceeds total"
-        );
-        _bookingDetails[_id].status = BookingStatus.cancelled;
-        _bukTreasury.stableRefund(_refund, _bookingOwner);
-        _bukTreasury.stableRefund(_charges, _bukWallet);
-        _nftContract.burn(_bookingOwner, _id, 1);
-        emit EmergencyCancellation(_id, true);
     }
 
     /// @dev See {IBukEventProtocol-getEventDetails}.
@@ -482,13 +282,11 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
         uint256 _tokenId
     ) external view returns (bool) {
         Booking memory booking = _eventBookings[_eventAddress][_tokenId];
-        // console.log(booking[1]);
         Event memory eventDetails = _eventDetails[booking.eventId];
-        // console.log(eventDetails[2]);
         return
-            block.timestamp <
-            (booking.start - (eventDetails.tradeTimeLimit * 3600)) &&
-            booking.tradeable;
+            (block.timestamp <
+                (booking.start - (eventDetails.tradeTimeLimit * 3600))) &&
+            (booking.status == BookingStatus.confirmed && booking.tradeable);
     }
 
     /// @dev See {IBukEventProtocol-getRoyaltyInfo}.
@@ -625,8 +423,6 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
     function _booking(
         BookingList memory _bookingData
     ) private returns (uint, uint256) {
-        // FIXME start and end with in event dates
-        // add validation to check event exists
         uint256 eventId = _bookingData.eventId;
         require(
             _eventDetails[eventId].eventId == eventId,
@@ -647,6 +443,13 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
             "Exceeded max ticket per booking"
         );
 
+        address eventAddr = _eventDetails[_bookingData.eventId].eventAddress;
+        require(
+            _eventbookingIds[eventId] + totalLen <=
+                _eventDetails[eventId].noOfTickets,
+            "Reached max tickets"
+        );
+
         uint256 totalAmount;
         uint commissionTotal;
         for (uint256 i = 0; i < _bookingData.total.length; ++i) {
@@ -655,7 +458,7 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
                 "Start date must be in the future"
             );
             require(
-                (_bookingData.end[i] > _bookingData.start[i]),
+                (_bookingData.end[i] >= _bookingData.start[i]),
                 "End date must be after start"
             );
 
@@ -663,8 +466,6 @@ contract BukEventProtocol is ReentrancyGuard, IBukEventProtocol, Pausable {
             uint256 bukCommission = (_bookingData.baseRate[i] * commission) /
                 100;
 
-            address eventAddr = _eventDetails[_bookingData.eventId]
-                .eventAddress;
             _eventBookings[eventAddr][_eventbookingIds[eventId]] = Booking(
                 _eventbookingIds[eventId],
                 0,

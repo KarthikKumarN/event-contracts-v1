@@ -69,19 +69,10 @@ describe("EventProtocol Bookings", function () {
       royaltiesContract.getAddress(),
     );
 
-    // BukNFT
-    const BukNFT = await ethers.getContractFactory("BukNFTs");
-    nftContract = await BukNFT.deploy(
-      "BUK_NFT",
-      bukEventProtocolContract.getAddress(),
-      bukTreasuryContract.getAddress(),
-    );
-
     //Marketplace
     const Marketplace = await ethers.getContractFactory("Marketplace");
     marketplaceContract = await Marketplace.deploy(
       bukEventProtocolContract.getAddress(),
-      nftContract.getAddress(),
       stableTokenContract.getAddress(),
     );
 
@@ -90,6 +81,7 @@ describe("EventProtocol Bookings", function () {
       await ethers.getContractFactory("BukEventDeployer");
     deployerContract = await BukEventDeployerFactory.deploy(
       await bukEventProtocolContract.getAddress(),
+      account1.address,
     );
 
     //Set Buk Royalty Info in BukRoyalties
@@ -99,7 +91,7 @@ describe("EventProtocol Bookings", function () {
     //Set First Owner Royalty Info in BukRoyalties
     await royaltiesContract.setFirstOwnerRoyaltyInfo(200);
     //Set Buk Treasury in BukNFTs
-    await nftContract.setBukTreasury(await bukTreasuryContract.getAddress());
+    // await nftContract.setBukTreasury(await bukTreasuryContract.getAddress());
 
     // Set deployer contract
     await bukEventProtocolContract.setEventDeployerContract(
@@ -331,7 +323,7 @@ describe("EventProtocol Bookings", function () {
             tradeable,
             users,
           ),
-      ).to.be.revertedWith("Only admin has access to this function");
+      ).to.be.revertedWith("Only admin");
     });
   });
 
@@ -355,10 +347,25 @@ describe("EventProtocol Bookings", function () {
       ).not.be.reverted;
       const eventDetails = await bukEventProtocolContract.getEventDetails(1);
 
+      expect(
+        await bukEventProtocolContract.mintBukNFTOwner(
+          eventId,
+          [1],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
+      ).not.be.reverted;
       const isTradeable = await bukEventProtocolContract.isBookingTradeable(
         eventDetails[9],
         1,
       );
+      const bookingDetails =
+        await bukEventProtocolContract.getEventBookingDetails(
+          eventDetails[9],
+          1,
+        );
+
       expect(isTradeable).to.equal(true);
     });
 
@@ -409,6 +416,16 @@ describe("EventProtocol Bookings", function () {
           .connect(owner)
           .bookEvent(eventId, refId, total, baseRate, start, end, tradeable),
       ).not.be.reverted;
+
+      expect(
+        await bukEventProtocolContract.mintBukNFTOwner(
+          eventId,
+          [1],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
+      ).not.be.reverted;
       const eventDetails = await bukEventProtocolContract.getEventDetails(1);
 
       const isTradeable = await bukEventProtocolContract.isBookingTradeable(
@@ -438,6 +455,15 @@ describe("EventProtocol Bookings", function () {
         await bukEventProtocolContract
           .connect(owner)
           .bookEvent(eventId, refId, total, baseRate, start, end, tradeable),
+      ).not.be.reverted;
+      expect(
+        await bukEventProtocolContract.mintBukNFTOwner(
+          eventId,
+          [1],
+          [
+            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+          ],
+        ),
       ).not.be.reverted;
       const eventDetails = await bukEventProtocolContract.getEventDetails(1);
 
@@ -595,7 +621,7 @@ describe("EventProtocol Bookings", function () {
         bukEventProtocolContract
           .connect(account1)
           .mintBukNFTOwner(eventId, nftIds, urls),
-      ).to.be.revertedWith("Only admin has access to this function");
+      ).to.be.revertedWith("Only admin");
     });
     it("should fail, mint event only booked", async function () {
       let eventId = 1;
@@ -618,6 +644,251 @@ describe("EventProtocol Bookings", function () {
       await expect(
         bukEventProtocolContract.mintBukNFTOwner(eventId, nftIds, urls),
       ).to.be.revertedWith("Check the Booking status");
+    });
+
+    it("Should fail for array size", async function () {
+      // Create event
+      const eventRef =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
+      const eventName = "Web3 Carnival";
+      const _eventType = 1;
+      const _start = startFromNow;
+      const _end = endFromNow;
+      const _noOfTickets = 2;
+      const _tradeTimeLimit = 24;
+
+      await bukEventProtocolContract.createEvent(
+        eventName,
+        eventRef,
+        _eventType,
+        _start,
+        _end,
+        _noOfTickets,
+        _tradeTimeLimit,
+        account1.address,
+      );
+      const eventDetails = await bukEventProtocolContract.getEventDetails(1);
+
+      let eventId = 2;
+      let refId = [
+        "0x3633666663356135366139343361313561626261336134630000000000000000",
+      ];
+      let total = [100000000, 100000000];
+      let baseRate = [80000000, 100000000];
+      let start = [startFromNow, startFromNow];
+      let end = [endFromNow, endFromNow];
+      let tradeable = [true, true];
+      let users = [account1.address, account1.address];
+      let nftIds = [1, 2];
+      let urls = [
+        "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+        "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+      ];
+
+      await expect(
+        bukEventProtocolContract.bookEventOwner(
+          eventId,
+          refId,
+          total,
+          baseRate,
+          start,
+          end,
+          tradeable,
+          users,
+        ),
+      ).to.be.revertedWith("Array sizes mismatch");
+    });
+
+    it("Should fail for array size mismatched", async function () {
+      // Create event
+      const eventRef =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
+      const eventName = "Web3 Carnival";
+      const _eventType = 1;
+      const _start = startFromNow;
+      const _end = endFromNow;
+      const _noOfTickets = 2;
+      const _tradeTimeLimit = 24;
+
+      await bukEventProtocolContract.createEvent(
+        eventName,
+        eventRef,
+        _eventType,
+        _start,
+        _end,
+        _noOfTickets,
+        _tradeTimeLimit,
+        account1.address,
+      );
+      const eventDetails = await bukEventProtocolContract.getEventDetails(1);
+
+      let eventId = 2;
+      let refId = [
+        "0x3633666663356135366139343361313561626261336134630000000000000000",
+        "0x3633666663356135366139343361313561626261336134630000000000000000",
+      ];
+      let total = [100000000, 100000000];
+      let baseRate = [80000000, 100000000];
+      let start = [startFromNow, startFromNow];
+      let end = [endFromNow, endFromNow];
+      let tradeable = [true, true];
+      let users = [account1.address, account1.address];
+      let nftIds = [1];
+      let urls = [
+        "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+        "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+      ];
+
+      await expect(
+        bukEventProtocolContract.bookEventOwner(
+          eventId,
+          refId,
+          total,
+          baseRate,
+          start,
+          end,
+          tradeable,
+          users,
+        ),
+      ).not.be.reverted;
+
+      await expect(
+        bukEventProtocolContract.mintBukNFTOwner(eventId, nftIds, urls),
+      ).to.be.revertedWith("Check Ids and URIs size");
+    });
+
+    it("Should fail for max ticket limit", async function () {
+      // Create event
+      const eventRef =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
+      const eventName = "Web3 Carnival";
+      const _eventType = 1;
+      const _start = startFromNow;
+      const _end = endFromNow;
+      const _noOfTickets = 2;
+      const _tradeTimeLimit = 24;
+
+      await bukEventProtocolContract.createEvent(
+        eventName,
+        eventRef,
+        _eventType,
+        _start,
+        _end,
+        _noOfTickets,
+        _tradeTimeLimit,
+        account1.address,
+      );
+      const eventDetails = await bukEventProtocolContract.getEventDetails(1);
+
+      let eventId = 2;
+      let refId = [
+        "0x3633666663356135366139343361313561626261336134630000000000000000",
+        "0x3633666663356135366139343361313561626261336134630000000000000000",
+      ];
+      let total = [100000000, 100000000];
+      let baseRate = [80000000, 100000000];
+      let start = [startFromNow, startFromNow];
+      let end = [endFromNow, endFromNow];
+      let tradeable = [true, true];
+      let users = [account1.address, account1.address];
+      let nftIds = [1, 2];
+      let urls = [
+        "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+        "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
+      ];
+
+      await expect(
+        bukEventProtocolContract.bookEventOwner(
+          eventId,
+          refId,
+          total,
+          baseRate,
+          start,
+          end,
+          tradeable,
+          users,
+        ),
+      ).not.be.reverted;
+
+      await expect(
+        bukEventProtocolContract.mintBukNFTOwner(eventId, nftIds, urls),
+      ).not.be.reverted;
+
+      await expect(
+        bukEventProtocolContract.bookEventOwner(
+          eventId,
+          refId,
+          total,
+          baseRate,
+          start,
+          end,
+          tradeable,
+          users,
+        ),
+      ).to.be.revertedWith("Reached max tickets");
+    });
+  });
+
+  describe("BukEventProtocol events, Pause and Unpause", function () {
+    it("should pause the bukEventProtocol", async function () {
+      await bukEventProtocolContract.pause();
+      expect(await bukEventProtocolContract.paused()).to.be.true;
+    });
+
+    it("should unpause the contract", async function () {
+      await bukEventProtocolContract.pause();
+      expect(await bukEventProtocolContract.paused()).to.be.true;
+
+      await bukEventProtocolContract.unpause();
+      expect(await bukEventProtocolContract.paused()).to.be.false;
+    });
+
+    it("should revert when trying to pause if not owner", async function () {
+      await expect(
+        bukEventProtocolContract.connect(account1).pause(),
+      ).to.be.revertedWith(`Only admin`);
+    });
+
+    it("should revert when trying to unpause if not owner", async function () {
+      await bukEventProtocolContract.pause();
+      await expect(
+        bukEventProtocolContract.connect(account1).unpause(),
+      ).to.be.revertedWith(`Only admin`);
+    });
+
+    it("should revert when trying to create an event while paused", async function () {
+      await bukEventProtocolContract.pause();
+      expect(await bukEventProtocolContract.paused()).to.be.true;
+
+      // Create event
+      const eventRef =
+        "0x3633666663356135366139343361313561626261336134630000000000000000";
+      const eventName = "Web3 Carnival";
+      const _eventType = 1;
+      const _start = startFromNow;
+      const _end = endFromNow;
+      const _noOfTickets = 2;
+      const _tradeTimeLimit = 24;
+
+      await expect(
+        bukEventProtocolContract.createEvent(
+          eventName,
+          eventRef,
+          _eventType,
+          _start,
+          _end,
+          _noOfTickets,
+          _tradeTimeLimit,
+          account1.address,
+        ),
+      ).to.be.revertedWith("Pausable: paused");
+      // const eventDetails = await bukEventProtocolContract.getEventDetails(1);
+
+      // await expect(
+      //   bukEventProtocolContract
+      //     .connect(owner)
+      //     .createListing(eventAddress, 1, 100000000),
+      // ).to.be.revertedWith("Pausable: paused");
     });
   });
 });

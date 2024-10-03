@@ -1,5 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
+
+//  FIXME : Update this test cases to event test cases. This is old test cases
 /**
  * The above function is a TypeScript function that retrieves the current timestamp of the latest
  * block in the Ethereum blockchain and saves an initial snapshot of the blockchain state.
@@ -48,8 +50,7 @@ const fastForwardTo = async (timestamp: number): Promise<void> => {
 };
 describe("BukRoyalties Updations", function () {
   let stableTokenContract;
-  let bukProtocolContract;
-  let marketplaceContract;
+  let bukEventProtocolContract;
   let signatureVerifierContract;
   let royaltiesContract;
   let owner;
@@ -58,9 +59,11 @@ describe("BukRoyalties Updations", function () {
   let adminWallet;
   let bukWallet;
   let bukTreasuryContract;
-  let nftContract;
   let sellerWallet;
   let buyerWallet;
+  let eventDetails;
+  let eventAddress;
+  let eventNFTContract;
 
   beforeEach("deploy the contract instance first", async function () {
     [
@@ -89,9 +92,8 @@ describe("BukRoyalties Updations", function () {
     );
 
     //Deploy SignatureVerifier contract
-    const SignatureVerifier = await ethers.getContractFactory(
-      "SignatureVerifier",
-    );
+    const SignatureVerifier =
+      await ethers.getContractFactory("SignatureVerifier");
     signatureVerifierContract = await SignatureVerifier.deploy();
 
     //Deploy BukRoyalties contract
@@ -99,10 +101,9 @@ describe("BukRoyalties Updations", function () {
     royaltiesContract = await BukRoyalties.deploy();
 
     //BukEventProtocol
-    const BukEventProtocol = await ethers.getContractFactory(
-      "BukEventProtocol",
-    );
-    bukProtocolContract = await BukEventProtocol.deploy(
+    const BukEventProtocol =
+      await ethers.getContractFactory("BukEventProtocol");
+    bukEventProtocolContract = await BukEventProtocol.deploy(
       bukTreasuryContract.getAddress(),
       stableTokenContract.getAddress(),
       bukWallet.getAddress(),
@@ -110,36 +111,15 @@ describe("BukRoyalties Updations", function () {
       royaltiesContract.getAddress(),
     );
 
-    // BukNFT
-    const BukNFT = await ethers.getContractFactory("BukNFTs");
-    nftContract = await BukNFT.deploy(
-      "BUK_NFT",
-      bukProtocolContract.getAddress(),
-      bukTreasuryContract.getAddress(),
-    );
-
-    //Marketplace
-    const Marketplace = await ethers.getContractFactory("Marketplace");
-    marketplaceContract = await Marketplace.deploy(
-      bukProtocolContract.getAddress(),
-      nftContract.getAddress(),
-      stableTokenContract.getAddress(),
-    );
-
-    //Set BukNFTs address in Buk Protocol
-    const setBukNFTs = await bukProtocolContract.setBukNFTs(
-      nftContract.getAddress(),
-    );
-
     //Set Buk Protocol in Treasury
     const setBukEventProtocol = await bukTreasuryContract.setBukEventProtocol(
-      bukProtocolContract.getAddress(),
+      bukEventProtocolContract.getAddress(),
     );
 
     //Set Buk Protocol in BukRoyalties
     const setBukEventProtocolRoyalties =
       await royaltiesContract.setBukEventProtocolContract(
-        bukProtocolContract.getAddress(),
+        bukEventProtocolContract.getAddress(),
       );
 
     await saveInitialSnapshot();
@@ -158,18 +138,20 @@ describe("BukRoyalties Updations", function () {
       ).not.be.reverted;
       const addr = await royaltiesContract
         .connect(adminWallet)
-        .bukProtocolContract();
+        .bukEventProtocolContract();
       expect(addr).to.equal(await account1.getAddress());
     });
     it("Should set buk protocol and emit events", async function () {
       //Set buk protocol
+      let currentBukEventContract =
+        await royaltiesContract.bukEventProtocolContract();
       expect(
         await royaltiesContract
           .connect(adminWallet)
           .setBukEventProtocolContract(account1),
       )
-        .to.emit(royaltiesContract, "SetBukTreasury")
-        .withArgs(await account1.getAddress());
+        .to.emit(royaltiesContract, "SetBukEventProtocol")
+        .withArgs(currentBukEventContract, await account1.getAddress());
     });
     it("Should not set buk protocol if not admin", async function () {
       //Set buk protocol
@@ -189,6 +171,7 @@ describe("BukRoyalties Updations", function () {
           .connect(adminWallet)
           .setBukRoyaltyInfo(bukTreasuryContract, 200),
       ).not.be.reverted;
+
       const bukRoyaltyRes = (await royaltiesContract.bukRoyalty())[1];
       expect(200).to.equal(bukRoyaltyRes);
     });
@@ -199,8 +182,8 @@ describe("BukRoyalties Updations", function () {
           .connect(adminWallet)
           .setBukRoyaltyInfo(bukTreasuryContract, 200),
       )
-        .to.emit(royaltiesContract, "SetStableToken")
-        .withArgs(await account1.getAddress());
+        .to.emit(royaltiesContract, "SetBukRoyalty")
+        .withArgs(0, 200);
     });
     it("Should not set Buk Royalty if not admin", async function () {
       //Set Buk Royalty
@@ -238,8 +221,8 @@ describe("BukRoyalties Updations", function () {
           .connect(adminWallet)
           .setHotelRoyaltyInfo(bukTreasuryContract, 200),
       )
-        .to.emit(royaltiesContract, "SetStableToken")
-        .withArgs(await account1.getAddress());
+        .to.emit(royaltiesContract, "SetHotelRoyalty")
+        .withArgs(0, 200);
     });
     it("Should not set Hotel Royalty if not admin", async function () {
       //Set Hotel Royalty
@@ -276,8 +259,8 @@ describe("BukRoyalties Updations", function () {
           .connect(adminWallet)
           .setFirstOwnerRoyaltyInfo(200),
       )
-        .to.emit(royaltiesContract, "SetStableToken")
-        .withArgs(await account1.getAddress());
+        .to.emit(royaltiesContract, "SetFirstOwnerRoyalty")
+        .withArgs(0, 200);
     });
     it("Should not set First Owner Royalty if not admin", async function () {
       //Set First Owner Royalty
@@ -290,188 +273,6 @@ describe("BukRoyalties Updations", function () {
       await expect(
         royaltiesContract.connect(adminWallet).setFirstOwnerRoyaltyInfo(20000),
       ).to.be.revertedWith("Royalty is more than 10000");
-    });
-  });
-
-  describe("Set other Royalties in BukRoyalties", function () {
-    it("Should set other Royalty by admin", async function () {
-      //Grant allowance permission
-      const res = await stableTokenContract
-        .connect(owner)
-        .approve(await bukProtocolContract.getAddress(), 150000000);
-
-      //Book room
-      expect(
-        await bukProtocolContract
-          .connect(owner)
-          .bookRooms(
-            [100000000],
-            [80000000],
-            [70000000],
-            "0x3633666663356135366139343361313561626261336134630000000000000000",
-            1729847061,
-            1729947061,
-            12,
-            true,
-          ),
-      ).not.be.reverted;
-
-      //Mint NFT
-      await expect(
-        bukProtocolContract.mintBukNFTOwner(
-          [1],
-          [
-            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-          ],
-          owner.address,
-        ),
-      ).not.be.reverted;
-
-      //Set Other Royalty
-      const recipients = [
-        await account1.getAddress(),
-        await account2.getAddress(),
-      ];
-      const royaltyFractions = [2000, 3000];
-      expect(
-        await royaltiesContract
-          .connect(adminWallet)
-          .setOtherRoyaltyInfo(recipients, royaltyFractions),
-      ).not.be.reverted;
-      const royaltyInfo = await royaltiesContract.getRoyaltyInfo(1);
-      const royaltyInfo2 = await bukProtocolContract.getRoyaltyInfo(1);
-      const royalties: number[] = [];
-      for (let i = 3; i < royaltyInfo.length; i++) {
-        expect(royaltyFractions[i - 3]).to.equal(royaltyInfo[i][1]);
-      }
-    });
-    it("Should set other Royalty and emit events", async function () {
-      //Set Other Royalty
-      const recipients = [
-        await account1.getAddress(),
-        await account2.getAddress(),
-      ];
-      const royaltyFractions = [2000, 3000];
-      expect(
-        await royaltiesContract
-          .connect(adminWallet)
-          .setOtherRoyaltyInfo(recipients, royaltyFractions),
-      )
-        .to.emit(royaltiesContract, "SetOtherRoyalties")
-        .withArgs([], [2000, 3000]);
-    });
-    it("Should set and replace the existing other royalties by admin", async function () {
-      //Grant allowance permission
-      const res = await stableTokenContract
-        .connect(owner)
-        .approve(await bukProtocolContract.getAddress(), 150000000);
-
-      //Book room
-      expect(
-        await bukProtocolContract
-          .connect(owner)
-          .bookRooms(
-            [100000000],
-            [80000000],
-            [70000000],
-            "0x3633666663356135366139343361313561626261336134630000000000000000",
-            1729847061,
-            1729947061,
-            12,
-            true,
-          ),
-      ).not.be.reverted;
-
-      //Mint NFT
-      await expect(
-        bukProtocolContract.mintBukNFTOwner(
-          [1],
-          [
-            "https://ipfs.io/ipfs/bafyreigi54yu7sosbn4b5kipwexktuh3wpescgc5niaejiftnuyflbe5z4/metadata.json",
-          ],
-          owner.address,
-        ),
-      ).not.be.reverted;
-
-      //Set Other Royalty
-      const recipients = [
-        await account1.getAddress(),
-        await account2.getAddress(),
-      ];
-      const royaltyFractions = [2000, 3000];
-      expect(
-        await royaltiesContract
-          .connect(adminWallet)
-          .setOtherRoyaltyInfo(recipients, royaltyFractions),
-      ).not.be.reverted;
-      const royaltyInfo = await royaltiesContract.getRoyaltyInfo(1);
-      for (let i = 3; i < royaltyInfo.length; i++) {
-        expect(royaltyFractions[i - 3]).to.equal(royaltyInfo[i][1]);
-      }
-
-      //Setting new royalties and check the update
-      const newRoyaltyFractions = [4000, 1000];
-      expect(
-        await royaltiesContract
-          .connect(adminWallet)
-          .setOtherRoyaltyInfo(recipients, newRoyaltyFractions),
-      ).not.be.reverted;
-      const newRoyaltyInfo = await royaltiesContract.getRoyaltyInfo(1);
-      for (let i = 3; i < newRoyaltyInfo.length; i++) {
-        expect(newRoyaltyFractions[i - 3]).to.equal(newRoyaltyInfo[i][1]);
-      }
-    });
-    it("Should not set other Royalty if not admin", async function () {
-      //Set Other Royalty
-      const recipients = [
-        await account1.getAddress(),
-        await account2.getAddress(),
-      ];
-      const royaltyFractions = [2000, 3000];
-      await expect(
-        royaltiesContract
-          .connect(account1)
-          .setOtherRoyaltyInfo(recipients, royaltyFractions),
-      ).to.be.reverted;
-    });
-    it("Should not set other Royalty if array size mismatch is there", async function () {
-      //Set Other Royalty
-      const recipients = [
-        await account1.getAddress(),
-        await account2.getAddress(),
-      ];
-      const royaltyFractions = [2000];
-      await expect(
-        royaltiesContract
-          .connect(adminWallet)
-          .setOtherRoyaltyInfo(recipients, royaltyFractions),
-      ).to.be.revertedWith("Arrays must have the same length");
-    });
-    it("Should not set other Royalty if total royalty fee is more than 10000", async function () {
-      //Set Other Royalty
-      const recipients = [
-        await account1.getAddress(),
-        await account2.getAddress(),
-      ];
-      const royaltyFractions = [20000, 1000];
-      await expect(
-        royaltiesContract
-          .connect(adminWallet)
-          .setOtherRoyaltyInfo(recipients, royaltyFractions),
-      ).to.be.revertedWith("Royalty is more than 10000");
-    });
-    it("Should not set other Royalty if royalty fee is more than 10000", async function () {
-      //Set Other Royalty
-      const recipients = [
-        await account1.getAddress(),
-        await account2.getAddress(),
-      ];
-      const royaltyFractions = [8000, 8000];
-      await expect(
-        royaltiesContract
-          .connect(adminWallet)
-          .setOtherRoyaltyInfo(recipients, royaltyFractions),
-      ).to.be.revertedWith("Total cannot be more than 10000");
     });
   });
 });
