@@ -11,7 +11,7 @@ async function main() {
 
   // Deploy Treasury
   const treasury = await ethers.deployContract("BukTreasury", [USDC_CONTRACT]);
-  console.log("🚀 ~ Deployed BukTreasury:", treasury.target);
+  console.log("🚀 ~  BukTreasury:", treasury.target);
   await treasury.waitForDeployment();
 
   // FIXME NOTE If Treasury already exists, then comment the above code and uncomment the below code
@@ -22,12 +22,12 @@ async function main() {
     "SignatureVerifier",
     [],
   );
-  console.log("🚀 ~ Deployed SignatureVerifier:", signatureVerifier.target);
+  console.log("🚀 ~  SignatureVerifier:", signatureVerifier.target);
   await signatureVerifier.waitForDeployment();
 
   // Deploy Royalties
   const royalties = await ethers.deployContract("BukRoyalties", []);
-  console.log("🚀 ~ Deployed Royalties:", royalties.target);
+  console.log("🚀 ~  Royalties:", royalties.target);
   await royalties.waitForDeployment();
 
   // Deploy BukEventProtocol
@@ -42,7 +42,7 @@ async function main() {
     "BukEventProtocol",
     bukEventProtocolArgs,
   );
-  console.log("🚀 ~ Deployed BukEventProtocol:", bukEventProtocol.target);
+  console.log("🚀 ~  BukEventProtocol:", bukEventProtocol.target);
   await bukEventProtocol.waitForDeployment();
 
   // Deploy Marketplace
@@ -51,7 +51,7 @@ async function main() {
     "Marketplace",
     marketplaceArgs,
   );
-  console.log("🚀 ~ Deployed Marketplace:", marketplace.target);
+  console.log("🚀 ~  Marketplace:", marketplace.target);
   await marketplace.waitForDeployment();
 
   // Deploy BukEventDeployer
@@ -60,11 +60,15 @@ async function main() {
     "BukEventDeployer",
     bukEventDeployerArgs,
   );
-  console.log("🚀 ~ Deployed bukEventDeployer:", bukEventDeployer.target);
+  console.log("🚀 ~  bukEventDeployer:", bukEventDeployer.target);
   await bukEventDeployer.waitForDeployment();
 
   console.log("🚀 ~ All contracts have been deployed");
   console.log("🚀 ~ 🚀 ~ Configuring contracts");
+  console.log("Timestamp 1: ", Date.now());
+  // add settimeout
+  await new Promise((resolve) => setTimeout(resolve, 20000));
+  console.log("Timestamp 2 : ", Date.now());
 
   // Set Buk Protocol in Treasury
   await treasury.setBukEventProtocol(bukEventProtocol.target);
